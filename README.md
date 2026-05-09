@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/GroundLens_header_01.png" alt="groundlens" width="800">
+  <img src="docs/assets/Logo_groundlens_white_background.png" alt="groundlens" width="200">
 </div>
 
 # Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
@@ -220,22 +220,22 @@ The architecture follows a layered design:
 
 ```
 ┌─────────────────────────────────────────────┐
-│            Public API (evaluate)             │
+│            Public API (evaluate)            │
 ├──────────────────┬──────────────────────────┤
 │   SGI (sgi.py)   │      DGI (dgi.py)        │
 ├──────────────────┴──────────────────────────┤
-│        _internal (geometry, embeddings)      │
+│        _internal (geometry, embeddings)     │
 ├─────────────────────────────────────────────┤
 │  sentence-transformers (all-MiniLM-L6-v2)   │
 └─────────────────────────────────────────────┘
-         ▲                          ▲
-         │                          │
-   ┌─────┴─────┐            ┌──────┴──────┐
-   │ Providers  │            │Integrations │
-   │ (OpenAI,   │            │ (LangChain, │
-   │  Anthropic,│            │  CrewAI,    │
-   │  Google)   │            │  SK, AutoGen│
-   └────────────┘            └─────────────┘
+         ▲                           ▲
+         │                           │
+   ┌─────┴──────┐            ┌───────┴──────┐
+   │ Providers  │            │ Integrations │
+   │ (OpenAI,   │            │ (LangChain,  │
+   │  Anthropic,│            │  CrewAI,     │
+   │  Google)   │            │  SK, AutoGen │
+   └────────────┘            └──────────────┘
 ```
 
 ## Scoring methods
