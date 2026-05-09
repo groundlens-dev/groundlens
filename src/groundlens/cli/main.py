@@ -222,10 +222,7 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
             version = getattr(mod, "__version__", "unknown")
             ok(f"{provider} ({version})")
         except ImportError:
-            warn(
-                f"{provider} not installed"
-                f" (optional — pip install 'groundlens[{provider}]')"
-            )
+            warn(f"{provider} not installed (optional — pip install 'groundlens[{provider}]')")
 
     print()
 
@@ -271,10 +268,7 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
             model=model_name,
         )
         if score.method == "sgi" and not score.flagged:
-            ok(
-                f"SGI={score.value:.3f}"
-                f" (norm={score.normalized:.3f}, flagged={score.flagged})"
-            )
+            ok(f"SGI={score.value:.3f} (norm={score.normalized:.3f}, flagged={score.flagged})")
         else:
             warn(f"Unexpected result: method={score.method}, flagged={score.flagged}")
 
