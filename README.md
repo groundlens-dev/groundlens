@@ -265,6 +265,22 @@ DGI = dot(delta / ||delta||, mu_hat)
 | 0.00 < DGI < 0.30 | Weak alignment (flagged) |
 | DGI < 0.00 | Opposes grounded direction (high risk) |
 
+## What groundlens detects (and what it cannot)
+
+Not all hallucinations are the same. groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) that classifies hallucinations by *how they look in embedding space* — which determines whether they can be caught.
+
+| Type | What happens | Example | Detectable? |
+|---|---|---|---|
+| **Type I — Unfaithfulness** | Response ignores the provided source and defaults to the question | RAG system returns an answer from memory instead of from the retrieved document | Yes (SGI) |
+| **Type II — Confabulation** | Response invents content outside the topic's vocabulary | Asked about CRISPR gene editing, the model describes protein-folding correction instead | Yes (DGI) |
+| **Type III — Within-frame error** | Response uses the right vocabulary and structure but gets the facts wrong | "The capital of Australia is Sydney" — same frame as the correct answer, wrong city | No |
+
+**Why Type III is undetectable:** Sentence embeddings cluster text by vocabulary and structure, not by truth value. Two responses that share the same words, entities, and syntax land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it affects every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers).
+
+**What this means in practice:** groundlens is a **triage tool**. It catches the types of hallucination that leave geometric traces (Types I and II), which are the most common in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with domain-specific fact-checking on the outputs that pass geometric verification.
+
+> Full details: [Hallucination Taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) | Paper: [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+
 ## Providers and integrations
 
 | Component | Install extra | Description |

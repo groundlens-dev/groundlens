@@ -78,6 +78,7 @@ nav:
     - "DGI: Directional Grounding Index": concepts/dgi.md
     - Calibration: concepts/calibration.md
   - Theory:
+    - Hallucination Taxonomy: theory/hallucination-taxonomy.md
     - Embedding Geometry: theory/embedding-geometry.md
     - SGI Mathematics: theory/sgi-mathematics.md
     - DGI Mathematics: theory/dgi-mathematics.md

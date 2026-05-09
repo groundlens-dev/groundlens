@@ -78,8 +78,8 @@ groundlens uses empirically-derived thresholds to flag responses:
 
 ## What groundlens Cannot Do
 
-- **Verify factual truth**: groundlens measures geometric properties of embeddings, not correspondence to external reality.
-- **Detect human-crafted confabulations**: Deliberately constructed false statements that mimic grounded patterns can fool DGI (see [Confabulation Boundary](../theory/confabulation-boundary.md)).
+- **Verify factual truth**: groundlens measures geometric properties of embeddings, not correspondence to external reality. See the [Hallucination Taxonomy](../theory/hallucination-taxonomy.md) for which types of errors are detectable and which are not.
+- **Detect within-frame factual errors (Type III)**: When the wrong answer shares vocabulary and structure with the correct answer, no embedding-based method can distinguish them. See [Confabulation Boundary](../theory/confabulation-boundary.md).
 - **Replace human review**: groundlens is a triage tool. It tells you *where to look*, not *what is true*.
 
 ## Next Steps
