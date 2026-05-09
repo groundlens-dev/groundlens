@@ -1,10 +1,10 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens"]
+# dependencies = ["groundlens"]
 # ///
 """Quickstart — compute SGI and DGI scores in a few lines."""
 
-from factlens import compute_dgi, compute_sgi
+from groundlens import compute_dgi, compute_sgi
 
 # SGI: with context (RAG verification)
 sgi = compute_sgi(

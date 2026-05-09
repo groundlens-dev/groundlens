@@ -31,8 +31,8 @@ Email **javier@jmarin.info** with:
 
 The following are in scope:
 
-- **Code execution vulnerabilities** in factlens core, CLI, providers, or integrations
-- **Dependency vulnerabilities** in direct dependencies (numpy, sentence-transformers) that affect factlens users
+- **Code execution vulnerabilities** in groundlens core, CLI, providers, or integrations
+- **Dependency vulnerabilities** in direct dependencies (numpy, sentence-transformers) that affect groundlens users
 - **Data leakage** through calibration files, cached embeddings, or provider wrappers
 - **Deserialization attacks** via crafted calibration JSON files or CSV inputs
 - **Path traversal** through CLI file arguments or calibration file paths
@@ -45,8 +45,8 @@ The following are out of scope:
 
 ## Security practices
 
-- **No secrets in code.** factlens does not store or transmit API keys. Provider wrappers read keys from environment variables or user-provided configuration.
+- **No secrets in code.** groundlens does not store or transmit API keys. Provider wrappers read keys from environment variables or user-provided configuration.
 - **Dependency auditing.** We run `pip-audit` in CI against known vulnerability databases.
 - **Type safety.** mypy strict mode is enforced across the codebase.
 - **Input validation.** All public functions validate inputs before processing.
-- **Minimal permissions.** factlens requires no network access for core functionality. Network access is only needed when loading sentence-transformer models (first use) or when using LLM provider wrappers.
+- **Minimal permissions.** groundlens requires no network access for core functionality. Network access is only needed when loading sentence-transformer models (first use) or when using LLM provider wrappers.

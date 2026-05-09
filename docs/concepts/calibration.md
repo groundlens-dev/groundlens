@@ -1,6 +1,6 @@
 # Calibration
 
-DGI accuracy depends on the quality of the reference direction $\hat{\mu}$. **Domain-specific calibration** is the single most impactful step you can take to improve factlens accuracy in production.
+DGI accuracy depends on the quality of the reference direction $\hat{\mu}$. **Domain-specific calibration** is the single most impactful step you can take to improve groundlens accuracy in production.
 
 ## Why Calibrate?
 
@@ -44,7 +44,7 @@ question,response
 ## The calibrate() API
 
 ```python
-from factlens import calibrate
+from groundlens import calibrate
 
 # From a CSV file
 result = calibrate(csv_path="my_domain_pairs.csv")
@@ -92,7 +92,7 @@ The concentration parameter indicates how consistent the displacement directions
 result.save("calibration_pharmacy.json")
 
 # Load in production
-from factlens.calibrate import CalibrationResult
+from groundlens.calibrate import CalibrationResult
 loaded = CalibrationResult.load("calibration_pharmacy.json")
 print(loaded.concentration)
 ```
@@ -104,7 +104,7 @@ The saved JSON contains all fields needed to reconstruct the reference direction
 === "Function API"
 
     ```python
-    from factlens import compute_dgi
+    from groundlens import compute_dgi
 
     result = compute_dgi(
         question="What is the dosage for X?",
@@ -116,7 +116,7 @@ The saved JSON contains all fields needed to reconstruct the reference direction
 === "Class API"
 
     ```python
-    from factlens import DGI
+    from groundlens import DGI
 
     dgi = DGI(reference_csv="my_domain_pairs.csv")
     result = dgi.score(question="...", response="...")
@@ -125,7 +125,7 @@ The saved JSON contains all fields needed to reconstruct the reference direction
 === "evaluate() API"
 
     ```python
-    from factlens import evaluate
+    from groundlens import evaluate
 
     score = evaluate(
         question="...",

@@ -17,7 +17,7 @@ repos:
           - types-requests
         args: [--ignore-missing-imports]
         pass_filenames: false
-        entry: mypy src/factlens/
+        entry: mypy src/groundlens/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

@@ -1,11 +1,11 @@
 # Google Gemini Provider
 
-`FactlensGemini` wraps the Google Generative AI Python SDK and automatically scores every Gemini response for hallucination risk using factlens.
+`GroundlensGemini` wraps the Google Generative AI Python SDK and automatically scores every Gemini response for hallucination risk using groundlens.
 
 ## Installation
 
 ```bash
-pip install "factlens[google]"
+pip install "groundlens[google]"
 ```
 
 This installs the `google-generativeai` package.
@@ -13,9 +13,9 @@ This installs the `google-generativeai` package.
 ## Quick Start
 
 ```python
-from factlens.providers.google import FactlensGemini
+from groundlens.providers.google import GroundlensGemini
 
-llm = FactlensGemini(api_key="AI...")
+llm = GroundlensGemini(api_key="AI...")
 
 # With context (SGI scoring)
 resp = llm.chat(
@@ -23,22 +23,22 @@ resp = llm.chat(
     context="The report concludes that renewable energy costs have decreased by 70% since 2010...",
 )
 print(resp.text)
-print(resp.factlens_score.method)         # 'sgi'
-print(resp.factlens_score.flagged)        # False
+print(resp.groundlens_score.method)         # 'sgi'
+print(resp.groundlens_score.flagged)        # False
 
 # Without context (DGI scoring)
 resp = llm.chat("How does DNA replication work?")
-print(resp.factlens_score.method)         # 'dgi'
+print(resp.groundlens_score.method)         # 'dgi'
 ```
 
 ## Configuration
 
 ```python
-llm = FactlensGemini(
+llm = GroundlensGemini(
     api_key="AI...",
     model="gemini-2.0-flash",             # Gemini model for generation
-    factlens_model="all-MiniLM-L6-v2",    # Sentence-transformer for scoring
-    factlens_threshold=0.45,               # Reserved for future use
+    groundlens_model="all-MiniLM-L6-v2",    # Sentence-transformer for scoring
+    groundlens_threshold=0.45,               # Reserved for future use
 )
 ```
 
@@ -46,8 +46,8 @@ llm = FactlensGemini(
 |---|---|---|
 | `api_key` | Required | Google AI API key |
 | `model` | `"gemini-2.0-flash"` | Gemini model for generation |
-| `factlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
-| `factlens_threshold` | `0.45` | Reserved for future threshold customization |
+| `groundlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
+| `groundlens_threshold` | `0.45` | Reserved for future threshold customization |
 
 ## Response Object
 
@@ -58,7 +58,7 @@ The `LLMResponse` returned by `chat()` contains:
 | `text` | `str` | Generated response text |
 | `model` | `str` | Model identifier |
 | `usage` | `dict` | Token usage (when available from the API) |
-| `factlens_score` | `FactlensScore` | Full factlens evaluation result |
+| `groundlens_score` | `GroundlensScore` | Full groundlens evaluation result |
 
 Usage metadata includes `prompt_token_count`, `candidates_token_count`, and `total_token_count` when provided by the Gemini API.
 
@@ -84,7 +84,7 @@ resp = llm.complete("Explain the water cycle.", context=source_text)
 
 ```python
 import os
-from factlens.providers.google import FactlensGemini
+from groundlens.providers.google import GroundlensGemini
 
-llm = FactlensGemini(api_key=os.environ["GOOGLE_API_KEY"])
+llm = GroundlensGemini(api_key=os.environ["GOOGLE_API_KEY"])
 ```

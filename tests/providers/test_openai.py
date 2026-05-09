@@ -1,4 +1,4 @@
-"""Tests for factlens.providers.openai.FactlensOpenAI."""
+"""Tests for groundlens.providers.openai.GroundlensOpenAI."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import factlens.providers.openai as openai_mod
+import groundlens.providers.openai as openai_mod
 
 
-class TestFactlensOpenAIInit:
-    """Test FactlensOpenAI initialization."""
+class TestGroundlensOpenAIInit:
+    """Test GroundlensOpenAI initialization."""
 
     def test_init_creates_client(self, mock_openai_client: MagicMock) -> None:
         with patch.object(
@@ -19,9 +19,9 @@ class TestFactlensOpenAIInit:
             "_get_openai_client",
             return_value=mock_openai_client,
         ):
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             assert llm._model == "gpt-4o"
-            assert llm._factlens_model == "all-MiniLM-L6-v2"
+            assert llm._groundlens_model == "all-MiniLM-L6-v2"
 
     def test_init_custom_model(self, mock_openai_client: MagicMock) -> None:
         with patch.object(
@@ -29,17 +29,17 @@ class TestFactlensOpenAIInit:
             "_get_openai_client",
             return_value=mock_openai_client,
         ):
-            llm = openai_mod.FactlensOpenAI(
+            llm = openai_mod.GroundlensOpenAI(
                 api_key="sk-test-key",
                 model="gpt-4o-mini",
-                factlens_model="all-mpnet-base-v2",
+                groundlens_model="all-mpnet-base-v2",
             )
             assert llm._model == "gpt-4o-mini"
-            assert llm._factlens_model == "all-mpnet-base-v2"
+            assert llm._groundlens_model == "all-mpnet-base-v2"
 
 
-class TestFactlensOpenAIChat:
-    """Test the chat method with mocked OpenAI and factlens scoring."""
+class TestGroundlensOpenAIChat:
+    """Test the chat method with mocked OpenAI and groundlens scoring."""
 
     def test_chat_returns_llm_response(self, mock_openai_client: MagicMock) -> None:
         with (
@@ -52,12 +52,12 @@ class TestFactlensOpenAIChat:
             mock_score.flagged = False
             mock_evaluate.return_value = mock_score
 
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             resp = llm.chat("What is the meaning of life?")
 
             assert resp.text == "Mocked LLM response text."
             assert resp.model == "gpt-4o"
-            assert resp.factlens_score is not None
+            assert resp.groundlens_score is not None
 
     def test_chat_calls_openai_api(self, mock_openai_client: MagicMock) -> None:
         with (
@@ -66,7 +66,7 @@ class TestFactlensOpenAIChat:
         ):
             mock_evaluate.return_value = MagicMock()
 
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             llm.chat("Hello world")
 
             mock_openai_client.chat.completions.create.assert_called_once()
@@ -78,7 +78,7 @@ class TestFactlensOpenAIChat:
         ):
             mock_evaluate.return_value = MagicMock()
 
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             llm.chat("Summarize this.", context="The source document text.")
 
             mock_evaluate.assert_called_once()
@@ -92,7 +92,7 @@ class TestFactlensOpenAIChat:
         ):
             mock_evaluate.return_value = MagicMock()
 
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             resp = llm.chat("Hello")
 
             assert resp.usage["prompt_tokens"] == 10
@@ -106,13 +106,13 @@ class TestFactlensOpenAIChat:
         ):
             mock_evaluate.return_value = MagicMock()
 
-            llm = openai_mod.FactlensOpenAI(api_key="sk-test-key")
+            llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             resp = llm.complete("Test prompt", context="Test context")
 
             assert resp.text == "Mocked LLM response text."
 
 
-class TestFactlensOpenAIImportError:
+class TestGroundlensOpenAIImportError:
     """Test ImportError when openai is not installed."""
 
     def test_import_error_message(self) -> None:

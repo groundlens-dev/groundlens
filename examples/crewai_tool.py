@@ -1,19 +1,19 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens[crewai]"]
+# dependencies = ["groundlens[crewai]"]
 # ///
 """CrewAI tool integration — give agents hallucination detection.
 
-Requires: ``pip install factlens[crewai]``
+Requires: ``pip install groundlens[crewai]``
 
-Demonstrates a FactlensTool that CrewAI agents can use to verify
+Demonstrates a GroundlensTool that CrewAI agents can use to verify
 their own outputs before returning results.
 """
 
-from factlens.evaluate import evaluate
+from groundlens.evaluate import evaluate
 
 
-class FactlensTool:
+class GroundlensTool:
     """CrewAI-compatible tool for hallucination verification.
 
     Agents call this tool to check whether a response is grounded
@@ -23,13 +23,13 @@ class FactlensTool:
 
         from crewai.tools import BaseTool
 
-        class FactlensTool(BaseTool):
-            name = "factlens_verify"
+        class GroundlensTool(BaseTool):
+            name = "groundlens_verify"
             description = "Verify if a response is factually grounded."
             ...
     """
 
-    name: str = "factlens_verify"
+    name: str = "groundlens_verify"
     description: str = (
         "Verify whether a response is factually grounded. "
         "Provide question, response, and optionally context."
@@ -66,9 +66,9 @@ class FactlensTool:
 
 
 if __name__ == "__main__":
-    print("=== CrewAI FactlensTool Demo ===\n")
+    print("=== CrewAI GroundlensTool Demo ===\n")
 
-    tool = FactlensTool()
+    tool = GroundlensTool()
 
     # Simulate an agent verifying its own response.
     print("Agent verifying a grounded response:\n")

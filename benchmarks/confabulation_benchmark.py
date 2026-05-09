@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens", "scikit-learn>=1.3.0"]
+# dependencies = ["groundlens", "scikit-learn>=1.3.0"]
 # ///
 """Human confabulation benchmark — AUROC evaluation for SGI and DGI.
 
@@ -27,8 +27,8 @@ from pathlib import Path
 
 from sklearn.metrics import roc_auc_score
 
-from factlens.dgi import compute_dgi
-from factlens.sgi import compute_sgi
+from groundlens.dgi import compute_dgi
+from groundlens.sgi import compute_sgi
 
 DATASET_NAME = "cert-framework/human-confabulation-benchmark"
 FALLBACK_CSV = Path(__file__).parent / "data" / "confabulation_benchmark.csv"

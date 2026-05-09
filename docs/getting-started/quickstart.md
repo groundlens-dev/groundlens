@@ -1,13 +1,13 @@
 # Quickstart
 
-This guide walks through the three main ways to use factlens: SGI (with context), DGI (without context), and the unified `evaluate()` function that auto-selects the right method.
+This guide walks through the three main ways to use groundlens: SGI (with context), DGI (without context), and the unified `evaluate()` function that auto-selects the right method.
 
 ## Your First SGI Check
 
 SGI (Semantic Grounding Index) evaluates whether an LLM response engaged with provided source context. Use it when you have retrieval context available --- the typical RAG verification scenario.
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 result = compute_sgi(
     question="What is the capital of France?",
@@ -33,7 +33,7 @@ print(f"Ctx distance: {result.ctx_dist:.4f}")
 DGI (Directional Grounding Index) evaluates grounding without any context. Use it when you only have a question and a response --- chat/dialogue verification, agent self-checks, or batch evaluation.
 
 ```python
-from factlens import compute_dgi
+from groundlens import compute_dgi
 
 result = compute_dgi(
     question="What causes seasons on Earth?",
@@ -56,7 +56,7 @@ print(f"Explanation:  {result.explanation}")
 The `evaluate()` function automatically selects SGI or DGI based on whether context is provided:
 
 ```python
-from factlens import evaluate
+from groundlens import evaluate
 
 # With context -> SGI
 score = evaluate(
@@ -74,7 +74,7 @@ score = evaluate(
 print(f"Method: {score.method}")  # 'dgi'
 ```
 
-The `FactlensScore` returned by `evaluate()` is a unified container:
+The `GroundlensScore` returned by `evaluate()` is a unified container:
 
 ```python
 score.value        # Raw score (SGI ratio or DGI cosine similarity)
@@ -90,7 +90,7 @@ score.detail       # Full SGIResult or DGIResult
 For repeated evaluations, use the class-based API to avoid passing `model` every time:
 
 ```python
-from factlens import SGI, DGI
+from groundlens import SGI, DGI
 
 # SGI scorer
 sgi = SGI(model="all-MiniLM-L6-v2")
@@ -113,7 +113,7 @@ result = dgi.score(
 Evaluate multiple items at once:
 
 ```python
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 items = [
     {
@@ -135,7 +135,7 @@ for i, score in enumerate(results):
 
 ## What Next?
 
-- [CLI Reference](cli.md) --- run factlens from the command line
+- [CLI Reference](cli.md) --- run groundlens from the command line
 - [How It Works](../concepts/how-it-works.md) --- understand the geometry behind the scores
 - [Domain Calibration](../guides/domain-calibration.md) --- boost DGI accuracy from 0.76 to 0.90+ AUROC
 - [RAG Verification](../guides/rag-verification.md) --- integrate SGI into your RAG pipeline

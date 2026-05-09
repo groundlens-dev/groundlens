@@ -1,6 +1,6 @@
 # Embedding Geometry
 
-This page provides the mathematical foundations underlying factlens. We cover the geometry of embedding spaces, the distributional hypothesis that makes them work, and the hyperspherical structure that DGI exploits for directional statistics.
+This page provides the mathematical foundations underlying groundlens. We cover the geometry of embedding spaces, the distributional hypothesis that makes them work, and the hyperspherical structure that DGI exploits for directional statistics.
 
 ## Embedding Spaces and $\mathbb{R}^n$
 
@@ -24,7 +24,7 @@ $$
 
 ## Distance Metrics
 
-factlens uses **Euclidean distance** for SGI and **cosine similarity** (via dot product on unit vectors) for DGI.
+groundlens uses **Euclidean distance** for SGI and **cosine similarity** (via dot product on unit vectors) for DGI.
 
 ### Euclidean Distance
 
@@ -64,7 +64,7 @@ $$
 d(\mathbf{u}, \mathbf{v}) = \sqrt{2(1 - \cos\theta)}
 $$
 
-This means on the unit hypersphere, maximizing cosine similarity is equivalent to minimizing Euclidean distance. factlens uses Euclidean distance for SGI (where magnitude matters) and cosine similarity for DGI (where only direction matters).
+This means on the unit hypersphere, maximizing cosine similarity is equivalent to minimizing Euclidean distance. groundlens uses Euclidean distance for SGI (where magnitude matters) and cosine similarity for DGI (where only direction matters).
 
 ## The Distributional Hypothesis
 
@@ -77,7 +77,7 @@ The theoretical foundation for why embedding geometry encodes semantic meaning i
 
 Modern sentence transformers extend this principle from words to sentences. Texts that appear in similar contexts --- that are used in similar ways, answer similar questions, or describe similar concepts --- receive similar embedding vectors. This is not a coincidence but a direct consequence of the contrastive training objective: the model is trained to minimize the distance between semantically similar text pairs and maximize the distance between dissimilar pairs.
 
-!!! abstract "Why this matters for factlens"
+!!! abstract "Why this matters for groundlens"
     The distributional hypothesis is both the **strength** and the **limitation** of geometric hallucination detection. It is the reason embeddings encode semantic similarity (enabling SGI and DGI), and it is also the reason DGI cannot detect human-crafted confabulations that mimic the distributional properties of grounded text (see [Confabulation Boundary](confabulation-boundary.md)).
 
 ## Sentence Transformer Training
@@ -95,7 +95,7 @@ where $\text{sim}$ is cosine similarity and $\tau$ is a temperature parameter. T
 - Contradictions are distant
 - Unrelated texts are scattered
 
-The resulting geometry is not arbitrary --- it reflects genuine semantic structure that factlens leverages for hallucination detection.
+The resulting geometry is not arbitrary --- it reflects genuine semantic structure that groundlens leverages for hallucination detection.
 
 ## The Unit Hypersphere $S^{n-1}$
 
@@ -109,7 +109,7 @@ This is an $(n-1)$-dimensional manifold embedded in $\mathbb{R}^n$. For $n = 384
 
 ### Properties of $S^{n-1}$
 
-The unit hypersphere has several properties relevant to factlens:
+The unit hypersphere has several properties relevant to groundlens:
 
 **Surface area.** The surface area of $S^{n-1}$ is:
 
@@ -129,7 +129,7 @@ $$
 
 ## Curse of Dimensionality
 
-In high-dimensional spaces, distance metrics behave counterintuitively. Several phenomena are relevant to factlens:
+In high-dimensional spaces, distance metrics behave counterintuitively. Several phenomena are relevant to groundlens:
 
 ### Distance Concentration
 
@@ -155,7 +155,7 @@ For $n = 384$, this gives $\sigma \approx 0.051$. This means that cosine similar
 
 ### The "Hub" Phenomenon
 
-In high-dimensional spaces, some points become "hubs" that are nearest neighbors of disproportionately many other points (Radovanovic et al., 2010)[^4]. Sentence transformer embeddings exhibit this phenomenon to some degree. factlens is robust to hubness because:
+In high-dimensional spaces, some points become "hubs" that are nearest neighbors of disproportionately many other points (Radovanovic et al., 2010)[^4]. Sentence transformer embeddings exhibit this phenomenon to some degree. groundlens is robust to hubness because:
 
 [^4]: Radovanovic, M. et al. (2010). Hubs in space: Popular nearest neighbors in high-dimensional data. *JMLR*.
 
@@ -176,7 +176,7 @@ The key insight is that grounded responses produce displacement vectors with a *
 
 This consistency is a consequence of the distributional hypothesis: grounded responses systematically shift the semantics from "question framing" toward "factual elaboration," and this shift has a characteristic geometric signature.
 
-## Summary of Geometric Primitives Used by factlens
+## Summary of Geometric Primitives Used by groundlens
 
 | Primitive | Used by | Purpose |
 |---|---|---|

@@ -1,6 +1,6 @@
 # Benchmarks Overview
 
-factlens benchmarks measure how well SGI and DGI discriminate between grounded and hallucinated responses. The primary metric is **AUROC** (Area Under the Receiver Operating Characteristic curve), which measures the probability that a randomly chosen grounded response scores higher than a randomly chosen hallucinated response.
+groundlens benchmarks measure how well SGI and DGI discriminate between grounded and hallucinated responses. The primary metric is **AUROC** (Area Under the Receiver Operating Characteristic curve), which measures the probability that a randomly chosen grounded response scores higher than a randomly chosen hallucinated response.
 
 ## What We Measure
 
@@ -50,19 +50,19 @@ Additional benchmark datasets for specific verticals:
 
 ```bash
 # Default benchmark (confabulation benchmark)
-factlens benchmark
+groundlens benchmark
 
 # Custom dataset
-factlens benchmark --dataset cert-framework/human-confabulation-benchmark
+groundlens benchmark --dataset cert-framework/human-confabulation-benchmark
 
 # Custom model
-factlens benchmark --model all-mpnet-base-v2
+groundlens benchmark --model all-mpnet-base-v2
 ```
 
 ### Python API
 
 ```python
-from factlens import compute_sgi, compute_dgi
+from groundlens import compute_sgi, compute_dgi
 from sklearn.metrics import roc_auc_score
 
 # Load your benchmark dataset
@@ -112,13 +112,13 @@ To ensure fair comparison, all benchmarks follow the same protocol:
 
 All reported results can be reproduced exactly because:
 
-- factlens scoring is **deterministic** (no sampling)
+- groundlens scoring is **deterministic** (no sampling)
 - Benchmark datasets are **versioned** and publicly available
 - The embedding model is **fixed** and downloadable
 
 ```bash
 # Reproduce the headline DGI AUROC 0.958 result
-factlens benchmark --dataset cert-framework/human-confabulation-benchmark
+groundlens benchmark --dataset cert-framework/human-confabulation-benchmark
 ```
 
 See [Results](results.md) for the full numbers.

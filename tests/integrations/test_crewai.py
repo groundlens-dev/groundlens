@@ -1,4 +1,4 @@
-"""Tests for factlens.integrations.crewai.FactlensTool."""
+"""Tests for groundlens.integrations.crewai.GroundlensTool."""
 
 from __future__ import annotations
 
@@ -23,8 +23,8 @@ def _make_fake_crewai_module() -> ModuleType:
     return mod
 
 
-class TestFactlensTool:
-    """Test the FactlensTool for CrewAI."""
+class TestGroundlensTool:
+    """Test the GroundlensTool for CrewAI."""
 
     def test_run_returns_verification_string(self) -> None:
         fake_crewai = _make_fake_crewai_module()
@@ -39,9 +39,9 @@ class TestFactlensTool:
             {"crewai": fake_crewai, "crewai_tools": fake_crewai_tools},
         ):
             try:
-                from factlens.integrations.crewai import FactlensTool
+                from groundlens.integrations.crewai import GroundlensTool
 
-                with patch("factlens.integrations.crewai.evaluate") as mock_eval:
+                with patch("groundlens.integrations.crewai.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.normalized = 0.85
@@ -50,7 +50,7 @@ class TestFactlensTool:
                     mock_score.explanation = "DGI=0.600 -- aligns with grounded patterns (pass)"
                     mock_eval.return_value = mock_score
 
-                    tool = FactlensTool()
+                    tool = GroundlensTool()
                     result = tool._run(
                         question="What is the capital of France?",
                         response="The capital of France is Paris.",
@@ -74,9 +74,9 @@ class TestFactlensTool:
             {"crewai": fake_crewai, "crewai_tools": fake_crewai_tools},
         ):
             try:
-                from factlens.integrations.crewai import FactlensTool
+                from groundlens.integrations.crewai import GroundlensTool
 
-                with patch("factlens.integrations.crewai.evaluate") as mock_eval:
+                with patch("groundlens.integrations.crewai.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = True
                     mock_score.normalized = 0.3
@@ -85,7 +85,7 @@ class TestFactlensTool:
                     mock_score.explanation = "SGI=0.400 -- weak context engagement (flagged)"
                     mock_eval.return_value = mock_score
 
-                    tool = FactlensTool()
+                    tool = GroundlensTool()
                     result = tool._run(
                         question="What is X?",
                         response="X is Z.",

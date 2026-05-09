@@ -12,9 +12,9 @@ LLM hallucination detection is stuck in a paradox: the dominant approach uses a 
 
 Probabilistic sampling methods (self-consistency, token-level entropy) improve on the second-LLM approach but remain non-deterministic. They require multiple forward passes and produce scores that shift between runs.
 
-## The factlens approach
+## The groundlens approach
 
-factlens takes a different path: use the geometry of embedding spaces to detect hallucinations deterministically.
+groundlens takes a different path: use the geometry of embedding spaces to detect hallucinations deterministically.
 
 The core insight is that when an LLM engages with source material, the spatial relationships between question, context, and response embeddings follow predictable geometric patterns. When the LLM confabulates, those patterns break.
 
@@ -50,9 +50,9 @@ Generic calibration achieves AUROC ~0.76. Domain-specific calibration (20-100 ve
 - **Auditable.** Every score decomposes into distances and angles that can be inspected, logged, and explained.
 - **Domain-adaptable.** Calibration with a small set of verified pairs from your domain transforms generic detection into domain-expert detection.
 
-## What factlens is not
+## What groundlens is not
 
-factlens is not a replacement for human review. It is a triage tool. It tells you which outputs to review first, not which outputs are definitively wrong. The scores are geometric measurements, not truth claims.
+groundlens is not a replacement for human review. It is a triage tool. It tells you which outputs to review first, not which outputs are definitively wrong. The scores are geometric measurements, not truth claims.
 
 The value proposition is verification triage: prioritize what to review, flag what diverges from expected patterns, and let human experts focus their attention where it matters most.
 
@@ -80,7 +80,7 @@ The value proposition is verification triage: prioritize what to review, flag wh
 
 ## Community vision
 
-factlens is built on published research with open methods. The goal is a community of practitioners and researchers who:
+groundlens is built on published research with open methods. The goal is a community of practitioners and researchers who:
 
 - Contribute domain-specific calibration datasets (anonymized) to improve generic baselines
 - Report real-world performance metrics across industries and use cases

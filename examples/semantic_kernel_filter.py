@@ -1,26 +1,26 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens[semantic-kernel]"]
+# dependencies = ["groundlens[semantic-kernel]"]
 # ///
 """Semantic Kernel filter — intercept completions for hallucination checks.
 
-Requires: ``pip install factlens[semantic-kernel]``
+Requires: ``pip install groundlens[semantic-kernel]``
 
-Demonstrates a FactlensFilter that hooks into Semantic Kernel's
+Demonstrates a GroundlensFilter that hooks into Semantic Kernel's
 function invocation pipeline to automatically verify LLM outputs.
 """
 
-from factlens.evaluate import evaluate
+from groundlens.evaluate import evaluate
 
 
-class FactlensFilter:
-    """Semantic Kernel filter that scores LLM outputs with factlens.
+class GroundlensFilter:
+    """Semantic Kernel filter that scores LLM outputs with groundlens.
 
     In a real Semantic Kernel setup, implement the filter protocol:
 
         from semantic_kernel.filters import FunctionInvocationFilter
 
-        class FactlensFilter(FunctionInvocationFilter):
+        class GroundlensFilter(FunctionInvocationFilter):
             async def on_function_invocation(self, context, next):
                 await next(context)
                 # Score the result...
@@ -36,7 +36,7 @@ class FactlensFilter:
         """Initialize the filter.
 
         Args:
-            model: Sentence transformer model for factlens scoring.
+            model: Sentence transformer model for groundlens scoring.
             block_on_flag: If True, raise an exception when a response
                 is flagged. If False, attach the score as metadata.
         """
@@ -79,17 +79,17 @@ class FactlensFilter:
         }
 
         if self.block_on_flag and score.flagged:
-            msg = f"Factlens blocked response: {score.explanation} (score={score.value:.3f})"
+            msg = f"Groundlens blocked response: {score.explanation} (score={score.value:.3f})"
             raise RuntimeError(msg)
 
         return result
 
 
 if __name__ == "__main__":
-    print("=== Semantic Kernel FactlensFilter Demo ===\n")
+    print("=== Semantic Kernel GroundlensFilter Demo ===\n")
 
     # Non-blocking mode (default): attach score as metadata.
-    filter_pass = FactlensFilter(block_on_flag=False)
+    filter_pass = GroundlensFilter(block_on_flag=False)
 
     result = filter_pass.verify(
         question="What is quantum computing?",
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     print(f"Explain:  {result['explanation']}\n")
 
     # Blocking mode: raises RuntimeError on flagged responses.
-    filter_block = FactlensFilter(block_on_flag=True)
+    filter_block = GroundlensFilter(block_on_flag=True)
     print("Blocking mode test:")
     try:
         filter_block.verify(

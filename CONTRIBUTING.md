@@ -1,6 +1,6 @@
-# Contributing to factlens
+# Contributing to groundlens
 
-Thank you for your interest in contributing to factlens. This document covers the development setup, code standards, and process for submitting changes.
+Thank you for your interest in contributing to groundlens. This document covers the development setup, code standards, and process for submitting changes.
 
 ## Prerequisites
 
@@ -13,8 +13,8 @@ Thank you for your interest in contributing to factlens. This document covers th
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/factlens/factlens.git
-cd factlens
+git clone https://github.com/groundlens-dev/groundlens.git
+cd groundlens
 ```
 
 2. Create a virtual environment:
@@ -42,7 +42,7 @@ pre-commit install
 ```bash
 pytest tests/unit/          # Fast tests (no model loading)
 ruff check src/ tests/      # Lint
-mypy src/factlens/          # Type check
+mypy src/groundlens/          # Type check
 ```
 
 ## Code standards
@@ -73,7 +73,7 @@ Configuration is in `pyproject.toml`. Key settings:
 mypy runs in strict mode:
 
 ```bash
-mypy src/factlens/
+mypy src/groundlens/
 ```
 
 All public functions must have complete type annotations. Use `from __future__ import annotations` at the top of every module.
@@ -99,17 +99,17 @@ pytest tests/providers/
 pytest tests/integrations/
 
 # With coverage report
-pytest --cov=factlens --cov-report=term-missing
+pytest --cov=groundlens --cov-report=term-missing
 ```
 
 Coverage minimum is 85%. New code should include tests. Tests go in the corresponding directory under `tests/`:
 
 | Source | Test location |
 |---|---|
-| `src/factlens/sgi.py` | `tests/integration/test_sgi.py` |
-| `src/factlens/_internal/geometry.py` | `tests/unit/test_geometry.py` |
-| `src/factlens/providers/openai.py` | `tests/providers/test_openai.py` |
-| `src/factlens/integrations/langchain/` | `tests/integrations/test_langchain.py` |
+| `src/groundlens/sgi.py` | `tests/integration/test_sgi.py` |
+| `src/groundlens/_internal/geometry.py` | `tests/unit/test_geometry.py` |
+| `src/groundlens/providers/openai.py` | `tests/providers/test_openai.py` |
+| `src/groundlens/integrations/langchain/` | `tests/integrations/test_langchain.py` |
 
 Unit tests in `tests/unit/` must not load the embedding model. Use mocking or pre-computed values.
 
@@ -178,7 +178,7 @@ git checkout -b feat/my-feature main
 ```bash
 pytest
 ruff check src/ tests/
-mypy src/factlens/
+mypy src/groundlens/
 ```
 
 4. **Push and open a PR.** Target the `main` branch. Fill in the PR template.
@@ -191,7 +191,7 @@ mypy src/factlens/
 
 - [ ] Tests pass locally (`pytest`)
 - [ ] Linting passes (`ruff check src/ tests/`)
-- [ ] Type checking passes (`mypy src/factlens/`)
+- [ ] Type checking passes (`mypy src/groundlens/`)
 - [ ] New code has tests
 - [ ] New public API has docstrings
 - [ ] CHANGELOG.md updated (for user-facing changes)
@@ -215,4 +215,4 @@ Larger contributions (please open an issue to discuss first):
 
 ## Questions?
 
-Open a [discussion](https://github.com/factlens/factlens/discussions) or email javier@jmarin.info.
+Open a [discussion](https://github.com/groundlens-dev/groundlens/discussions) or email javier@jmarin.info.

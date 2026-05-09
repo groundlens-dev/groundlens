@@ -24,14 +24,14 @@
 ```bash
 pytest tests/
 ruff check src/ tests/
-mypy src/factlens/
+mypy src/groundlens/
 ```
 
 ## Checklist
 
 - [ ] Tests pass locally (`pytest`)
 - [ ] Linting passes (`ruff check src/ tests/`)
-- [ ] Type checking passes (`mypy src/factlens/`)
+- [ ] Type checking passes (`mypy src/groundlens/`)
 - [ ] New code has tests
 - [ ] New public API has docstrings (Google style)
 - [ ] CHANGELOG.md updated (for user-facing changes)

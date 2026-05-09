@@ -1,10 +1,10 @@
-"""Tests for factlens._internal.thresholds constants and normalization."""
+"""Tests for groundlens._internal.thresholds constants and normalization."""
 
 from __future__ import annotations
 
 import pytest
 
-from factlens._internal.thresholds import (
+from groundlens._internal.thresholds import (
     DGI_PASS,
     SGI_REVIEW,
     SGI_STRONG_PASS,

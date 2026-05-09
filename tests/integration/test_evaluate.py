@@ -1,4 +1,4 @@
-"""Integration tests for factlens.evaluate module.
+"""Integration tests for groundlens.evaluate module.
 
 Tests the high-level evaluate() and evaluate_batch() functions with
 real embeddings.
@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from factlens.evaluate import evaluate, evaluate_batch
-from factlens.score import DGIResult, SGIResult
+from groundlens.evaluate import evaluate, evaluate_batch
+from groundlens.score import DGIResult, SGIResult
 
 pytestmark = pytest.mark.slow
 
@@ -60,7 +60,7 @@ class TestEvaluateAutoSelect:
 
 
 class TestEvaluateScoreFields:
-    """Test that FactlensScore fields are populated."""
+    """Test that GroundlensScore fields are populated."""
 
     def test_all_fields_present_sgi(self, grounded_triple: dict[str, str]) -> None:
         score = evaluate(

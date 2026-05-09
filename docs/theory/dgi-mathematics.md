@@ -102,7 +102,7 @@ $$
 \hat{\boldsymbol{\mu}}_{\text{MLE}} = \frac{\mathbf{R}}{\|\mathbf{R}\|} = \frac{\sum_{i=1}^N \hat{\boldsymbol{\delta}}_i}{\left\|\sum_{i=1}^N \hat{\boldsymbol{\delta}}_i\right\|}
 $$
 
-This is exactly what factlens computes. The MLE for the mean direction does not depend on $\kappa$ --- it is the same regardless of how concentrated the distribution is.
+This is exactly what groundlens computes. The MLE for the mean direction does not depend on $\kappa$ --- it is the same regardless of how concentrated the distribution is.
 
 ### The Resultant Length $\bar{R}$
 
@@ -129,7 +129,7 @@ where $A_n(\kappa) = I_{n/2}(\kappa) / I_{n/2-1}(\kappa)$ is the ratio of Bessel
 
 ### Sra (2012) Approximation
 
-factlens uses the approximation from Sra (2012)[^1] for the MLE of $\kappa$:
+groundlens uses the approximation from Sra (2012)[^1] for the MLE of $\kappa$:
 
 $$
 \hat{\kappa} \approx \frac{\bar{R}(n - \bar{R}^2)}{1 - \bar{R}^2}
@@ -239,7 +239,7 @@ The vMF distribution gives the "density of grounded responses" as a function of 
 
 ## Caching Strategy
 
-Computing the reference direction requires embedding all calibration pairs, which involves $2N$ forward passes through the sentence transformer. factlens caches $\hat{\boldsymbol{\mu}}$ by `(model_name, reference_csv)` key to avoid recomputation:
+Computing the reference direction requires embedding all calibration pairs, which involves $2N$ forward passes through the sentence transformer. groundlens caches $\hat{\boldsymbol{\mu}}$ by `(model_name, reference_csv)` key to avoid recomputation:
 
 - First call with a given key: compute and cache.
 - Subsequent calls with the same key: return cached result.

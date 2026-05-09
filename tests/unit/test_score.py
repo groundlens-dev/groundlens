@@ -1,11 +1,11 @@
-"""Tests for factlens.score dataclasses."""
+"""Tests for groundlens.score dataclasses."""
 
 from __future__ import annotations
 
 import pytest
 
-from factlens._internal.thresholds import DGI_PASS, SGI_REVIEW, SGI_STRONG_PASS
-from factlens.score import DGIResult, FactlensScore, SGIResult
+from groundlens._internal.thresholds import DGI_PASS, SGI_REVIEW, SGI_STRONG_PASS
+from groundlens.score import DGIResult, GroundlensScore, SGIResult
 
 # ---------------------------------------------------------------------------
 # SGIResult
@@ -130,16 +130,16 @@ class TestDGIResult:
 
 
 # ---------------------------------------------------------------------------
-# FactlensScore
+# GroundlensScore
 # ---------------------------------------------------------------------------
 
 
-class TestFactlensScore:
-    """Tests for the FactlensScore frozen dataclass."""
+class TestGroundlensScore:
+    """Tests for the GroundlensScore frozen dataclass."""
 
     def test_creation_with_sgi_detail(self) -> None:
         detail = SGIResult(value=1.3, normalized=0.65, flagged=False, q_dist=1.0, ctx_dist=0.7)
-        score = FactlensScore(
+        score = GroundlensScore(
             value=1.3,
             normalized=0.65,
             flagged=False,
@@ -152,7 +152,7 @@ class TestFactlensScore:
 
     def test_creation_with_dgi_detail(self) -> None:
         detail = DGIResult(value=0.5, normalized=0.75, flagged=False)
-        score = FactlensScore(
+        score = GroundlensScore(
             value=0.5,
             normalized=0.75,
             flagged=False,
@@ -165,7 +165,7 @@ class TestFactlensScore:
 
     def test_frozen_immutability(self) -> None:
         detail = DGIResult(value=0.5, normalized=0.75, flagged=False)
-        score = FactlensScore(
+        score = GroundlensScore(
             value=0.5,
             normalized=0.75,
             flagged=False,
@@ -178,7 +178,7 @@ class TestFactlensScore:
 
     def test_detail_provides_method_specific_fields(self) -> None:
         detail = SGIResult(value=1.3, normalized=0.65, flagged=False, q_dist=1.0, ctx_dist=0.7)
-        score = FactlensScore(
+        score = GroundlensScore(
             value=1.3,
             normalized=0.65,
             flagged=False,

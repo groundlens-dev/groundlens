@@ -1,15 +1,15 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens"]
+# dependencies = ["groundlens"]
 # ///
-"""RAG pipeline with factlens verification.
+"""RAG pipeline with groundlens verification.
 
-Demonstrates integrating factlens into a retrieval-augmented generation
+Demonstrates integrating groundlens into a retrieval-augmented generation
 pipeline: retrieve context, generate a response, verify with SGI, and
 flag unreliable outputs. Uses mock data — no external dependencies.
 """
 
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 # --- Mock RAG components ---------------------------------------------------
 
@@ -49,7 +49,7 @@ def generate(query: str, context: str) -> str:
 
 
 def rag_with_verification(question: str) -> None:
-    """Run a RAG query with factlens hallucination verification."""
+    """Run a RAG query with groundlens hallucination verification."""
     context = retrieve(question)
     if not context:
         print(f"  No context found for: {question}")
@@ -75,6 +75,6 @@ def rag_with_verification(question: str) -> None:
 
 
 if __name__ == "__main__":
-    print("=== RAG Pipeline with Factlens Verification ===\n")
+    print("=== RAG Pipeline with Groundlens Verification ===\n")
     rag_with_verification("What is photosynthesis?")
     rag_with_verification("Explain mitosis.")

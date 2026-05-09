@@ -1,26 +1,26 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens[anthropic]"]
+# dependencies = ["groundlens[anthropic]"]
 # ///
-"""Anthropic provider with factlens hallucination guard.
+"""Anthropic provider with groundlens hallucination guard.
 
-Requires: ``pip install factlens[anthropic]``
+Requires: ``pip install groundlens[anthropic]``
 
-Demonstrates wrapping Anthropic's Claude API with factlens scoring.
+Demonstrates wrapping Anthropic's Claude API with groundlens scoring.
 Each response is automatically evaluated for hallucination risk.
 """
 
 import os
 
-from factlens.evaluate import evaluate
+from groundlens.evaluate import evaluate
 
 
-def anthropic_with_factlens(question: str, context: str | None = None) -> None:
-    """Call Anthropic Claude and score the response with factlens."""
+def anthropic_with_groundlens(question: str, context: str | None = None) -> None:
+    """Call Anthropic Claude and score the response with groundlens."""
     try:
         import anthropic
     except ImportError as err:
-        print("Install anthropic: pip install factlens[anthropic]")
+        print("Install anthropic: pip install groundlens[anthropic]")
         raise SystemExit(1) from err
 
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -54,10 +54,10 @@ def anthropic_with_factlens(question: str, context: str | None = None) -> None:
 
 
 if __name__ == "__main__":
-    print("=== Anthropic + Factlens ===\n")
+    print("=== Anthropic + Groundlens ===\n")
 
     # With context (SGI)
-    anthropic_with_factlens(
+    anthropic_with_groundlens(
         question="What is CRISPR?",
         context=(
             "CRISPR-Cas9 is a genome editing tool adapted from a bacterial "
@@ -66,6 +66,6 @@ if __name__ == "__main__":
     )
 
     # Without context (DGI)
-    anthropic_with_factlens(
+    anthropic_with_groundlens(
         question="What causes auroras?",
     )

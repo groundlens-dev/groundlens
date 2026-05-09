@@ -1,12 +1,12 @@
 # How It Works
 
-factlens detects hallucinations by analyzing the **geometry** of text embeddings. Instead of asking a second LLM "is this answer correct?" (which is itself susceptible to hallucination), factlens computes deterministic geometric scores in embedding space.
+groundlens detects hallucinations by analyzing the **geometry** of text embeddings. Instead of asking a second LLM "is this answer correct?" (which is itself susceptible to hallucination), groundlens computes deterministic geometric scores in embedding space.
 
 ## The Core Idea
 
 Every piece of text --- a question, a context document, an LLM response --- can be mapped to a point in a high-dimensional vector space using a sentence transformer. In this space, texts with similar meaning are close together; texts with different meaning are far apart.
 
-factlens exploits two geometric properties of this space:
+groundlens exploits two geometric properties of this space:
 
 1. **Distance ratios** (SGI): If a response truly engaged with the source context, it should be geometrically closer to that context than to the bare question.
 2. **Displacement directions** (DGI): Grounded responses create a characteristic "direction of movement" from question to answer. Hallucinations move in different directions.
@@ -20,14 +20,14 @@ graph LR
 
 ## The Embedding Space
 
-factlens uses sentence transformers (default: `all-MiniLM-L6-v2`) to map text into $\mathbb{R}^{384}$. In this space:
+groundlens uses sentence transformers (default: `all-MiniLM-L6-v2`) to map text into $\mathbb{R}^{384}$. In this space:
 
 - Each text becomes a 384-dimensional vector
 - Semantic similarity correlates with geometric proximity
 - The space has rich structure: clusters for topics, gradients for specificity, and characteristic directions for question-answer relationships
 
 !!! info "Why sentence transformers?"
-    Sentence transformers are specifically trained (via contrastive learning) to place semantically similar texts nearby and dissimilar texts far apart. This is exactly the property factlens needs --- the geometric structure encodes semantic relationships.
+    Sentence transformers are specifically trained (via contrastive learning) to place semantically similar texts nearby and dissimilar texts far apart. This is exactly the property groundlens needs --- the geometric structure encodes semantic relationships.
 
 ## SGI: Distance Ratios
 
@@ -65,7 +65,7 @@ Raw scores are normalized to [0, 1] for convenience:
 
 ## Thresholds
 
-factlens uses empirically-derived thresholds to flag responses:
+groundlens uses empirically-derived thresholds to flag responses:
 
 | Threshold | Value | Meaning |
 |---|---|---|
@@ -74,13 +74,13 @@ factlens uses empirically-derived thresholds to flag responses:
 | `DGI_PASS` | 0.30 | Above this: aligned with grounded patterns |
 
 !!! warning "Thresholds are for triage, not for truth"
-    factlens scores are verification triage signals --- they help you prioritize which outputs need human review. A high score does not guarantee factual accuracy; a low score does not guarantee hallucination. The value is in **efficiently directing human attention** to the outputs most likely to need it.
+    groundlens scores are verification triage signals --- they help you prioritize which outputs need human review. A high score does not guarantee factual accuracy; a low score does not guarantee hallucination. The value is in **efficiently directing human attention** to the outputs most likely to need it.
 
-## What factlens Cannot Do
+## What groundlens Cannot Do
 
-- **Verify factual truth**: factlens measures geometric properties of embeddings, not correspondence to external reality.
+- **Verify factual truth**: groundlens measures geometric properties of embeddings, not correspondence to external reality.
 - **Detect human-crafted confabulations**: Deliberately constructed false statements that mimic grounded patterns can fool DGI (see [Confabulation Boundary](../theory/confabulation-boundary.md)).
-- **Replace human review**: factlens is a triage tool. It tells you *where to look*, not *what is true*.
+- **Replace human review**: groundlens is a triage tool. It tells you *where to look*, not *what is true*.
 
 ## Next Steps
 

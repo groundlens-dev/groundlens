@@ -1,4 +1,4 @@
-"""Tests for factlens.integrations.langchain (FactlensCallback, FactlensEvaluator)."""
+"""Tests for groundlens.integrations.langchain (GroundlensCallback, GroundlensEvaluator)."""
 
 from __future__ import annotations
 
@@ -26,16 +26,16 @@ def _make_fake_langchain_modules() -> dict[str, ModuleType]:
     }
 
 
-class TestFactlensCallback:
-    """Test the FactlensCallback for langchain."""
+class TestGroundlensCallback:
+    """Test the GroundlensCallback for langchain."""
 
     def test_on_llm_start_stores_prompts(self) -> None:
         fake_modules = _make_fake_langchain_modules()
         with patch.dict(sys.modules, fake_modules):
             try:
-                from factlens.integrations.langchain import FactlensCallback
+                from groundlens.integrations.langchain import GroundlensCallback
 
-                cb = FactlensCallback()
+                cb = GroundlensCallback()
                 run_id = uuid4()
                 cb.on_llm_start(
                     serialized={"name": "test-model"},
@@ -52,15 +52,15 @@ class TestFactlensCallback:
         fake_modules = _make_fake_langchain_modules()
         with patch.dict(sys.modules, fake_modules):
             try:
-                from factlens.integrations.langchain import FactlensCallback
+                from groundlens.integrations.langchain import GroundlensCallback
 
-                with patch("factlens.integrations.langchain.callback.evaluate") as mock_eval:
+                with patch("groundlens.integrations.langchain.callback.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.value = 0.8
                     mock_eval.return_value = mock_score
 
-                    cb = FactlensCallback()
+                    cb = GroundlensCallback()
                     run_id = uuid4()
                     cb.on_llm_start(
                         serialized={"name": "test-model"},
@@ -82,9 +82,9 @@ class TestFactlensCallback:
         fake_modules = _make_fake_langchain_modules()
         with patch.dict(sys.modules, fake_modules):
             try:
-                from factlens.integrations.langchain import FactlensCallback
+                from groundlens.integrations.langchain import GroundlensCallback
 
-                cb = FactlensCallback()
+                cb = GroundlensCallback()
                 run_id = uuid4()
                 cb.on_llm_start(
                     serialized={"name": "test-model"},
@@ -99,16 +99,16 @@ class TestFactlensCallback:
                 pytest.skip("langchain integration not implemented yet")
 
 
-class TestFactlensEvaluator:
-    """Test the FactlensEvaluator for langsmith."""
+class TestGroundlensEvaluator:
+    """Test the GroundlensEvaluator for langsmith."""
 
     def test_evaluator_creation(self) -> None:
         fake_modules = _make_fake_langchain_modules()
         with patch.dict(sys.modules, fake_modules):
             try:
-                from factlens.integrations.langchain import FactlensEvaluator
+                from groundlens.integrations.langchain import GroundlensEvaluator
 
-                evaluator = FactlensEvaluator()
+                evaluator = GroundlensEvaluator()
                 assert evaluator is not None
             except (ImportError, ModuleNotFoundError):
                 pytest.skip("langchain evaluator not implemented yet")
@@ -117,16 +117,16 @@ class TestFactlensEvaluator:
         fake_modules = _make_fake_langchain_modules()
         with patch.dict(sys.modules, fake_modules):
             try:
-                from factlens.integrations.langchain import FactlensEvaluator
+                from groundlens.integrations.langchain import GroundlensEvaluator
 
-                with patch("factlens.integrations.langchain.evaluate") as mock_eval:
+                with patch("groundlens.integrations.langchain.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.normalized = 0.75
                     mock_score.method = "dgi"
                     mock_eval.return_value = mock_score
 
-                    evaluator = FactlensEvaluator()
+                    evaluator = GroundlensEvaluator()
                     mock_run = MagicMock()
                     mock_run.inputs = {"question": "What is X?"}
                     mock_run.outputs = {"output": "X is Y."}

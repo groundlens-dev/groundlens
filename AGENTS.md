@@ -1,10 +1,10 @@
 # AGENTS.md -- Codebase guide for AI coding agents
 
-This file helps AI coding agents (Claude Code, Codex, Copilot Workspace, etc.) navigate and contribute to the factlens codebase.
+This file helps AI coding agents (Claude Code, Codex, Copilot Workspace, etc.) navigate and contribute to the groundlens codebase.
 
-## What factlens does
+## What groundlens does
 
-factlens detects LLM hallucinations using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`). No second LLM is needed.
+groundlens detects LLM hallucinations using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`). No second LLM is needed.
 
 Two scoring methods:
 - **SGI (Semantic Grounding Index):** ratio-based, requires context. `SGI = dist(response, question) / dist(response, context)`.
@@ -13,15 +13,15 @@ Two scoring methods:
 ## Repository layout
 
 ```
-factlens/
-├── src/factlens/                # Source code (src layout)
+groundlens/
+├── src/groundlens/                # Source code (src layout)
 │   ├── __init__.py              # Public API exports
 │   ├── _version.py              # CalVer version string
 │   ├── sgi.py                   # SGI: compute_sgi(), SGI class
 │   ├── dgi.py                   # DGI: compute_dgi(), DGI class, calibration cache
 │   ├── evaluate.py              # evaluate(), evaluate_batch() -- auto-selects method
 │   ├── calibrate.py             # calibrate(), CalibrationResult
-│   ├── score.py                 # Result dataclasses: SGIResult, DGIResult, FactlensScore
+│   ├── score.py                 # Result dataclasses: SGIResult, DGIResult, GroundlensScore
 │   ├── _internal/               # Private implementation (not public API)
 │   │   ├── geometry.py          # euclidean_distance, displacement_vector, unit_normalize, cosine_similarity
 │   │   ├── embeddings.py        # encode_texts(), model loading, DEFAULT_MODEL constant
@@ -54,11 +54,11 @@ factlens/
 
 ## Public API
 
-All public symbols are exported from `factlens/__init__.py`:
+All public symbols are exported from `groundlens/__init__.py`:
 
 ```python
-from factlens import compute_sgi, compute_dgi, evaluate, evaluate_batch, calibrate
-from factlens import SGI, DGI, SGIResult, DGIResult, FactlensScore, CalibrationResult
+from groundlens import compute_sgi, compute_dgi, evaluate, evaluate_batch, calibrate
+from groundlens import SGI, DGI, SGIResult, DGIResult, GroundlensScore, CalibrationResult
 ```
 
 ## Key abstractions
@@ -67,7 +67,7 @@ from factlens import SGI, DGI, SGIResult, DGIResult, FactlensScore, CalibrationR
 
 - `SGIResult` -- frozen dataclass with `value`, `normalized`, `flagged`, `q_dist`, `ctx_dist`, `method`, `explanation`
 - `DGIResult` -- frozen dataclass with `value`, `normalized`, `flagged`, `method`, `explanation`
-- `FactlensScore` -- unified wrapper returned by `evaluate()`, contains a `detail` field with the underlying SGI/DGI result
+- `GroundlensScore` -- unified wrapper returned by `evaluate()`, contains a `detail` field with the underlying SGI/DGI result
 
 ### Geometry layer (_internal/geometry.py)
 
@@ -79,7 +79,7 @@ Decision boundaries: `SGI_REVIEW=0.95`, `SGI_STRONG_PASS=1.20`, `DGI_PASS=0.30`.
 
 ### Provider protocol (providers/_base.py)
 
-`BaseLLMProvider` is a `Protocol` with `complete()` and `chat()` methods. `LLMResponse` carries `text`, `model`, `usage`, and optional `factlens_score`.
+`BaseLLMProvider` is a `Protocol` with `complete()` and `chat()` methods. `LLMResponse` carries `text`, `model`, `usage`, and optional `groundlens_score`.
 
 ## Commands
 
@@ -96,7 +96,7 @@ pytest tests/unit/
 pytest tests/integration/
 
 # With coverage
-pytest --cov=factlens --cov-report=term-missing
+pytest --cov=groundlens --cov-report=term-missing
 
 # Skip slow tests
 pytest -m "not slow"
@@ -118,7 +118,7 @@ ruff format src/ tests/
 ### Type check
 
 ```bash
-mypy src/factlens/
+mypy src/groundlens/
 ```
 
 mypy is configured in strict mode in `pyproject.toml`. Provider and integration dependencies use `ignore_missing_imports = true`.
@@ -127,16 +127,16 @@ mypy is configured in strict mode in `pyproject.toml`. Provider and integration 
 
 ```bash
 # Single check
-factlens check --question "Q?" --response "A." --context "Source."
+groundlens check --question "Q?" --response "A." --context "Source."
 
 # Batch CSV
-factlens evaluate input.csv --output results.csv
+groundlens evaluate input.csv --output results.csv
 
 # Calibrate DGI
-factlens calibrate --pairs pairs.csv --output calibration.json
+groundlens calibrate --pairs pairs.csv --output calibration.json
 
 # Benchmark
-factlens benchmark --dataset cert-framework/human-confabulation-benchmark
+groundlens benchmark --dataset cert-framework/human-confabulation-benchmark
 ```
 
 ### Install for development
@@ -148,12 +148,12 @@ pre-commit install
 
 ## Architecture principles
 
-1. **src layout** -- source code lives in `src/factlens/`, preventing accidental imports from the working directory.
+1. **src layout** -- source code lives in `src/groundlens/`, preventing accidental imports from the working directory.
 2. **Private internals** -- `_internal/` is not part of the public API. Do not import from it in user-facing code outside the package.
 3. **Lazy provider imports** -- providers and integrations are optional. They import their third-party dependencies at call time, not at package import time.
 4. **Frozen dataclasses** -- all result types are immutable (`frozen=True, slots=True`).
 5. **CalVer versioning** -- version format is `YYYY.M.D` in `_version.py`.
-6. **Deferred CLI imports** -- the CLI defers all heavy imports to keep `factlens --help` fast.
+6. **Deferred CLI imports** -- the CLI defers all heavy imports to keep `groundlens --help` fast.
 
 ## Coding standards
 
@@ -167,7 +167,7 @@ pre-commit install
 
 ### Adding a new provider
 
-1. Create `src/factlens/providers/new_provider.py`
+1. Create `src/groundlens/providers/new_provider.py`
 2. Implement `BaseLLMProvider` protocol (see `_base.py`)
 3. Add optional dependency in `pyproject.toml` under `[project.optional-dependencies]`
 4. Add tests in `tests/providers/test_new_provider.py`
@@ -175,14 +175,14 @@ pre-commit install
 
 ### Adding a new integration
 
-1. Create `src/factlens/integrations/new_framework/` with `__init__.py`
+1. Create `src/groundlens/integrations/new_framework/` with `__init__.py`
 2. Import the framework dependency lazily
 3. Add optional dependency in `pyproject.toml`
 4. Add tests in `tests/integrations/test_new_framework.py`
 
 ### Modifying thresholds
 
-Thresholds live in `src/factlens/_internal/thresholds.py`. Changes require updating:
+Thresholds live in `src/groundlens/_internal/thresholds.py`. Changes require updating:
 - The threshold constants
 - The normalization function docstrings (reference point tables)
 - The `score.py` explanation logic in `__post_init__`
@@ -190,4 +190,4 @@ Thresholds live in `src/factlens/_internal/thresholds.py`. Changes require updat
 
 ### Updating the version
 
-Edit `src/factlens/_version.py`. The version follows CalVer: `YYYY.M.D`.
+Edit `src/groundlens/_version.py`. The version follows CalVer: `YYYY.M.D`.

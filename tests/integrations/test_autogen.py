@@ -1,4 +1,4 @@
-"""Tests for factlens.integrations.autogen.FactlensChecker."""
+"""Tests for groundlens.integrations.autogen.GroundlensChecker."""
 
 from __future__ import annotations
 
@@ -16,16 +16,16 @@ def _make_fake_autogen_module() -> ModuleType:
     return mod
 
 
-class TestFactlensChecker:
-    """Test the FactlensChecker for AutoGen."""
+class TestGroundlensChecker:
+    """Test the GroundlensChecker for AutoGen."""
 
     def test_check_returns_dict_with_score_and_flagged(self) -> None:
         fake_autogen = _make_fake_autogen_module()
         with patch.dict(sys.modules, {"autogen": fake_autogen}):
             try:
-                from factlens.integrations.autogen import FactlensChecker
+                from groundlens.integrations.autogen import GroundlensChecker
 
-                with patch("factlens.integrations.autogen.evaluate") as mock_eval:
+                with patch("groundlens.integrations.autogen.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.normalized = 0.85
@@ -34,7 +34,7 @@ class TestFactlensChecker:
                     mock_score.explanation = "DGI=0.600 -- pass"
                     mock_eval.return_value = mock_score
 
-                    checker = FactlensChecker()
+                    checker = GroundlensChecker()
                     result = checker.check(
                         question="What is the speed of light?",
                         response="The speed of light is approximately 299,792 km/s.",
@@ -52,9 +52,9 @@ class TestFactlensChecker:
         fake_autogen = _make_fake_autogen_module()
         with patch.dict(sys.modules, {"autogen": fake_autogen}):
             try:
-                from factlens.integrations.autogen import FactlensChecker
+                from groundlens.integrations.autogen import GroundlensChecker
 
-                with patch("factlens.integrations.autogen.evaluate") as mock_eval:
+                with patch("groundlens.integrations.autogen.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = True
                     mock_score.normalized = 0.2
@@ -63,7 +63,7 @@ class TestFactlensChecker:
                     mock_score.explanation = "DGI=-0.100 -- high risk"
                     mock_eval.return_value = mock_score
 
-                    checker = FactlensChecker()
+                    checker = GroundlensChecker()
                     result = checker.check(
                         question="What is the speed of light?",
                         response="The speed of light is 42 bananas per second.",
@@ -78,9 +78,9 @@ class TestFactlensChecker:
         fake_autogen = _make_fake_autogen_module()
         with patch.dict(sys.modules, {"autogen": fake_autogen}):
             try:
-                from factlens.integrations.autogen import FactlensChecker
+                from groundlens.integrations.autogen import GroundlensChecker
 
-                with patch("factlens.integrations.autogen.evaluate") as mock_eval:
+                with patch("groundlens.integrations.autogen.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.normalized = 0.9
@@ -89,7 +89,7 @@ class TestFactlensChecker:
                     mock_score.explanation = "SGI=1.300 -- strong pass"
                     mock_eval.return_value = mock_score
 
-                    checker = FactlensChecker()
+                    checker = GroundlensChecker()
                     result = checker.check(
                         question="What is X?",
                         response="X is Y.",
@@ -105,9 +105,9 @@ class TestFactlensChecker:
         fake_autogen = _make_fake_autogen_module()
         with patch.dict(sys.modules, {"autogen": fake_autogen}):
             try:
-                from factlens.integrations.autogen import FactlensChecker
+                from groundlens.integrations.autogen import GroundlensChecker
 
-                checker = FactlensChecker()
+                checker = GroundlensChecker()
                 assert checker is not None
                 assert hasattr(checker, "check")
             except (ImportError, ModuleNotFoundError):

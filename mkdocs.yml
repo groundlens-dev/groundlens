@@ -1,9 +1,9 @@
-site_name: factlens
+site_name: groundlens
 site_description: Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
 site_author: Javier Marin
-site_url: https://javihaus.github.io/factlens/
-repo_url: https://github.com/factlens/factlens
-repo_name: factlens/factlens
+site_url: https://groundlens.dev/
+repo_url: https://github.com/groundlens-dev/groundlens
+repo_name: groundlens-dev/groundlens
 
 copyright: Copyright &copy; 2025-2026 Javier Marin
 
@@ -135,9 +135,9 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/factlens/factlens
+      link: https://github.com/groundlens-dev/groundlens
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/factlens/
+      link: https://pypi.org/project/groundlens/
   generator: false
 
 extra_javascript:

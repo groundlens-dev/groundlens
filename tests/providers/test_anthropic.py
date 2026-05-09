@@ -1,4 +1,4 @@
-"""Tests for factlens.providers.anthropic.FactlensAnthropic."""
+"""Tests for groundlens.providers.anthropic.GroundlensAnthropic."""
 
 from __future__ import annotations
 
@@ -16,44 +16,44 @@ def _make_fake_anthropic_module() -> ModuleType:
     return mod
 
 
-class TestFactlensAnthropicInit:
-    """Test FactlensAnthropic initialization."""
+class TestGroundlensAnthropicInit:
+    """Test GroundlensAnthropic initialization."""
 
     def test_init_default_model(self) -> None:
         fake_mod = _make_fake_anthropic_module()
         with patch.dict(sys.modules, {"anthropic": fake_mod}):
             try:
-                from factlens.providers.anthropic import FactlensAnthropic
+                from groundlens.providers.anthropic import GroundlensAnthropic
 
-                llm = FactlensAnthropic(api_key="sk-ant-test")
+                llm = GroundlensAnthropic(api_key="sk-ant-test")
                 assert hasattr(llm, "_model") or hasattr(llm, "model")
             except ImportError:
                 pytest.skip("anthropic provider not implemented yet")
 
 
-class TestFactlensAnthropicChat:
+class TestGroundlensAnthropicChat:
     """Test chat/complete with mocked Anthropic client."""
 
     def test_chat_returns_response(self, mock_anthropic_client: MagicMock) -> None:
         fake_mod = _make_fake_anthropic_module()
         with patch.dict(sys.modules, {"anthropic": fake_mod}):
             try:
-                from factlens.providers.anthropic import FactlensAnthropic
+                from groundlens.providers.anthropic import GroundlensAnthropic
 
                 with (
                     patch.object(
-                        FactlensAnthropic,
+                        GroundlensAnthropic,
                         "__init__",
                         lambda self, **kw: (
                             setattr(self, "_client", mock_anthropic_client)
                             or setattr(self, "_model", "claude-sonnet-4-20250514")
-                            or setattr(self, "_factlens_model", "all-MiniLM-L6-v2")
+                            or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("factlens.providers.anthropic.evaluate") as mock_eval,
+                    patch("groundlens.providers.anthropic.evaluate") as mock_eval,
                 ):
                     mock_eval.return_value = MagicMock()
-                    llm = FactlensAnthropic(api_key="sk-ant-test")
+                    llm = GroundlensAnthropic(api_key="sk-ant-test")
                     resp = llm.chat("What is X?")
                     assert resp.text == "Mocked Anthropic response text."
             except (ImportError, AttributeError, ModuleNotFoundError):
@@ -63,45 +63,45 @@ class TestFactlensAnthropicChat:
         fake_mod = _make_fake_anthropic_module()
         with patch.dict(sys.modules, {"anthropic": fake_mod}):
             try:
-                from factlens.providers.anthropic import FactlensAnthropic
+                from groundlens.providers.anthropic import GroundlensAnthropic
 
                 with (
                     patch.object(
-                        FactlensAnthropic,
+                        GroundlensAnthropic,
                         "__init__",
                         lambda self, **kw: (
                             setattr(self, "_client", mock_anthropic_client)
                             or setattr(self, "_model", "claude-sonnet-4-20250514")
-                            or setattr(self, "_factlens_model", "all-MiniLM-L6-v2")
+                            or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("factlens.providers.anthropic.evaluate") as mock_eval,
+                    patch("groundlens.providers.anthropic.evaluate") as mock_eval,
                 ):
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_eval.return_value = mock_score
 
-                    llm = FactlensAnthropic(api_key="sk-ant-test")
+                    llm = GroundlensAnthropic(api_key="sk-ant-test")
                     resp = llm.chat("What is X?")
-                    assert resp.factlens_score is not None
+                    assert resp.groundlens_score is not None
                     mock_eval.assert_called_once()
             except (ImportError, AttributeError, ModuleNotFoundError):
                 pytest.skip("anthropic provider not fully implemented yet")
 
 
-class TestFactlensAnthropicImportError:
+class TestGroundlensAnthropicImportError:
     """Test ImportError when anthropic is not installed."""
 
     def test_import_error_raised(self) -> None:
         with patch.dict(sys.modules, {"anthropic": None}):
             try:
                 # Force reimport
-                if "factlens.providers.anthropic" in sys.modules:
-                    del sys.modules["factlens.providers.anthropic"]
-                from factlens.providers.anthropic import FactlensAnthropic
+                if "groundlens.providers.anthropic" in sys.modules:
+                    del sys.modules["groundlens.providers.anthropic"]
+                from groundlens.providers.anthropic import GroundlensAnthropic
 
                 with pytest.raises(ImportError, match="anthropic"):
-                    FactlensAnthropic(api_key="sk-test")
+                    GroundlensAnthropic(api_key="sk-test")
             except ImportError:
                 # Expected -- the import itself may raise
                 pass

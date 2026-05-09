@@ -1,11 +1,11 @@
 # AutoGen Integration
 
-`FactlensChecker` evaluates agent replies in AutoGen conversations for hallucination risk, providing a structured verification result.
+`GroundlensChecker` evaluates agent replies in AutoGen conversations for hallucination risk, providing a structured verification result.
 
 ## Installation
 
 ```bash
-pip install "factlens[autogen]"
+pip install "groundlens[autogen]"
 ```
 
 This installs the `pyautogen` package.
@@ -13,9 +13,9 @@ This installs the `pyautogen` package.
 ## Quick Start
 
 ```python
-from factlens.integrations.autogen import FactlensChecker
+from groundlens.integrations.autogen import GroundlensChecker
 
-checker = FactlensChecker()
+checker = GroundlensChecker()
 
 messages = [
     {"role": "user", "content": "What is the capital of France?"},
@@ -41,15 +41,15 @@ print(result)
 ## Configuration
 
 ```python
-checker = FactlensChecker(
-    factlens_model="all-MiniLM-L6-v2",  # Embedding model
+checker = GroundlensChecker(
+    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
     context_key="context",                # Metadata key for context
 )
 ```
 
 | Parameter | Default | Description |
 |---|---|---|
-| `factlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
 | `context_key` | `"context"` | Key to look for context in message metadata |
 
 ## How It Works
@@ -70,7 +70,7 @@ The returned dict contains:
 
 | Key | Type | Description |
 |---|---|---|
-| `score` | `float` | Raw factlens score |
+| `score` | `float` | Raw groundlens score |
 | `normalized` | `float` | Score in [0, 1] |
 | `flagged` | `bool` | Whether human review is recommended |
 | `method` | `str` | `"sgi"` or `"dgi"` |
@@ -109,9 +109,9 @@ result = checker.check(messages, sender=None)
 
 ```python
 import autogen
-from factlens.integrations.autogen import FactlensChecker
+from groundlens.integrations.autogen import GroundlensChecker
 
-checker = FactlensChecker()
+checker = GroundlensChecker()
 
 # Create agents
 assistant = autogen.AssistantAgent(

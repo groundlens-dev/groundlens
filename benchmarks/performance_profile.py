@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens"]
+# dependencies = ["groundlens"]
 # ///
 """Performance profiling — measure latency and throughput for SGI and DGI.
 
@@ -14,8 +14,8 @@ from __future__ import annotations
 import statistics
 import time
 
-from factlens.dgi import compute_dgi
-from factlens.sgi import compute_sgi
+from groundlens.dgi import compute_dgi
+from groundlens.sgi import compute_sgi
 
 # Test data — varied lengths to capture realistic performance.
 SGI_CASES = [
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     iterations = 50
 
     print("=" * 50)
-    print("  FACTLENS PERFORMANCE PROFILE")
+    print("  GROUNDLENS PERFORMANCE PROFILE")
     print("=" * 50)
     print(f"\n  Iterations per case: {iterations}")
     print(f"  SGI test cases: {len(SGI_CASES)}")

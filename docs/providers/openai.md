@@ -1,19 +1,19 @@
 # OpenAI Provider
 
-`FactlensOpenAI` wraps the OpenAI Python SDK and automatically scores every response for hallucination risk using factlens.
+`GroundlensOpenAI` wraps the OpenAI Python SDK and automatically scores every response for hallucination risk using groundlens.
 
 ## Installation
 
 ```bash
-pip install "factlens[openai]"
+pip install "groundlens[openai]"
 ```
 
 ## Quick Start
 
 ```python
-from factlens.providers.openai import FactlensOpenAI
+from groundlens.providers.openai import GroundlensOpenAI
 
-llm = FactlensOpenAI(api_key="sk-...")
+llm = GroundlensOpenAI(api_key="sk-...")
 
 # With context (SGI scoring)
 resp = llm.chat(
@@ -21,24 +21,24 @@ resp = llm.chat(
     context="The document discusses the effects of climate change on coral reefs...",
 )
 print(resp.text)                          # The LLM's response
-print(resp.factlens_score.method)         # 'sgi'
-print(resp.factlens_score.value)          # e.g., 1.23
-print(resp.factlens_score.flagged)        # False
-print(resp.factlens_score.explanation)    # Human-readable
+print(resp.groundlens_score.method)         # 'sgi'
+print(resp.groundlens_score.value)          # e.g., 1.23
+print(resp.groundlens_score.flagged)        # False
+print(resp.groundlens_score.explanation)    # Human-readable
 
 # Without context (DGI scoring)
 resp = llm.chat("What causes seasons on Earth?")
-print(resp.factlens_score.method)         # 'dgi'
+print(resp.groundlens_score.method)         # 'dgi'
 ```
 
 ## Configuration
 
 ```python
-llm = FactlensOpenAI(
+llm = GroundlensOpenAI(
     api_key="sk-...",
     model="gpt-4o",                     # OpenAI model for generation
-    factlens_model="all-MiniLM-L6-v2",  # Sentence-transformer for scoring
-    factlens_threshold=0.45,             # Reserved for future use
+    groundlens_model="all-MiniLM-L6-v2",  # Sentence-transformer for scoring
+    groundlens_threshold=0.45,             # Reserved for future use
 )
 ```
 
@@ -46,8 +46,8 @@ llm = FactlensOpenAI(
 |---|---|---|
 | `api_key` | Required | OpenAI API key |
 | `model` | `"gpt-4o"` | Chat model for generation |
-| `factlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
-| `factlens_threshold` | `0.45` | Reserved for future threshold customization |
+| `groundlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
+| `groundlens_threshold` | `0.45` | Reserved for future threshold customization |
 
 ## Response Object
 
@@ -58,7 +58,7 @@ The `LLMResponse` returned by `chat()` contains:
 | `text` | `str` | Generated response text |
 | `model` | `str` | Model identifier |
 | `usage` | `dict` | Token usage (`prompt_tokens`, `completion_tokens`, `total_tokens`) |
-| `factlens_score` | `FactlensScore` | Full factlens evaluation result |
+| `groundlens_score` | `GroundlensScore` | Full groundlens evaluation result |
 
 ## Passing Extra Parameters
 
@@ -77,7 +77,7 @@ resp = llm.chat(
 ```python
 resp = llm.chat("What is the recommended treatment?", context=medical_context)
 
-if resp.factlens_score.flagged:
+if resp.groundlens_score.flagged:
     # Response may not be grounded in the provided context
     fallback_response = "I cannot verify this answer against the provided sources."
 else:
@@ -89,7 +89,7 @@ else:
 
 ```python
 import os
-from factlens.providers.openai import FactlensOpenAI
+from groundlens.providers.openai import GroundlensOpenAI
 
-llm = FactlensOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+llm = GroundlensOpenAI(api_key=os.environ["OPENAI_API_KEY"])
 ```

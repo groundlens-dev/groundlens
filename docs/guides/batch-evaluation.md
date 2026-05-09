@@ -1,11 +1,11 @@
 # Batch Evaluation
 
-This guide covers using `evaluate_batch()` and the CLI `factlens evaluate` command for scoring large sets of LLM outputs, suitable for CI/CD pipelines, regression testing, and quality monitoring.
+This guide covers using `evaluate_batch()` and the CLI `groundlens evaluate` command for scoring large sets of LLM outputs, suitable for CI/CD pipelines, regression testing, and quality monitoring.
 
 ## Python API: evaluate_batch()
 
 ```python
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 items = [
     {
@@ -51,12 +51,12 @@ results = evaluate_batch(
 )
 ```
 
-## CLI: factlens evaluate
+## CLI: groundlens evaluate
 
 For batch evaluation from the command line:
 
 ```bash
-factlens evaluate input.csv --output results.csv
+groundlens evaluate input.csv --output results.csv
 ```
 
 ### Input CSV
@@ -69,10 +69,10 @@ question,response,context
 
 ### Output CSV
 
-The output includes all original columns plus factlens scores:
+The output includes all original columns plus groundlens scores:
 
 ```csv
-question,response,context,factlens_method,factlens_score,factlens_normalized,factlens_flagged,factlens_explanation
+question,response,context,groundlens_method,groundlens_score,groundlens_normalized,groundlens_flagged,groundlens_explanation
 "What is X?","X is Y.","According to docs, X is Y.",sgi,1.2341,0.6142,False,"SGI=1.234 -- strong context engagement (pass)"
 "What causes Z?","Z happens because of W.",,dgi,0.4521,0.7261,False,"DGI=0.452 -- aligns with grounded patterns (pass)"
 ```
@@ -80,7 +80,7 @@ question,response,context,factlens_method,factlens_score,factlens_normalized,fac
 With domain calibration:
 
 ```bash
-factlens evaluate input.csv --output results.csv --reference-csv domain_pairs.csv
+groundlens evaluate input.csv --output results.csv --reference-csv domain_pairs.csv
 ```
 
 ## CI/CD Integration
@@ -92,7 +92,7 @@ name: Hallucination Gate
 on: [push]
 
 jobs:
-  factlens:
+  groundlens:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,12 +102,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install factlens
-        run: pip install factlens
+      - name: Install groundlens
+        run: pip install groundlens
 
       - name: Run evaluation
         run: |
-          factlens evaluate tests/golden_qa.csv --output results.csv
+          groundlens evaluate tests/golden_qa.csv --output results.csv
 
       - name: Check for flagged responses
         run: |
@@ -122,7 +122,7 @@ jobs:
 
 ```python
 import sys
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 # Load test cases
 items = load_golden_dataset("tests/golden_qa.json")
@@ -185,7 +185,7 @@ For very large datasets, consider splitting into chunks and processing in parall
 
 ```python
 from concurrent.futures import ProcessPoolExecutor
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 
 def evaluate_chunk(chunk):

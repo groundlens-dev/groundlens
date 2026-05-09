@@ -3,7 +3,7 @@ requires = ["hatchling>=1.21.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "factlens"
+name = "groundlens"
 version = "2026.4.22"
 description = "Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable."
 readme = "README.md"
@@ -58,9 +58,9 @@ semantic-kernel = ["semantic-kernel>=1.0.0"]
 autogen = ["autogen-agentchat>=0.4.0"]
 
 # Bundles
-providers = ["factlens[openai,anthropic,google]"]
-integrations = ["factlens[langchain,crewai,semantic-kernel,autogen]"]
-all = ["factlens[providers,integrations]"]
+providers = ["groundlens[openai,anthropic,google]"]
+integrations = ["groundlens[langchain,crewai,semantic-kernel,autogen]"]
+all = ["groundlens[providers,integrations]"]
 
 # Development
 dev = [
@@ -82,23 +82,23 @@ docs = [
 ]
 
 [project.scripts]
-factlens = "factlens.cli.main:main"
+groundlens = "groundlens.cli.main:main"
 
 [project.urls]
-Homepage = "https://factlens.dev"
-Documentation = "https://docs.factlens.dev"
-Repository = "https://github.com/factlens/factlens"
-Issues = "https://github.com/factlens/factlens/issues"
-Changelog = "https://github.com/factlens/factlens/blob/main/CHANGELOG.md"
+Homepage = "https://groundlens.dev"
+Documentation = "https://docs.groundlens.dev"
+Repository = "https://github.com/groundlens-dev/groundlens"
+Issues = "https://github.com/groundlens-dev/groundlens/issues"
+Changelog = "https://github.com/groundlens-dev/groundlens/blob/main/CHANGELOG.md"
 "Research (SGI)" = "https://arxiv.org/abs/2512.13771"
 "Research (DGI)" = "https://arxiv.org/abs/2602.13224"
 "Research (Confabulation Benchmark)" = "https://arxiv.org/abs/2603.13259"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/factlens"]
+packages = ["src/groundlens"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/factlens", "tests", "LICENSE", "README.md"]
+include = ["src/groundlens", "tests", "LICENSE", "README.md"]
 
 # ── Ruff (lint + format) ────────────────────────────────────────────────────
 
@@ -138,13 +138,14 @@ ignore = [
 convention = "google"
 
 [tool.ruff.lint.isort]
-known-first-party = ["factlens"]
+known-first-party = ["groundlens"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["D", "ANN", "T20"]          # Relaxed for tests
 "examples/**/*.py" = ["D", "ANN", "T20"]       # Relaxed for examples
+"examples/**/*.ipynb" = ["D", "ANN", "T20"]    # Relaxed for notebooks
 "benchmarks/**/*.py" = ["D", "ANN", "T20"]
-"src/factlens/cli/**/*.py" = ["T20"]           # CLI needs print
+"src/groundlens/cli/**/*.py" = ["T20"]           # CLI needs print
 
 # ── mypy (strict) ───────────────────────────────────────────────────────────
 
@@ -192,7 +193,7 @@ addopts = [
 # ── coverage ─────────────────────────────────────────────────────────────────
 
 [tool.coverage.run]
-source = ["factlens"]
+source = ["groundlens"]
 omit = ["*/cli/*", "*/data/*"]
 
 [tool.coverage.report]

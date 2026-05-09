@@ -1,4 +1,4 @@
-"""Tests for factlens._internal.csv_loader."""
+"""Tests for groundlens._internal.csv_loader."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from factlens._internal.csv_loader import _load_user_csv
+from groundlens._internal.csv_loader import _load_user_csv
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -40,7 +40,7 @@ question,response
 === "Python API"
 
     ```python
-    from factlens import calibrate
+    from groundlens import calibrate
 
     result = calibrate(
         csv_path="medical_pairs.csv",
@@ -59,7 +59,7 @@ question,response
 === "CLI"
 
     ```bash
-    factlens calibrate \
+    groundlens calibrate \
         --pairs medical_pairs.csv \
         --output calibration_medical.json
     ```
@@ -80,7 +80,7 @@ The concentration $\kappa$ tells you how consistent your calibration data is:
 Compare generic vs. calibrated DGI on a held-out test set.
 
 ```python
-from factlens import compute_dgi
+from groundlens import compute_dgi
 from sklearn.metrics import roc_auc_score
 
 # Load test data: list of (question, response, is_grounded) triples
@@ -127,7 +127,7 @@ print(f"Improvement:      +{calibrated_auroc - generic_auroc:.4f}")
 result.save("calibration_medical.json")
 
 # Verify it loads correctly
-from factlens.calibrate import CalibrationResult
+from groundlens.calibrate import CalibrationResult
 loaded = CalibrationResult.load("calibration_medical.json")
 print(f"Loaded: {loaded.n_pairs} pairs, kappa={loaded.concentration:.2f}")
 ```
@@ -137,7 +137,7 @@ print(f"Loaded: {loaded.n_pairs} pairs, kappa={loaded.concentration:.2f}")
 Use the calibration CSV in production scoring:
 
 ```python
-from factlens import evaluate
+from groundlens import evaluate
 
 score = evaluate(
     question=user_question,
@@ -149,7 +149,7 @@ score = evaluate(
 Or with the class API:
 
 ```python
-from factlens import DGI
+from groundlens import DGI
 
 # Initialize once at startup
 dgi = DGI(reference_csv="medical_pairs.csv")
@@ -172,7 +172,7 @@ Recalibrate when:
 For systems that serve multiple domains, maintain separate calibration files:
 
 ```python
-from factlens import DGI
+from groundlens import DGI
 
 # Initialize domain-specific scorers
 dgi_medical = DGI(reference_csv="calibration_medical.csv")

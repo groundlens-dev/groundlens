@@ -1,25 +1,25 @@
 # CLI Reference
 
-factlens provides a command-line interface for quick checks, batch evaluation, calibration, and benchmarking. All commands are available via the `factlens` entry point.
+groundlens provides a command-line interface for quick checks, batch evaluation, calibration, and benchmarking. All commands are available via the `groundlens` entry point.
 
 ```bash
-factlens --help
-factlens --version
+groundlens --help
+groundlens --version
 ```
 
-## `factlens check`
+## `groundlens check`
 
 Evaluate a single response for hallucination risk.
 
 ```bash
 # With context (uses SGI)
-factlens check \
+groundlens check \
     --question "What is the capital of France?" \
     --response "The capital of France is Paris." \
     --context "France is in Western Europe. Its capital is Paris."
 
 # Without context (uses DGI)
-factlens check \
+groundlens check \
     --question "What causes seasons on Earth?" \
     --response "Seasons are caused by Earth's 23.5-degree axial tilt."
 ```
@@ -43,12 +43,12 @@ Explanation: SGI=1.234 -- strong context engagement (pass)
 | `--context` | No | None | Source context (enables SGI when provided) |
 | `--model` | No | `all-MiniLM-L6-v2` | Sentence-transformer model |
 
-## `factlens evaluate`
+## `groundlens evaluate`
 
 Batch evaluate a CSV file of question/response pairs.
 
 ```bash
-factlens evaluate input.csv --output results.csv
+groundlens evaluate input.csv --output results.csv
 ```
 
 **Input CSV format:**
@@ -65,11 +65,11 @@ The `context` column is optional. When present, SGI is used; when absent or empt
 
 | Column | Description |
 |---|---|
-| `factlens_method` | `sgi` or `dgi` |
-| `factlens_score` | Raw score value |
-| `factlens_normalized` | Score in [0, 1] |
-| `factlens_flagged` | `True` or `False` |
-| `factlens_explanation` | Human-readable interpretation |
+| `groundlens_method` | `sgi` or `dgi` |
+| `groundlens_score` | Raw score value |
+| `groundlens_normalized` | Score in [0, 1] |
+| `groundlens_flagged` | `True` or `False` |
+| `groundlens_explanation` | Human-readable interpretation |
 
 **Options:**
 
@@ -81,14 +81,14 @@ The `context` column is optional. When present, SGI is used; when absent or empt
 | `--reference-csv` | No | None | DGI calibration CSV path |
 
 !!! tip "CI/CD integration"
-    Use `factlens evaluate` in your CI pipeline to gate deployments on hallucination scores. Parse the output CSV and fail the build if any row has `factlens_flagged=True`.
+    Use `groundlens evaluate` in your CI pipeline to gate deployments on hallucination scores. Parse the output CSV and fail the build if any row has `groundlens_flagged=True`.
 
-## `factlens calibrate`
+## `groundlens calibrate`
 
 Compute a DGI reference direction from domain-specific calibration pairs.
 
 ```bash
-factlens calibrate \
+groundlens calibrate \
     --pairs domain_pairs.csv \
     --output calibration.json
 ```
@@ -116,7 +116,7 @@ Calibration complete.
 The saved JSON contains the reference direction vector (`mu_hat`), the concentration parameter ($\kappa$), and metadata. Use it with:
 
 ```bash
-factlens evaluate input.csv --output results.csv --reference-csv domain_pairs.csv
+groundlens evaluate input.csv --output results.csv --reference-csv domain_pairs.csv
 ```
 
 **Options:**
@@ -127,13 +127,13 @@ factlens evaluate input.csv --output results.csv --reference-csv domain_pairs.cs
 | `--output` | Yes | --- | Output JSON file path |
 | `--model` | No | `all-MiniLM-L6-v2` | Sentence-transformer model |
 
-## `factlens benchmark`
+## `groundlens benchmark`
 
 Run the confabulation benchmark against a HuggingFace dataset.
 
 ```bash
-factlens benchmark
-factlens benchmark --dataset cert-framework/human-confabulation-benchmark
+groundlens benchmark
+groundlens benchmark --dataset cert-framework/human-confabulation-benchmark
 ```
 
 **Output:**

@@ -8,43 +8,43 @@
 ## Install from PyPI
 
 ```bash
-pip install factlens
+pip install groundlens
 ```
 
 This installs the core library with SGI, DGI, calibration, and CLI support. The default embedding model (`all-MiniLM-L6-v2`) is downloaded automatically on first use via the `sentence-transformers` package.
 
 ## Optional Extras
 
-factlens uses optional dependency groups to keep the core install lightweight. Install only what you need:
+groundlens uses optional dependency groups to keep the core install lightweight. Install only what you need:
 
 === "Provider extras"
 
     ```bash
-    pip install "factlens[openai]"       # FactlensOpenAI provider
-    pip install "factlens[anthropic]"    # FactlensAnthropic provider
-    pip install "factlens[google]"       # FactlensGemini provider
+    pip install "groundlens[openai]"       # GroundlensOpenAI provider
+    pip install "groundlens[anthropic]"    # GroundlensAnthropic provider
+    pip install "groundlens[google]"       # GroundlensGemini provider
     ```
 
 === "Integration extras"
 
     ```bash
-    pip install "factlens[langchain]"        # LangChain evaluator + callback
-    pip install "factlens[crewai]"           # CrewAI tool
-    pip install "factlens[semantic-kernel]"  # Semantic Kernel filter
-    pip install "factlens[autogen]"          # AutoGen checker
+    pip install "groundlens[langchain]"        # LangChain evaluator + callback
+    pip install "groundlens[crewai]"           # CrewAI tool
+    pip install "groundlens[semantic-kernel]"  # Semantic Kernel filter
+    pip install "groundlens[autogen]"          # AutoGen checker
     ```
 
 === "Everything"
 
     ```bash
-    pip install "factlens[all]"
+    pip install "groundlens[all]"
     ```
 
 ## Install from Source
 
 ```bash
-git clone https://github.com/factlens/factlens.git
-cd factlens
+git clone https://github.com/groundlens-dev/groundlens.git
+cd groundlens
 pip install -e ".[dev]"
 ```
 
@@ -53,14 +53,14 @@ The editable install (`-e`) is recommended for development --- changes to source
 ## Verify Installation
 
 ```python
-import factlens
-print(factlens.__version__)  # e.g., 2026.4.22
+import groundlens
+print(groundlens.__version__)  # e.g., 2026.4.22
 ```
 
 Run a quick smoke test:
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 result = compute_sgi(
     question="What is the capital of France?",
@@ -77,10 +77,10 @@ print(result.explanation)  # Human-readable interpretation
 
 ## Embedding Model Selection
 
-factlens defaults to `all-MiniLM-L6-v2` (384 dimensions, ~80 MB). You can use any sentence-transformer model by passing the `model` parameter:
+groundlens defaults to `all-MiniLM-L6-v2` (384 dimensions, ~80 MB). You can use any sentence-transformer model by passing the `model` parameter:
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 result = compute_sgi(
     question="...",
@@ -102,4 +102,4 @@ result = compute_sgi(
 | GPU | Not required | Not required |
 | Python | 3.10 | 3.12+ |
 
-factlens runs entirely on CPU. The sentence-transformer inference is fast enough (~5ms per embedding) that GPU acceleration is unnecessary for typical workloads.
+groundlens runs entirely on CPU. The sentence-transformer inference is fast enough (~5ms per embedding) that GPU acceleration is unnecessary for typical workloads.

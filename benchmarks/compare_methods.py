@@ -1,8 +1,8 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens", "scikit-learn>=1.3.0"]
+# dependencies = ["groundlens", "scikit-learn>=1.3.0"]
 # ///
-"""Compare factlens SGI/DGI vs cosine similarity on the benchmark.
+"""Compare groundlens SGI/DGI vs cosine similarity on the benchmark.
 
 Demonstrates that standard cosine similarity fails on human
 confabulations (fluent, plausible-sounding fabrications), while
@@ -23,9 +23,9 @@ import time
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-from factlens._internal.embeddings import encode_texts
-from factlens.dgi import compute_dgi
-from factlens.sgi import compute_sgi
+from groundlens._internal.embeddings import encode_texts
+from groundlens.dgi import compute_dgi
+from groundlens.sgi import compute_sgi
 
 DATASET_NAME = "cert-framework/human-confabulation-benchmark"
 

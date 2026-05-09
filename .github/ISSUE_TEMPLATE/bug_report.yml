@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in factlens
+description: Report a bug in groundlens
 title: "[Bug]: "
 labels: ["bug", "triage"]
 assignees:
@@ -26,7 +26,7 @@ body:
       description: Minimal code or steps to reproduce the issue.
       placeholder: |
         ```python
-        from factlens import compute_sgi
+        from groundlens import compute_sgi
         result = compute_sgi(question="...", context="...", response="...")
         # Expected: ...
         # Actual: ...
@@ -53,8 +53,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: factlens version
-      description: Output of `python -c "import factlens; print(factlens.__version__)"`.
+      label: groundlens version
+      description: Output of `python -c "import groundlens; print(groundlens.__version__)"`.
       placeholder: "2026.4.22"
     validations:
       required: true
@@ -84,7 +84,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: Which part of factlens is affected?
+      description: Which part of groundlens is affected?
       options:
         - Core (SGI/DGI)
         - CLI

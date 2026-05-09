@@ -1,19 +1,19 @@
 # CrewAI Integration
 
-`FactlensTool` enables CrewAI agents to verify their own outputs for hallucination risk before presenting results to users or other agents.
+`GroundlensTool` enables CrewAI agents to verify their own outputs for hallucination risk before presenting results to users or other agents.
 
 ## Installation
 
 ```bash
-pip install "factlens[crewai]"
+pip install "groundlens[crewai]"
 ```
 
 ## Quick Start
 
 ```python
-from factlens.integrations.crewai import FactlensTool
+from groundlens.integrations.crewai import GroundlensTool
 
-tool = FactlensTool()
+tool = GroundlensTool()
 
 # Verify a response
 result = tool._run(
@@ -27,7 +27,7 @@ print(result)
 **Output:**
 
 ```text
-Factlens Verification Result
+Groundlens Verification Result
 ----------------------------
 Method: SGI
 Score: 1.234 (normalized: 0.614)
@@ -38,29 +38,29 @@ Explanation: SGI=1.234 -- strong context engagement (pass)
 ## Configuration
 
 ```python
-tool = FactlensTool(
-    name="factlens_verify",           # Tool name visible to the agent
+tool = GroundlensTool(
+    name="groundlens_verify",           # Tool name visible to the agent
     description="Verify a response...",  # Custom description
-    factlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
 )
 ```
 
 | Parameter | Default | Description |
 |---|---|---|
-| `name` | `"factlens_verify"` | Tool name for agent tool selection |
+| `name` | `"groundlens_verify"` | Tool name for agent tool selection |
 | `description` | (built-in) | Description shown to the agent |
-| `factlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
 
 ## Using in a CrewAI Agent
 
 ```python
 from crewai import Agent, Task, Crew
-from factlens.integrations.crewai import FactlensTool
+from groundlens.integrations.crewai import GroundlensTool
 
 # Create the verification tool
-verify_tool = FactlensTool()
+verify_tool = GroundlensTool()
 
-# Create an agent that uses factlens for self-verification
+# Create an agent that uses groundlens for self-verification
 researcher = Agent(
     role="Research Analyst",
     goal="Provide accurate, verified research summaries",
@@ -68,7 +68,7 @@ researcher = Agent(
     backstory="You are a meticulous researcher who always verifies your findings.",
 )
 
-# The agent can call factlens_verify to check its own outputs
+# The agent can call groundlens_verify to check its own outputs
 task = Task(
     description="Research the effects of caffeine on sleep quality. Verify your findings.",
     agent=researcher,
@@ -103,16 +103,16 @@ Returns a formatted string containing:
 
 ## Agent Self-Verification Pattern
 
-The most powerful use of FactlensTool is **agent self-verification**: the agent generates a response, verifies it with factlens, and revises if flagged.
+The most powerful use of GroundlensTool is **agent self-verification**: the agent generates a response, verifies it with groundlens, and revises if flagged.
 
 ```python
 researcher = Agent(
     role="Medical Information Specialist",
     goal="Provide accurate medical information, always verified",
-    tools=[FactlensTool()],
+    tools=[GroundlensTool()],
     backstory=(
         "You are a medical information specialist. Before presenting any answer, "
-        "you MUST use the factlens_verify tool to check your response. If flagged, "
+        "you MUST use the groundlens_verify tool to check your response. If flagged, "
         "revise your answer and verify again."
     ),
 )

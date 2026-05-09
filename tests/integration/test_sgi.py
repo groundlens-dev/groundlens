@@ -1,4 +1,4 @@
-"""Integration tests for factlens.sgi.compute_sgi.
+"""Integration tests for groundlens.sgi.compute_sgi.
 
 These tests load a real embedding model and compute actual SGI scores.
 They verify semantic behavior: grounded responses pass, hallucinated
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from factlens.sgi import compute_sgi
+from groundlens.sgi import compute_sgi
 
 pytestmark = pytest.mark.slow
 

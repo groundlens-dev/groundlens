@@ -1,25 +1,25 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens[langchain]"]
+# dependencies = ["groundlens[langchain]"]
 # ///
 """LangChain evaluator integration with LangSmith evaluate().
 
-Requires: ``pip install factlens[langchain]``
+Requires: ``pip install groundlens[langchain]``
 
-Demonstrates using FactlensEvaluator as a custom evaluator within
+Demonstrates using GroundlensEvaluator as a custom evaluator within
 LangSmith's ``evaluate()`` function for systematic LLM evaluation.
 """
 
 from typing import TYPE_CHECKING
 
-from factlens.evaluate import evaluate
+from groundlens.evaluate import evaluate
 
 if TYPE_CHECKING:
-    from factlens.score import FactlensScore
+    from groundlens.score import GroundlensScore
 
 
-class FactlensEvaluator:
-    """LangChain-compatible evaluator wrapping factlens scoring.
+class GroundlensEvaluator:
+    """LangChain-compatible evaluator wrapping groundlens scoring.
 
     Implements the evaluator interface expected by LangSmith's
     ``evaluate()`` function. Each example is scored with SGI (if
@@ -44,7 +44,7 @@ class FactlensEvaluator:
         response = run.outputs.get("output", run.outputs.get("response", ""))
         context = example.inputs.get("context")
 
-        score: FactlensScore = evaluate(
+        score: GroundlensScore = evaluate(
             question=question,
             response=response,
             context=context,
@@ -52,7 +52,7 @@ class FactlensEvaluator:
         )
 
         return {
-            "key": f"factlens_{score.method}",
+            "key": f"groundlens_{score.method}",
             "score": score.normalized,
             "comment": score.explanation,
         }
@@ -66,16 +66,16 @@ if __name__ == "__main__":
     #   results = ls_evaluate(
     #       my_chain,
     #       data="my-dataset",
-    #       evaluators=[FactlensEvaluator()],
+    #       evaluators=[GroundlensEvaluator()],
     #   )
 
-    print("=== FactlensEvaluator Demo ===\n")
+    print("=== GroundlensEvaluator Demo ===\n")
     print("In production, use with LangSmith:\n")
     print("  from langsmith import evaluate as ls_evaluate")
     print("  results = ls_evaluate(")
     print("      my_chain,")
     print('      data="my-dataset",')
-    print("      evaluators=[FactlensEvaluator()],")
+    print("      evaluators=[GroundlensEvaluator()],")
     print("  )\n")
 
     # Quick standalone test with mock objects.
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             if context:
                 self.inputs["context"] = context
 
-    evaluator = FactlensEvaluator()
+    evaluator = GroundlensEvaluator()
 
     result = evaluator(
         MockRun("The speed of light is approximately 3 x 10^8 m/s."),

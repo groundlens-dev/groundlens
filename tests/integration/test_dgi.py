@@ -1,4 +1,4 @@
-"""Integration tests for factlens.dgi.compute_dgi.
+"""Integration tests for groundlens.dgi.compute_dgi.
 
 These tests load a real embedding model and compute actual DGI scores.
 They verify directional grounding behavior against the bundled reference
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from factlens.dgi import compute_dgi, reset_calibration_cache
+from groundlens.dgi import compute_dgi, reset_calibration_cache
 
 pytestmark = pytest.mark.slow
 

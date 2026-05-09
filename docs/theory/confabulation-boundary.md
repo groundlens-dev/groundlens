@@ -136,7 +136,7 @@ The confabulation boundary can be stated formally:
 
     Consequently, any hallucination detection method based solely on $\phi$ cannot distinguish $r_{\text{true}}$ from $r_{\text{false}}$.
 
-This is not a limitation of factlens specifically --- it is a fundamental constraint on **all** embedding-based methods, including:
+This is not a limitation of groundlens specifically --- it is a fundamental constraint on **all** embedding-based methods, including:
 
 - LLM-as-judge (when the judge uses embeddings internally)
 - Retrieval-based fact checking
@@ -145,7 +145,7 @@ This is not a limitation of factlens specifically --- it is a fundamental constr
 
 ## Implications for Practice
 
-### What factlens Can Detect
+### What groundlens Can Detect
 
 | Hallucination type | Detection ability | AUROC |
 |---|---|---|
@@ -158,17 +158,17 @@ This is not a limitation of factlens specifically --- it is a fundamental constr
 
 ### What This Means for Deployment
 
-1. **factlens is a triage tool, not a truth oracle.** It efficiently identifies outputs that are geometrically anomalous --- the most common and most damaging hallucination types. It cannot verify factual correctness at the individual claim level.
+1. **groundlens is a triage tool, not a truth oracle.** It efficiently identifies outputs that are geometrically anomalous --- the most common and most damaging hallucination types. It cannot verify factual correctness at the individual claim level.
 
-2. **The value is in the 80% you do not need to review.** If factlens passes 80% of outputs and flags 20%, and the flagged set contains 95% of the actual hallucinations, you have reduced your human review workload by 4x while catching nearly all problems.
+2. **The value is in the 80% you do not need to review.** If groundlens passes 80% of outputs and flags 20%, and the flagged set contains 95% of the actual hallucinations, you have reduced your human review workload by 4x while catching nearly all problems.
 
-3. **Complement with domain knowledge.** For high-stakes applications where single-fact confabulations matter (medical, legal, financial), combine factlens triage with domain-specific fact-checking on the outputs that pass geometric verification.
+3. **Complement with domain knowledge.** For high-stakes applications where single-fact confabulations matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification.
 
 ## Why This Is Honest
 
-Many hallucination detection products claim to "detect all hallucinations" or provide "factual accuracy scores." These claims are not possible under the distributional hypothesis. By explicitly documenting the confabulation boundary, factlens gives users an honest understanding of what geometric detection can and cannot do.
+Many hallucination detection products claim to "detect all hallucinations" or provide "factual accuracy scores." These claims are not possible under the distributional hypothesis. By explicitly documenting the confabulation boundary, groundlens gives users an honest understanding of what geometric detection can and cannot do.
 
-The CERT Framework positions factlens as **verification triage**: prioritize what to review, not "detect so you don't need to review." This positioning is aligned with the theoretical limitations.
+The CERT Framework positions groundlens as **verification triage**: prioritize what to review, not "detect so you don't need to review." This positioning is aligned with the theoretical limitations.
 
 ## Toward Breaking the Boundary
 
@@ -179,7 +179,7 @@ The confabulation boundary is a limitation of distributional embeddings. Methods
 - **Causal reasoning**: Detecting logical inconsistencies that distributional methods miss.
 - **Multi-modal verification**: Cross-referencing text claims against non-text sources.
 
-These approaches complement factlens rather than replace it --- they address the cases that fall beyond the confabulation boundary while factlens handles the efficiently-detectable cases.
+These approaches complement groundlens rather than replace it --- they address the cases that fall beyond the confabulation boundary while groundlens handles the efficiently-detectable cases.
 
 ## References
 

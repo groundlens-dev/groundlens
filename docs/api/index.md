@@ -1,6 +1,6 @@
 # API Reference
 
-This page provides the complete API reference for factlens. All public classes and functions are documented with their signatures, parameters, return types, and examples.
+This page provides the complete API reference for groundlens. All public classes and functions are documented with their signatures, parameters, return types, and examples.
 
 For auto-generated documentation from source docstrings, ensure `mkdocstrings` is configured in your MkDocs build.
 
@@ -8,87 +8,87 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 
 ### compute_sgi
 
-::: factlens.sgi.compute_sgi
+::: groundlens.sgi.compute_sgi
 
 ### compute_dgi
 
-::: factlens.dgi.compute_dgi
+::: groundlens.dgi.compute_dgi
 
 ### evaluate
 
-::: factlens.evaluate.evaluate
+::: groundlens.evaluate.evaluate
 
 ### evaluate_batch
 
-::: factlens.evaluate.evaluate_batch
+::: groundlens.evaluate.evaluate_batch
 
 ### calibrate
 
-::: factlens.calibrate.calibrate
+::: groundlens.calibrate.calibrate
 
 ## Core Classes
 
 ### SGI
 
-::: factlens.sgi.SGI
+::: groundlens.sgi.SGI
 
 ### DGI
 
-::: factlens.dgi.DGI
+::: groundlens.dgi.DGI
 
 ## Result Types
 
 ### SGIResult
 
-::: factlens.score.SGIResult
+::: groundlens.score.SGIResult
 
 ### DGIResult
 
-::: factlens.score.DGIResult
+::: groundlens.score.DGIResult
 
-### FactlensScore
+### GroundlensScore
 
-::: factlens.score.FactlensScore
+::: groundlens.score.GroundlensScore
 
 ### CalibrationResult
 
-::: factlens.calibrate.CalibrationResult
+::: groundlens.calibrate.CalibrationResult
 
 ## Providers
 
-### FactlensOpenAI
+### GroundlensOpenAI
 
-::: factlens.providers.openai.FactlensOpenAI
+::: groundlens.providers.openai.GroundlensOpenAI
 
-### FactlensAnthropic
+### GroundlensAnthropic
 
-::: factlens.providers.anthropic.FactlensAnthropic
+::: groundlens.providers.anthropic.GroundlensAnthropic
 
-### FactlensGemini
+### GroundlensGemini
 
-::: factlens.providers.google.FactlensGemini
+::: groundlens.providers.google.GroundlensGemini
 
 ## Integrations
 
-### FactlensEvaluator (LangChain)
+### GroundlensEvaluator (LangChain)
 
-::: factlens.integrations.langchain.evaluator.FactlensEvaluator
+::: groundlens.integrations.langchain.evaluator.GroundlensEvaluator
 
-### FactlensCallback (LangChain)
+### GroundlensCallback (LangChain)
 
-::: factlens.integrations.langchain.callback.FactlensCallback
+::: groundlens.integrations.langchain.callback.GroundlensCallback
 
-### FactlensTool (CrewAI)
+### GroundlensTool (CrewAI)
 
-::: factlens.integrations.crewai.tool.FactlensTool
+::: groundlens.integrations.crewai.tool.GroundlensTool
 
-### FactlensFilter (Semantic Kernel)
+### GroundlensFilter (Semantic Kernel)
 
-::: factlens.integrations.semantic_kernel.filter.FactlensFilter
+::: groundlens.integrations.semantic_kernel.filter.GroundlensFilter
 
-### FactlensChecker (AutoGen)
+### GroundlensChecker (AutoGen)
 
-::: factlens.integrations.autogen.checker.FactlensChecker
+::: groundlens.integrations.autogen.checker.GroundlensChecker
 
 ## Internal Modules
 
@@ -97,20 +97,20 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 
 ### Geometry Primitives
 
-::: factlens._internal.geometry
+::: groundlens._internal.geometry
 
 ### Thresholds
 
-::: factlens._internal.thresholds
+::: groundlens._internal.thresholds
 
 ## Constants
 
 | Constant | Value | Module | Description |
 |---|---|---|---|
-| `SGI_STRONG_PASS` | 1.20 | `factlens._internal.thresholds` | SGI strong pass threshold |
-| `SGI_REVIEW` | 0.95 | `factlens._internal.thresholds` | SGI review/flag threshold |
-| `DGI_PASS` | 0.30 | `factlens._internal.thresholds` | DGI pass threshold |
-| `DEFAULT_MODEL` | `"all-MiniLM-L6-v2"` | `factlens._internal.embeddings` | Default sentence-transformer model |
+| `SGI_STRONG_PASS` | 1.20 | `groundlens._internal.thresholds` | SGI strong pass threshold |
+| `SGI_REVIEW` | 0.95 | `groundlens._internal.thresholds` | SGI review/flag threshold |
+| `DGI_PASS` | 0.30 | `groundlens._internal.thresholds` | DGI pass threshold |
+| `DEFAULT_MODEL` | `"all-MiniLM-L6-v2"` | `groundlens._internal.embeddings` | Default sentence-transformer model |
 
 ## Type Summary
 
@@ -118,6 +118,6 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 |---|---|---|
 | `SGIResult` | SGI computation result | `value`, `normalized`, `flagged`, `q_dist`, `ctx_dist` |
 | `DGIResult` | DGI computation result | `value`, `normalized`, `flagged` |
-| `FactlensScore` | Unified evaluation result | `value`, `normalized`, `flagged`, `method`, `explanation`, `detail` |
+| `GroundlensScore` | Unified evaluation result | `value`, `normalized`, `flagged`, `method`, `explanation`, `detail` |
 | `CalibrationResult` | DGI calibration output | `model`, `n_pairs`, `embedding_dim`, `mu_hat`, `concentration` |
-| `LLMResponse` | Provider response wrapper | `text`, `model`, `usage`, `factlens_score` |
+| `LLMResponse` | Provider response wrapper | `text`, `model`, `usage`, `groundlens_score` |

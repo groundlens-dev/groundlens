@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens"]
+# dependencies = ["groundlens"]
 # ///
 """Custom DGI calibration with domain-specific pairs.
 
@@ -11,8 +11,8 @@ Demonstrates the full calibration workflow:
 4. Use the calibrated DGI class for scoring.
 """
 
-from factlens import calibrate
-from factlens.dgi import DGI
+from groundlens import calibrate
+from groundlens.dgi import DGI
 
 # Step 1: Collect verified grounded pairs from your domain.
 # In practice, use 20-100 pairs for best results.

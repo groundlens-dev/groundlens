@@ -30,7 +30,7 @@ jobs:
         run: ruff format --check .
 
       - name: Mypy
-        run: mypy src/factlens/
+        run: mypy src/groundlens/
 
   test:
     name: Test (Python ${{ matrix.python-version }})

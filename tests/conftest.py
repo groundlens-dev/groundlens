@@ -1,4 +1,4 @@
-"""Shared fixtures for the factlens test suite."""
+"""Shared fixtures for the groundlens test suite."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def embedding_model():
     embeddings.  Unit tests should prefer the ``mock_encode_texts``
     fixture instead.
     """
-    from factlens._internal.embeddings import get_encoder
+    from groundlens._internal.embeddings import get_encoder
 
     return get_encoder()
 
@@ -47,7 +47,7 @@ def mock_encode_texts():
     def _fake_encode(texts: list[str], model_name: str = "mock") -> NDArray[np.float32]:
         return rng.standard_normal((len(texts), 384)).astype(np.float32)
 
-    with patch("factlens._internal.embeddings.encode_texts", side_effect=_fake_encode) as m:
+    with patch("groundlens._internal.embeddings.encode_texts", side_effect=_fake_encode) as m:
         yield m
 
 

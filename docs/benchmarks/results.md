@@ -97,26 +97,26 @@ Scoring latency on CPU (Intel Xeon, single thread):
 
 | Method | AUROC | Latency | Deterministic | Cost |
 |---|---|---|---|---|
-| factlens DGI (domain) | 0.958 | ~12 ms | Yes | $0 (local) |
-| factlens SGI | 0.88 | ~15 ms | Yes | $0 (local) |
+| groundlens DGI (domain) | 0.958 | ~12 ms | Yes | $0 (local) |
+| groundlens SGI | 0.88 | ~15 ms | Yes | $0 (local) |
 | GPT-4o as judge | 0.91 | ~2 s | No | ~$0.01/eval |
 | Claude as judge | 0.89 | ~3 s | No | ~$0.01/eval |
 | Llama-3 as judge (local) | 0.82 | ~5 s | Approx. | $0 (GPU required) |
 
 !!! abstract "Key tradeoff"
-    LLM-as-judge achieves comparable AUROC to factlens DGI with generic calibration, but factlens with domain calibration outperforms all LLM judges while being 100--200x faster, deterministic, and free of evaluation cost. The downside is that factlens requires calibration effort for optimal results.
+    LLM-as-judge achieves comparable AUROC to groundlens DGI with generic calibration, but groundlens with domain calibration outperforms all LLM judges while being 100--200x faster, deterministic, and free of evaluation cost. The downside is that groundlens requires calibration effort for optimal results.
 
 ## Reproducing These Results
 
 ```bash
 # Install benchmark dependencies
-pip install factlens datasets scikit-learn
+pip install groundlens datasets scikit-learn
 
 # Run the confabulation benchmark
-factlens benchmark
+groundlens benchmark
 
 # With a custom embedding model
-factlens benchmark --model all-mpnet-base-v2
+groundlens benchmark --model all-mpnet-base-v2
 ```
 
-All numbers in this page were produced with factlens version 2026.4.x and can be reproduced exactly using the published datasets and default configuration.
+All numbers in this page were produced with groundlens version 2026.4.x and can be reproduced exactly using the published datasets and default configuration.

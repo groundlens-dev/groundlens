@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["factlens"]
+# dependencies = ["groundlens"]
 # ///
 """Batch evaluation — evaluate multiple items with mixed SGI and DGI.
 
@@ -8,7 +8,7 @@ Shows how to use ``evaluate_batch()`` on a list of items, some with
 context (triggering SGI) and some without (triggering DGI).
 """
 
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 items = [
     # With context → SGI

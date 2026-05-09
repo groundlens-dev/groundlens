@@ -1,6 +1,6 @@
 # RAG Verification
 
-This guide shows how to integrate factlens SGI scoring into a Retrieval-Augmented Generation (RAG) pipeline to verify that the LLM actually used the retrieved context when generating its response.
+This guide shows how to integrate groundlens SGI scoring into a Retrieval-Augmented Generation (RAG) pipeline to verify that the LLM actually used the retrieved context when generating its response.
 
 ## The Problem
 
@@ -15,11 +15,11 @@ SGI detects case 1 with high confidence, provides signal for case 2, and is robu
 ## Basic Integration
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 
 def rag_pipeline(question: str, retriever, llm) -> dict:
-    """RAG pipeline with factlens verification."""
+    """RAG pipeline with groundlens verification."""
     # Step 1: Retrieve context
     context = retriever.retrieve(question)
 
@@ -47,7 +47,7 @@ def rag_pipeline(question: str, retriever, llm) -> dict:
 Use the SGI score to implement a verification policy:
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 
 def verified_rag(question, context, response):
@@ -95,7 +95,7 @@ result = compute_sgi(
 ### Option 2: Score Against Each Chunk
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 chunks = retriever.retrieve(question, top_k=3)
 
@@ -122,7 +122,7 @@ For production systems handling concurrent requests:
 
 ```python
 import asyncio
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 
 async def async_rag(question, retriever, llm):

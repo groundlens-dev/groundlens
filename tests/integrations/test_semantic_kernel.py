@@ -1,4 +1,4 @@
-"""Tests for factlens.integrations.semantic_kernel.FactlensFilter."""
+"""Tests for groundlens.integrations.semantic_kernel.GroundlensFilter."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ def _make_fake_sk_module() -> ModuleType:
     return sk
 
 
-class TestFactlensFilter:
-    """Test the FactlensFilter for Semantic Kernel."""
+class TestGroundlensFilter:
+    """Test the GroundlensFilter for Semantic Kernel."""
 
     def test_filter_creation(self) -> None:
         fake_sk = _make_fake_sk_module()
@@ -31,9 +31,9 @@ class TestFactlensFilter:
             },
         ):
             try:
-                from factlens.integrations.semantic_kernel import FactlensFilter
+                from groundlens.integrations.semantic_kernel import GroundlensFilter
 
-                filt = FactlensFilter()
+                filt = GroundlensFilter()
                 assert filt is not None
             except (ImportError, ModuleNotFoundError):
                 pytest.skip("semantic_kernel integration not implemented yet")
@@ -48,15 +48,15 @@ class TestFactlensFilter:
             },
         ):
             try:
-                from factlens.integrations.semantic_kernel import FactlensFilter
+                from groundlens.integrations.semantic_kernel import GroundlensFilter
 
-                with patch("factlens.integrations.semantic_kernel.filter.evaluate") as mock_eval:
+                with patch("groundlens.integrations.semantic_kernel.filter.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = False
                     mock_score.normalized = 0.8
                     mock_eval.return_value = mock_score
 
-                    filt = FactlensFilter()
+                    filt = GroundlensFilter()
 
                     # Simulate a post-invocation filter call
                     mock_context = MagicMock()
@@ -86,16 +86,16 @@ class TestFactlensFilter:
             },
         ):
             try:
-                from factlens.integrations.semantic_kernel import FactlensFilter
+                from groundlens.integrations.semantic_kernel import GroundlensFilter
 
-                with patch("factlens.integrations.semantic_kernel.filter.evaluate") as mock_eval:
+                with patch("groundlens.integrations.semantic_kernel.filter.evaluate") as mock_eval:
                     mock_score = MagicMock()
                     mock_score.flagged = True
                     mock_score.normalized = 0.2
                     mock_score.explanation = "Flagged for review"
                     mock_eval.return_value = mock_score
 
-                    filt = FactlensFilter()
+                    filt = GroundlensFilter()
                     # Filter created -- specific behavior depends on implementation
                     assert filt is not None
             except (ImportError, ModuleNotFoundError):

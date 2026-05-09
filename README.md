@@ -1,27 +1,28 @@
 <div align="center">
-  <img src="docs/assets/FactLens_header_01.png" alt="factlens" width="800">
+  <img src="docs/assets/GroundLens_header_01.png" alt="groundlens" width="800">
 </div>
 
 # Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
 
 
 
-[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue)](https://github.com/factlens/factlens)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://img.shields.io/github/actions/workflow/status/factlens/factlens/ci.yml?branch=main&label=CI)](https://github.com/factlens/factlens/actions)
-[![Docs](https://img.shields.io/badge/docs-docs.factlens.dev-blue)](https://docs.factlens.dev)
+[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
+[![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
+[![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
+[![Version](https://img.shields.io/badge/version-2026.4.22-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 
-[Documentation](https://docs.factlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)
+[Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
 
-***factlens*** detects LLM hallucinations using embedding geometry instead of a second LLM. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in an embedding space. The result is a verification signal you can explain in an audit, reproduce on demand, and run in regulated environments.
+***groundlens*** detects LLM hallucinations using embedding geometry instead of a second LLM. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in an embedding space. The result is a verification signal you can explain in an audit, reproduce on demand, and run in regulated environments.
 
-## Why ***factlens***?
+## Why ***groundlens***?
 
-| Problem | How factlens solves it |
+| Problem | How groundlens solves it |
 |---|---|
 | Second-LLM judges are non-deterministic and expensive | Single embedding model (`all-MiniLM-L6-v2`), deterministic output, sub-second latency |
 | Probabilistic scores cannot be audited | Geometric ratios and angular measurements with clear mathematical definitions |
@@ -34,26 +35,26 @@
 ## Installation
 
 ```bash
-pip install factlens
+pip install groundlens
 ```
 
 With LLM provider support:
 
 ```bash
-pip install "factlens[openai]"       # OpenAI
-pip install "factlens[anthropic]"    # Anthropic
-pip install "factlens[google]"       # Google Generative AI
-pip install "factlens[providers]"    # All providers
+pip install "groundlens[openai]"       # OpenAI
+pip install "groundlens[anthropic]"    # Anthropic
+pip install "groundlens[google]"       # Google Generative AI
+pip install "groundlens[providers]"    # All providers
 ```
 
 With framework integrations:
 
 ```bash
-pip install "factlens[langchain]"    # LangChain
-pip install "factlens[crewai]"       # CrewAI
-pip install "factlens[semantic-kernel]"  # Semantic Kernel
-pip install "factlens[autogen]"      # AutoGen
-pip install "factlens[all]"          # Everything
+pip install "groundlens[langchain]"    # LangChain
+pip install "groundlens[crewai]"       # CrewAI
+pip install "groundlens[semantic-kernel]"  # Semantic Kernel
+pip install "groundlens[autogen]"      # AutoGen
+pip install "groundlens[all]"          # Everything
 ```
 
 **Requirements:** Python 3.10+, numpy, sentence-transformers.
@@ -65,7 +66,7 @@ pip install "factlens[all]"          # Everything
 SGI (Semantic Grounding Index) measures whether a response engaged with the provided context or stayed anchored to the question. It requires three inputs.
 
 ```python
-from factlens import compute_sgi
+from groundlens import compute_sgi
 
 result = compute_sgi(
     question="What is the capital of France?",
@@ -86,7 +87,7 @@ print(result.explanation) # "SGI=1.230 — strong context engagement (pass)"
 DGI (Directional Grounding Index) detects hallucinations without requiring source context. It checks whether the question-to-response displacement vector aligns with the characteristic direction of verified grounded responses.
 
 ```python
-from factlens import compute_dgi
+from groundlens import compute_dgi
 
 result = compute_dgi(
     question="What causes seasons on Earth?",
@@ -101,7 +102,7 @@ print(result.flagged)     # False — above pass threshold (0.30)
 **Domain calibration** improves DGI accuracy from AUROC ~0.76 (generic) to 0.90-0.99:
 
 ```python
-from factlens import compute_dgi
+from groundlens import compute_dgi
 
 result = compute_dgi(
     question="What is the statute of limitations for breach of contract in California?",
@@ -115,7 +116,7 @@ result = compute_dgi(
 The `evaluate()` function picks the right method automatically: SGI when context is provided, DGI when it is not.
 
 ```python
-from factlens import evaluate
+from groundlens import evaluate
 
 # With context -> SGI
 score = evaluate(
@@ -136,7 +137,7 @@ assert score.method == "dgi"
 ### Batch evaluation
 
 ```python
-from factlens import evaluate_batch
+from groundlens import evaluate_batch
 
 items = [
     {"question": "Q1?", "response": "A1.", "context": "Source."},
@@ -153,25 +154,25 @@ print(f"{len(flagged)}/{len(results)} flagged for review")
 
 ```bash
 # Single response check
-factlens check \
+groundlens check \
   --question "What is the capital of France?" \
   --response "The capital of France is Paris." \
   --context "France is in Western Europe. Its capital is Paris."
 
 # Batch CSV evaluation
-factlens evaluate input.csv --output results.csv
+groundlens evaluate input.csv --output results.csv
 
 # Domain calibration
-factlens calibrate --pairs domain_pairs.csv --output calibration.json
+groundlens calibrate --pairs domain_pairs.csv --output calibration.json
 
 # Run the confabulation benchmark
-factlens benchmark
+groundlens benchmark
 ```
 
 ### LLM provider guard
 
 ```python
-from factlens.providers.openai import OpenAIProvider
+from groundlens.providers.openai import OpenAIProvider
 
 provider = OpenAIProvider(model="gpt-4o")
 response = provider.complete(
@@ -179,7 +180,7 @@ response = provider.complete(
     context="The document text here...",
 )
 
-if response.factlens_score and response.factlens_score.flagged:
+if response.groundlens_score and response.groundlens_score.flagged:
     print("Hallucination risk detected — review recommended.")
 else:
     print(response.text)
@@ -188,13 +189,13 @@ else:
 ## Architecture
 
 ```
-factlens/
+groundlens/
 ├── __init__.py              # Public API: compute_sgi, compute_dgi, evaluate, calibrate
 ├── sgi.py                   # Semantic Grounding Index (context-required)
 ├── dgi.py                   # Directional Grounding Index (context-free)
 ├── evaluate.py              # High-level evaluate() and evaluate_batch()
 ├── calibrate.py             # Domain-specific DGI calibration
-├── score.py                 # Result types: SGIResult, DGIResult, FactlensScore
+├── score.py                 # Result types: SGIResult, DGIResult, GroundlensScore
 ├── _version.py              # CalVer version (2026.4.22)
 ├── _internal/               # Private implementation
 │   ├── geometry.py          # Euclidean distance, displacement, unit normalize
@@ -281,7 +282,7 @@ DGI = dot(delta / ||delta||, mu_hat)
 Generic DGI uses a bundled reference direction that achieves AUROC ~0.76. For production use, calibrate with 20-100 verified question-response pairs from your domain:
 
 ```python
-from factlens import calibrate
+from groundlens import calibrate
 
 result = calibrate(csv_path="my_domain_pairs.csv")
 print(f"Concentration: {result.concentration:.2f}")
@@ -292,7 +293,7 @@ Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation
 
 ## Research
 
-factlens implements the methods described in three peer-reviewed papers:
+groundlens implements the methods described in three peer-reviewed papers:
 
 1. **Semantic Grounding Index (SGI)**
    Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.*

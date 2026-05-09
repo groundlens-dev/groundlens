@@ -100,7 +100,7 @@ DGI is the right choice when you **do not have source context**:
 ## API Reference
 
 ```python
-from factlens import compute_dgi, DGI
+from groundlens import compute_dgi, DGI
 
 # Function API
 result = compute_dgi(

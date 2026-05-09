@@ -1,19 +1,19 @@
 # Semantic Kernel Integration
 
-`FactlensFilter` is a function invocation filter for Microsoft Semantic Kernel that automatically evaluates function results for hallucination risk.
+`GroundlensFilter` is a function invocation filter for Microsoft Semantic Kernel that automatically evaluates function results for hallucination risk.
 
 ## Installation
 
 ```bash
-pip install "factlens[semantic-kernel]"
+pip install "groundlens[semantic-kernel]"
 ```
 
 ## Quick Start
 
 ```python
-from factlens.integrations.semantic_kernel import FactlensFilter
+from groundlens.integrations.semantic_kernel import GroundlensFilter
 
-filt = FactlensFilter()
+filt = GroundlensFilter()
 
 # Register with Semantic Kernel
 kernel.add_filter("function_invocation", filt)
@@ -22,8 +22,8 @@ kernel.add_filter("function_invocation", filt)
 ## Configuration
 
 ```python
-filt = FactlensFilter(
-    factlens_model="all-MiniLM-L6-v2",  # Embedding model
+filt = GroundlensFilter(
+    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
     input_key="input",                    # Key for question in function args
     context_key="context",                # Key for context in function args
 )
@@ -31,7 +31,7 @@ filt = FactlensFilter(
 
 | Parameter | Default | Description |
 |---|---|---|
-| `factlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
 | `input_key` | `"input"` | Key to extract question from function arguments |
 | `context_key` | `"context"` | Key to extract context from function arguments |
 
@@ -43,14 +43,14 @@ The filter operates as an async function invocation interceptor:
 2. It extracts the question from `context.arguments[input_key]`.
 3. It extracts the result from `context.result.value`.
 4. It optionally extracts context from `context.arguments[context_key]`.
-5. It evaluates the result with factlens (SGI if context is present, DGI otherwise).
-6. It attaches the score to `context.metadata["factlens_score"]`.
+5. It evaluates the result with groundlens (SGI if context is present, DGI otherwise).
+6. It attaches the score to `context.metadata["groundlens_score"]`.
 7. It stores the score in `filt.scores` for later inspection.
 
 ## Accessing Scores
 
 ```python
-filt = FactlensFilter()
+filt = GroundlensFilter()
 kernel.add_filter("function_invocation", filt)
 
 # ... run functions ...
@@ -66,11 +66,11 @@ for function_name, score in filt.scores:
 ```python
 import semantic_kernel as sk
 from semantic_kernel.functions import kernel_function
-from factlens.integrations.semantic_kernel import FactlensFilter
+from groundlens.integrations.semantic_kernel import GroundlensFilter
 
 # Create kernel and register filter
 kernel = sk.Kernel()
-filt = FactlensFilter()
+filt = GroundlensFilter()
 kernel.add_filter("function_invocation", filt)
 
 # Define a semantic function
@@ -90,7 +90,7 @@ result = await kernel.invoke(
     context="Treatment guidelines state...",
 )
 
-# Check the factlens score
+# Check the groundlens score
 for fn_name, score in filt.scores:
     print(f"{fn_name}: {score.explanation}")
 ```
@@ -105,5 +105,5 @@ The filter logs at two levels:
 ```python
 import logging
 logging.basicConfig(level=logging.INFO)
-# FactlensFilter events now appear in logs
+# GroundlensFilter events now appear in logs
 ```

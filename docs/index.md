@@ -1,10 +1,10 @@
-# factlens
+# groundlens
 
 **Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.**
 
 ---
 
-factlens is a Python library that detects hallucinations in LLM outputs using embedding geometry rather than a second language model. It provides two complementary scoring methods grounded in peer-reviewed research:
+groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry rather than a second language model. It provides two complementary scoring methods grounded in peer-reviewed research:
 
 - **SGI (Semantic Grounding Index)** --- measures whether a response engaged with provided source context, using distance ratios in embedding space.
 - **DGI (Directional Grounding Index)** --- evaluates response grounding without any context, using directional statistics on displacement vectors.
@@ -26,21 +26,21 @@ Both methods are deterministic, sub-second, and produce auditable numeric scores
 ## Quick Install
 
 ```bash
-pip install factlens
+pip install groundlens
 ```
 
 For provider-specific extras:
 
 ```bash
-pip install "factlens[openai]"       # OpenAI provider
-pip install "factlens[langchain]"    # LangChain integration
-pip install "factlens[all]"          # Everything
+pip install "groundlens[openai]"       # OpenAI provider
+pip install "groundlens[langchain]"    # LangChain integration
+pip install "groundlens[all]"          # Everything
 ```
 
 ## 3-Line Example
 
 ```python
-from factlens import evaluate
+from groundlens import evaluate
 
 score = evaluate(
     question="What is the capital of France?",
@@ -76,4 +76,4 @@ No token generation. No prompt engineering. No stochastic sampling. Pure geometr
 
 ---
 
-*factlens is part of the [CERT Framework](https://github.com/factlens/factlens) for verification triage --- helping teams prioritize which LLM outputs need human review.*
+*groundlens is part of the [CERT Framework](https://github.com/groundlens-dev/groundlens) for verification triage --- helping teams prioritize which LLM outputs need human review.*

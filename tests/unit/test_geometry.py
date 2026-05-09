@@ -1,11 +1,11 @@
-"""Tests for factlens._internal.geometry functions."""
+"""Tests for groundlens._internal.geometry functions."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from factlens._internal.geometry import (
+from groundlens._internal.geometry import (
     cosine_similarity,
     displacement_vector,
     euclidean_distance,

@@ -82,7 +82,7 @@ Common scenarios:
 ## API Reference
 
 ```python
-from factlens import compute_sgi, SGI
+from groundlens import compute_sgi, SGI
 
 # Function API
 result = compute_sgi(

@@ -15,7 +15,7 @@ body:
     attributes:
       label: Problem statement
       description: What problem does this feature solve? What is the use case?
-      placeholder: "I need to detect hallucinations in streaming responses, but factlens currently requires the full response text..."
+      placeholder: "I need to detect hallucinations in streaming responses, but groundlens currently requires the full response text..."
     validations:
       required: true
 
@@ -27,7 +27,7 @@ body:
       placeholder: |
         ```python
         # Example API
-        from factlens import StreamingEvaluator
+        from groundlens import StreamingEvaluator
         evaluator = StreamingEvaluator(question="...", context="...")
         for token in llm_stream:
             score = evaluator.update(token)
@@ -47,7 +47,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: Which part of factlens would this affect?
+      description: Which part of groundlens would this affect?
       options:
         - Core (SGI/DGI)
         - CLI
