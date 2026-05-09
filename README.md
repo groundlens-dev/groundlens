@@ -99,7 +99,7 @@ print(result.normalized)  # 0.71 — mapped to [0, 1]
 print(result.flagged)     # False — above pass threshold (0.30)
 ```
 
-**Domain calibration** improves DGI accuracy from AUROC ~0.76 (generic) to 0.90-0.99:
+**Domain calibration** improves DGI accuracy from AUROC ~0.8 with a basic calibration to 0.90-0.99 with domain-sepecific calibration:
 
 ```python
 from groundlens import compute_dgi
@@ -279,7 +279,7 @@ DGI = dot(delta / ||delta||, mu_hat)
 
 ## Domain calibration
 
-Generic DGI uses a bundled reference direction that achieves AUROC ~0.76. For production use, calibrate with 20-100 verified question-response pairs from your domain:
+Generic DGI uses a bundled reference direction that achieves AUROC ~0.8 with a basic calibration. For production use, a domain-specific calibration can be applied (a minimum of 200 queries recommended):
 
 ```python
 from groundlens import calibrate
