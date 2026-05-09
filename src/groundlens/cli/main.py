@@ -131,6 +131,161 @@ def _cmd_calibrate(args: argparse.Namespace) -> None:
     print(f"  Saved to:      {output_path}")
 
 
+def _cmd_doctor(args: argparse.Namespace) -> None:
+    """Handle the ``doctor`` subcommand — diagnose environment health."""
+    import importlib
+    import platform
+    import shutil
+
+    from groundlens._version import __version__
+
+    checks_passed = 0
+    checks_failed = 0
+    checks_warned = 0
+
+    def ok(msg: str) -> None:
+        nonlocal checks_passed
+        checks_passed += 1
+        print(f"  ✔ {msg}")
+
+    def fail(msg: str) -> None:
+        nonlocal checks_failed
+        checks_failed += 1
+        print(f"  ✘ {msg}")
+
+    def warn(msg: str) -> None:
+        nonlocal checks_warned
+        checks_warned += 1
+        print(f"  ! {msg}")
+
+    print(f"groundlens doctor v{__version__}")
+    print(f"Python {platform.python_version()} on {platform.system()} {platform.machine()}")
+    print()
+
+    # ── Core dependencies ─────────────────────────────────────────────────
+    print("Core dependencies:")
+
+    try:
+        import numpy as np
+
+        ok(f"numpy {np.__version__}")
+    except ImportError:
+        fail("numpy not installed — pip install numpy")
+
+    try:
+        import sentence_transformers
+
+        ok(f"sentence-transformers {sentence_transformers.__version__}")
+    except ImportError:
+        fail("sentence-transformers not installed — pip install groundlens")
+
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            ok(f"torch {torch.__version__} (CUDA {torch.version.cuda})")
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            ok(f"torch {torch.__version__} (MPS — Apple Silicon)")
+        else:
+            ok(f"torch {torch.__version__} (CPU only)")
+    except ImportError:
+        fail("torch not installed")
+
+    print()
+
+    # ── Embedding model ───────────────────────────────────────────────────
+    print("Embedding model:")
+
+    model_name = args.model
+    try:
+        from groundlens._internal.embeddings import encode_texts
+
+        test_embedding = encode_texts(["groundlens doctor test"], model_name=model_name)
+        dim = test_embedding.shape[1]
+        ok(f"{model_name} loaded ({dim} dimensions)")
+    except Exception as exc:
+        fail(f"{model_name} failed to load: {exc}")
+
+    print()
+
+    # ── Optional providers ────────────────────────────────────────────────
+    print("Optional providers:")
+
+    for provider, pkg in [("openai", "openai"), ("anthropic", "anthropic"), ("google", "google.generativeai")]:
+        try:
+            mod = importlib.import_module(pkg)
+            version = getattr(mod, "__version__", "unknown")
+            ok(f"{provider} ({version})")
+        except ImportError:
+            warn(f"{provider} not installed (optional — pip install 'groundlens[{provider}]')")
+
+    print()
+
+    # ── Optional integrations ─────────────────────────────────────────────
+    print("Optional integrations:")
+
+    for name, pkg in [("langchain", "langchain_core"), ("crewai", "crewai"), ("semantic-kernel", "semantic_kernel"), ("autogen", "autogen")]:
+        try:
+            mod = importlib.import_module(pkg)
+            version = getattr(mod, "__version__", "unknown")
+            ok(f"{name} ({version})")
+        except ImportError:
+            warn(f"{name} not installed (optional — pip install 'groundlens[{name}]')")
+
+    print()
+
+    # ── CLI tools ─────────────────────────────────────────────────────────
+    print("CLI tools:")
+
+    if shutil.which("groundlens"):
+        ok("groundlens CLI on PATH")
+    else:
+        warn("groundlens CLI not on PATH (run from package: python -m groundlens.cli.main)")
+
+    print()
+
+    # ── Quick scoring test ────────────────────────────────────────────────
+    print("Quick scoring test:")
+
+    try:
+        from groundlens.evaluate import evaluate
+
+        score = evaluate(
+            question="What is the capital of France?",
+            response="The capital of France is Paris.",
+            context="France is in Western Europe. Its capital is Paris.",
+            model=model_name,
+        )
+        if score.method == "sgi" and not score.flagged:
+            ok(f"SGI={score.value:.3f} (normalized={score.normalized:.3f}, flagged={score.flagged})")
+        else:
+            warn(f"Unexpected result: method={score.method}, flagged={score.flagged}")
+
+        score_dgi = evaluate(
+            question="What is the capital of France?",
+            response="The capital of France is Paris.",
+            model=model_name,
+        )
+        if score_dgi.method == "dgi" and not score_dgi.flagged:
+            ok(f"DGI={score_dgi.value:.3f} (normalized={score_dgi.normalized:.3f}, flagged={score_dgi.flagged})")
+        else:
+            warn(f"Unexpected DGI result: method={score_dgi.method}, flagged={score_dgi.flagged}")
+    except Exception as exc:
+        fail(f"Scoring test failed: {exc}")
+
+    print()
+
+    # ── Summary ───────────────────────────────────────────────────────────
+    total = checks_passed + checks_failed + checks_warned
+    print(f"Results: {checks_passed} passed, {checks_failed} failed, {checks_warned} warnings (of {total} checks)")
+
+    if checks_failed == 0:
+        print("\ngroundlens is ready.")
+    else:
+        print(f"\n{checks_failed} issue(s) found. Fix the errors above before using groundlens.")
+        sys.exit(1)
+
+
 def _cmd_benchmark(args: argparse.Namespace) -> None:
     """Handle the ``benchmark`` subcommand."""
     from groundlens.dgi import compute_dgi
@@ -270,6 +425,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model."
     )
 
+    # ── doctor ─────────────────────────────────────────────────────────────
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Check environment health: dependencies, model, scoring.",
+    )
+    doctor_parser.add_argument(
+        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model to test."
+    )
+
     # ── benchmark ──────────────────────────────────────────────────────────
     bench_parser = subparsers.add_parser(
         "benchmark",
@@ -301,6 +465,7 @@ def main() -> None:
         "evaluate": _cmd_evaluate,
         "calibrate": _cmd_calibrate,
         "benchmark": _cmd_benchmark,
+        "doctor": _cmd_doctor,
     }
 
     handler = handlers.get(args.command)

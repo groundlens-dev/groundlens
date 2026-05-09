@@ -28,7 +28,7 @@ groundlens/
 │   │   ├── thresholds.py        # SGI_REVIEW, SGI_STRONG_PASS, DGI_PASS, normalization functions
 │   │   └── csv_loader.py        # load_reference_pairs() for calibration data
 │   ├── cli/
-│   │   └── main.py              # CLI entry point: check, evaluate, calibrate, benchmark
+│   │   └── main.py              # CLI entry point: check, evaluate, calibrate, benchmark, doctor
 │   ├── providers/               # LLM provider wrappers (optional deps)
 │   │   ├── _base.py             # BaseLLMProvider protocol, LLMResponse dataclass
 │   │   ├── openai.py            # OpenAI provider
@@ -126,6 +126,9 @@ mypy is configured in strict mode in `pyproject.toml`. Provider and integration 
 ### CLI
 
 ```bash
+# Diagnose environment
+groundlens doctor
+
 # Single check
 groundlens check --question "Q?" --response "A." --context "Source."
 

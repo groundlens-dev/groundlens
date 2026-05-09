@@ -12,7 +12,7 @@
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
 [![Version](https://img.shields.io/badge/version-2026.4.22-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 
-[Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)
+[Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Vision](VISION.md) | [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -31,6 +31,21 @@
 
 `SGI`: Semantic Grounding Index | `DGI`: Directional Grounding Index
 
+## I want to...
+
+| Goal | Start here |
+|---|---|
+| **Verify my RAG pipeline outputs** | [SGI quick start](#sgi----with-context-rag-verification) · [RAG verification guide](https://docs.groundlens.dev/guides/rag-verification/) |
+| **Score chat responses without context** | [DGI quick start](#dgi----without-context) · [DGI deep dive](https://docs.groundlens.dev/concepts/dgi/) |
+| **Evaluate a batch of outputs** | [Batch evaluation](#batch-evaluation) · [Batch guide](https://docs.groundlens.dev/guides/batch-evaluation/) |
+| **Wrap my LLM provider with auto-scoring** | [Provider guard](#llm-provider-guard) · [Providers docs](https://docs.groundlens.dev/providers/openai/) |
+| **Integrate with LangChain / CrewAI / etc.** | [Integrations](#providers-and-integrations) · [Integration docs](https://docs.groundlens.dev/integrations/langchain/) |
+| **Improve accuracy for my domain** | [Domain calibration](#domain-calibration) · [Calibration guide](https://docs.groundlens.dev/guides/domain-calibration/) |
+| **Comply with the EU AI Act** | [EU AI Act guide](https://docs.groundlens.dev/guides/eu-ai-act/) |
+| **Understand the math** | [How it works](https://docs.groundlens.dev/concepts/how-it-works/) · [Research papers](#research) |
+| **Understand what it can and cannot detect** | [Hallucination taxonomy](#what-groundlens-detects-and-what-it-cannot) |
+| **Check my environment is set up correctly** | [`groundlens doctor`](#cli) |
+| **Contribute** | [CONTRIBUTING.md](CONTRIBUTING.md) · [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md) |
 
 ## Installation
 
@@ -99,7 +114,7 @@ print(result.normalized)  # 0.71 — mapped to [0, 1]
 print(result.flagged)     # False — above pass threshold (0.30)
 ```
 
-**Domain calibration** improves DGI accuracy from AUROC ~0.8 with a basic calibration to 0.90-0.99 with domain-sepecific calibration:
+**Domain calibration** improves DGI accuracy from AUROC ~0.8 with a basic calibration to 0.90-0.99 with domain-specific calibration:
 
 ```python
 from groundlens import compute_dgi
@@ -153,6 +168,9 @@ print(f"{len(flagged)}/{len(results)} flagged for review")
 ### CLI
 
 ```bash
+# Check environment health
+groundlens doctor
+
 # Single response check
 groundlens check \
   --question "What is the capital of France?" \
@@ -184,58 +202,6 @@ if response.groundlens_score and response.groundlens_score.flagged:
     print("Hallucination risk detected — review recommended.")
 else:
     print(response.text)
-```
-
-## Architecture
-
-```
-groundlens/
-├── __init__.py              # Public API: compute_sgi, compute_dgi, evaluate, calibrate
-├── sgi.py                   # Semantic Grounding Index (context-required)
-├── dgi.py                   # Directional Grounding Index (context-free)
-├── evaluate.py              # High-level evaluate() and evaluate_batch()
-├── calibrate.py             # Domain-specific DGI calibration
-├── score.py                 # Result types: SGIResult, DGIResult, GroundlensScore
-├── _version.py              # CalVer version (2026.4.22)
-├── _internal/               # Private implementation
-│   ├── geometry.py          # Euclidean distance, displacement, unit normalize
-│   ├── embeddings.py        # Sentence transformer encoding
-│   ├── thresholds.py        # Decision boundaries and normalization
-│   └── csv_loader.py        # Calibration data loading
-├── cli/
-│   └── main.py              # CLI: check, evaluate, calibrate, benchmark
-├── providers/               # LLM provider wrappers
-│   ├── _base.py             # BaseLLMProvider protocol + LLMResponse
-│   ├── openai.py            # OpenAI provider
-│   ├── anthropic.py         # Anthropic provider
-│   └── google.py            # Google Generative AI provider
-└── integrations/            # Framework integrations
-    ├── langchain/           # LangChain evaluator + callback
-    ├── crewai/              # CrewAI tool
-    ├── semantic_kernel/     # Semantic Kernel filter
-    └── autogen/             # AutoGen checker
-```
-
-The architecture follows a layered design:
-
-```
-┌─────────────────────────────────────────────┐
-│            Public API (evaluate)            │
-├──────────────────┬──────────────────────────┤
-│   SGI (sgi.py)   │      DGI (dgi.py)        │
-├──────────────────┴──────────────────────────┤
-│        _internal (geometry, embeddings)     │
-├─────────────────────────────────────────────┤
-│  sentence-transformers (all-MiniLM-L6-v2)   │
-└─────────────────────────────────────────────┘
-         ▲                           ▲
-         │                           │
-   ┌─────┴──────┐            ┌───────┴──────┐
-   │ Providers  │            │ Integrations │
-   │ (OpenAI,   │            │ (LangChain,  │
-   │  Anthropic,│            │  CrewAI,     │
-   │  Google)   │            │  SK, AutoGen │
-   └────────────┘            └──────────────┘
 ```
 
 ## Scoring methods
@@ -273,7 +239,7 @@ Not all hallucinations are the same. groundlens is built on a [geometric taxonom
 |---|---|---|---|
 | **Type I — Unfaithfulness** | Response ignores the provided source and defaults to the question | RAG system returns an answer from memory instead of from the retrieved document | Yes (SGI) |
 | **Type II — Confabulation** | Response invents content outside the topic's vocabulary | Asked about CRISPR gene editing, the model describes protein-folding correction instead | Yes (DGI) |
-| **Type III — Within-frame error** | Response uses the right vocabulary and structure but gets the facts wrong | "The capital of Australia is Sydney" — same frame as the correct answer, wrong city | No |
+| **Type III — Within-frame error** | Response uses the right vocabulary and structure but gets the facts wrong | "The capital of Australia is Canberra" vs. "The capital of Australia is Sydney" — same frame, wrong city | No |
 
 **Why Type III is undetectable:** Sentence embeddings cluster text by vocabulary and structure, not by truth value. Two responses that share the same words, entities, and syntax land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it affects every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers).
 
@@ -307,6 +273,30 @@ result.save("calibration.json")
 
 Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation benchmark (arXiv:2603.13259) reports DGI AUROC 0.958 with domain calibration.
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│            Public API (evaluate)            │
+├──────────────────┬──────────────────────────┤
+│   SGI (sgi.py)   │      DGI (dgi.py)        │
+├──────────────────┴──────────────────────────┤
+│        _internal (geometry, embeddings)     │
+├─────────────────────────────────────────────┤
+│  sentence-transformers (all-MiniLM-L6-v2)   │
+└─────────────────────────────────────────────┘
+         ▲                           ▲
+         │                           │
+   ┌─────┴──────┐            ┌───────┴──────┐
+   │ Providers  │            │ Integrations │
+   │ (OpenAI,   │            │ (LangChain,  │
+   │  Anthropic,│            │  CrewAI,     │
+   │  Google)   │            │  SK, AutoGen │
+   └────────────┘            └──────────────┘
+```
+
+See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.md](CLAUDE.md) for AI-assisted development guidelines.
+
 ## Research
 
 groundlens implements the methods described in three peer-reviewed papers:
@@ -323,9 +313,23 @@ groundlens implements the methods described in three peer-reviewed papers:
    Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in Large Language Models.*
    [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
 
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting, scope, and response timelines.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code standards, and PR process.
+
+```bash
+# Quick start for contributors
+git clone https://github.com/groundlens-dev/groundlens.git
+cd groundlens
+pip install -e ".[dev]"
+pre-commit install
+groundlens doctor     # verify your environment
+pytest tests/unit/    # run fast tests
+```
 
 ## License
 
