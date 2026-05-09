@@ -1,0 +1,2665 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.">
+      
+      
+        <meta name="author" content="Javier Marin">
+      
+      
+        <link rel="canonical" href="https://groundlens.dev/theory/dgi-mathematics/">
+      
+      
+        <link rel="prev" href="../sgi-mathematics/">
+      
+      
+        <link rel="next" href="../confabulation-boundary/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>DGI Mathematics - groundlens</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dgi-mathematics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="groundlens" class="md-header__button md-logo" aria-label="groundlens" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            groundlens
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              DGI Mathematics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/groundlens-dev/groundlens" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    groundlens-dev/groundlens
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/how-it-works/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../embedding-geometry/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Theory
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/rag-verification/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../providers/openai/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Providers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../integrations/langchain/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Integrations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../benchmarks/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Benchmarks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="groundlens" class="md-nav__button md-logo" aria-label="groundlens" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    groundlens
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/groundlens-dev/groundlens" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    groundlens-dev/groundlens
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sgi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SGI: Semantic Grounding Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/dgi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DGI: Directional Grounding Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Calibration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embedding-geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedding Geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sgi-mathematics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SGI Mathematics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DGI Mathematics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DGI Mathematics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#displacement-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Displacement Vectors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-unit-displacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Unit Displacement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-reference-direction-hatboldsymbolmu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Reference Direction \(\hat{\boldsymbol{\mu}}\)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Reference Direction \(\hat{\boldsymbol{\mu}}\)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical Interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-von-mises-fisher-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Von Mises-Fisher Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Von Mises-Fisher Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probability-density-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probability Density Function
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpretation-of-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation of Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relationship-to-the-gaussian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship to the Gaussian
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mean-direction-estimation-mle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mean Direction Estimation (MLE)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mean Direction Estimation (MLE)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-resultant-length-barr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Resultant Length \(\bar{R}\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concentration-parameter-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concentration Parameter Estimation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concentration Parameter Estimation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sra-2012-approximation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sra (2012) Approximation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpretation-of-hatkappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation of \(\hat{\kappa}\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dgi-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The DGI Score
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The DGI Score">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statistical-interpretation-under-vmf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical Interpretation Under vMF
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear Normalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linear Normalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-linear-not-tanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Linear (Not Tanh)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dgi-as-a-sufficient-statistic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DGI as a Sufficient Statistic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-to-hypothesis-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection to Hypothesis Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometric-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometric Visualization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caching Strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../confabulation-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Confabulation Boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/rag-verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/domain-calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Calibration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/batch-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Batch Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/eu-ai-act/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EU AI Act Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../providers/openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../providers/anthropic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anthropic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../providers/google/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Google Gemini
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/langchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LangChain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/crewai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CrewAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/semantic-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/autogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AutoGen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Benchmarks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#displacement-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Displacement Vectors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-unit-displacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Unit Displacement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-reference-direction-hatboldsymbolmu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Reference Direction \(\hat{\boldsymbol{\mu}}\)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Reference Direction \(\hat{\boldsymbol{\mu}}\)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical Interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-von-mises-fisher-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Von Mises-Fisher Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Von Mises-Fisher Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probability-density-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probability Density Function
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpretation-of-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation of Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relationship-to-the-gaussian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship to the Gaussian
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mean-direction-estimation-mle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mean Direction Estimation (MLE)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mean Direction Estimation (MLE)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-resultant-length-barr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Resultant Length \(\bar{R}\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concentration-parameter-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concentration Parameter Estimation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concentration Parameter Estimation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sra-2012-approximation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sra (2012) Approximation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpretation-of-hatkappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation of \(\hat{\kappa}\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dgi-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The DGI Score
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The DGI Score">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statistical-interpretation-under-vmf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistical Interpretation Under vMF
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear Normalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linear Normalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-linear-not-tanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Linear (Not Tanh)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dgi-as-a-sufficient-statistic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DGI as a Sufficient Statistic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-to-hypothesis-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection to Hypothesis Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometric-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometric Visualization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caching Strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="dgi-mathematics">DGI Mathematics<a class="headerlink" href="#dgi-mathematics" title="Permanent link">&para;</a></h1>
+<p>This page presents the complete mathematical framework for the Directional Grounding Index, including displacement vector analysis, the von Mises-Fisher distribution on the unit hypersphere, mean direction estimation, the concentration parameter <span class="arithmatex">\(\kappa\)</span>, and the linear normalization scheme.</p>
+<h2 id="displacement-vectors">Displacement Vectors<a class="headerlink" href="#displacement-vectors" title="Permanent link">&para;</a></h2>
+<p>Given a question <span class="arithmatex">\(q\)</span> and response <span class="arithmatex">\(r\)</span>, the <strong>displacement vector</strong> is:</p>
+<div class="arithmatex">\[
+\boldsymbol{\delta} = \phi(r) - \phi(q) \in \mathbb{R}^n
+\]</div>
+<p>This vector encodes the semantic transformation from question to response. Its two components carry distinct information:</p>
+<ul>
+<li><strong>Direction</strong> <span class="arithmatex">\(\hat{\boldsymbol{\delta}} = \boldsymbol{\delta} / \|\boldsymbol{\delta}\|\)</span>: <em>How</em> the semantics changed (toward factual elaboration, toward tangential topics, toward contradictions, etc.)</li>
+<li><strong>Magnitude</strong> <span class="arithmatex">\(\|\boldsymbol{\delta}\|\)</span>: <em>How much</em> the semantics changed (small for paraphrases, large for substantial elaboration)</li>
+</ul>
+<p>DGI uses only the <strong>direction</strong> component, discarding magnitude. This is a deliberate design choice: the magnitude of semantic displacement varies widely across different question types and response lengths, but the <em>direction</em> of grounded displacement is consistent.</p>
+<h2 id="the-unit-displacement">The Unit Displacement<a class="headerlink" href="#the-unit-displacement" title="Permanent link">&para;</a></h2>
+<p>The unit-normalized displacement vector is:</p>
+<div class="arithmatex">\[
+\hat{\boldsymbol{\delta}} = \frac{\boldsymbol{\delta}}{\|\boldsymbol{\delta}\|} = \frac{\phi(r) - \phi(q)}{\|\phi(r) - \phi(q)\|}
+\]</div>
+<p>This maps the displacement to the <strong>unit hypersphere</strong> <span class="arithmatex">\(S^{n-1} = \{\mathbf{v} \in \mathbb{R}^n : \|\mathbf{v}\| = 1\}\)</span>. All directional analysis --- the reference direction, the DGI score, the von Mises-Fisher model --- operates on <span class="arithmatex">\(S^{n-1}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Degenerate case</p>
+<p>When <span class="arithmatex">\(\phi(r) = \phi(q)\)</span> (the response is identical to the question in embedding space), <span class="arithmatex">\(\|\boldsymbol{\delta}\| = 0\)</span> and the unit displacement is undefined. The implementation detects this case (<span class="arithmatex">\(\|\boldsymbol{\delta}\| &lt; 10^{-8}\)</span>) and returns DGI = 0, flagged = True.</p>
+</div>
+<h2 id="the-reference-direction-hatboldsymbolmu">The Reference Direction <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span><a class="headerlink" href="#the-reference-direction-hatboldsymbolmu" title="Permanent link">&para;</a></h2>
+<p>The reference direction is the <strong>mean direction</strong> of displacement vectors computed from a set of <span class="arithmatex">\(N\)</span> verified grounded (question, response) pairs <span class="arithmatex">\(\{(q_i, r_i)\}_{i=1}^N\)</span>.</p>
+<h3 id="computation">Computation<a class="headerlink" href="#computation" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Compute each displacement: <span class="arithmatex">\(\boldsymbol{\delta}_i = \phi(r_i) - \phi(q_i)\)</span></li>
+<li>Normalize to unit length: <span class="arithmatex">\(\hat{\boldsymbol{\delta}}_i = \boldsymbol{\delta}_i / \|\boldsymbol{\delta}_i\|\)</span></li>
+<li>Compute the resultant vector: <span class="arithmatex">\(\mathbf{R} = \sum_{i=1}^N \hat{\boldsymbol{\delta}}_i\)</span></li>
+<li>Normalize: <span class="arithmatex">\(\hat{\boldsymbol{\mu}} = \mathbf{R} / \|\mathbf{R}\|\)</span></li>
+</ol>
+<p>This is equivalently expressed as:</p>
+<div class="arithmatex">\[
+\hat{\boldsymbol{\mu}} = \text{normalize}\left(\frac{1}{N}\sum_{i=1}^{N} \hat{\boldsymbol{\delta}}_i\right)
+\]</div>
+<h3 id="statistical-interpretation">Statistical Interpretation<a class="headerlink" href="#statistical-interpretation" title="Permanent link">&para;</a></h3>
+<p>The reference direction <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> is the <strong>maximum-likelihood estimate (MLE)</strong> of the mean direction parameter <span class="arithmatex">\(\boldsymbol{\mu}\)</span> of a von Mises-Fisher distribution (see below). This makes it the optimal estimate under the assumption that grounded displacement directions are drawn from a unimodal directional distribution.</p>
+<h2 id="the-von-mises-fisher-distribution">The Von Mises-Fisher Distribution<a class="headerlink" href="#the-von-mises-fisher-distribution" title="Permanent link">&para;</a></h2>
+<p>The von Mises-Fisher (vMF) distribution is the natural probability distribution for directional data on <span class="arithmatex">\(S^{n-1}\)</span>. It is the hyperspherical analog of the Gaussian distribution, and DGI uses it as the probabilistic model for grounded displacement directions.</p>
+<h3 id="probability-density-function">Probability Density Function<a class="headerlink" href="#probability-density-function" title="Permanent link">&para;</a></h3>
+<p>The vMF distribution on <span class="arithmatex">\(S^{n-1}\)</span> with mean direction <span class="arithmatex">\(\boldsymbol{\mu} \in S^{n-1}\)</span> and concentration parameter <span class="arithmatex">\(\kappa \geq 0\)</span> has density:</p>
+<div class="arithmatex">\[
+f(\mathbf{x}; \boldsymbol{\mu}, \kappa) = C_n(\kappa) \exp\bigl(\kappa \, \boldsymbol{\mu}^\top \mathbf{x}\bigr)
+\]</div>
+<p>where the normalizing constant is:</p>
+<div class="arithmatex">\[
+C_n(\kappa) = \frac{\kappa^{n/2 - 1}}{(2\pi)^{n/2} I_{n/2 - 1}(\kappa)}
+\]</div>
+<p>and <span class="arithmatex">\(I_\nu(\cdot)\)</span> is the modified Bessel function of the first kind of order <span class="arithmatex">\(\nu\)</span>.</p>
+<h3 id="interpretation-of-parameters">Interpretation of Parameters<a class="headerlink" href="#interpretation-of-parameters" title="Permanent link">&para;</a></h3>
+<p><strong>Mean direction <span class="arithmatex">\(\boldsymbol{\mu}\)</span></strong>: The mode of the distribution. This is the "most likely" direction. For DGI, <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> represents the characteristic displacement direction of grounded responses.</p>
+<p><strong>Concentration <span class="arithmatex">\(\kappa\)</span></strong>: Controls how tightly the distribution is concentrated around <span class="arithmatex">\(\boldsymbol{\mu}\)</span>:</p>
+<ul>
+<li><span class="arithmatex">\(\kappa = 0\)</span>: Uniform distribution on <span class="arithmatex">\(S^{n-1}\)</span>. No preferred direction.</li>
+<li><span class="arithmatex">\(\kappa\)</span> small: Spread out, weak directional preference.</li>
+<li><span class="arithmatex">\(\kappa\)</span> large: Tightly concentrated around <span class="arithmatex">\(\boldsymbol{\mu}\)</span>.</li>
+<li><span class="arithmatex">\(\kappa \to \infty\)</span>: Point mass at <span class="arithmatex">\(\boldsymbol{\mu}\)</span>.</li>
+</ul>
+<div class="admonition abstract">
+<p class="admonition-title">Why vMF for DGI?</p>
+<p>The vMF distribution is the maximum-entropy distribution on <span class="arithmatex">\(S^{n-1}\)</span> given a constraint on the mean direction. This makes it the least-informative assumption consistent with the observation that grounded displacements have a preferred direction. Using any other distributional family would impose additional structural assumptions not supported by the data.</p>
+</div>
+<h3 id="relationship-to-the-gaussian">Relationship to the Gaussian<a class="headerlink" href="#relationship-to-the-gaussian" title="Permanent link">&para;</a></h3>
+<p>In low dimensions, the vMF distribution is well-known:</p>
+<ul>
+<li>On <span class="arithmatex">\(S^1\)</span> (the circle): vMF reduces to the <strong>von Mises distribution</strong>, the circular analog of the Gaussian.</li>
+<li>On <span class="arithmatex">\(S^2\)</span> (the 2-sphere): vMF is the <strong>Fisher distribution</strong>, used extensively in paleomagnetic studies and geological directional data.</li>
+</ul>
+<p>In high dimensions (<span class="arithmatex">\(n = 384\)</span>), the vMF distribution concentrates rapidly for even moderate <span class="arithmatex">\(\kappa\)</span> values, due to the vast surface area of <span class="arithmatex">\(S^{n-1}\)</span>.</p>
+<h2 id="mean-direction-estimation-mle">Mean Direction Estimation (MLE)<a class="headerlink" href="#mean-direction-estimation-mle" title="Permanent link">&para;</a></h2>
+<p>Given <span class="arithmatex">\(N\)</span> independent samples <span class="arithmatex">\(\hat{\boldsymbol{\delta}}_1, \ldots, \hat{\boldsymbol{\delta}}_N\)</span> from <span class="arithmatex">\(\text{vMF}(\boldsymbol{\mu}, \kappa)\)</span>, the maximum-likelihood estimate of <span class="arithmatex">\(\boldsymbol{\mu}\)</span> is:</p>
+<div class="arithmatex">\[
+\hat{\boldsymbol{\mu}}_{\text{MLE}} = \frac{\mathbf{R}}{\|\mathbf{R}\|} = \frac{\sum_{i=1}^N \hat{\boldsymbol{\delta}}_i}{\left\|\sum_{i=1}^N \hat{\boldsymbol{\delta}}_i\right\|}
+\]</div>
+<p>This is exactly what groundlens computes. The MLE for the mean direction does not depend on <span class="arithmatex">\(\kappa\)</span> --- it is the same regardless of how concentrated the distribution is.</p>
+<h3 id="the-resultant-length-barr">The Resultant Length <span class="arithmatex">\(\bar{R}\)</span><a class="headerlink" href="#the-resultant-length-barr" title="Permanent link">&para;</a></h3>
+<p>The <strong>mean resultant length</strong> is:</p>
+<div class="arithmatex">\[
+\bar{R} = \frac{1}{N}\left\|\sum_{i=1}^N \hat{\boldsymbol{\delta}}_i\right\| = \frac{\|\mathbf{R}\|}{N}
+\]</div>
+<p>This scalar in <span class="arithmatex">\([0, 1]\)</span> measures the consistency of the directional data:</p>
+<ul>
+<li><span class="arithmatex">\(\bar{R} \approx 0\)</span>: The unit vectors point in many different directions (no consistent pattern). The calibration data is noisy or from mixed domains.</li>
+<li><span class="arithmatex">\(\bar{R} \approx 1\)</span>: All unit vectors point in nearly the same direction (strong consensus). The domain has a clear grounded displacement direction.</li>
+</ul>
+<h2 id="concentration-parameter-estimation">Concentration Parameter Estimation<a class="headerlink" href="#concentration-parameter-estimation" title="Permanent link">&para;</a></h2>
+<p>The MLE for <span class="arithmatex">\(\kappa\)</span> involves solving the equation:</p>
+<div class="arithmatex">\[
+A_n(\kappa) = \bar{R}
+\]</div>
+<p>where <span class="arithmatex">\(A_n(\kappa) = I_{n/2}(\kappa) / I_{n/2-1}(\kappa)\)</span> is the ratio of Bessel functions. This equation has no closed-form solution.</p>
+<h3 id="sra-2012-approximation">Sra (2012) Approximation<a class="headerlink" href="#sra-2012-approximation" title="Permanent link">&para;</a></h3>
+<p>groundlens uses the approximation from Sra (2012)<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> for the MLE of <span class="arithmatex">\(\kappa\)</span>:</p>
+<div class="arithmatex">\[
+\hat{\kappa} \approx \frac{\bar{R}(n - \bar{R}^2)}{1 - \bar{R}^2}
+\]</div>
+<p>This approximation is accurate for moderate to large <span class="arithmatex">\(n\)</span> and avoids the computational cost of evaluating Bessel functions. For <span class="arithmatex">\(n = 384\)</span> (our default embedding dimension), the approximation error is negligible.</p>
+<h3 id="interpretation-of-hatkappa">Interpretation of <span class="arithmatex">\(\hat{\kappa}\)</span><a class="headerlink" href="#interpretation-of-hatkappa" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(\hat{\kappa}\)</span></th>
+<th>Interpretation</th>
+<th>DGI quality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&gt; 10</td>
+<td>High concentration --- strong directional consensus</td>
+<td>Excellent discrimination</td>
+</tr>
+<tr>
+<td>5--10</td>
+<td>Moderate concentration</td>
+<td>Good discrimination</td>
+</tr>
+<tr>
+<td>1--5</td>
+<td>Low concentration --- weak consensus</td>
+<td>Poor discrimination</td>
+</tr>
+<tr>
+<td>&lt; 1</td>
+<td>Near-uniform --- no meaningful direction</td>
+<td>Calibration failure</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Practical guidance</p>
+<p>If <span class="arithmatex">\(\hat{\kappa} &lt; 5\)</span> after calibration, the reference direction is unreliable. Consider: (1) adding more calibration pairs, (2) filtering noisy pairs, (3) splitting into sub-domains if the data spans multiple topics.</p>
+</div>
+<h2 id="the-dgi-score">The DGI Score<a class="headerlink" href="#the-dgi-score" title="Permanent link">&para;</a></h2>
+<p>Given the reference direction <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> and a new (question, response) pair, the DGI score is:</p>
+<div class="arithmatex">\[
+\text{DGI} = \hat{\boldsymbol{\delta}}^\top \hat{\boldsymbol{\mu}} = \cos\theta
+\]</div>
+<p>where <span class="arithmatex">\(\theta\)</span> is the angle between the displacement direction and the reference direction. This is the cosine similarity between the unit displacement and the unit reference direction.</p>
+<h3 id="statistical-interpretation-under-vmf">Statistical Interpretation Under vMF<a class="headerlink" href="#statistical-interpretation-under-vmf" title="Permanent link">&para;</a></h3>
+<p>Under the null hypothesis that the displacement direction is drawn uniformly from <span class="arithmatex">\(S^{n-1}\)</span> (i.e., the response is unrelated to the grounded pattern), the expected DGI score is:</p>
+<div class="arithmatex">\[
+\mathbb{E}_{\text{uniform}}[\text{DGI}] = \mathbb{E}[\hat{\boldsymbol{\delta}}^\top \hat{\boldsymbol{\mu}}] = 0
+\]</div>
+<p>with variance <span class="arithmatex">\(\approx 1/n\)</span>. For <span class="arithmatex">\(n = 384\)</span>, the standard deviation is <span class="arithmatex">\(\approx 0.051\)</span>.</p>
+<p>Under the alternative hypothesis that the displacement is drawn from <span class="arithmatex">\(\text{vMF}(\hat{\boldsymbol{\mu}}, \kappa)\)</span>:</p>
+<div class="arithmatex">\[
+\mathbb{E}_{\text{grounded}}[\text{DGI}] = A_n(\kappa) = \frac{I_{n/2}(\kappa)}{I_{n/2-1}(\kappa)}
+\]</div>
+<p>For well-calibrated domains (<span class="arithmatex">\(\kappa \geq 10\)</span>, <span class="arithmatex">\(n = 384\)</span>), <span class="arithmatex">\(A_n(\kappa) \approx 1 - (n-1)/(2\kappa)\)</span>, which is close to 1.</p>
+<p>The DGI threshold of 0.30 is approximately <span class="arithmatex">\(6\sigma\)</span> above the null hypothesis mean, providing strong statistical confidence.</p>
+<h2 id="linear-normalization">Linear Normalization<a class="headerlink" href="#linear-normalization" title="Permanent link">&para;</a></h2>
+<p>The DGI score lies in <span class="arithmatex">\([-1, 1]\)</span> (the range of cosine similarity). The linear normalization maps this to <span class="arithmatex">\([0, 1]\)</span>:</p>
+<div class="arithmatex">\[
+\text{DGI}_{\text{norm}} = \frac{\text{DGI} + 1}{2}
+\]</div>
+<h3 id="why-linear-not-tanh">Why Linear (Not Tanh)?<a class="headerlink" href="#why-linear-not-tanh" title="Permanent link">&para;</a></h3>
+<p>Unlike SGI (which has a semi-infinite range requiring compression), DGI already lies in a bounded interval. A linear map preserves the metric structure:</p>
+<ul>
+<li>Equal differences in raw DGI correspond to equal differences in normalized DGI.</li>
+<li>The midpoint (DGI = 0, orthogonal to reference direction) maps to 0.5.</li>
+<li>The extremes (DGI = -1 and DGI = +1) map to 0 and 1 respectively.</li>
+</ul>
+<p>A non-linear normalization (such as tanh) would distort the well-calibrated cosine similarity values and reduce the interpretability of the vMF concentration parameter.</p>
+<h2 id="dgi-as-a-sufficient-statistic">DGI as a Sufficient Statistic<a class="headerlink" href="#dgi-as-a-sufficient-statistic" title="Permanent link">&para;</a></h2>
+<p>Under the vMF model, the DGI score <span class="arithmatex">\(\gamma = \hat{\boldsymbol{\delta}}^\top \hat{\boldsymbol{\mu}}\)</span> is a <strong>sufficient statistic</strong> for the concentration parameter <span class="arithmatex">\(\kappa\)</span>. This means that the DGI score contains all the information that the full displacement direction <span class="arithmatex">\(\hat{\boldsymbol{\delta}}\)</span> has about whether the response follows the grounded pattern. No additional information about grounding can be extracted from <span class="arithmatex">\(\hat{\boldsymbol{\delta}}\)</span> beyond what is captured by DGI.</p>
+<p>This is a consequence of the exponential family structure of the vMF distribution. The density can be written as:</p>
+<div class="arithmatex">\[
+f(\mathbf{x}; \boldsymbol{\mu}, \kappa) = C_n(\kappa) \exp(\kappa \, \boldsymbol{\mu}^\top \mathbf{x})
+\]</div>
+<p>The sufficient statistic for <span class="arithmatex">\(\kappa\)</span> is <span class="arithmatex">\(\boldsymbol{\mu}^\top \mathbf{x}\)</span>, which is exactly the DGI score (when <span class="arithmatex">\(\boldsymbol{\mu}\)</span> is known or estimated).</p>
+<h2 id="connection-to-hypothesis-testing">Connection to Hypothesis Testing<a class="headerlink" href="#connection-to-hypothesis-testing" title="Permanent link">&para;</a></h2>
+<p>DGI can be framed as a one-sided hypothesis test:</p>
+<ul>
+<li><span class="arithmatex">\(H_0\)</span>: The displacement direction is uniform on <span class="arithmatex">\(S^{n-1}\)</span> (no grounding signal).</li>
+<li><span class="arithmatex">\(H_1\)</span>: The displacement direction follows <span class="arithmatex">\(\text{vMF}(\hat{\boldsymbol{\mu}}, \kappa)\)</span> with <span class="arithmatex">\(\kappa &gt; 0\)</span> (grounded).</li>
+</ul>
+<p>The DGI score is the test statistic. The threshold DGI = 0.30 defines the rejection region. Under <span class="arithmatex">\(H_0\)</span>, the probability of DGI &gt; 0.30 is vanishingly small (since <span class="arithmatex">\(0.30 / 0.051 \approx 5.9\sigma\)</span>), giving the test high specificity.</p>
+<p>Under <span class="arithmatex">\(H_1\)</span> with domain-specific calibration (<span class="arithmatex">\(\kappa \geq 10\)</span>), the expected DGI for grounded responses is well above 0.30, giving the test high sensitivity. This explains the observed AUROC values of 0.90--0.99 with domain calibration.</p>
+<h2 id="geometric-visualization">Geometric Visualization<a class="headerlink" href="#geometric-visualization" title="Permanent link">&para;</a></h2>
+<p>Consider the unit hypersphere <span class="arithmatex">\(S^{n-1}\)</span> with the reference direction <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> at the "north pole." The DGI score is the cosine of the polar angle <span class="arithmatex">\(\theta\)</span> from the north pole:</p>
+<div class="arithmatex">\[
+\text{DGI} = \cos\theta
+\]</div>
+<ul>
+<li>Grounded responses cluster near the north pole (small <span class="arithmatex">\(\theta\)</span>, high DGI).</li>
+<li>Hallucinated responses are scattered away from the north pole (large <span class="arithmatex">\(\theta\)</span>, low DGI).</li>
+<li>The DGI = 0.30 threshold corresponds to <span class="arithmatex">\(\theta \approx 72.5°\)</span>.</li>
+<li>The DGI = 0.00 threshold corresponds to <span class="arithmatex">\(\theta = 90°\)</span> (equator).</li>
+</ul>
+<p>The vMF distribution gives the "density of grounded responses" as a function of polar angle: highest at the pole, decaying exponentially as <span class="arithmatex">\(\theta\)</span> increases, with the rate of decay controlled by <span class="arithmatex">\(\kappa\)</span>.</p>
+<h2 id="caching-strategy">Caching Strategy<a class="headerlink" href="#caching-strategy" title="Permanent link">&para;</a></h2>
+<p>Computing the reference direction requires embedding all calibration pairs, which involves <span class="arithmatex">\(2N\)</span> forward passes through the sentence transformer. groundlens caches <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> by <code>(model_name, reference_csv)</code> key to avoid recomputation:</p>
+<ul>
+<li>First call with a given key: compute and cache.</li>
+<li>Subsequent calls with the same key: return cached result.</li>
+<li>Different CSV paths produce independent cache entries, allowing multiple domain calibrations to coexist.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Marin, J. (2026). <em>A Geometric Taxonomy of Hallucinations in LLMs</em>. arXiv:2602.13224.</li>
+<li>Fisher, R. A. (1953). Dispersion on a sphere. <em>Proceedings of the Royal Society A</em>, 217, 295--305.</li>
+<li>Mardia, K. V., &amp; Jupp, P. E. (2000). <em>Directional Statistics</em>. John Wiley &amp; Sons.</li>
+<li>Sra, S. (2012). A short note on parameter approximation for von Mises-Fisher distributions. <em>Computational Statistics</em>, 27(1), 177--190.</li>
+<li>Banerjee, A. et al. (2005). Clustering on the unit hypersphere using von Mises-Fisher distributions. <em>JMLR</em>, 6, 1345--1382.</li>
+</ul>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Sra, S. (2012). A short note on parameter approximation for von Mises-Fisher distributions: and a fast implementation of <span class="arithmatex">\(I_s(x)\)</span>. <em>Computational Statistics</em>, 27(1), 177--190.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025-2026 Javier Marin
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/groundlens-dev/groundlens" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/groundlens/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
