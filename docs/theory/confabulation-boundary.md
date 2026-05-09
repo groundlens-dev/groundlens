@@ -168,7 +168,7 @@ This is not a limitation of groundlens specifically --- it is a fundamental cons
 
 Many hallucination detection products claim to "detect all hallucinations" or provide "factual accuracy scores." These claims are not possible under the distributional hypothesis. By explicitly documenting the confabulation boundary, groundlens gives users an honest understanding of what geometric detection can and cannot do.
 
-The CERT Framework positions groundlens as **verification triage**: prioritize what to review, not "detect so you don't need to review." This positioning is aligned with the theoretical limitations.
+groundlens is positioned as **verification triage**: prioritize what to review, not "detect so you don't need to review." If a tool cannot explain what it misses and why, it is selling confidence it has not earned.
 
 ## Toward Breaking the Boundary
 

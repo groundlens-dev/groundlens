@@ -331,6 +331,10 @@ groundlens doctor     # verify your environment
 pytest tests/unit/    # run fast tests
 ```
 
+## About
+
+groundlens is built and maintained by [Javier Marin](https://jmarin.info) -- an engineer who has reinvented himself more times than most people change jobs. The math comes from engineering, the skepticism from regulated industries, and the stubbornness from experience. Read the [origin story](VISION.md#origin).
+
 ## License
 
 [MIT](LICENSE) -- Javier Marin (javier@jmarin.info)

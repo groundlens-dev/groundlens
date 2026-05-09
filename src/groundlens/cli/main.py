@@ -211,20 +211,34 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
     # ── Optional providers ────────────────────────────────────────────────
     print("Optional providers:")
 
-    for provider, pkg in [("openai", "openai"), ("anthropic", "anthropic"), ("google", "google.generativeai")]:
+    providers = [
+        ("openai", "openai"),
+        ("anthropic", "anthropic"),
+        ("google", "google.generativeai"),
+    ]
+    for provider, pkg in providers:
         try:
             mod = importlib.import_module(pkg)
             version = getattr(mod, "__version__", "unknown")
             ok(f"{provider} ({version})")
         except ImportError:
-            warn(f"{provider} not installed (optional — pip install 'groundlens[{provider}]')")
+            warn(
+                f"{provider} not installed"
+                f" (optional — pip install 'groundlens[{provider}]')"
+            )
 
     print()
 
     # ── Optional integrations ─────────────────────────────────────────────
     print("Optional integrations:")
 
-    for name, pkg in [("langchain", "langchain_core"), ("crewai", "crewai"), ("semantic-kernel", "semantic_kernel"), ("autogen", "autogen")]:
+    frameworks = [
+        ("langchain", "langchain_core"),
+        ("crewai", "crewai"),
+        ("semantic-kernel", "semantic_kernel"),
+        ("autogen", "autogen"),
+    ]
+    for name, pkg in frameworks:
         try:
             mod = importlib.import_module(pkg)
             version = getattr(mod, "__version__", "unknown")
@@ -257,7 +271,10 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
             model=model_name,
         )
         if score.method == "sgi" and not score.flagged:
-            ok(f"SGI={score.value:.3f} (normalized={score.normalized:.3f}, flagged={score.flagged})")
+            ok(
+                f"SGI={score.value:.3f}"
+                f" (norm={score.normalized:.3f}, flagged={score.flagged})"
+            )
         else:
             warn(f"Unexpected result: method={score.method}, flagged={score.flagged}")
 
@@ -267,7 +284,11 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
             model=model_name,
         )
         if score_dgi.method == "dgi" and not score_dgi.flagged:
-            ok(f"DGI={score_dgi.value:.3f} (normalized={score_dgi.normalized:.3f}, flagged={score_dgi.flagged})")
+            ok(
+                f"DGI={score_dgi.value:.3f}"
+                f" (norm={score_dgi.normalized:.3f},"
+                f" flagged={score_dgi.flagged})"
+            )
         else:
             warn(f"Unexpected DGI result: method={score_dgi.method}, flagged={score_dgi.flagged}")
     except Exception as exc:
@@ -277,7 +298,10 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
 
     # ── Summary ───────────────────────────────────────────────────────────
     total = checks_passed + checks_failed + checks_warned
-    print(f"Results: {checks_passed} passed, {checks_failed} failed, {checks_warned} warnings (of {total} checks)")
+    print(
+        f"Results: {checks_passed} passed, {checks_failed} failed,"
+        f" {checks_warned} warnings (of {total} checks)"
+    )
 
     if checks_failed == 0:
         print("\ngroundlens is ready.")

@@ -1,5 +1,15 @@
 # Vision -- Geometric methods for LLM reliability
 
+## Origin
+
+I built groundlens because I kept asking the same question and nobody had a good answer: *how do you verify an LLM's output without trusting another LLM?*
+
+My background is not a straight line. Chemical engineering, an MBA, social psychology, a reinvention into data analytics, and then AI -- each pivot driven by curiosity and the reality that the Spanish job market is not kind to a 53-year-old who refuses to stop learning. That winding path turned out to be the point. The math came from engineering. The skepticism about overconfident systems came from psychology. The insistence on auditability came from working in regulated industries where "the model said so" is not an acceptable answer.
+
+The first paper (SGI) started from a geometric observation so simple it felt like it couldn't be new: if a response actually engaged with its source material, it should be *closer* to that material than to the question that prompted it. Measure the distance ratio. That's the whole idea. It was new. It worked. Three peer-reviewed papers later, the geometric framework detects the hallucination types that matter most in production -- and is honest about the ones it cannot catch.
+
+groundlens is built by someone who has been on the other side of every tool that promises more than it delivers. It will never claim to detect what it mathematically cannot detect. That is the commitment.
+
 ## The problem
 
 LLM hallucination detection is stuck in a paradox: the dominant approach uses a second LLM to judge the first. This creates three fundamental issues:
