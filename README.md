@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/Logo_groundlens_white_background.png" alt="groundlens" width="200">
+  <img src="docs/assets/Logo_groundlens_new-05.png" alt="groundlens" width="200">
 </div>
 
 # Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
