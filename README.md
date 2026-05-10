@@ -214,6 +214,7 @@ Not all hallucinations are the same. Groundlens is built on a [geometric taxonom
   <br>
   <sub>Every text maps to a point on the hypersphere S<sup>d−1</sup>. The question <b>q</b> and context <b>c</b> define a geodesic arc. Grounded responses (blue) fall inside the plausibility region 𝒫<sub>q</sub>. <b>Type I</b> (purple) stays near q — the response ignored the context. <b>Type II</b> (red) deviates far from both q and c — invented content. <b>Type III</b> (pink) lands inside 𝒫<sub>q</sub> alongside the correct answer — same vocabulary and structure, wrong facts, geometrically indistinguishable.</sub>
 </div>
+<br>
 
 | Type | What happens | Example | Detection |
 |---|---|---|---|
