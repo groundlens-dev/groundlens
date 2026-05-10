@@ -173,9 +173,7 @@ class TestGetMuHat:
 
     @patch("groundlens.dgi._compute_reference_direction")
     @patch("groundlens.dgi.load_reference_pairs")
-    def test_caches_result(
-        self, mock_loader, mock_compute
-    ) -> None:
+    def test_caches_result(self, mock_loader, mock_compute) -> None:
         reset_calibration_cache()
         mock_loader.return_value = [("Q?", "A.")]
         fake_mu = np.array([1.0, 0.0, 0.0], dtype=np.float32)
@@ -191,9 +189,7 @@ class TestGetMuHat:
 
     @patch("groundlens.dgi._compute_reference_direction")
     @patch("groundlens.dgi.load_reference_pairs")
-    def test_different_csv_separate_cache(
-        self, mock_loader, mock_compute
-    ) -> None:
+    def test_different_csv_separate_cache(self, mock_loader, mock_compute) -> None:
         reset_calibration_cache()
         mock_loader.return_value = [("Q?", "A.")]
         fake_mu = np.array([1.0, 0.0, 0.0], dtype=np.float32)

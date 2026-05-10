@@ -66,9 +66,7 @@ class TestParser:
 
     def test_calibrate_subcommand_parsed(self) -> None:
         parser = _build_parser()
-        args = parser.parse_args(
-            ["calibrate", "--pairs", "pairs.csv", "--output", "cal.json"]
-        )
+        args = parser.parse_args(["calibrate", "--pairs", "pairs.csv", "--output", "cal.json"])
         assert args.command == "calibrate"
         assert args.pairs == "pairs.csv"
 
@@ -152,9 +150,7 @@ class TestCmdEvaluate:
 
     def test_evaluate_missing_file_exits(self, tmp_path) -> None:
         parser = _build_parser()
-        args = parser.parse_args(
-            ["evaluate", str(tmp_path / "nope.csv"), "--output", "out.csv"]
-        )
+        args = parser.parse_args(["evaluate", str(tmp_path / "nope.csv"), "--output", "out.csv"])
         with pytest.raises(SystemExit, match="1"):
             _cmd_evaluate(args)
 
@@ -168,9 +164,7 @@ class TestCmdEvaluate:
             _cmd_evaluate(args)
 
     @patch.object(_eval_mod, "evaluate", return_value=_MOCK_SCORE)
-    def test_evaluate_skips_rows_missing_question(
-        self, mock_eval, tmp_path, capsys
-    ) -> None:
+    def test_evaluate_skips_rows_missing_question(self, mock_eval, tmp_path, capsys) -> None:
         inp = tmp_path / "input.csv"
         self._write_csv(
             inp,
@@ -245,24 +239,30 @@ class TestCmdDoctor:
 
     @patch("groundlens._internal.embeddings.encode_texts")
     @patch.object(_eval_mod, "evaluate")
-    def test_doctor_runs_without_crash(
-        self, mock_eval, mock_encode, capsys
-    ) -> None:
+    def test_doctor_runs_without_crash(self, mock_eval, mock_encode, capsys) -> None:
         """Doctor should run to completion when all imports succeed."""
-        mock_encode.return_value = np.random.default_rng(0).standard_normal((1, 384)).astype(
-            np.float32
+        mock_encode.return_value = (
+            np.random.default_rng(0).standard_normal((1, 384)).astype(np.float32)
         )
 
         mock_sgi = SGIResult(value=1.2, normalized=0.6, flagged=False, q_dist=0.8, ctx_dist=0.64)
         mock_dgi = DGIResult(value=0.4, normalized=0.7, flagged=False)
         mock_eval.side_effect = [
             GroundlensScore(
-                value=1.2, normalized=0.6, flagged=False, method="sgi",
-                explanation="ok", detail=mock_sgi,
+                value=1.2,
+                normalized=0.6,
+                flagged=False,
+                method="sgi",
+                explanation="ok",
+                detail=mock_sgi,
             ),
             GroundlensScore(
-                value=0.4, normalized=0.7, flagged=False, method="dgi",
-                explanation="ok", detail=mock_dgi,
+                value=0.4,
+                normalized=0.7,
+                flagged=False,
+                method="dgi",
+                explanation="ok",
+                detail=mock_dgi,
             ),
         ]
 
