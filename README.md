@@ -207,7 +207,13 @@ else:
 
 ## Taxonomy of LLM hallucinations
 
-Not all hallucinations are the same. groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/abs/2602.13224)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
+Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/abs/2602.13224)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
+
+<div align="center">
+  <img src="docs/assets/taxonomy.png" alt="groundlens" width="500">
+  <br>
+  <sub>Every text maps to a point on the hypersphere S<sup>d−1</sup>. The question <b>q</b> and context <b>c</b> define a geodesic arc. Grounded responses (blue) fall inside the plausibility region 𝒫<sub>q</sub>. <b>Type I</b> (purple) stays near q — the response ignored the context. <b>Type II</b> (red) deviates far from both q and c — invented content. <b>Type III</b> (pink) lands inside 𝒫<sub>q</sub> alongside the correct answer — same vocabulary and structure, wrong facts, geometrically indistinguishable.</sub>
+</div>
 
 | Type | What happens | Example | Detection |
 |---|---|---|---|
@@ -217,7 +223,7 @@ Not all hallucinations are the same. groundlens is built on a [geometric taxonom
 
 **Why Type III is undetectable:** Sentence embeddings encode distributional similarity (vocabulary, syntax, co-occurrence), not truth value. Two responses that share the same words, entities, and syntactic frame land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it is a property of the distributional hypothesis (Harris, 1954) that constrains every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers over truthful ones).
 
-**What this means in practice:** groundlens is **verification triage** — it catches the hallucination types that leave geometric traces (Types I and II), which are the most common and most damaging in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with claim-level fact-checking tools on the outputs that pass geometric verification. See [Complementary Tools for Type III](https://docs.groundlens.dev/theory/confabulation-boundary/#complementary-tools-for-type-iii-detection).
+**Implications:** Groundlens is **verification triage** — it detects the hallucination types that leave geometric traces (Types I and II), which are the most common and most damaging in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with claim-level fact-checking tools on the outputs that pass geometric verification. See [Complementary Tools for Type III](https://docs.groundlens.dev/theory/confabulation-boundary/#complementary-tools-for-type-iii-detection).
 
 ## Scoring methods
 
@@ -248,9 +254,11 @@ DGI = dot(delta / ||delta||, mu_hat)
 
 | Score | Interpretation |
 |---|---|
-| DGI > 0.30 | Aligns with grounded patterns (pass) |
+| DGI > 0.30 $^1$ | Aligns with grounded patterns (pass) |
 | 0.00 < DGI < 0.30 | Weak alignment (flagged — possible Type II) |
 | DGI < 0.00 | Opposes grounded direction (high risk) |
+
+$^1$ This score corresponds to a general calibration. In domain-specific calibrations the score can vary.
 
 ## Providers and integrations
 
