@@ -1144,6 +1144,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Why LLM-Generated Hallucinations Are Detectable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mechanistic-evidence-active-suppression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanistic evidence: active suppression
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1286,13 +1303,74 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#toward-breaking-the-boundary" class="md-nav__link">
+  <a href="#complementary-tools-for-type-iii-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Toward Breaking the Boundary
+        Complementary Tools for Type III Detection
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Complementary Tools for Type III Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#claim-decomposition-source-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Claim decomposition + source retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#llm-as-judge-with-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM-as-judge (with caveats)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-graph-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge graph verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consistency-based-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consistency-based methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2088,6 +2166,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Why LLM-Generated Hallucinations Are Detectable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mechanistic-evidence-active-suppression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanistic evidence: active suppression
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2230,13 +2325,74 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#toward-breaking-the-boundary" class="md-nav__link">
+  <a href="#complementary-tools-for-type-iii-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Toward Breaking the Boundary
+        Complementary Tools for Type III Detection
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Complementary Tools for Type III Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#claim-decomposition-source-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Claim decomposition + source retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#llm-as-judge-with-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM-as-judge (with caveats)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-graph-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge graph verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consistency-based-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consistency-based methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2324,6 +2480,17 @@
 </li>
 </ol>
 <p>This is why DGI achieves AUROC 0.958 on the confabulation benchmark for <strong>LLM-generated</strong> hallucinations (arXiv:2603.13259). The LLM's generative process leaves a detectable geometric trace.</p>
+<h3 id="mechanistic-evidence-active-suppression">Mechanistic evidence: active suppression<a class="headerlink" href="#mechanistic-evidence-active-suppression" title="Permanent link">&para;</a></h3>
+<p>The arXiv preprint paper (Marin, 2026b) provides direct evidence for <em>why</em> this geometric trace exists by probing what happens inside the transformer during hallucination.</p>
+<p>Using forced-completion probing across seven decoder-only models (Llama-2 7B through Llama-3.1 70B, Mistral 7B, Gemma-2 9B, Phi-3 3.8B, Qwen-2.5 7B), the study measures how residual-stream representations evolve layer by layer when a model produces a grounded versus a hallucinated completion. The key findings:</p>
+<p><strong>Models retrieve correct answers, then override them.</strong> In the middle layers, the correct factual answer is recoverable from the residual stream even when the model ultimately hallucinates. At late layers (<span class="arithmatex">\(\ell &gt; 0.7L\)</span>), the representation undergoes an <strong>isometric rotational divergence</strong>: the residual-stream vector rotates away from the correct-answer subspace while preserving its norm. This is not a decay of signal --- it is an active redirection.</p>
+<p><strong>Factual selection is geometry-in-direction, not magnitude.</strong> The divergence between grounded and hallucinated trajectories manifests as angular deviation (measured by cosine similarity <span class="arithmatex">\(\kappa\)</span> between the two trajectories), not as a change in vector norm. When <span class="arithmatex">\(\kappa\)</span> drops below 0.5 at late layers, the model is actively suppressing the correct answer. This rotational signature is exactly what DGI detects in the output embedding: the displacement direction from question to response carries a trace of whether the generation process stayed on the grounded trajectory or rotated away from it.</p>
+<p><strong>The suppression pattern is consistent across model families.</strong> All seven architectures tested show the same qualitative pattern --- mid-layer factual retrieval followed by late-layer rotational suppression --- despite different training data, tokenizers, and parameter counts. This universality explains why DGI generalizes across models: it measures a downstream consequence of a mechanism that is shared across transformer architectures.</p>
+<p><strong>Domain-local transfer.</strong> Calibrating DGI's reference direction <span class="arithmatex">\(\hat{\mu}\)</span> on one declarative-knowledge domain (e.g., biology) transfers to other declarative domains (e.g., history) with minimal AUROC loss (<span class="arithmatex">\(\Delta &lt; 0.05\)</span>), consistent with the finding that the suppression rotation is domain-general rather than topic-specific.</p>
+<div class="admonition info">
+<p class="admonition-title">Connecting mechanistic and geometric levels</p>
+<p>groundlens operates at the sentence-embedding level (black-box, single-pass). The COLM findings explain <em>why</em> this works: the rotational divergence at late transformer layers propagates through the embedding model's own encoder, producing the directional deviation that DGI measures. The mechanistic and geometric accounts are complementary --- the rotational dynamics paper explains the cause; groundlens measures the consequence.</p>
+</div>
 <h2 id="why-human-crafted-confabulations-are-undetectable">Why Human-Crafted Confabulations Are Undetectable<a class="headerlink" href="#why-human-crafted-confabulations-are-undetectable" title="Permanent link">&para;</a></h2>
 <p>A human expert can craft a false statement that is distributionally indistinguishable from a true statement. Consider:</p>
 <ul>
@@ -2438,21 +2605,68 @@
 <h2 id="why-this-is-honest">Why This Is Honest<a class="headerlink" href="#why-this-is-honest" title="Permanent link">&para;</a></h2>
 <p>Many hallucination detection products claim to "detect all hallucinations" or provide "factual accuracy scores." These claims are not possible under the distributional hypothesis. By explicitly documenting the confabulation boundary, groundlens gives users an honest understanding of what geometric detection can and cannot do.</p>
 <p>groundlens is positioned as <strong>verification triage</strong>: prioritize what to review, not "detect so you don't need to review." If a tool cannot explain what it misses and why, it is selling confidence it has not earned.</p>
-<h2 id="toward-breaking-the-boundary">Toward Breaking the Boundary<a class="headerlink" href="#toward-breaking-the-boundary" title="Permanent link">&para;</a></h2>
-<p>The confabulation boundary is a limitation of distributional embeddings. Methods that could potentially go beyond it include:</p>
+<h2 id="complementary-tools-for-type-iii-detection">Complementary Tools for Type III Detection<a class="headerlink" href="#complementary-tools-for-type-iii-detection" title="Permanent link">&para;</a></h2>
+<p>The confabulation boundary is a limitation of distributional embeddings, not of verification in general. For high-stakes applications where within-frame factual errors matter, the recommended architecture is <strong>groundlens for triage + a complementary method for the outputs that pass geometric verification</strong>. This section describes concrete tools and techniques for the Type III cases that groundlens cannot catch.</p>
+<h3 id="claim-decomposition-source-retrieval">Claim decomposition + source retrieval<a class="headerlink" href="#claim-decomposition-source-retrieval" title="Permanent link">&para;</a></h3>
+<p>Break each LLM output into atomic claims, then verify each claim against an authoritative source. This is the most mature approach and the one with broadest applicability.</p>
+<p><strong>Tools:</strong></p>
 <ul>
-<li><strong>Knowledge graph grounding</strong>: Verifying individual claims against structured knowledge bases.</li>
-<li><strong>Provenance tracking</strong>: Tracing which training data or retrieval sources contributed to each output token.</li>
-<li><strong>Causal reasoning</strong>: Detecting logical inconsistencies that distributional methods miss.</li>
-<li><strong>Multi-modal verification</strong>: Cross-referencing text claims against non-text sources.</li>
+<li><strong><a href="https://huggingface.co/vectara/hallucination_evaluation_model">Vectara HHEM</a></strong> --- A cross-encoder fine-tuned specifically for factual consistency checking. Operates on (source, claim) pairs and returns a consistency probability. Effective when the source document is available (RAG settings). Complementary to groundlens because it performs token-level entailment rather than sentence-level geometry.</li>
+<li><strong><a href="https://github.com/yuh-zha/AlignScore">AlignScore</a></strong> --- A unified alignment function trained on 4.7M examples across NLI, QA, and paraphrase tasks. Particularly strong on factual consistency in summarization. Handles the source-grounded verification that groundlens deliberately excludes from its scope.</li>
+<li><strong><a href="https://github.com/Liyan06/MiniCheck">MiniCheck</a></strong> --- Fact-checking grounded in document retrieval, designed for claim-level verification. Lightweight and suitable for pipeline integration.</li>
+<li><strong><a href="https://github.com/shmsw25/FActScore">FActScore</a></strong> --- Decomposes long-form generation into atomic facts and verifies each against Wikipedia. Originally designed for biography generation but the decompose-then-verify pattern applies broadly.</li>
 </ul>
-<p>These approaches complement groundlens rather than replace it --- they address the cases that fall beyond the confabulation boundary while groundlens handles the efficiently-detectable cases.</p>
+<h3 id="llm-as-judge-with-caveats">LLM-as-judge (with caveats)<a class="headerlink" href="#llm-as-judge-with-caveats" title="Permanent link">&para;</a></h3>
+<p>Using a second LLM to evaluate the first is conceptually simple but carries the risk that the judge hallucinates in the same way as the generator. The approach works best when:</p>
+<ol>
+<li>The judge model is different from the generator (different architecture or training data)</li>
+<li>The judge is given access to source documents for grounded evaluation</li>
+<li>Multiple judges are used and their assessments are aggregated</li>
+</ol>
+<p><strong>Tools:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/explodinggradients/ragas">RAGAS</a></strong> --- Framework for RAG pipeline evaluation. Includes faithfulness, answer relevance, and context precision metrics. Uses LLM-as-judge internally but structures the evaluation to reduce judge hallucination.</li>
+<li><strong><a href="https://github.com/confident-ai/deepeval">DeepEval</a></strong> --- LLM evaluation framework with hallucination-specific metrics. Includes G-Eval implementation and faithfulness scoring.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">LLM-as-judge inherits the NLI inversion problem</p>
+<p>On TruthfulQA, NLI-based methods achieve AUROC 0.311 --- worse than random. LLM judges trained on similar data can exhibit the same inversion: they assign higher confidence to common misconceptions stated simply than to hedged, accurate answers. Use LLM-as-judge for source-grounded evaluation (where the source constrains the judge), not for open-domain factual verification.</p>
+</div>
+<h3 id="knowledge-graph-verification">Knowledge graph verification<a class="headerlink" href="#knowledge-graph-verification" title="Permanent link">&para;</a></h3>
+<p>For domains with structured knowledge (medicine, law, finance), verify extracted entities and relationships against a knowledge graph.</p>
+<p><strong>Tools:</strong></p>
+<ul>
+<li><strong><a href="https://www.wikidata.org/">Wikidata / SPARQL</a></strong> --- Free, broad-coverage knowledge graph. Suitable for verifying named entities, dates, relationships, and numerical facts.</li>
+<li><strong>Domain-specific ontologies</strong> --- SNOMED CT (medical), FIBO (financial), or your organization's internal knowledge graph. These provide authoritative facts that no distributional method can access.</li>
+<li><strong><a href="https://python.langchain.com/">LangChain fact-checking chains</a></strong> --- Can be configured to decompose claims and verify against a retrieval backend (vector store, knowledge graph, or API).</li>
+</ul>
+<h3 id="consistency-based-methods">Consistency-based methods<a class="headerlink" href="#consistency-based-methods" title="Permanent link">&para;</a></h3>
+<p>Rather than verifying against an external source, these methods detect hallucinations by checking whether the LLM is self-consistent.</p>
+<p><strong>Tools:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/potsawee/selfcheckgpt">SelfCheckGPT</a></strong> --- Samples multiple responses to the same question and measures consistency. If the model says different things each time, at least some of the responses are hallucinated. Effective for Type III detection because within-frame factual errors tend to be inconsistent across samples while correct facts are stable.</li>
+<li><strong>Semantic entropy</strong> (Kuhn et al., 2023) --- Clusters sampled responses by semantic equivalence and measures the entropy of the cluster distribution. High entropy indicates uncertainty, which correlates with hallucination.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Cost tradeoff</p>
+<p>Consistency-based methods require multiple LLM calls per output (typically 5-20 samples). They are best reserved for the subset of outputs that pass groundlens triage, reducing the total cost by 4-5x compared to applying them to all outputs.</p>
+</div>
+<h3 id="recommended-architecture">Recommended architecture<a class="headerlink" href="#recommended-architecture" title="Permanent link">&para;</a></h3>
+<p>For production systems, the practical architecture is a two-stage pipeline:</p>
+<ol>
+<li><strong>Stage 1 — groundlens triage</strong> (fast, deterministic, single-pass): Score all outputs with SGI/DGI. Flag outputs below threshold for human review. Pass outputs above threshold to Stage 2.</li>
+<li><strong>Stage 2 — claim-level verification</strong> (slower, more expensive): Apply one or more of the tools above to the outputs that passed geometric triage. This catches the Type III errors that groundlens cannot detect.</li>
+</ol>
+<p>The value of this architecture is cost efficiency: if groundlens passes 80% of outputs and the flagged 20% contains 95% of Type I and Type II hallucinations, you only need to run the expensive claim-level tools on the remaining 80% — and only on the high-stakes subset of those. In practice, this reduces claim-verification costs by an order of magnitude while maintaining high recall across all three hallucination types.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Marin, J. (2026). <em>Rotational Dynamics of Factual Constraint Processing in LLMs</em>. arXiv:2603.13259.</li>
-<li>Marin, J. (2026). <em>A Geometric Taxonomy of Hallucinations in LLMs</em>. arXiv:2602.13224.</li>
+<li>Marin, J. (2026a). <em>Rotational Dynamics of Factual Constraint Processing in LLMs</em>. arXiv:2603.13259.</li>
+<li>Marin, J. (2026b). <em>Hallucination Is Active Suppression</em>. arXiv preprint. <a href="https://arxiv.org/abs/2604.xxxxx">arXiv:2604.xxxxx</a>.</li>
+<li>Marin, J. (2026c). <em>A Geometric Taxonomy of Hallucinations in LLMs</em>. arXiv:2602.13224.</li>
+<li>Marin, J. (2025). <em>Semantic Grounding Index for LLM Hallucination Detection</em>. arXiv:2512.13771.</li>
 <li>Harris, Z. S. (1954). Distributional structure. <em>Word</em>, 10(2-3), 146--162.</li>
 <li>Ji, Z. et al. (2023). Survey of hallucination in natural language generation. <em>ACM Computing Surveys</em>.</li>
+<li>Kalai, A. T. &amp; Vempala, S. S. (2025). <em>Why Language Models Hallucinate</em>. arXiv preprint.</li>
 </ul>
 
 

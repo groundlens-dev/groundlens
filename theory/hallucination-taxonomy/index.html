@@ -2254,6 +2254,11 @@
 <p>groundlens is built on a geometric taxonomy that classifies hallucinations by their <strong>relation to the plausibility region</strong> of grounded responses in embedding space. The taxonomy determines which types are detectable by angular geometry and which are not — and the predictions hold empirically.</p>
 <p><strong>Paper:</strong> Marin, J. (2026). <em>A Geometric Taxonomy of Hallucination in Large Language Models.</em> <a href="https://arxiv.org/abs/2602.13224">arXiv:2602.13224</a></p>
 <hr />
+<figure>
+  <img src="../images/hallucination-taxonomy-sphere.svg" alt="Geometric taxonomy of LLM hallucinations on the unit hypersphere, showing question q, context c, plausibility region P_q, and the three hallucination types" width="100%">
+  <figcaption>The three hallucination types on the unit hypersphere S<sup>d−1</sup>. Grounded responses fall inside the plausibility region 𝒫<sub>q</sub>. Type I (unfaithfulness) stays near the question; Type II (confabulation) deviates from the grounded displacement direction; Type III (within-frame error) lands inside 𝒫<sub>q</sub> and is geometrically indistinguishable from a correct answer.</figcaption>
+</figure>
+
 <h2 id="the-three-types">The three types<a class="headerlink" href="#the-three-types" title="Permanent link">&para;</a></h2>
 <h3 id="type-i-unfaithfulness-query-proximate">Type I — Unfaithfulness (query-proximate)<a class="headerlink" href="#type-i-unfaithfulness-query-proximate" title="Permanent link">&para;</a></h3>
 <p><strong>What happens:</strong> The response ignores the provided source context and stays anchored to the question. In a RAG system, this means the model answered from parametric memory instead of from the retrieved document.</p>
@@ -2452,7 +2457,7 @@
 <p><strong>The value is in what you don't need to review.</strong> If groundlens passes 80% of outputs and flags 20%, and the flagged set contains 95% of the actual hallucinations, you have reduced your human review workload by 4x while catching nearly all problems.</p>
 </li>
 <li>
-<p><strong>Complement with domain knowledge.</strong> For high-stakes applications where within-frame factual errors matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification.</p>
+<p><strong>Complement with domain knowledge.</strong> For high-stakes applications where within-frame factual errors matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification. See <a href="../confabulation-boundary/#complementary-tools-for-type-iii-detection">Complementary Tools for Type III Detection</a> for concrete tool recommendations.</p>
 </li>
 <li>
 <p><strong>Calibrate per domain.</strong> Generic DGI achieves AUROC ~0.76. Domain-specific calibration with 20–100 verified pairs reaches 0.90–0.99. The improvement is largest in declarative-knowledge domains where <span class="arithmatex">\(\hat{\mu}\)</span> is well-defined.</p>

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrBlack" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#334155" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrTeal" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#0d9488" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#ea580c" stroke-width="1.2"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <!-- ===== LEFT PANEL: SGI ===== -->
+  <rect x="15" y="10" width="340" height="375" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="185" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">SGI — Distance Ratio</text>
+  <text x="185" y="58" text-anchor="middle" font-size="11" fill="#64748b">When context is available</text>
+
+  <!-- Points -->
+  <!-- q -->
+  <circle cx="80" cy="280" r="8" fill="#1e40af" filter="url(#shadow)"/>
+  <text x="58" y="303" font-size="14" font-weight="600" fill="#1e40af">φ(q)</text>
+
+  <!-- r (response) -->
+  <circle cx="220" cy="180" r="8" fill="#059669" filter="url(#shadow)"/>
+  <text x="230" y="175" font-size="14" font-weight="600" fill="#059669">φ(r)</text>
+
+  <!-- ctx -->
+  <circle cx="300" cy="120" r="8" fill="#0e7490" filter="url(#shadow)"/>
+  <text x="312" y="118" font-size="14" font-weight="600" fill="#0e7490">φ(ctx)</text>
+
+  <!-- Distance q → r -->
+  <line x1="88" y1="275" x2="212" y2="185" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrBlue)"/>
+  <text x="125" y="218" font-size="12" font-weight="600" fill="#2563eb" transform="rotate(-33, 125, 218)">‖r − q‖</text>
+
+  <!-- Distance ctx → r -->
+  <line x1="293" y1="126" x2="228" y2="175" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrTeal)"/>
+  <text x="270" y="160" font-size="12" font-weight="600" fill="#0d9488">‖r − ctx‖</text>
+
+  <!-- Formula box -->
+  <rect x="50" y="320" width="270" height="50" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#shadow)"/>
+  <text x="185" y="342" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">SGI = ‖r − q‖ / ‖r − ctx‖</text>
+  <text x="185" y="360" text-anchor="middle" font-size="11" fill="#64748b">SGI &gt; 1 → grounded  |  SGI &lt; 1 → flagged</text>
+
+  <!-- ===== RIGHT PANEL: DGI ===== -->
+  <rect x="370" y="10" width="340" height="375" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="540" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">DGI — Displacement Direction</text>
+  <text x="540" y="58" text-anchor="middle" font-size="11" fill="#64748b">When no context is available</text>
+
+  <!-- q point -->
+  <circle cx="430" cy="270" r="8" fill="#1e40af" filter="url(#shadow)"/>
+  <text x="408" y="293" font-size="14" font-weight="600" fill="#1e40af">φ(q)</text>
+
+  <!-- Reference direction μ̂ (dashed, shows the "grounded direction") -->
+  <line x1="438" y1="266" x2="600" y2="145" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="7,4" marker-end="url(#arrBlack)" opacity="0.5"/>
+  <text x="545" y="185" font-size="13" font-weight="600" fill="#16a34a" transform="rotate(-35, 545, 185)">μ̂ (grounded)</text>
+
+  <!-- Grounded displacement (close to μ̂) -->
+  <line x1="438" y1="266" x2="575" y2="165" stroke="#059669" stroke-width="2" marker-end="url(#arrTeal)"/>
+  <circle cx="580" cy="162" r="6" fill="#059669"/>
+  <text x="588" y="158" font-size="11" font-weight="600" fill="#059669">r<tspan baseline-shift="sub" font-size="8">grounded</tspan></text>
+
+  <!-- Hallucinated displacement (away from μ̂) -->
+  <line x1="438" y1="266" x2="530" y2="310" stroke="#ea580c" stroke-width="2" marker-end="url(#arrOrange)"/>
+  <circle cx="535" cy="313" r="6" fill="#ea580c"/>
+  <text x="545" y="318" font-size="11" font-weight="600" fill="#ea580c">r<tspan baseline-shift="sub" font-size="8">hallucinated</tspan></text>
+
+  <!-- Angle arcs -->
+  <!-- Small angle for grounded -->
+  <path d="M 460,255 Q 468,250 472,245" fill="none" stroke="#059669" stroke-width="1.2"/>
+  <text x="478" y="248" font-size="10" fill="#059669">small θ</text>
+
+  <!-- Large angle for hallucinated -->
+  <path d="M 460,275 Q 470,285 475,290" fill="none" stroke="#ea580c" stroke-width="1.2"/>
+  <text x="482" y="295" font-size="10" fill="#ea580c">large θ</text>
+
+  <!-- Formula box -->
+  <rect x="405" y="320" width="270" height="50" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#shadow)"/>
+  <text x="540" y="342" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">DGI = δ̂(q,r) · μ̂</text>
+  <text x="540" y="360" text-anchor="middle" font-size="11" fill="#64748b">DGI &gt; 0.3 → aligned  |  DGI &lt; 0.3 → flagged</text>
+</svg>
