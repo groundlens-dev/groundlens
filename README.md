@@ -314,10 +314,13 @@ groundlens implements the methods described in three research papers:
    Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in Large Language Models.*
    [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
 
-3. **Confabulation Benchmark**
+3. **Mechanistic Interpretability**
    Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in Large Language Models.*
    [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
 
+4. **Hallucination Benchmark**
+https://github.com/groundlens-dev/grounding-benchmark/blob/4abf98ec5d2f846850a44f713115323659c2a793/paper/A_Methodology_for_Building_Human_Confabulated_Hallucination_Benchmarks.pdf
+   
 ## Security
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting, scope, and response timelines.
