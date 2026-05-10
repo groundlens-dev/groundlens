@@ -11,7 +11,6 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![codecov](https://img.shields.io/codecov/c/github/groundlens-dev/groundlens?style=flat-square&logo=codecov)](https://codecov.io/gh/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![arXiv](https://img.shields.io/badge/arXiv-2603.13259-b31b1b?style=flat-square&logo=arxiv)](https://arxiv.org/abs/2603.13259)
 [![Version](https://img.shields.io/badge/version-2026.4.22-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 
 [Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Vision](VISION.md) | [Contributing](CONTRIBUTING.md)
