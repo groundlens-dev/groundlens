@@ -194,7 +194,7 @@ addopts = [
 
 [tool.coverage.run]
 source = ["groundlens"]
-omit = ["*/cli/*", "*/data/*"]
+omit = ["*/data/*"]
 
 [tool.coverage.report]
 exclude_lines = [

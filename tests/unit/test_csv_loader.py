@@ -162,3 +162,38 @@ class TestLoadUserCsvErrors:
         )
         with pytest.raises(ValueError, match="No valid pairs"):
             _load_user_csv(str(csv_file))
+
+
+# ---------------------------------------------------------------------------
+# Bundled CSV (load_reference_pairs with None)
+# ---------------------------------------------------------------------------
+
+
+class TestLoadBundledCsv:
+    """Test loading the bundled reference dataset."""
+
+    def test_bundled_loads_nonempty(self) -> None:
+        from groundlens._internal.csv_loader import load_reference_pairs
+
+        pairs = load_reference_pairs(None)
+        assert len(pairs) > 0
+        assert isinstance(pairs[0], tuple)
+        assert len(pairs[0]) == 2
+
+    def test_bundled_pairs_are_strings(self) -> None:
+        from groundlens._internal.csv_loader import load_reference_pairs
+
+        pairs = load_reference_pairs(None)
+        for q, r in pairs[:5]:
+            assert isinstance(q, str)
+            assert isinstance(r, str)
+            assert len(q) > 0
+            assert len(r) > 0
+
+    def test_load_reference_pairs_dispatches_to_user_csv(self, tmp_path: Path) -> None:
+        from groundlens._internal.csv_loader import load_reference_pairs
+
+        csv_file = tmp_path / "user.csv"
+        csv_file.write_text("question,response\nQ?,A.\n", encoding="utf-8")
+        pairs = load_reference_pairs(str(csv_file))
+        assert pairs == [("Q?", "A.")]
