@@ -1,7 +1,7 @@
 site_name: groundlens
 site_description: Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
 site_author: Javier Marin
-site_url: https://groundlens.dev/
+site_url: https://docs.groundlens.dev/
 repo_url: https://github.com/groundlens-dev/groundlens
 repo_name: groundlens-dev/groundlens
 
