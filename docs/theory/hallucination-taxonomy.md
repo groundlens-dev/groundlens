@@ -8,6 +8,11 @@ groundlens is built on a geometric taxonomy that classifies hallucinations by th
 
 ---
 
+<figure>
+  <img src="../images/hallucination-taxonomy-sphere.svg" alt="Geometric taxonomy of LLM hallucinations on the unit hypersphere, showing question q, context c, plausibility region P_q, and the three hallucination types" width="100%">
+  <figcaption>The three hallucination types on the unit hypersphere S<sup>d−1</sup>. Grounded responses fall inside the plausibility region 𝒫<sub>q</sub>. Type I (unfaithfulness) stays near the question; Type II (confabulation) deviates from the grounded displacement direction; Type III (within-frame error) lands inside 𝒫<sub>q</sub> and is geometrically indistinguishable from a correct answer.</figcaption>
+</figure>
+
 ## The three types
 
 ### Type I — Unfaithfulness (query-proximate)
@@ -153,7 +158,7 @@ The pattern is itself a prediction: $\Gamma$ wins when errors are predominantly 
 
 2. **The value is in what you don't need to review.** If groundlens passes 80% of outputs and flags 20%, and the flagged set contains 95% of the actual hallucinations, you have reduced your human review workload by 4x while catching nearly all problems.
 
-3. **Complement with domain knowledge.** For high-stakes applications where within-frame factual errors matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification.
+3. **Complement with domain knowledge.** For high-stakes applications where within-frame factual errors matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification. See [Complementary Tools for Type III Detection](confabulation-boundary.md#complementary-tools-for-type-iii-detection) for concrete tool recommendations.
 
 4. **Calibrate per domain.** Generic DGI achieves AUROC ~0.76. Domain-specific calibration with 20–100 verified pairs reaches 0.90–0.99. The improvement is largest in declarative-knowledge domains where $\hat{\mu}$ is well-defined.
 

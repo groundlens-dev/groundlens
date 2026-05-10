@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
-[![codecov](https://img.shields.io/codecov/c/github/groundlens-dev/groundlens?style=flat-square&logo=codecov)](https://codecov.io/gh/groundlens-dev/groundlens)
+[![codecov](https://codecov.io/gh/groundlens-dev/groundlens/branch/main/graph/badge.svg)](https://codecov.io/gh/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
 [![Version](https://img.shields.io/badge/version-2026.4.22-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 
@@ -44,7 +44,7 @@
 | **Improve accuracy for my domain** | [Domain calibration](#domain-calibration) · [Calibration guide](https://docs.groundlens.dev/guides/domain-calibration/) |
 | **Comply with the EU AI Act** | [EU AI Act guide](https://docs.groundlens.dev/guides/eu-ai-act/) |
 | **Understand the math** | [How it works](https://docs.groundlens.dev/concepts/how-it-works/) · [Research papers](#research) |
-| **Understand what it can and cannot detect** | [Hallucination taxonomy](#what-groundlens-detects-and-what-it-cannot) |
+| **Understand what it can and cannot detect** | [Hallucination taxonomy](#taxonomy-of-llm-hallucinations) |
 | **Check my environment is set up correctly** | [`groundlens doctor`](#cli) |
 | **Contribute** | [CONTRIBUTING.md](CONTRIBUTING.md) · [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md) |
 
@@ -205,9 +205,27 @@ else:
     print(response.text)
 ```
 
+## Taxonomy of LLM hallucinations
+
+Not all hallucinations are the same. groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/abs/2602.13224)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
+
+| Type | What happens | Example | Detection |
+|---|---|---|---|
+| **Type I — Unfaithfulness** | Response ignores the provided source and defaults to the question | RAG system returns an answer from memory instead of from the retrieved document | **SGI** (distance ratio) |
+| **Type II — Confabulation** | Response invents content outside the topic's vocabulary | Asked about CRISPR gene editing, the model describes protein-folding correction instead | **DGI** (displacement direction) |
+| **Type III — Within-frame error** | Response uses the right vocabulary and structure but gets the facts wrong | "The capital of Australia is Canberra" vs. "The capital of Australia is Sydney" — same frame, wrong city | **Undetectable by geometry** |
+
+**Why Type III is undetectable:** Sentence embeddings encode distributional similarity (vocabulary, syntax, co-occurrence), not truth value. Two responses that share the same words, entities, and syntactic frame land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it is a property of the distributional hypothesis (Harris, 1954) that constrains every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers over truthful ones).
+
+**What this means in practice:** groundlens is **verification triage** — it catches the hallucination types that leave geometric traces (Types I and II), which are the most common and most damaging in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with claim-level fact-checking tools on the outputs that pass geometric verification. See [Complementary Tools for Type III](https://docs.groundlens.dev/theory/confabulation-boundary/#complementary-tools-for-type-iii-detection).
+
 ## Scoring methods
 
-### SGI (Semantic Grounding Index)
+Each scoring method targets a specific hallucination type from the taxonomy above.
+
+### SGI (Semantic Grounding Index) — detects Type I
+
+When context is available, SGI measures whether the response engaged with the source or stayed anchored to the question:
 
 ```
 SGI = dist(phi(response), phi(question)) / dist(phi(response), phi(context))
@@ -217,9 +235,11 @@ SGI = dist(phi(response), phi(question)) / dist(phi(response), phi(context))
 |---|---|
 | SGI > 1.20 | Strong context engagement (pass) |
 | 0.95 < SGI < 1.20 | Partial engagement (review recommended) |
-| SGI < 0.95 | Weak engagement (flagged) |
+| SGI < 0.95 | Weak engagement (flagged — possible Type I) |
 
-### DGI (Directional Grounding Index)
+### DGI (Directional Grounding Index) — detects Type II
+
+When no context is available, DGI checks whether the question-to-response displacement aligns with a learned "grounded direction":
 
 ```
 delta = phi(response) - phi(question)
@@ -229,24 +249,8 @@ DGI = dot(delta / ||delta||, mu_hat)
 | Score | Interpretation |
 |---|---|
 | DGI > 0.30 | Aligns with grounded patterns (pass) |
-| 0.00 < DGI < 0.30 | Weak alignment (flagged) |
+| 0.00 < DGI < 0.30 | Weak alignment (flagged — possible Type II) |
 | DGI < 0.00 | Opposes grounded direction (high risk) |
-
-## What groundlens detects (and what it cannot)
-
-Not all hallucinations are the same. groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) that classifies hallucinations by *how they look in embedding space* — which determines whether they can be caught.
-
-| Type | What happens | Example | Detectable? |
-|---|---|---|---|
-| **Type I — Unfaithfulness** | Response ignores the provided source and defaults to the question | RAG system returns an answer from memory instead of from the retrieved document | Yes (SGI) |
-| **Type II — Confabulation** | Response invents content outside the topic's vocabulary | Asked about CRISPR gene editing, the model describes protein-folding correction instead | Yes (DGI) |
-| **Type III — Within-frame error** | Response uses the right vocabulary and structure but gets the facts wrong | "The capital of Australia is Canberra" vs. "The capital of Australia is Sydney" — same frame, wrong city | No |
-
-**Why Type III is undetectable:** Sentence embeddings cluster text by vocabulary and structure, not by truth value. Two responses that share the same words, entities, and syntax land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it affects every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers).
-
-**What this means in practice:** groundlens is a **triage tool**. It catches the types of hallucination that leave geometric traces (Types I and II), which are the most common in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with domain-specific fact-checking on the outputs that pass geometric verification.
-
-> Full details: [Hallucination Taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) | Paper: [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
 
 ## Providers and integrations
 
@@ -300,7 +304,7 @@ See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.
 
 ## Research
 
-groundlens implements the methods described in three peer-reviewed papers:
+groundlens implements the methods described in three research papers:
 
 1. **Semantic Grounding Index (SGI)**
    Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.*
