@@ -210,7 +210,7 @@ else:
 Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
 
 <div align="center">
-  <img src="docs/assets/taxonomy.png" alt="groundlens" width="500">
+  <img src="docs/assets/taxonomy.png" alt="groundlens" width="400">
   <br>
   <sub>Every text maps to a point on the hypersphere S<sup>d−1</sup>. The question <b>q</b> and context <b>c</b> define a geodesic arc. Grounded responses (blue) fall inside the plausibility region 𝒫<sub>q</sub>. <b>Type I</b> (purple) stays near q — the response ignored the context. <b>Type II</b> (red) deviates far from both q and c — invented content. <b>Type III</b> (pink) lands inside 𝒫<sub>q</sub> alongside the correct answer — same vocabulary and structure, wrong facts, geometrically indistinguishable.</sub>
 </div>
@@ -350,7 +350,7 @@ pytest tests/unit/    # run fast tests
 
 ## About
 
-groundlens is built and maintained by [Javier Marin](https://jmarin.info) -- an engineer who has reinvented himself more times than most people change jobs. The math comes from engineering, the skepticism from regulated industries, and the stubbornness from experience. Read the [origin story](VISION.md#origin).
+Groundlens is built and maintained by [Javier Marin](https://jmarin.info) -- an engineer who has reinvented himself more times than most people change jobs. The math comes from engineering, the skepticism from regulated industries, and the stubbornness from experience. Read the [origin story](VISION.md#origin).
 
 ## License
 
