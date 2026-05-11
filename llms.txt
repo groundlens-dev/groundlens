@@ -1,0 +1,57 @@
+# groundlens
+
+> Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+
+groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), not a second LLM.
+
+## Core Concepts
+
+- SGI (Semantic Grounding Index): measures whether a response engaged with provided source context using distance ratios. SGI > 1.0 means context engagement. SGI < 0.95 means the response defaulted to the question.
+- DGI (Directional Grounding Index): evaluates response grounding without context, using directional alignment with a learned reference direction. DGI > 0.30 means grounded. DGI < 0.00 means high hallucination risk.
+- Hallucination taxonomy: Type I (unfaithfulness, detectable by SGI), Type II (confabulation, detectable by DGI), Type III (within-frame factual error, undetectable by geometry).
+
+## Documentation
+
+- [Installation](https://docs.groundlens.dev/getting-started/installation/)
+- [Quickstart](https://docs.groundlens.dev/getting-started/quickstart/)
+- [CLI Reference](https://docs.groundlens.dev/getting-started/cli/)
+- [How It Works](https://docs.groundlens.dev/concepts/how-it-works/)
+- [SGI: Semantic Grounding Index](https://docs.groundlens.dev/concepts/sgi/)
+- [DGI: Directional Grounding Index](https://docs.groundlens.dev/concepts/dgi/)
+- [Calibration](https://docs.groundlens.dev/concepts/calibration/)
+- [Hallucination Taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/)
+- [Embedding Geometry](https://docs.groundlens.dev/theory/embedding-geometry/)
+- [SGI Mathematics](https://docs.groundlens.dev/theory/sgi-mathematics/)
+- [DGI Mathematics](https://docs.groundlens.dev/theory/dgi-mathematics/)
+- [Confabulation Boundary](https://docs.groundlens.dev/theory/confabulation-boundary/)
+- [RAG Verification Guide](https://docs.groundlens.dev/guides/rag-verification/)
+- [Domain Calibration Guide](https://docs.groundlens.dev/guides/domain-calibration/)
+- [Batch Evaluation Guide](https://docs.groundlens.dev/guides/batch-evaluation/)
+- [EU AI Act Compliance](https://docs.groundlens.dev/guides/eu-ai-act/)
+- [API Reference](https://docs.groundlens.dev/api/)
+
+## Providers
+
+- [OpenAI](https://docs.groundlens.dev/providers/openai/)
+- [Anthropic](https://docs.groundlens.dev/providers/anthropic/)
+- [Google Gemini](https://docs.groundlens.dev/providers/google/)
+
+## Integrations
+
+- [LangChain](https://docs.groundlens.dev/integrations/langchain/)
+- [CrewAI](https://docs.groundlens.dev/integrations/crewai/)
+- [Semantic Kernel](https://docs.groundlens.dev/integrations/semantic-kernel/)
+- [AutoGen](https://docs.groundlens.dev/integrations/autogen/)
+
+## Research
+
+- [SGI paper (arXiv:2512.13771)](https://arxiv.org/abs/2512.13771)
+- [Taxonomy paper (arXiv:2602.13224v3)](https://arxiv.org/pdf/2602.13224v3)
+- [Mechanistic interpretability paper (arXiv:2603.13259)](https://arxiv.org/abs/2603.13259)
+
+## Links
+
+- [GitHub](https://github.com/groundlens-dev/groundlens)
+- [PyPI](https://pypi.org/project/groundlens/)
+- [Documentation](https://docs.groundlens.dev)
+- [Website](https://groundlens.dev)
