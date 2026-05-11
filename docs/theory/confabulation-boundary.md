@@ -15,7 +15,7 @@ However, this detection mechanism has a fundamental boundary: it relies on the *
 
 ## Types of Hallucinations
 
-The geometric taxonomy (arXiv:2602.13224) classifies hallucinations by their geometric signature:
+The geometric taxonomy (arXiv:2602.13224v3) classifies hallucinations by their geometric signature:
 
 ### Type 1: Divergent Hallucinations
 
@@ -253,7 +253,7 @@ The value of this architecture is cost efficiency: if groundlens passes 80% of o
 
 - Marin, J. (2026a). *Rotational Dynamics of Factual Constraint Processing in LLMs*. arXiv:2603.13259.
 - Marin, J. (2026b). *Hallucination Is Active Suppression*. arXiv preprint. [arXiv:2604.xxxxx](https://arxiv.org/abs/2604.xxxxx).
-- Marin, J. (2026c). *A Geometric Taxonomy of Hallucinations in LLMs*. arXiv:2602.13224.
+- Marin, J. (2026c). *A Geometric Taxonomy of Hallucinations in LLMs*. arXiv:2602.13224v3.
 - Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection*. arXiv:2512.13771.
 - Harris, Z. S. (1954). Distributional structure. *Word*, 10(2-3), 146--162.
 - Ji, Z. et al. (2023). Survey of hallucination in natural language generation. *ACM Computing Surveys*.

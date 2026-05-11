@@ -2,7 +2,7 @@
 
 The Directional Grounding Index (DGI) evaluates whether an LLM response follows the characteristic semantic displacement pattern of grounded responses --- **without requiring any source context**. It needs only a question and a response, plus calibration data defining the "grounded direction."
 
-**Paper**: Marin (2026). *A Geometric Taxonomy of Hallucinations in LLMs*. [arXiv:2602.13224](https://arxiv.org/abs/2602.13224).
+**Paper**: Marin (2026). *A Geometric Taxonomy of Hallucinations in LLMs*. [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3).
 
 ## Formula
 

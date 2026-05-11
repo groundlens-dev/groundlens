@@ -1,7 +1,7 @@
 """Threshold constants and normalization functions.
 
 All thresholds are derived empirically from the experiments reported
-in arXiv:2512.13771 (SGI) and arXiv:2602.13224 (DGI).
+in arXiv:2512.13771 (SGI) and arXiv:2602.13224v3 (DGI).
 
 These constants define the decision boundaries for flagging LLM outputs
 as potential hallucinations. They are intentionally conservative: the
@@ -27,7 +27,7 @@ SGI_STRONG_PASS: float = 1.20
 SGI_REVIEW: float = 0.95
 """SGI score below which output is flagged for human review. Red zone."""
 
-# ── DGI thresholds (arXiv:2602.13224) ─────────────���──────────────��──────────
+# ── DGI thresholds (arXiv:2602.13224v3) ─────────────���──────────────��──────────
 #
 # DGI = dot(normalize(phi(r) - phi(q)), mu_hat)
 #

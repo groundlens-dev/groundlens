@@ -19,7 +19,7 @@ Key concepts:
 
 References:
     Marin (2025). Semantic Grounding Index. arXiv:2512.13771.
-    Marin (2026). A Geometric Taxonomy of Hallucinations. arXiv:2602.13224.
+    Marin (2026). A Geometric Taxonomy of Hallucinations. arXiv:2602.13224v3.
 """
 
 from __future__ import annotations

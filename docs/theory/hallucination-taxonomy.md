@@ -4,7 +4,7 @@ Not all hallucinations are the same. A response that ignores its source document
 
 groundlens is built on a geometric taxonomy that classifies hallucinations by their **relation to the plausibility region** of grounded responses in embedding space. The taxonomy determines which types are detectable by angular geometry and which are not — and the predictions hold empirically.
 
-**Paper:** Marin, J. (2026). *A Geometric Taxonomy of Hallucination in Large Language Models.* [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+**Paper:** Marin, J. (2026). *A Geometric Taxonomy of Hallucination in Large Language Models.* [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)
 
 ---
 
@@ -204,7 +204,7 @@ The human-confabulated dataset uses provoked confabulation (Berlyne, 1972; Mosco
 
 ## References
 
-- Marin, J. (2026). *A Geometric Taxonomy of Hallucination in Large Language Models.* [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+- Marin, J. (2026). *A Geometric Taxonomy of Hallucination in Large Language Models.* [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)
 - Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.* [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
 - Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in LLMs.* [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
 - Wang, T. & Isola, P. (2020). Understanding contrastive representation learning through alignment and uniformity on the hypersphere. *ICML*.

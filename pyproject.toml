@@ -91,7 +91,7 @@ Repository = "https://github.com/groundlens-dev/groundlens"
 Issues = "https://github.com/groundlens-dev/groundlens/issues"
 Changelog = "https://github.com/groundlens-dev/groundlens/blob/main/CHANGELOG.md"
 "Research (SGI)" = "https://arxiv.org/abs/2512.13771"
-"Research (DGI)" = "https://arxiv.org/abs/2602.13224"
+"Research (DGI)" = "https://arxiv.org/pdf/2602.13224v3"
 "Research (Confabulation Benchmark)" = "https://arxiv.org/abs/2603.13259"
 
 [tool.hatch.build.targets.wheel]

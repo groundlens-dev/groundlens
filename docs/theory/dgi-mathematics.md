@@ -247,7 +247,7 @@ Computing the reference direction requires embedding all calibration pairs, whic
 
 ## References
 
-- Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in LLMs*. arXiv:2602.13224.
+- Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in LLMs*. arXiv:2602.13224v3.
 - Fisher, R. A. (1953). Dispersion on a sphere. *Proceedings of the Royal Society A*, 217, 295--305.
 - Mardia, K. V., & Jupp, P. E. (2000). *Directional Statistics*. John Wiley & Sons.
 - Sra, S. (2012). A short note on parameter approximation for von Mises-Fisher distributions. *Computational Statistics*, 27(1), 177--190.

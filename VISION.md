@@ -71,7 +71,7 @@ The value proposition is verification triage: prioritize what to review, flag wh
 ### Completed
 
 - SGI for grounded hallucination detection in RAG pipelines (arXiv:2512.13771)
-- DGI for context-free hallucination detection via directional analysis (arXiv:2602.13224)
+- DGI for context-free hallucination detection via directional analysis (arXiv:2602.13224v3)
 - Confabulation boundary characterization via rotational dynamics (arXiv:2603.13259)
 - Domain calibration framework achieving AUROC 0.90-0.99
 

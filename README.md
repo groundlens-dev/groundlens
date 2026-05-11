@@ -207,7 +207,7 @@ else:
 
 ## Taxonomy of LLM hallucinations
 
-Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/abs/2602.13224)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
+Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
 
 <div align="center">
   <img src="docs/assets/taxonomy.png" alt="groundlens" width="500">
@@ -321,7 +321,7 @@ groundlens implements the methods described in three research papers:
 
 2. **Directional Grounding Index (DGI)**
    Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in Large Language Models.*
-   [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+   [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)
 
 3. **Mechanistic Interpretability**
    Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in Large Language Models.*

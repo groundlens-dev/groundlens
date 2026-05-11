@@ -67,7 +67,7 @@ No token generation. No prompt engineering. No stochastic sampling. Pure geometr
 | Paper | Index | arXiv |
 |---|---|---|
 | Semantic Grounding Index for LLM Hallucination Detection | SGI | [2512.13771](https://arxiv.org/abs/2512.13771) |
-| A Geometric Taxonomy of Hallucinations in LLMs | DGI | [2602.13224](https://arxiv.org/abs/2602.13224) |
+| A Geometric Taxonomy of Hallucinations in LLMs | DGI | [2602.13224](https://arxiv.org/pdf/2602.13224v3) |
 | Rotational Dynamics of Factual Constraint Processing | Confabulation benchmark | [2603.13259](https://arxiv.org/abs/2603.13259) |
 
 ## Author

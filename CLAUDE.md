@@ -116,7 +116,7 @@ CalVer: `YYYY.M.D`. The version lives in `src/groundlens/_version.py` and in `py
 
 groundlens implements methods from three papers:
 1. SGI — arXiv:2512.13771 (Marin, 2025)
-2. DGI + geometric taxonomy — arXiv:2602.13224 (Marin, 2026)
+2. DGI + geometric taxonomy — arXiv:2602.13224v3 (Marin, 2026)
 3. Confabulation benchmark — arXiv:2603.13259 (Marin, 2026)
 
 If you're modifying SGI/DGI math, check the paper formulas. The code must match the published definitions.
