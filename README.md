@@ -27,7 +27,7 @@
 |---|---|
 | Second-LLM judges are non-deterministic and expensive | Single embedding model (`all-MiniLM-L6-v2`), deterministic output, sub-second latency |
 | Probabilistic scores cannot be audited | Geometric ratios and angular measurements with clear mathematical definitions |
-| Regulatory compliance requires explainability | Every score traces to Euclidean distances and cosine similarities in $\mathbf{R}^n$ (unit hypershpere of query/anwser embeddings space)|
+| Regulatory compliance requires explainability | Every score traces to Euclidean distances and cosine similarities in $\mathbf{R}^n$ (n-dimensional real vector space query/anwser)|
 | One method does not fit all use cases | SGI for RAG/context verification, DGI for context-free chat, `evaluate()` auto-selects |
 
 `SGI`: Semantic Grounding Index | `DGI`: Directional Grounding Index
