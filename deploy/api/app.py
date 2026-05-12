@@ -13,7 +13,9 @@ Endpoints:
 from __future__ import annotations
 
 import time
-from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -30,7 +32,7 @@ _model_load_time: float = 0.0
 
 def _load_model() -> None:
     """Import groundlens to trigger model download + warm the embedding cache."""
-    global _model_ready, _model_load_time  # noqa: PLW0603
+    global _model_ready, _model_load_time
     if _model_ready:
         return
     t0 = time.monotonic()
