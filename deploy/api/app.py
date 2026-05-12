@@ -13,14 +13,15 @@ Endpoints:
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-  from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Model preloading
