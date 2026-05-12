@@ -1,0 +1,5 @@
+groundlens>=2026.4.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+transformers>=4.40.0,<5.0.0
+torch>=2.0.0
