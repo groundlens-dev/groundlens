@@ -46,7 +46,7 @@ class GroundlensLangGraphCallback:
     This callback intercepts LLM calls within a LangGraph execution,
     evaluates each response with groundlens (SGI when tool context is
     available, DGI otherwise), and accumulates results into a structured
-    :class:\`AgentTrace\`.
+    :class:`AgentTrace`.
 
     **Auto context detection:** If a tool call produced output before an
     LLM call, that output is used as grounding context (SGI). If no tool
@@ -54,9 +54,9 @@ class GroundlensLangGraphCallback:
 
     Args:
         groundlens_model: Sentence-transformer model for scoring.
-            Defaults to \`\`"all-MiniLM-L6-v2"\`\`.
+            Defaults to ``"all-MiniLM-L6-v2"``.
         context_key: Metadata key for explicit context override.
-            Defaults to \`\`"context"\`\`.
+            Defaults to ``"context"``.
 
     Example:
         >>> from groundlens.integrations.langgraph import GroundlensLangGraphCallback
@@ -175,7 +175,10 @@ class GroundlensLangGraphCallback:
                 run_id,
             )
         else:
-            logger.debug("on_tool_end tool=%s empty_output run_id=%s", self._last_tool_name, run_id)
+            logger.debug(
+                "on_tool_end tool=%s empty_output run_id=%s",
+                self._last_tool_name, run_id,
+            )
 
     def on_tool_error(
         self,
