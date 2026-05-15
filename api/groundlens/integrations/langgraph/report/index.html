@@ -2333,7 +2333,8 @@ html = trace.to_html("report.html")</p>
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
 <span class="normal"><a href="#__codelineno-0-472">472</a></span>
 <span class="normal"><a href="#__codelineno-0-473">473</a></span>
-<span class="normal"><a href="#__codelineno-0-474">474</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="k">def</span><span class="w"> </span><span class="nf">render_html_report</span><span class="p">(</span><span class="n">trace</span><span class="p">:</span> <span class="n">AgentTrace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="k">def</span><span class="w"> </span><span class="nf">render_html_report</span><span class="p">(</span><span class="n">trace</span><span class="p">:</span> <span class="n">AgentTrace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a complete self-contained HTML triage report.</span>
 </span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">    Args:</span>
@@ -2675,52 +2676,53 @@ html = trace.to_html("report.html")</p>
 </span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="s2">        &lt;div class=&quot;label&quot;&gt;Flagged&lt;/div&gt;</span>
 </span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="s2">    &lt;/div&gt;</span>
 </span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="s2">    &lt;div class=&quot;summary-card&quot;&gt;</span>
-</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="s2">        &lt;div class=&quot;count&quot;&gt;</span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">total_duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&lt;span style=&quot;font-size:0.875rem&quot;&gt;ms&lt;/span&gt;&lt;/div&gt;</span>
-</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="s2">        &lt;div class=&quot;label&quot;&gt;Total Time&lt;/div&gt;</span>
-</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="s2">    &lt;/div&gt;</span>
-</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="s2">&lt;/div&gt;</span>
-</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="s2">&lt;div class=&quot;score-bar&quot;&gt;</span>
-</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="s2">    &lt;div class=&quot;bar-trusted&quot; style=&quot;width:</span><span class="si">{</span><span class="n">trusted_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
-</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="s2">    &lt;div class=&quot;bar-review&quot; style=&quot;width:</span><span class="si">{</span><span class="n">review_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
-</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="s2">    &lt;div class=&quot;bar-flagged&quot; style=&quot;width:</span><span class="si">{</span><span class="n">flagged_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
-</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="s2">&lt;/div&gt;</span>
-</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>
-</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="s2">&lt;div class=&quot;steps-header&quot;&gt;</span>
-</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="s2">    &lt;h2&gt;Execution Timeline&lt;/h2&gt;</span>
-</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="s2">    &lt;div class=&quot;filter-buttons&quot;&gt;</span>
-</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="s2">        &lt;button class=&quot;filter-btn active&quot; onclick=&quot;filterSteps(&#39;all&#39;)&quot;&gt;All&lt;/button&gt;</span>
-</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;flagged&#39;)&quot;&gt;Flagged&lt;/button&gt;</span>
-</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;review&#39;)&quot;&gt;Review&lt;/button&gt;</span>
-</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;trusted&#39;)&quot;&gt;Trusted&lt;/button&gt;</span>
-</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="s2">    &lt;/div&gt;</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="s2">&lt;/div&gt;</span>
-</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>
-</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="s2">&lt;div class=&quot;steps-container&quot;&gt;</span>
-</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="si">{</span><span class="n">steps_html</span><span class="si">}</span>
-</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="s2">&lt;/div&gt;</span>
-</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>
-</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="s2">&lt;div class=&quot;footer&quot;&gt;</span>
-</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="s2">    &lt;span&gt;groundlens v2026.5 · Geometric hallucination triage&lt;/span&gt;</span>
-</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="s2">    &lt;a href=&quot;https://groundlens.dev&quot; target=&quot;_blank&quot;&gt;groundlens.dev&lt;/a&gt;</span>
-</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="s2">&lt;/div&gt;</span>
-</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>
-</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="s2">&lt;script&gt;</span>
-</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="s2">function filterSteps(triage) </span><span class="se">{{</span>
-</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="s2">    document.querySelectorAll(&#39;.filter-btn&#39;).forEach(b =&gt; b.classList.remove(&#39;active&#39;));</span>
-</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="s2">    event.target.classList.add(&#39;active&#39;);</span>
-</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="s2">    document.querySelectorAll(&#39;.step&#39;).forEach(s =&gt; </span><span class="se">{{</span>
-</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="s2">        if (triage === &#39;all&#39; || s.dataset.triage === triage) </span><span class="se">{{</span>
-</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="s2">            s.style.display = &#39;&#39;;</span>
-</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="s2">        </span><span class="se">}}</span><span class="s2"> else </span><span class="se">{{</span>
-</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="s2">            s.style.display = &#39;none&#39;;</span>
-</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="s2">        </span><span class="se">}}</span>
-</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="s2">    </span><span class="se">}}</span><span class="s2">);</span>
-</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="se">}}</span>
-</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="s2">&lt;/script&gt;</span>
-</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>
-</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="s2">&lt;/body&gt;</span>
-</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
+</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="s2">        &lt;div class=&quot;count&quot;&gt;</span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">total_duration_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span>
+</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="s2">        &lt;span style=&quot;font-size:0.875rem&quot;&gt;ms&lt;/span&gt;&lt;/div&gt;</span>
+</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="s2">        &lt;div class=&quot;label&quot;&gt;Total Time&lt;/div&gt;</span>
+</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="s2">    &lt;/div&gt;</span>
+</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="s2">&lt;/div&gt;</span>
+</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>
+</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="s2">&lt;div class=&quot;score-bar&quot;&gt;</span>
+</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="s2">    &lt;div class=&quot;bar-trusted&quot; style=&quot;width:</span><span class="si">{</span><span class="n">trusted_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
+</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="s2">    &lt;div class=&quot;bar-review&quot; style=&quot;width:</span><span class="si">{</span><span class="n">review_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
+</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="s2">    &lt;div class=&quot;bar-flagged&quot; style=&quot;width:</span><span class="si">{</span><span class="n">flagged_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;&gt;&lt;/div&gt;</span>
+</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="s2">&lt;/div&gt;</span>
+</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>
+</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="s2">&lt;div class=&quot;steps-header&quot;&gt;</span>
+</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="s2">    &lt;h2&gt;Execution Timeline&lt;/h2&gt;</span>
+</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="s2">    &lt;div class=&quot;filter-buttons&quot;&gt;</span>
+</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="s2">        &lt;button class=&quot;filter-btn active&quot; onclick=&quot;filterSteps(&#39;all&#39;)&quot;&gt;All&lt;/button&gt;</span>
+</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;flagged&#39;)&quot;&gt;Flagged&lt;/button&gt;</span>
+</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;review&#39;)&quot;&gt;Review&lt;/button&gt;</span>
+</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="s2">        &lt;button class=&quot;filter-btn&quot; onclick=&quot;filterSteps(&#39;trusted&#39;)&quot;&gt;Trusted&lt;/button&gt;</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="s2">    &lt;/div&gt;</span>
+</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="s2">&lt;/div&gt;</span>
+</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>
+</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="s2">&lt;div class=&quot;steps-container&quot;&gt;</span>
+</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="si">{</span><span class="n">steps_html</span><span class="si">}</span>
+</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="s2">&lt;/div&gt;</span>
+</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="s2">&lt;div class=&quot;footer&quot;&gt;</span>
+</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="s2">    &lt;span&gt;groundlens v2026.5 · Geometric hallucination triage&lt;/span&gt;</span>
+</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="s2">    &lt;a href=&quot;https://groundlens.dev&quot; target=&quot;_blank&quot;&gt;groundlens.dev&lt;/a&gt;</span>
+</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="s2">&lt;/div&gt;</span>
+</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>
+</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="s2">&lt;script&gt;</span>
+</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="s2">function filterSteps(triage) </span><span class="se">{{</span>
+</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="s2">    document.querySelectorAll(&#39;.filter-btn&#39;).forEach(b =&gt; b.classList.remove(&#39;active&#39;));</span>
+</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="s2">    event.target.classList.add(&#39;active&#39;);</span>
+</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="s2">    document.querySelectorAll(&#39;.step&#39;).forEach(s =&gt; </span><span class="se">{{</span>
+</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="s2">        if (triage === &#39;all&#39; || s.dataset.triage === triage) </span><span class="se">{{</span>
+</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="s2">            s.style.display = &#39;&#39;;</span>
+</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="s2">        </span><span class="se">}}</span><span class="s2"> else </span><span class="se">{{</span>
+</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="s2">            s.style.display = &#39;none&#39;;</span>
+</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="s2">        </span><span class="se">}}</span>
+</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="s2">    </span><span class="se">}}</span><span class="s2">);</span>
+</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="se">}}</span>
+</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="s2">&lt;/script&gt;</span>
+</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>
+</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="s2">&lt;/body&gt;</span>
+</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
