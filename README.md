@@ -1,8 +1,10 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Logo_groundlens_new-05.png" alt="groundlens" width="250">
+
+# Groundlens
 </div>
 
-# Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+## Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
 
 <div align="center">
 
@@ -21,7 +23,7 @@
 
 Groundlens detects LLM hallucinations using embedding geometry instead of a second LLM. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in an embedding space. The result is a verification signal you can explain in an audit, reproduce on demand, and run in regulated environments.
 
-## Why ***groundlens***?
+## Why groundlens?
 
 | Problem | How groundlens solves it |
 |---|---|
