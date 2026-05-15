@@ -93,6 +93,7 @@ nav:
     - Anthropic: providers/anthropic.md
     - Google Gemini: providers/google.md
   - Integrations:
+    - LangGraph: integrations/langgraph.md
     - LangChain: integrations/langchain.md
     - CrewAI: integrations/crewai.md
     - Semantic Kernel: integrations/semantic-kernel.md
