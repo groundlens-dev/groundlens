@@ -426,7 +426,8 @@ body {{
         <div class="label">Flagged</div>
     </div>
     <div class="summary-card">
-        <div class="count">{trace.total_duration_ms:.0f}<span style="font-size:0.875rem">ms</span></div>
+        <div class="count">{trace.total_duration_ms:.0f}
+        <span style="font-size:0.875rem">ms</span></div>
         <div class="label">Total Time</div>
     </div>
 </div>
