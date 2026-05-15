@@ -2160,14 +2160,12 @@ with visual reports.</p>
 <blockquote>
 <blockquote>
 <p>from langgraph.graph import StateGraph
-    &gt;&gt;&gt; from groundlens.integrations.langgraph import GroundlensLangGraphCallback
-        &gt;&gt;&gt;
-            &gt;&gt;&gt; gl = GroundlensLangGraphCallback()
-                &gt;&gt;&gt; result = app.invoke({"question": "..."}, config={"callbacks": [gl]})
-                    &gt;&gt;&gt;
-                        &gt;&gt;&gt; trace = gl.get_trace()
-                            &gt;&gt;&gt; print(trace.summary())
-                                &gt;&gt;&gt; trace.to_html("report.html")</p>
+from groundlens.integrations.langgraph import GroundlensLangGraphCallback</p>
+<p>gl = GroundlensLangGraphCallback()
+result = app.invoke({"question": "..."}, config={"callbacks": [gl]})</p>
+<p>trace = gl.get_trace()
+print(trace.summary())
+trace.to_html("report.html")</p>
 </blockquote>
 </blockquote>
 </blockquote>
