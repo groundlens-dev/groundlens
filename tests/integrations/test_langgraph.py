@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -15,6 +15,9 @@ from groundlens.integrations.langgraph.trace import (
     _triage_label,
 )
 from groundlens.score import GroundlensScore
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 # ── Fixtures ─────────────────────────────────────────────────────────────────
