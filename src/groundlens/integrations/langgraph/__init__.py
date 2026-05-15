@@ -7,15 +7,15 @@ with visual reports.
 
 Example:
     >>> from langgraph.graph import StateGraph
-        >>> from groundlens.integrations.langgraph import GroundlensLangGraphCallback
-            >>>
-                >>> gl = GroundlensLangGraphCallback()
-                    >>> result = app.invoke({"question": "..."}, config={"callbacks": [gl]})
-                        >>>
-                            >>> trace = gl.get_trace()
-                                >>> print(trace.summary())
-                                    >>> trace.to_html("report.html")
-                                    """
+    >>> from groundlens.integrations.langgraph import GroundlensLangGraphCallback
+    >>>
+    >>> gl = GroundlensLangGraphCallback()
+    >>> result = app.invoke({"question": "..."}, config={"callbacks": [gl]})
+    >>>
+    >>> trace = gl.get_trace()
+    >>> print(trace.summary())
+    >>> trace.to_html("report.html")
+"""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from groundlens.integrations.langgraph.callback import GroundlensLangGraphCallba
 from groundlens.integrations.langgraph.trace import AgentStep, AgentTrace
 
 __all__ = [
-      "AgentStep",
-      "AgentTrace",
-      "GroundlensLangGraphCallback",
+    "AgentStep",
+    "AgentTrace",
+    "GroundlensLangGraphCallback",
 ]
