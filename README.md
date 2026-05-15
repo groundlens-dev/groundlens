@@ -163,9 +163,9 @@ trace.to_json()  # JSON string
 trace.to_dict()  # Python dict
 ```
 
-**How it works:** The callback hooks into LangGraph's lifecycle events. When a tool produces output, it becomes the context for the next LLM call (scored with SGI). When no tool output is available, the LLM call is scored with DGI. Each step gets a triage label: `trusted`, `review`, or `flagged`.
+The callback hooks into LangGraph's lifecycle events. When a tool produces output, it becomes the context for the next LLM call (scored with SGI). When no tool output is available, the LLM call is scored with DGI. Each step gets a triage label: `trusted`, `review`, or `flagged`.
 
-**Why this matters for agentic AI:** In a multi-step agent, a hallucination in step 2 can cascade through steps 3-5 and produce a confidently wrong final answer. Groundlens gives you per-node visibility so you can catch problems where they originate, not after they compound.
+In a multi-step agent, a hallucination in step 2 can cascade through steps 3-5 and produce a confidently wrong final answer. Groundlens gives you per-node visibility so you can catch problems where they originate, not after they compound.
 
 ### evaluate() -- auto-select
 
