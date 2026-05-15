@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Logo_groundlens_new-05.png" alt="groundlens" width="250">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Logo_groundlens_new-05.png" alt="groundlens" width="250">
 
 # Groundlens
 </div>
@@ -31,6 +31,7 @@ Groundlens detects LLM hallucinations using embedding geometry instead of a seco
 | Probabilistic scores cannot be audited | Geometric ratios and angular measurements with clear mathematical definitions |
 | Regulatory compliance requires explainability | Every score traces to Euclidean distances and cosine similarities in $\mathbf{R}^n$ (n-dimensional real vector space query/anwser)|
 | One method does not fit all use cases | SGI for RAG/context verification, DGI for context-free chat, `evaluate()` auto-selects |
+| **Agentic pipelines are black boxes** | **LangGraph callback auto-scores every LLM call with per-node triage and structured traces** |
 
 `SGI`: Semantic Grounding Index | `DGI`: Directional Grounding Index
 
@@ -40,6 +41,7 @@ Groundlens detects LLM hallucinations using embedding geometry instead of a seco
 |---|---|
 | **Verify my RAG pipeline outputs** | [SGI quick start](#sgi----with-context-rag-verification) · [RAG verification guide](https://docs.groundlens.dev/guides/rag-verification/) |
 | **Score chat responses without context** | [DGI quick start](#dgi----without-context) · [DGI deep dive](https://docs.groundlens.dev/concepts/dgi/) |
+| **Score every LLM call in my LangGraph agent** | [LangGraph quick start](#langgraph----agentic-pipeline-scoring) · [LangGraph docs](https://docs.groundlens.dev/integrations/langgraph/) |
 | **Evaluate a batch of outputs** | [Batch evaluation](#batch-evaluation) · [Batch guide](https://docs.groundlens.dev/guides/batch-evaluation/) |
 | **Wrap my LLM provider with auto-scoring** | [Provider guard](#llm-provider-guard) · [Providers docs](https://docs.groundlens.dev/providers/openai/) |
 | **Integrate with LangChain / CrewAI / etc.** | [Integrations](#providers-and-integrations) · [Integration docs](https://docs.groundlens.dev/integrations/langchain/) |
@@ -59,20 +61,21 @@ pip install groundlens
 With LLM provider support:
 
 ```bash
-pip install "groundlens[openai]"       # OpenAI
-pip install "groundlens[anthropic]"    # Anthropic
-pip install "groundlens[google]"       # Google Generative AI
-pip install "groundlens[providers]"    # All providers
+pip install "groundlens[openai]"          # OpenAI
+pip install "groundlens[anthropic]"       # Anthropic
+pip install "groundlens[google]"          # Google Generative AI
+pip install "groundlens[providers]"       # All providers
 ```
 
 With framework integrations:
 
 ```bash
-pip install "groundlens[langchain]"    # LangChain
-pip install "groundlens[crewai]"       # CrewAI
-pip install "groundlens[semantic-kernel]"  # Semantic Kernel
-pip install "groundlens[autogen]"      # AutoGen
-pip install "groundlens[all]"          # Everything
+pip install "groundlens[langgraph]"       # LangGraph (agentic pipelines)
+pip install "groundlens[langchain]"       # LangChain
+pip install "groundlens[crewai]"          # CrewAI
+pip install "groundlens[semantic-kernel]" # Semantic Kernel
+pip install "groundlens[autogen]"         # AutoGen
+pip install "groundlens[all]"             # Everything
 ```
 
 **Requirements:** Python 3.10+, numpy, sentence-transformers.
@@ -92,10 +95,10 @@ result = compute_sgi(
     response="The capital of France is Paris.",
 )
 
-print(result.value)       # 1.23 — ratio of distances
-print(result.normalized)  # 0.61 — mapped to [0, 1]
-print(result.flagged)     # False — above review threshold
-print(result.explanation) # "SGI=1.230 — strong context engagement (pass)"
+print(result.value)        # 1.23 — ratio of distances
+print(result.normalized)   # 0.61 — mapped to [0, 1]
+print(result.flagged)      # False — above review threshold
+print(result.explanation)  # "SGI=1.230 — strong context engagement (pass)"
 ```
 
 **Interpretation:** `SGI > 1.0` means the response is closer to the context than to the question in embedding space. The response engaged with the source material.
@@ -112,9 +115,9 @@ result = compute_dgi(
     response="Seasons are caused by Earth's 23.5-degree axial tilt.",
 )
 
-print(result.value)       # 0.42 — cosine similarity to reference direction
-print(result.normalized)  # 0.71 — mapped to [0, 1]
-print(result.flagged)     # False — above pass threshold (0.30)
+print(result.value)        # 0.42 — cosine similarity to reference direction
+print(result.normalized)   # 0.71 — mapped to [0, 1]
+print(result.flagged)      # False — above pass threshold (0.30)
 ```
 
 **Domain calibration** improves DGI accuracy from AUROC ~0.8 with a basic calibration to 0.90-0.99 with domain-specific calibration:
@@ -128,6 +131,41 @@ result = compute_dgi(
     reference_csv="legal_calibration_pairs.csv",
 )
 ```
+
+### LangGraph -- agentic pipeline scoring
+
+LangGraph agents chain multiple LLM calls through tool-use, retrieval, and reasoning nodes. Groundlens intercepts every LLM call, auto-selects SGI or DGI based on available context, and builds a structured trace with per-node triage labels.
+
+```python
+from langgraph.graph import StateGraph
+from groundlens.integrations.langgraph import GroundlensLangGraphCallback
+
+# Attach the callback to your LangGraph agent
+callback = GroundlensLangGraphCallback()
+app = graph.compile()
+result = app.invoke({"messages": [...]}, config={"callbacks": [callback]})
+
+# Get the structured trace
+trace = callback.get_trace()
+print(trace.summary())
+# "3 steps | 2 trusted, 1 flagged | retriever [SGI=1.30 trusted], ..."
+
+# Triage: which nodes need review?
+for step in trace.steps:
+    if step.triage == "flagged":
+        print(f"  {step.node_name}: {step.method}={step.score.value:.3f}")
+
+# Export an interactive HTML report
+trace.to_html(path="triage_report.html")
+
+# Or get structured data for logging
+trace.to_json()  # JSON string
+trace.to_dict()  # Python dict
+```
+
+**How it works:** The callback hooks into LangGraph's lifecycle events. When a tool produces output, it becomes the context for the next LLM call (scored with SGI). When no tool output is available, the LLM call is scored with DGI. Each step gets a triage label: `trusted`, `review`, or `flagged`.
+
+**Why this matters for agentic AI:** In a multi-step agent, a hallucination in step 2 can cascade through steps 3-5 and produce a confidently wrong final answer. Groundlens gives you per-node visibility so you can catch problems where they originate, not after they compound.
 
 ### evaluate() -- auto-select
 
@@ -212,9 +250,9 @@ else:
 Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/taxonomy.png" alt="Hallucination taxonomy on the unit hypersphere" width="480">
-  <br>
-  <sub>Every text maps to a point on the hypersphere S<sup>d−1</sup>. The question <b>q</b> and context <b>c</b> define a geodesic arc. Grounded responses (blue) fall inside the plausibility region 𝒫<sub>q</sub>. <b>Type I</b> (purple) stays near q — the response ignored the context. <b>Type II</b> (red) deviates far from both q and c — invented content. <b>Type III</b> (pink) lands inside 𝒫<sub>q</sub> alongside the correct answer — same vocabulary and structure, wrong facts, geometrically indistinguishable.</sub>
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/taxonomy.png" alt="Hallucination taxonomy on the unit hypersphere" width="480">
+<br>
+<sub>Every text maps to a point on the hypersphere S<sup>d−1</sup>. The question <b>q</b> and context <b>c</b> define a geodesic arc. Grounded responses (blue) fall inside the plausibility region 𝒫<sub>q</sub>. <b>Type I</b> (purple) stays near q — the response ignored the context. <b>Type II</b> (red) deviates far from both q and c — invented content. <b>Type III</b> (pink) lands inside 𝒫<sub>q</sub> alongside the correct answer — same vocabulary and structure, wrong facts, geometrically indistinguishable.</sub>
 </div>
 <br>
 
@@ -267,6 +305,7 @@ $^1$ This score corresponds to a general calibration. In domain-specific calibra
 
 | Component | Install extra | Description |
 |---|---|---|
+| **LangGraph** | **`langgraph`** | **Callback handler for agentic pipelines — auto-scores every LLM call, structured traces, HTML reports** |
 | OpenAI | `openai` | Wraps `openai` SDK with automatic scoring |
 | Anthropic | `anthropic` | Wraps `anthropic` SDK with automatic scoring |
 | Google | `google` | Wraps `google-generativeai` with automatic scoring |
@@ -293,22 +332,23 @@ Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation
 
 ```
 ┌─────────────────────────────────────────────┐
-│            Public API (evaluate)            │
+│             Public API (evaluate)            │
 ├──────────────────┬──────────────────────────┤
-│   SGI (sgi.py)   │      DGI (dgi.py)        │
+│   SGI (sgi.py)   │       DGI (dgi.py)       │
 ├──────────────────┴──────────────────────────┤
-│        _internal (geometry, embeddings)     │
+│       _internal (geometry, embeddings)       │
 ├─────────────────────────────────────────────┤
-│  sentence-transformers (all-MiniLM-L6-v2)   │
+│   sentence-transformers (all-MiniLM-L6-v2)  │
 └─────────────────────────────────────────────┘
-         ▲                           ▲
-         │                           │
-   ┌─────┴──────┐            ┌───────┴──────┐
-   │ Providers  │            │ Integrations │
-   │ (OpenAI,   │            │ (LangChain,  │
-   │  Anthropic,│            │  CrewAI,     │
-   │  Google)   │            │  SK, AutoGen │
-   └────────────┘            └──────────────┘
+       ▲                    ▲
+       │                    │
+┌──────┴──────┐    ┌───────┴──────────┐
+│  Providers  │    │   Integrations   │
+│  (OpenAI,   │    │   (LangGraph,    │
+│  Anthropic, │    │   LangChain,     │
+│  Google)    │    │   CrewAI, SK,    │
+│             │    │   AutoGen)       │
+└─────────────┘    └──────────────────┘
 ```
 
 See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.md](CLAUDE.md) for AI-assisted development guidelines.
@@ -330,8 +370,8 @@ groundlens implements the methods described in three research papers:
    [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
 
 4. **Hallucination Benchmark**
-https://github.com/groundlens-dev/grounding-benchmark/blob/4abf98ec5d2f846850a44f713115323659c2a793/paper/A_Methodology_for_Building_Human_Confabulated_Hallucination_Benchmarks.pdf
-   
+   https://github.com/groundlens-dev/grounding-benchmark/blob/4abf98ec5d2f846850a44f713115323659c2a793/paper/A_Methodology_for_Building_Human_Confabulated_Hallucination_Benchmarks.pdf
+
 ## Security
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting, scope, and response timelines.
@@ -346,8 +386,8 @@ git clone https://github.com/groundlens-dev/groundlens.git
 cd groundlens
 pip install -e ".[dev]"
 pre-commit install
-groundlens doctor     # verify your environment
-pytest tests/unit/    # run fast tests
+groundlens doctor            # verify your environment
+pytest tests/unit/           # run fast tests
 ```
 
 ## About
