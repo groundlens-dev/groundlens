@@ -177,7 +177,8 @@ class GroundlensLangGraphCallback:
         else:
             logger.debug(
                 "on_tool_end tool=%s empty_output run_id=%s",
-                self._last_tool_name, run_id,
+                self._last_tool_name,
+                run_id,
             )
 
     def on_tool_error(
