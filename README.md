@@ -332,11 +332,11 @@ Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation
 
 ```
 ┌─────────────────────────────────────────────┐
-│             Public API (evaluate)            │
+│             Public API (evaluate)           │
 ├──────────────────┬──────────────────────────┤
 │   SGI (sgi.py)   │       DGI (dgi.py)       │
 ├──────────────────┴──────────────────────────┤
-│       _internal (geometry, embeddings)       │
+│       _internal (geometry, embeddings)      │
 ├─────────────────────────────────────────────┤
 │   sentence-transformers (all-MiniLM-L6-v2)  │
 └─────────────────────────────────────────────┘
@@ -361,7 +361,7 @@ groundlens implements the methods described in three research papers:
    Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.*
    [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
 
-2. **Directional Grounding Index (DGI)**
+2. **Halucinations Taxonomy|Directional Grounding Index(DGI)**
    Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in Large Language Models.*
    [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)
 
