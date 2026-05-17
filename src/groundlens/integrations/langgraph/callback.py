@@ -86,12 +86,13 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
         self._start_times: dict[UUID, float] = {}
         self._run_nodes: dict[UUID, str] = {}
 
-        # Tool output accumulator
+        # Tool / chain output accumulator
         self._last_tool_output: str | None = None
         self._last_tool_name: str | None = None
 
         # Current graph node tracking
         self._current_node: str = "unknown"
+        self._node_run_ids: set[UUID] = set()
 
         # The trace being built
         self._trace = AgentTrace()
@@ -111,6 +112,7 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         """Track the current graph node when a chain starts."""
+        serialized = serialized or {}
         tags = tags or []
         metadata = metadata or {}
 
@@ -123,6 +125,7 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
 
         if node:
             self._current_node = node
+            self._node_run_ids.add(run_id)
             logger.debug("on_chain_start node=%s run_id=%s", node, run_id)
 
     def on_chain_end(
@@ -132,7 +135,43 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
         run_id: UUID,
         **kwargs: Any,
     ) -> None:
-        """Handle chain completion."""
+        """Capture node outputs as potential context for the next LLM call.
+
+        In LangGraph pipelines, non-LLM nodes (like retrievers) produce
+        grounding context through state updates rather than tool callbacks.
+        This method captures those outputs so subsequent LLM calls get
+        SGI (grounded) scoring instead of DGI.
+        """
+        is_node = run_id in self._node_run_ids
+        if is_node:
+            self._node_run_ids.discard(run_id)
+
+        if is_node and isinstance(outputs, dict):
+            # Priority: keys that typically carry grounding context
+            for key in ("context", "documents", "retrieved_docs", "search_results"):
+                val = outputs.get(key)
+                if val and isinstance(val, str) and val.strip():
+                    self._last_tool_output = val
+                    logger.debug(
+                        "on_chain_end captured context key=%s len=%d run_id=%s",
+                        key,
+                        len(val),
+                        run_id,
+                    )
+                    return
+
+            # Fallback: any substantial string from a graph node state update
+            for key, val in outputs.items():
+                if isinstance(val, str) and len(val.strip()) > 20:
+                    self._last_tool_output = val
+                    logger.debug(
+                        "on_chain_end captured node output key=%s len=%d run_id=%s",
+                        key,
+                        len(val),
+                        run_id,
+                    )
+                    return
+
         logger.debug("on_chain_end run_id=%s", run_id)
 
     def on_chain_error(
@@ -330,6 +369,7 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
         self._contexts.clear()
         self._start_times.clear()
         self._run_nodes.clear()
+        self._node_run_ids.clear()
         self._last_tool_output = None
         self._last_tool_name = None
         self._current_node = "unknown"
