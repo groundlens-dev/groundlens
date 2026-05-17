@@ -29,6 +29,8 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
+from langchain_core.callbacks import BaseCallbackHandler
+
 from groundlens.evaluate import evaluate
 from groundlens.integrations.langgraph.trace import AgentStep, AgentTrace, _triage_label
 
@@ -40,7 +42,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class GroundlensLangGraphCallback:
+class GroundlensLangGraphCallback(BaseCallbackHandler):
     """LangGraph callback that scores every LLM response and builds a triage trace.
 
     This callback intercepts LLM calls within a LangGraph execution,
@@ -74,6 +76,7 @@ class GroundlensLangGraphCallback:
         groundlens_model: str = "all-MiniLM-L6-v2",
         context_key: str = "context",
     ) -> None:
+        super().__init__()
         self._groundlens_model = groundlens_model
         self._context_key = context_key
 
