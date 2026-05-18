@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> object:  # noqa: ANN401
+def __getattr__(name: str) -> object:
     """Lazy-import GroundlensLangGraphCallback to avoid hard dep on langchain_core."""
     if name == "GroundlensLangGraphCallback":
         from groundlens.integrations.langgraph.callback import GroundlensLangGraphCallback
