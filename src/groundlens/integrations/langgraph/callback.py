@@ -147,25 +147,16 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):
             self._node_run_ids.discard(run_id)
 
         if is_node and isinstance(outputs, dict):
-            # Priority: keys that typically carry grounding context
+            # Only capture keys that typically carry grounding context.
+            # Intermediate LLM outputs (synthesis, summary, etc.) are NOT
+            # grounding context — scoring against them inflates SGI and
+            # hides real hallucination risk.
             for key in ("context", "documents", "retrieved_docs", "search_results"):
                 val = outputs.get(key)
                 if val and isinstance(val, str) and val.strip():
                     self._last_tool_output = val
                     logger.debug(
                         "on_chain_end captured context key=%s len=%d run_id=%s",
-                        key,
-                        len(val),
-                        run_id,
-                    )
-                    return
-
-            # Fallback: any substantial string from a graph node state update
-            for key, val in outputs.items():
-                if isinstance(val, str) and len(val.strip()) > 20:
-                    self._last_tool_output = val
-                    logger.debug(
-                        "on_chain_end captured node output key=%s len=%d run_id=%s",
                         key,
                         len(val),
                         run_id,
