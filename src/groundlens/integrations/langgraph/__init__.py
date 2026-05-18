@@ -19,7 +19,6 @@ Example:
 
 from __future__ import annotations
 
-from groundlens.integrations.langgraph.callback import GroundlensLangGraphCallback
 from groundlens.integrations.langgraph.trace import AgentStep, AgentTrace
 
 __all__ = [
@@ -27,3 +26,13 @@ __all__ = [
     "AgentTrace",
     "GroundlensLangGraphCallback",
 ]
+
+
+def __getattr__(name: str) -> object:  # noqa: ANN401
+    """Lazy-import GroundlensLangGraphCallback to avoid hard dep on langchain_core."""
+    if name == "GroundlensLangGraphCallback":
+        from groundlens.integrations.langgraph.callback import GroundlensLangGraphCallback
+
+        return GroundlensLangGraphCallback
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
