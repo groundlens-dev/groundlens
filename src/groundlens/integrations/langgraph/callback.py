@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class GroundlensLangGraphCallback(BaseCallbackHandler):
+class GroundlensLangGraphCallback(BaseCallbackHandler):  # type: ignore[misc]
     """LangGraph callback that scores every LLM response and builds a triage trace.
 
     This callback intercepts LLM calls within a LangGraph execution,
