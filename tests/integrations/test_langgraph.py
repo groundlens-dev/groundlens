@@ -357,6 +357,9 @@ class TestHtmlReport:
 # ── GroundlensLangGraphCallback ──────────────────────────────────────────────
 
 
+langchain_core = pytest.importorskip("langchain_core")
+
+
 class TestGroundlensLangGraphCallback:
     """Test the callback handler's lifecycle hooks."""
 
