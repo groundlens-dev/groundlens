@@ -147,11 +147,25 @@ class GroundlensLangGraphCallback(BaseCallbackHandler):  # type: ignore[misc]
             self._node_run_ids.discard(run_id)
 
         if is_node and isinstance(outputs, dict):
-            # Only capture keys that typically carry grounding context.
-            # Intermediate LLM outputs (synthesis, summary, etc.) are NOT
-            # grounding context — scoring against them inflates SGI and
-            # hides real hallucination risk.
-            for key in ("context", "documents", "retrieved_docs", "search_results"):
+            # Capture node outputs as context for the NEXT node's LLM call.
+            # Each node's output is legitimate grounding context for the
+            # downstream node — e.g. synthesizer output is context for
+            # the reporter, just as retriever output is context for the
+            # synthesizer.  This is safe because on_chain_end fires AFTER
+            # the node's own LLM call, so a node can never score against
+            # its own output.
+            for key in (
+                "context",
+                "documents",
+                "retrieved_docs",
+                "search_results",
+                "synthesis",
+                "summary",
+                "answer",
+                "response",
+                "output",
+                "result",
+            ):
                 val = outputs.get(key)
                 if val and isinstance(val, str) and val.strip():
                     self._last_tool_output = val

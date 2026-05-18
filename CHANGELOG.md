@@ -5,6 +5,12 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.5.22 -- LangGraph context propagation fix
+
+### Fixed
+
+- **LangGraph reporter always DGI-flagged:** Expanded context capture keys to include intermediate state keys (`synthesis`, `summary`, `answer`, `response`, `output`, `result`). Each node's output is legitimate grounding context for the downstream node — the synthesizer's output is context for the reporter, just as the retriever's output is context for the synthesizer. The previous fix was too aggressive: it prevented SGI inflation by blocking ALL intermediate outputs, but this caused the reporter to always fall back to DGI with near-zero scores on correct answers. Safe because `on_chain_end` fires after the node's own LLM call, so a node can never score against its own output.
+
 ## 2026.5.21 -- LangGraph integration fixes
 
 ### Fixed
