@@ -4,7 +4,7 @@
 # Groundlens
 </div>
 
-## Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+## Triage for LLM outputs. Geometric, deterministic, auditable.
 
 <div align="center">
 
@@ -21,28 +21,31 @@
 
 ---
 
-Groundlens detects LLM hallucinations using embedding geometry instead of a second LLM. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in an embedding space. The result is a verification signal you can explain in an audit, reproduce on demand, and run in regulated environments.
+Most teams evaluate LLM responses with another LLM. That doesn't survive an audit. Groundlens replaces the judge with a geometric scorer: every response gets a deterministic, sub-second grounding score so humans review the bottom percentile, not everything. No second LLM in the loop. Designed for production deployment in regulated industries.
 
-## Why groundlens?
+Groundlens is **triage** — *pay immediate attention to particular priorities*. It does not classify responses as right or wrong. It ranks them by grounding signal, exposes the riskiest first, and stays out of the human reviewer's way for the rest.
 
-| Problem | How groundlens solves it |
+## Why triage instead of an LLM judge?
+
+| Problem with LLM-as-judge | The triage approach |
 |---|---|
-| Second-LLM judges are non-deterministic and expensive | Single embedding model (`all-MiniLM-L6-v2`), deterministic output, sub-second latency |
-| Probabilistic scores cannot be audited | Geometric ratios and angular measurements with clear mathematical definitions |
-| Regulatory compliance requires explainability | Every score traces to Euclidean distances and cosine similarities in $\mathbf{R}^n$ (n-dimensional real vector space query/anwser)|
-| One method does not fit all use cases | SGI for RAG/context verification, DGI for context-free chat, `evaluate()` auto-selects |
-| **Agentic pipelines are black boxes** | **LangGraph callback auto-scores every LLM call with per-node triage and structured traces** |
+| Non-deterministic — same response, different verdict next month | Same input → same score, byte-identical, indefinitely. Reproducible across years for audit. |
+| Circular — the judge LLM has the same failure modes as the LLM it judges | Geometric scorer over embedding space. No second LLM in the loop. |
+| Doesn't scale — $0.05–$0.20 per call × 1M responses/month = $50K–$200K/month just to validate | Sub-second per response, marginal cost ~$0 post-deployment. Score every output, not a sample. |
+| Binary verdicts hide nuance, force arbitrary thresholds | Continuous score for ranking. Review the bottom percentile of your batch — the threshold is operational, not metaphysical. |
+| Comparable historicals are lost when you upgrade the judge | Pure embedding geometry. Method does not change with model upgrades. Time-series analysis stays valid. |
+| Agentic pipelines are black boxes | LangGraph callback auto-scores every LLM call with per-node triage and structured traces. |
 
-`SGI`: Semantic Grounding Index | `DGI`: Directional Grounding Index
+`SGI`: Semantic Grounding Index (with context) | `DGI`: Directional Grounding Index (without context)
 
 ## I want to...
 
 | Goal | Start here |
 |---|---|
-| **Verify my RAG pipeline outputs** | [SGI quick start](#sgi----with-context-rag-verification) · [RAG verification guide](https://docs.groundlens.dev/guides/rag-verification/) |
+| **Triage my RAG pipeline outputs** | [SGI quick start](#sgi----with-context-rag-verification) · [RAG triage guide](https://docs.groundlens.dev/guides/rag-verification/) |
 | **Score chat responses without context** | [DGI quick start](#dgi----without-context) · [DGI deep dive](https://docs.groundlens.dev/concepts/dgi/) |
 | **Score every LLM call in my LangGraph agent** | [LangGraph quick start](#langgraph----agentic-pipeline-scoring) · [LangGraph docs](https://docs.groundlens.dev/integrations/langgraph/) |
-| **Evaluate a batch of outputs** | [Batch evaluation](#batch-evaluation) · [Batch guide](https://docs.groundlens.dev/guides/batch-evaluation/) |
+| **Rank a batch of outputs for review** | [Batch evaluation](#batch-evaluation) · [Batch guide](https://docs.groundlens.dev/guides/batch-evaluation/) |
 | **Wrap my LLM provider with auto-scoring** | [Provider guard](#llm-provider-guard) · [Providers docs](https://docs.groundlens.dev/providers/openai/) |
 | **Integrate with LangChain / CrewAI / etc.** | [Integrations](#providers-and-integrations) · [Integration docs](https://docs.groundlens.dev/integrations/langchain/) |
 | **Improve accuracy for my domain** | [Domain calibration](#domain-calibration) · [Calibration guide](https://docs.groundlens.dev/guides/domain-calibration/) |
@@ -101,7 +104,7 @@ print(result.flagged)      # False — above review threshold
 print(result.explanation)  # "SGI=1.230 — strong context engagement (pass)"
 ```
 
-**Interpretation:** `SGI > 1.0` means the response is closer to the context than to the question in embedding space. The response engaged with the source material.
+**Interpretation:** SGI is a continuous score, not a verdict. Higher values mean the response engaged more with the source material than with the question. Use SGI for ranking and triage; default thresholds (`flagged`, `review`, `trusted`) are provided as interpretation aids but can be tuned to your operating point.
 
 ### DGI -- without context
 
@@ -163,7 +166,7 @@ trace.to_json()  # JSON string
 trace.to_dict()  # Python dict
 ```
 
-The callback hooks into LangGraph's lifecycle events. When a tool produces output, it becomes the context for the next LLM call (scored with SGI). When no tool output is available, the LLM call is scored with DGI. Each step gets a triage label: `trusted`, `review`, or `flagged`.
+The callback hooks into LangGraph's lifecycle events. When a tool produces output, it becomes the context for the next LLM call (scored with SGI). When no tool output is available, the LLM call is scored with DGI. Each step gets a triage label so the reviewer goes straight to the nodes that matter.
 
 In a multi-step agent, a hallucination in step 2 can cascade through steps 3-5 and produce a confidently wrong final answer. Groundlens gives you per-node visibility so you can catch problems where they originate, not after they compound.
 
@@ -202,8 +205,11 @@ items = [
 ]
 
 results = evaluate_batch(items)
-flagged = [r for r in results if r.flagged]
-print(f"{len(flagged)}/{len(results)} flagged for review")
+
+# Triage: sort by SGI, review the bottom percentile
+sorted_results = sorted(results, key=lambda r: r.score.value)
+to_review = sorted_results[:max(1, len(sorted_results) // 20)]   # bottom 5%
+print(f"{len(to_review)}/{len(results)} flagged for human review")
 ```
 
 ### CLI
@@ -240,7 +246,7 @@ response = provider.complete(
 )
 
 if response.groundlens_score and response.groundlens_score.flagged:
-    print("Hallucination risk detected — review recommended.")
+    print("Low-grounding response — surface for human review.")
 else:
     print(response.text)
 ```
@@ -256,7 +262,7 @@ Not all hallucinations are the same. Groundlens is built on a [geometric taxonom
 </div>
 <br>
 
-| Type | What happens | Example | Detection |
+| Type | What happens | Example | Triage signal |
 |---|---|---|---|
 | **Type I — Unfaithfulness** | Response ignores the provided source and defaults to the question | RAG system returns an answer from memory instead of from the retrieved document | **SGI** (distance ratio) |
 | **Type II — Confabulation** | Response invents content outside the topic's vocabulary | Asked about CRISPR gene editing, the model describes protein-folding correction instead | **DGI** (displacement direction) |
@@ -264,13 +270,13 @@ Not all hallucinations are the same. Groundlens is built on a [geometric taxonom
 
 **Why Type III is undetectable:** Sentence embeddings encode distributional similarity (vocabulary, syntax, co-occurrence), not truth value. Two responses that share the same words, entities, and syntactic frame land in the same region of embedding space regardless of which one is correct. This is not a limitation of groundlens — it is a property of the distributional hypothesis (Harris, 1954) that constrains every embedding-based method, including NLI (which *inverts* to AUROC 0.311 on TruthfulQA, actively favoring false answers over truthful ones).
 
-**Implications:** Groundlens is **verification triage** — it detects the hallucination types that leave geometric traces (Types I and II), which are the most common and most damaging in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with claim-level fact-checking tools on the outputs that pass geometric verification. See [Complementary Tools for Type III](https://docs.groundlens.dev/theory/confabulation-boundary/#complementary-tools-for-type-iii-detection).
+**Implications:** Groundlens is **triage** — it ranks the hallucination types that leave geometric traces (Types I and II), which are the most common and most damaging in production. For Type III errors in high-stakes domains (medical, legal, financial), complement groundlens with claim-level fact-checking tools on the outputs that pass geometric triage. See [Complementary Tools for Type III](https://docs.groundlens.dev/theory/confabulation-boundary/#complementary-tools-for-type-iii-detection).
 
 ## Scoring methods
 
 Each scoring method targets a specific hallucination type from the taxonomy above.
 
-### SGI (Semantic Grounding Index) — detects Type I
+### SGI (Semantic Grounding Index) — surfaces Type I
 
 When context is available, SGI measures whether the response engaged with the source or stayed anchored to the question:
 
@@ -280,11 +286,13 @@ SGI = dist(phi(response), phi(question)) / dist(phi(response), phi(context))
 
 | Score | Interpretation |
 |---|---|
-| SGI > 1.20 | Strong context engagement (pass) |
+| SGI > 1.20 | Strong context engagement (high-trust band) |
 | 0.95 < SGI < 1.20 | Partial engagement (review recommended) |
-| SGI < 0.95 | Weak engagement (flagged — possible Type I) |
+| SGI < 0.95 | Weak engagement (low-trust band — possible Type I) |
 
-### DGI (Directional Grounding Index) — detects Type II
+Thresholds are interpretation aids. For production triage, sort by raw `result.value` and surface the bottom percentile of your batch.
+
+### DGI (Directional Grounding Index) — surfaces Type II
 
 When no context is available, DGI checks whether the question-to-response displacement aligns with a learned "grounded direction":
 
@@ -295,9 +303,9 @@ DGI = dot(delta / ||delta||, mu_hat)
 
 | Score | Interpretation |
 |---|---|
-| DGI > 0.30 $^1$ | Aligns with grounded patterns (pass) |
-| 0.00 < DGI < 0.30 | Weak alignment (flagged — possible Type II) |
-| DGI < 0.00 | Opposes grounded direction (high risk) |
+| DGI > 0.30 $^1$ | Aligns with grounded patterns (high-trust band) |
+| 0.00 < DGI < 0.30 | Weak alignment (low-trust band — possible Type II) |
+| DGI < 0.00 | Opposes grounded direction (highest priority for review) |
 
 $^1$ This score corresponds to a general calibration. In domain-specific calibrations the score can vary.
 
@@ -305,7 +313,7 @@ $^1$ This score corresponds to a general calibration. In domain-specific calibra
 
 | Component | Install extra | Description |
 |---|---|---|
-| **LangGraph** | **`langgraph`** | **Callback handler for agentic pipelines — auto-scores every LLM call, structured traces, HTML reports** |
+| **LangGraph** | **`langgraph`** | **Callback handler for agentic pipelines — auto-scores every LLM call, structured traces, HTML triage reports** |
 | OpenAI | `openai` | Wraps `openai` SDK with automatic scoring |
 | Anthropic | `anthropic` | Wraps `anthropic` SDK with automatic scoring |
 | Google | `google` | Wraps `google-generativeai` with automatic scoring |
@@ -340,15 +348,15 @@ Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation
 ├─────────────────────────────────────────────┤
 │   sentence-transformers (all-MiniLM-L6-v2)  │
 └─────────────────────────────────────────────┘
-       ▲                    ▲
-       │                    │
-┌──────┴──────┐    ┌───────┴──────────┐
-│  Providers  │    │   Integrations   │
-│  (OpenAI,   │    │   (LangGraph,    │
-│  Anthropic, │    │   LangChain,     │
-│  Google)    │    │   CrewAI, SK,    │
-│             │    │   AutoGen)       │
-└─────────────┘    └──────────────────┘
+         ▲                       ▲
+         │                       │
+  ┌──────┴──────┐       ┌────────┴─────────┐
+  │  Providers  │       │   Integrations   │
+  │  (OpenAI,   │       │   (LangGraph,    │
+  │  Anthropic, │       │   LangChain,     │
+  │  Google)    │       │   CrewAI, SK,    │
+  │             │       │   AutoGen)       │
+  └─────────────┘       └──────────────────┘
 ```
 
 See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.md](CLAUDE.md) for AI-assisted development guidelines.
@@ -361,39 +369,10 @@ groundlens implements the methods described in three research papers:
    Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.*
    [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
 
-2. **Halucinations Taxonomy|Directional Grounding Index(DGI)**
+2. **Hallucinations Taxonomy | Directional Grounding Index (DGI)**
    Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in Large Language Models.*
    [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)
 
 3. **Mechanistic Interpretability**
    Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in Large Language Models.*
    [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
-
-4. **Hallucination Benchmark**
-   https://github.com/groundlens-dev/grounding-benchmark/blob/4abf98ec5d2f846850a44f713115323659c2a793/paper/A_Methodology_for_Building_Human_Confabulated_Hallucination_Benchmarks.pdf
-
-## Security
-
-See [SECURITY.md](SECURITY.md) for vulnerability reporting, scope, and response timelines.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code standards, and PR process.
-
-```bash
-# Quick start for contributors
-git clone https://github.com/groundlens-dev/groundlens.git
-cd groundlens
-pip install -e ".[dev]"
-pre-commit install
-groundlens doctor            # verify your environment
-pytest tests/unit/           # run fast tests
-```
-
-## About
-
-Groundlens is built and maintained by [Javier Marin](https://jmarin.info) -- an engineer who has reinvented himself more times than most people change jobs. The math comes from engineering, the skepticism from regulated industries, and the stubbornness from experience. Read the [origin story](VISION.md#origin).
-
-## License
-
-[MIT](LICENSE) -- Javier Marin (javier@jmarin.info)
