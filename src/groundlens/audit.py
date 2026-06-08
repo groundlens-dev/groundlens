@@ -43,15 +43,18 @@ multi-process logging is required.
 
 from __future__ import annotations
 
+import contextlib
 import datetime as _dt
 import hashlib
 import json
 import sqlite3
-from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 # ── Constants ───────────────────────────────────────────────────────────────
 
@@ -391,18 +394,19 @@ class AuditLog:
 
     def close(self) -> None:
         """Close the underlying SQLite connection."""
-        try:
+        with contextlib.suppress(sqlite3.Error):
             self._conn.close()
-        except sqlite3.Error:
-            pass
 
     def __enter__(self) -> AuditLog:
+        """Enter the context manager and return self."""
         return self
 
     def __exit__(self, *exc_info: Any) -> None:
+        """Exit the context manager, closing the SQLite connection."""
         self.close()
 
     def __del__(self) -> None:
+        """Best-effort close on garbage collection."""
         self.close()
 
 

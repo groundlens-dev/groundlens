@@ -5,6 +5,34 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.8 -- DGI inline calibration fix + lint hygiene
+
+### Fixed
+
+- **DGI inline calibration silently ignored:** `DGI.calibrate(pairs=...)` populated
+  the inline `mu_hat` under the cache key `(model, "__inline__")`, but
+  `DGI.score()` then passed `reference_csv=None` to `compute_dgi`, which looks
+  up `(model, "__bundled__")` — so the inline calibration was never applied
+  and every call fell through to the bundled reference direction. Fix: pass
+  `self.reference_csv` through unchanged. Now `_get_mu_hat` resolves `None →
+  bundled`, real path → load CSV, and `"__inline__"` → inline cache hit.
+  Added defensive guard in `_get_mu_hat` to raise a clear `RuntimeError` if
+  `compute_dgi(reference_csv="__inline__")` is called without prior `calibrate()`.
+- **Lint hygiene across 2026.6.7 modules:** Removed 64 unused `# noqa: ARG001`
+  directives from `rules.py` (the ARG ruleset isn't enabled), moved
+  `collections.abc` imports to `TYPE_CHECKING` blocks in `rules.py` and
+  `audit.py`, replaced `try/except sqlite3.Error/pass` with
+  `contextlib.suppress(sqlite3.Error)` in `audit.AuditLog.close`, added
+  docstrings to `__enter__` / `__exit__` / `__del__`, removed unused
+  imports in `tests/unit/test_rules.py`, fixed one over-long line.
+
+### Added
+
+- **`tests/integration/test_dgi_inline_calibration.py`:** Regression tests
+  for the DGI inline-calibration fix. Verifies inline scores differ from
+  bundled on the same input, that the inline cache key is populated, and
+  that the two error paths raise a clear `RuntimeError`.
+
 ## 2026.6.7 -- AI Governance tool uplift
 
 ### Added
