@@ -43,9 +43,11 @@ References:
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Sequence
 
 # ── Public types ────────────────────────────────────────────────────────────
 
@@ -337,9 +339,9 @@ _BANKING_FLAGS: tuple[str, ...] = (
 
 
 def _check_regulatory_flag(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
+    context: str | None,
     metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response cite a regulatory flag present in the case metadata?"""
@@ -350,10 +352,10 @@ def _check_regulatory_flag(
 
 
 def _check_risk_reference(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response reference a risk score or risk concept?"""
     ev = _matches_any(response, ["risk score", "risk level", "risk indicator", "risk"])
@@ -363,10 +365,10 @@ def _check_risk_reference(
 
 
 def _check_numeric_value(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response include a numeric value (case parameter or threshold)?"""
     ev = _matches_regex(response, _NUMERIC_RE)
@@ -376,10 +378,10 @@ def _check_numeric_value(
 
 
 def _check_gate_name(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response name a specific gate or threshold rule?"""
     ev = _matches_regex(response, _GATE_NAME_RE)
@@ -389,10 +391,10 @@ def _check_gate_name(
 
 
 def _check_information_gap(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response identify a missing-information gap?"""
     ev = _matches_any(
@@ -405,9 +407,9 @@ def _check_information_gap(
 
 
 def _check_case_specific_detail(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
+    context: str | None,
     metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response cite a case-specific contextual detail?"""
@@ -430,10 +432,10 @@ def _check_case_specific_detail(
 
 
 def _check_substantive_length(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response provide substantive length (> 30 tokens)?"""
     matched = len(response.split()) > 30
@@ -443,10 +445,10 @@ def _check_substantive_length(
 
 
 def _check_specificity_language(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response use specificity-marking language?"""
     ev = _matches_any(response, ["specifically", "in particular"])
@@ -458,10 +460,10 @@ def _check_specificity_language(
 
 
 def _check_conditional_structure(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response use conditional structure (if / because / cannot)?"""
     ev = _matches_any(response, ["if ", "because", "cannot"])
@@ -471,10 +473,10 @@ def _check_conditional_structure(
 
 
 def _check_pending_action(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response name a pending action?"""
     ev = _matches_any(response, ["pending", "awaiting"])
@@ -484,10 +486,10 @@ def _check_pending_action(
 
 
 def _check_causal_connective(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response use an explicit causal connective?"""
     ev = _matches_any(response, ["due to", "consequently", "therefore"])
@@ -497,10 +499,10 @@ def _check_causal_connective(
 
 
 def _check_epistemic_limit(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response state an epistemic limitation?"""
     ev = _matches_any(
@@ -512,10 +514,10 @@ def _check_epistemic_limit(
 
 
 def _check_domain_reference(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response reference a domain concept (compliance / regulatory)?"""
     ev = _matches_any(response, ["compliance", "regulatory", "policy", "flag"])
@@ -525,10 +527,10 @@ def _check_domain_reference(
 
 
 def _check_modal_verb(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response use a modal verb (would/should/need)?"""
     ev = _matches_any(response, ["would", "should", "need"])
@@ -538,10 +540,10 @@ def _check_modal_verb(
 
 
 def _check_minimum_length(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response meet minimum length (> 20 tokens)?"""
     matched = len(response.split()) > 20
@@ -549,10 +551,10 @@ def _check_minimum_length(
 
 
 def _check_temporal_ordering(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response include temporal ordering (before / prior to / until)?"""
     ev = _matches_any(response, ["before", "prior to", "until"])
@@ -562,10 +564,10 @@ def _check_temporal_ordering(
 
 
 def _check_conditional_approval(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response state a conditional approval pathway?"""
     ev = _matches_any(
@@ -580,10 +582,10 @@ def _check_conditional_approval(
 
 
 def _check_information_request(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response request additional information?"""
     ev = _matches_any(
@@ -595,10 +597,10 @@ def _check_information_request(
 
 
 def _check_risk_reduction(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response propose risk-reduction language?"""
     ev = _matches_any(response, ["risk reduction", "mitigate", "reduce risk"])
@@ -608,10 +610,10 @@ def _check_risk_reduction(
 
 
 def _check_alternative_framing(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response offer an alternative framing?"""
     ev = _matches_any(response, ["otherwise", "alternatively"])
@@ -621,10 +623,10 @@ def _check_alternative_framing(
 
 
 def _check_threshold_reference(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response reference a standard / threshold / criterion?"""
     ev = _matches_any(response, ["standard", "threshold", "criteria"])
@@ -634,10 +636,10 @@ def _check_threshold_reference(
 
 
 def _check_resolution_length(
-    question: str,  # noqa: ARG001
+    question: str,
     response: str,
-    context: str | None,  # noqa: ARG001
-    metadata: dict[str, Any],  # noqa: ARG001
+    context: str | None,
+    metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response have substantive length for resolution path (> 25 tokens)?"""
     matched = len(response.split()) > 25
@@ -691,7 +693,9 @@ def banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> RuleSet:
         ChecklistRule(
             "spec.case_detail", "case-specific detail", 0.10, "spec", _check_case_specific_detail
         ),
-        ChecklistRule("spec.length", "substantive length", 0.10, "spec", _check_substantive_length),
+        ChecklistRule(
+            "spec.length", "substantive length", 0.10, "spec", _check_substantive_length
+        ),
         ChecklistRule(
             "spec.spec_language",
             "specificity language",

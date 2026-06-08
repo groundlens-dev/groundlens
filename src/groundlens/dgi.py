@@ -126,6 +126,15 @@ def _get_mu_hat(
     cache_key = (model_name, reference_csv or "__bundled__")
 
     if cache_key not in _mu_hat_cache:
+        # The inline sentinel only resolves via cache; there is no on-disk
+        # CSV to fall back to. Surface a clear error rather than letting
+        # load_reference_pairs raise FileNotFoundError on a sentinel string.
+        if reference_csv == "__inline__":
+            msg = (
+                "DGI inline calibration not initialized. Call "
+                "DGI.calibrate(pairs=...) on a DGI instance before scoring."
+            )
+            raise RuntimeError(msg)
         logger.info(
             "Computing DGI reference direction (model=%s, data=%s)...",
             model_name,
@@ -289,18 +298,27 @@ class DGI:
 
         Returns:
             DGIResult with score and flag status.
+
+        Raises:
+            RuntimeError: If ``calibrate(pairs=...)`` has not been called
+                yet on this instance and ``reference_csv`` is the inline
+                sentinel.
         """
-        ref = self.reference_csv if self.reference_csv != "__inline__" else None
         if self.reference_csv == "__inline__":
-            # Use the inline-calibrated mu_hat.
+            # Guard: the inline mu_hat must already be in the cache, since
+            # there is no on-disk CSV to fall back to.
             cache_key = (self.model, "__inline__")
             if cache_key not in _mu_hat_cache:
                 msg = "Call calibrate() before score() when using inline pairs."
                 raise RuntimeError(msg)
 
+        # Pass reference_csv through unchanged. ``_get_mu_hat`` resolves:
+        #   None         -> bundled mu_hat
+        #   real path    -> load CSV, compute mu_hat
+        #   "__inline__" -> hit the cache populated by calibrate(pairs=...)
         return compute_dgi(
             question=question,
             response=response,
             model=self.model,
-            reference_csv=ref,
+            reference_csv=self.reference_csv,
         )
