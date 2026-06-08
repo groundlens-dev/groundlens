@@ -54,7 +54,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterator
 
 # ── Constants ───────────────────────────────────────────────────────────────
 
@@ -436,7 +436,7 @@ def _row_to_entry(row: sqlite3.Row) -> AuditEntry:
 
 
 @contextmanager
-def open_log(db_path: str | Path | None = None) -> Iterable[AuditLog]:
+def open_log(db_path: str | Path | None = None) -> Iterator[AuditLog]:
     """Open an :class:`AuditLog` as a context manager."""
     log = AuditLog(db_path=db_path)
     try:
