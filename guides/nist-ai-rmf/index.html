@@ -12,13 +12,13 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/guides/batch-evaluation/">
+        <link rel="canonical" href="https://docs.groundlens.dev/guides/nist-ai-rmf/">
       
       
-        <link rel="prev" href="../domain-calibration/">
+        <link rel="prev" href="../sr-11-7/">
       
       
-        <link rel="next" href="../banking-deployment/">
+        <link rel="next" href="../../providers/openai/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Batch Evaluation - groundlens</title>
+        <title>NIST AI RMF Mapping - groundlens</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#batch-evaluation" class="md-skip">
+        <a href="#nist-ai-rmf-10-mapping" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Batch Evaluation
+              NIST AI RMF Mapping
             
           </span>
         </div>
@@ -1175,37 +1175,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Batch Evaluation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1221,193 +1194,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#python-api-evaluate_batch" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API: evaluate_batch()
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Python API: evaluate_batch()">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#input-format" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Input Format
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#options" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Options
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cli-groundlens-evaluate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI: groundlens evaluate
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="CLI: groundlens evaluate">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#input-csv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Input CSV
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output-csv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Output CSV
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cicd-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CI/CD Integration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="CI/CD Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#github-actions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GitHub Actions
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-ci-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python CI Script
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#aggregating-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Aggregating Results
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Aggregating Results">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#summary-statistics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary Statistics
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#by-method" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        By Method
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance Considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1501,10 +1287,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../nist-ai-rmf/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NIST AI RMF Mapping
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1520,6 +1333,226 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-groundlens-fits-the-ai-rmf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why groundlens fits the AI RMF
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#govern-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GOVERN function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GOVERN function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#govern-14-risk-management-activities-are-documented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GOVERN 1.4 — Risk management activities are documented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#govern-15-ongoing-monitoring-and-review-processes-are-in-place" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GOVERN 1.5 — Ongoing monitoring and review processes are in place
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#map-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAP function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MAP function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#map-23-context-characterization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAP 2.3 — Context characterization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#map-51-likelihood-and-magnitude-of-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAP 5.1 — Likelihood and magnitude of impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#measure-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEASURE function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MEASURE function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#measure-25-trustworthiness-characteristics-are-evaluated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEASURE 2.5 — Trustworthiness characteristics are evaluated
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measure-27-performance-is-monitored-against-baselines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEASURE 2.7 — Performance is monitored against baselines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measure-42-operational-metrics-for-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEASURE 4.2 — Operational metrics for monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manage-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MANAGE function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MANAGE function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manage-41-risk-treatment-via-flagged-output-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MANAGE 4.1 — Risk treatment via flagged-output review
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-43-incident-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MANAGE 4.3 — Incident management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations-for-ai-rmf-profiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known limitations for AI RMF profiling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2075,22 +2108,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#python-api-evaluate_batch" class="md-nav__link">
+  <a href="#why-groundlens-fits-the-ai-rmf" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API: evaluate_batch()
+        Why groundlens fits the AI RMF
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Python API: evaluate_batch()">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#govern-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GOVERN function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GOVERN function">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#input-format" class="md-nav__link">
+  <a href="#govern-14-risk-management-activities-are-documented" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Input Format
+        GOVERN 1.4 — Risk management activities are documented
       
     </span>
   </a>
@@ -2098,10 +2142,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#options" class="md-nav__link">
+  <a href="#govern-15-ongoing-monitoring-and-review-processes-are-in-place" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Options
+        GOVERN 1.5 — Ongoing monitoring and review processes are in place
       
     </span>
   </a>
@@ -2114,22 +2158,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cli-groundlens-evaluate" class="md-nav__link">
+  <a href="#map-function" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CLI: groundlens evaluate
+        MAP function
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="CLI: groundlens evaluate">
+    <nav class="md-nav" aria-label="MAP function">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#input-csv" class="md-nav__link">
+  <a href="#map-23-context-characterization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Input CSV
+        MAP 2.3 — Context characterization
       
     </span>
   </a>
@@ -2137,10 +2181,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#output-csv" class="md-nav__link">
+  <a href="#map-51-likelihood-and-magnitude-of-impact" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Output CSV
+        MAP 5.1 — Likelihood and magnitude of impact
       
     </span>
   </a>
@@ -2153,22 +2197,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cicd-integration" class="md-nav__link">
+  <a href="#measure-function" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CI/CD Integration
+        MEASURE function
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="CI/CD Integration">
+    <nav class="md-nav" aria-label="MEASURE function">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#github-actions" class="md-nav__link">
+  <a href="#measure-25-trustworthiness-characteristics-are-evaluated" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GitHub Actions
+        MEASURE 2.5 — Trustworthiness characteristics are evaluated
       
     </span>
   </a>
@@ -2176,10 +2220,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#python-ci-script" class="md-nav__link">
+  <a href="#measure-27-performance-is-monitored-against-baselines" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python CI Script
+        MEASURE 2.7 — Performance is monitored against baselines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measure-42-operational-metrics-for-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEASURE 4.2 — Operational metrics for monitoring
       
     </span>
   </a>
@@ -2192,22 +2247,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#aggregating-results" class="md-nav__link">
+  <a href="#manage-function" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Aggregating Results
+        MANAGE function
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Aggregating Results">
+    <nav class="md-nav" aria-label="MANAGE function">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#summary-statistics" class="md-nav__link">
+  <a href="#manage-41-risk-treatment-via-flagged-output-review" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Summary Statistics
+        MANAGE 4.1 — Risk treatment via flagged-output review
       
     </span>
   </a>
@@ -2215,10 +2270,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#by-method" class="md-nav__link">
+  <a href="#manage-43-incident-management" class="md-nav__link">
     <span class="md-ellipsis">
       
-        By Method
+        MANAGE 4.3 — Incident management
       
     </span>
   </a>
@@ -2231,10 +2286,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
+  <a href="#known-limitations-for-ai-rmf-profiling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Performance Considerations
+        Known limitations for AI RMF profiling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
       
     </span>
   </a>
@@ -2261,211 +2327,232 @@
   
 
 
-<h1 id="batch-evaluation">Batch Evaluation<a class="headerlink" href="#batch-evaluation" title="Permanent link">&para;</a></h1>
-<p>This guide covers using <code>evaluate_batch()</code> and the CLI <code>groundlens evaluate</code> command for scoring large sets of LLM outputs, suitable for CI/CD pipelines, regression testing, and quality monitoring.</p>
-<h2 id="python-api-evaluate_batch">Python API: evaluate_batch()<a class="headerlink" href="#python-api-evaluate_batch" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_batch</span>
+<h1 id="nist-ai-rmf-10-mapping">NIST AI RMF 1.0 Mapping<a class="headerlink" href="#nist-ai-rmf-10-mapping" title="Permanent link">&para;</a></h1>
+<p>The NIST AI Risk Management Framework 1.0 (NIST AI 100-1, January 2023)
+is a voluntary framework that organizes AI risk management around four
+functions: <strong>Govern</strong>, <strong>Map</strong>, <strong>Measure</strong>, and <strong>Manage</strong>. Each function
+is decomposed into categories and subcategories with concrete outcomes.</p>
+<p>groundlens contributes to specific subcategories in all four functions.
+This page maps the contributions explicitly so a deployment team can
+include them in its NIST AI RMF profile.</p>
+<h2 id="why-groundlens-fits-the-ai-rmf">Why groundlens fits the AI RMF<a class="headerlink" href="#why-groundlens-fits-the-ai-rmf" title="Permanent link">&para;</a></h2>
+<p>The AI RMF emphasizes seven trustworthy AI characteristics: valid and
+reliable, safe, secure and resilient, accountable and transparent,
+explainable and interpretable, privacy-enhanced, and fair with managed
+harmful bias. groundlens supports several:</p>
+<table>
+<thead>
+<tr>
+<th>Trustworthy characteristic</th>
+<th>groundlens contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Valid and reliable</td>
+<td>Deterministic scoring with documented mathematical properties; reproducible results across runs and machines</td>
+</tr>
+<tr>
+<td>Accountable and transparent</td>
+<td>Hash-chain audit log; per-evaluation traceability of inputs, outputs, configuration</td>
+</tr>
+<tr>
+<td>Explainable and interpretable</td>
+<td>Rule-based sub-scores with evidence spans; geometric scores decomposable into distances and angles</td>
+</tr>
+<tr>
+<td>Secure and resilient</td>
+<td>No second LLM in the verification loop removes a class of failure modes (judge model compromised or drifted)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="govern-function">GOVERN function<a class="headerlink" href="#govern-function" title="Permanent link">&para;</a></h2>
+<p>GOVERN focuses on organizational policies, accountability, and culture
+that anticipate, identify, and manage AI risks.</p>
+<h3 id="govern-14-risk-management-activities-are-documented">GOVERN 1.4 — Risk management activities are documented<a class="headerlink" href="#govern-14-risk-management-activities-are-documented" title="Permanent link">&para;</a></h3>
+<p>groundlens makes risk management activities inspectable in code:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.compliance</span><span class="w"> </span><span class="kn">import</span> <span class="n">all_mappings</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;Paris is the capital of France.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="p">},</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="p">{</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What causes tides?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;Tides are caused by gravitational forces from the Moon and Sun.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="p">},</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">{</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What is photosynthesis?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;Photosynthesis is the process by which plants convert light into energy.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;Plants use photosynthesis to convert sunlight, water, and CO2 into glucose and oxygen.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="p">},</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">]</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;FLAGGED&quot;</span> <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">flagged</span> <span class="k">else</span> <span class="s2">&quot;PASS&quot;</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">all_mappings</span><span class="p">():</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mapping</span><span class="o">.</span><span class="n">fn_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">mapping</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">references</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">ref</span><span class="o">.</span><span class="n">standard</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">clauses</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<h3 id="input-format">Input Format<a class="headerlink" href="#input-format" title="Permanent link">&para;</a></h3>
-<p>Each item is a dict with:</p>
+<p>The mapping is declarative and version-controlled with the source; any
+change to the documented intent is visible in the commit history.</p>
+<h3 id="govern-15-ongoing-monitoring-and-review-processes-are-in-place">GOVERN 1.5 — Ongoing monitoring and review processes are in place<a class="headerlink" href="#govern-15-ongoing-monitoring-and-review-processes-are-in-place" title="Permanent link">&para;</a></h3>
+<p>The audit log enables continuous monitoring:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">log</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;production_audit.sqlite&quot;</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Daily flagged-rate check fed to the monitoring dashboard</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">daily_summary</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">entries</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">log</span><span class="o">.</span><span class="n">entries</span><span class="p">()</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">timestamp_utc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">date</span><span class="p">)]</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">flagged</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">flagged</span><span class="p">]</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="s2">&quot;flagged&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">flagged</span><span class="p">),</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="s2">&quot;flagged_rate&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">flagged</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="k">if</span> <span class="n">entries</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">}</span>
+</span></code></pre></div>
+<p>Combine with the verify_chain method for periodic integrity checks
+that document the chain has not been tampered with.</p>
+<h2 id="map-function">MAP function<a class="headerlink" href="#map-function" title="Permanent link">&para;</a></h2>
+<p>MAP contextualizes the AI system's risks within its operating
+environment.</p>
+<h3 id="map-23-context-characterization">MAP 2.3 — Context characterization<a class="headerlink" href="#map-23-context-characterization" title="Permanent link">&para;</a></h3>
+<p>The DGI calibration corpus characterizes the operating context for
+hallucination detection:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">banking_reference_pairs_path</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What triggers a SAR filing under the Bank Secrecy Act?&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">response</span><span class="o">=</span><span class="n">llm_output</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">reference_csv</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">banking_reference_pairs_path</span><span class="p">()),</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>The bundled banking corpus covers seven sub-domains (credit, AML, KYC,
+fraud, sanctions, concentration, model risk). Deployments should
+extend this with deployment-specific verified pairs to reflect their
+exact operating context — see the
+<a href="../domain-calibration/">domain calibration guide</a>.</p>
+<h3 id="map-51-likelihood-and-magnitude-of-impact">MAP 5.1 — Likelihood and magnitude of impact<a class="headerlink" href="#map-51-likelihood-and-magnitude-of-impact" title="Permanent link">&para;</a></h3>
+<p>groundlens surfaces a flag and a continuous score. The flag aligns
+with the documented risk threshold; the score supports prioritized
+review:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Severity tier based on score, not just binary flag</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">severity</span> <span class="o">=</span> <span class="s2">&quot;high&quot;</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">elif</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mf">0.95</span><span class="p">:</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">severity</span> <span class="o">=</span> <span class="s2">&quot;medium&quot;</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">severity</span> <span class="o">=</span> <span class="s2">&quot;low&quot;</span>
+</span></code></pre></div>
+<p>Document severity tiers in the deployment's NIST AI RMF profile so
+human reviewers operate against a shared rubric.</p>
+<h2 id="measure-function">MEASURE function<a class="headerlink" href="#measure-function" title="Permanent link">&para;</a></h2>
+<p>MEASURE selects and applies appropriate metrics to identified risks.</p>
+<h3 id="measure-25-trustworthiness-characteristics-are-evaluated">MEASURE 2.5 — Trustworthiness characteristics are evaluated<a class="headerlink" href="#measure-25-trustworthiness-characteristics-are-evaluated" title="Permanent link">&para;</a></h3>
+<p>Each groundlens method tracks a specific trustworthiness dimension:</p>
 <table>
 <thead>
 <tr>
-<th>Key</th>
-<th>Required</th>
-<th>Description</th>
+<th>Method</th>
+<th>Trustworthy characteristic</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>question</code></td>
-<td>Yes</td>
-<td>The input question or prompt</td>
+<td>SGI</td>
+<td>Valid and reliable (does the response engage with the source?)</td>
 </tr>
 <tr>
-<td><code>response</code></td>
-<td>Yes</td>
-<td>The LLM-generated response</td>
+<td>DGI</td>
+<td>Valid and reliable (does the response follow grounded patterns?)</td>
 </tr>
 <tr>
-<td><code>context</code></td>
-<td>No</td>
-<td>Source context (triggers SGI when present)</td>
+<td>Rules (<code>spec</code>)</td>
+<td>Explainable (does the response cite concrete case details?)</td>
+</tr>
+<tr>
+<td>Rules (<code>expl</code>)</td>
+<td>Explainable (does the response link facts to decision?)</td>
+</tr>
+<tr>
+<td>Rules (<code>bshift</code>)</td>
+<td>Accountable (does the response state what would resolve the case?)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">items</span><span class="p">,</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>          <span class="c1"># Sentence-transformer model</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">reference_csv</span><span class="o">=</span><span class="s2">&quot;domain_pairs.csv&quot;</span><span class="p">,</span>    <span class="c1"># DGI calibration (for items without context)</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+<h3 id="measure-27-performance-is-monitored-against-baselines">MEASURE 2.7 — Performance is monitored against baselines<a class="headerlink" href="#measure-27-performance-is-monitored-against-baselines" title="Permanent link">&para;</a></h3>
+<p>The bundled benchmark provides a published baseline:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--dataset<span class="w"> </span>cert-framework/human-confabulation-benchmark
 </span></code></pre></div>
-<h2 id="cli-groundlens-evaluate">CLI: groundlens evaluate<a class="headerlink" href="#cli-groundlens-evaluate" title="Permanent link">&para;</a></h2>
-<p>For batch evaluation from the command line:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>groundlens<span class="w"> </span>evaluate<span class="w"> </span>input.csv<span class="w"> </span>--output<span class="w"> </span>results.csv
+<p>Track per-batch metrics over time and alert on regression against the
+deployment's own historical baseline:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">window</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># 30-day rolling</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">window</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daily_summary</span><span class="p">(</span><span class="s2">&quot;2026-06-08&quot;</span><span class="p">))</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Alert on rolling deviation</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;flagged_rate&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">window</span><span class="p">]</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">mean</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;flagged_rate&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">mean</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">:</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">alert_oncall</span><span class="p">(</span><span class="s2">&quot;flagged rate elevated 50</span><span class="si">% a</span><span class="s2">bove 30d mean&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<h3 id="input-csv">Input CSV<a class="headerlink" href="#input-csv" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>question,response,context
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>&quot;What is X?&quot;,&quot;X is Y.&quot;,&quot;According to docs, X is Y.&quot;
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>&quot;What causes Z?&quot;,&quot;Z happens because of W.&quot;,
+<h3 id="measure-42-operational-metrics-for-monitoring">MEASURE 4.2 — Operational metrics for monitoring<a class="headerlink" href="#measure-42-operational-metrics-for-monitoring" title="Permanent link">&para;</a></h3>
+<p>The audit log persists operational metrics per evaluation. Use this
+for drift detection, capacity planning, and root-cause investigation
+when a flagged rate jump is detected.</p>
+<h2 id="manage-function">MANAGE function<a class="headerlink" href="#manage-function" title="Permanent link">&para;</a></h2>
+<p>MANAGE allocates risk-related resources and treatments.</p>
+<h3 id="manage-41-risk-treatment-via-flagged-output-review">MANAGE 4.1 — Risk treatment via flagged-output review<a class="headerlink" href="#manage-41-risk-treatment-via-flagged-output-review" title="Permanent link">&para;</a></h3>
+<p>groundlens is explicitly a triage tool. Flagged outputs are routed to
+human review; passed outputs are released:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">flagged</span><span class="p">:</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">queue_for_human_review</span><span class="p">(</span><span class="n">case_id</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">else</span><span class="p">:</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">release_to_user</span><span class="p">(</span><span class="n">case_id</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
 </span></code></pre></div>
-<h3 id="output-csv">Output CSV<a class="headerlink" href="#output-csv" title="Permanent link">&para;</a></h3>
-<p>The output includes all original columns plus groundlens scores:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>question,response,context,groundlens_method,groundlens_score,groundlens_normalized,groundlens_flagged,groundlens_explanation
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&quot;What is X?&quot;,&quot;X is Y.&quot;,&quot;According to docs, X is Y.&quot;,sgi,1.2341,0.6142,False,&quot;SGI=1.234 -- strong context engagement (pass)&quot;
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&quot;What causes Z?&quot;,&quot;Z happens because of W.&quot;,,dgi,0.4521,0.7261,False,&quot;DGI=0.452 -- aligns with grounded patterns (pass)&quot;
+<p>The flagged rate is itself a managed metric: too low may indicate the
+threshold is mis-tuned (false negatives); too high indicates excessive
+human workload and may justify investment in upstream model improvements.</p>
+<h3 id="manage-43-incident-management">MANAGE 4.3 — Incident management<a class="headerlink" href="#manage-43-incident-management" title="Permanent link">&para;</a></h3>
+<p>For incident investigations, the audit log provides forensic-quality
+evidence:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">log</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;production_audit.sqlite&quot;</span><span class="p">)</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Reproduce the exact decision for a contested case</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">entry</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">log</span><span class="o">.</span><span class="n">entries</span><span class="p">()</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">identifier</span> <span class="o">==</span> <span class="s2">&quot;case_2026_06_05_123&quot;</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">payload_json</span><span class="p">)</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hash: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">entry_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># Verify the chain has not been altered around this entry</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="n">verification</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">verify_chain</span><span class="p">()</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="k">assert</span> <span class="n">verification</span><span class="o">.</span><span class="n">valid</span>
 </span></code></pre></div>
-<p>With domain calibration:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>groundlens<span class="w"> </span>evaluate<span class="w"> </span>input.csv<span class="w"> </span>--output<span class="w"> </span>results.csv<span class="w"> </span>--reference-csv<span class="w"> </span>domain_pairs.csv
-</span></code></pre></div>
-<h2 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">&para;</a></h2>
-<h3 id="github-actions">GitHub Actions<a class="headerlink" href="#github-actions" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Hallucination Gate</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">]</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">jobs</span><span class="p">:</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">groundlens</span><span class="p">:</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v5</span>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.12&quot;</span>
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install groundlens</span>
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install groundlens</span>
-</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
-</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run evaluation</span>
-</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">          </span><span class="no">groundlens evaluate tests/golden_qa.csv --output results.csv</span>
-</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
-</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check for flagged responses</span>
-</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">          </span><span class="no">flagged=$(grep -c &quot;True&quot; results.csv | head -1 || echo 0)</span>
-</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">          </span><span class="no">if [ &quot;$flagged&quot; -gt &quot;0&quot; ]; then</span>
-</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">            </span><span class="no">echo &quot;FAIL: $flagged responses flagged for hallucination&quot;</span>
-</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">            </span><span class="no">exit 1</span>
-</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">          </span><span class="no">fi</span>
-</span></code></pre></div>
-<h3 id="python-ci-script">Python CI Script<a class="headerlink" href="#python-ci-script" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_batch</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Load test cases</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">items</span> <span class="o">=</span> <span class="n">load_golden_dataset</span><span class="p">(</span><span class="s2">&quot;tests/golden_qa.json&quot;</span><span class="p">)</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">flagged</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">flagged</span><span class="p">]</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="k">if</span> <span class="n">flagged</span><span class="p">:</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FAIL: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">flagged</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> responses flagged&quot;</span><span class="p">)</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">flagged</span><span class="p">:</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> -- </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PASS: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> responses evaluated, 0 flagged&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="aggregating-results">Aggregating Results<a class="headerlink" href="#aggregating-results" title="Permanent link">&para;</a></h2>
-<h3 id="summary-statistics">Summary Statistics<a class="headerlink" href="#summary-statistics" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">flagged_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">flagged</span><span class="p">)</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total:    </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flagged:  </span><span class="si">{</span><span class="n">flagged_count</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">flagged_count</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean:     </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Median:   </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Std dev:  </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="by-method">By Method<a class="headerlink" href="#by-method" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">sgi_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;sgi&quot;</span><span class="p">]</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">dgi_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;dgi&quot;</span><span class="p">]</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SGI: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sgi_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> items, </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sgi_results</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">r</span><span class="o">.</span><span class="n">flagged</span><span class="p">)</span><span class="si">}</span><span class="s2"> flagged&quot;</span><span class="p">)</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DGI: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dgi_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> items, </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">dgi_results</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">r</span><span class="o">.</span><span class="n">flagged</span><span class="p">)</span><span class="si">}</span><span class="s2"> flagged&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Dataset size</th>
-<th>Approximate time</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10 items</td>
-<td>~1s</td>
-<td>Includes model loading</td>
-</tr>
-<tr>
-<td>100 items</td>
-<td>~5s</td>
-<td>Model cached after first item</td>
-</tr>
-<tr>
-<td>1,000 items</td>
-<td>~30s</td>
-<td>Linear scaling</td>
-</tr>
-<tr>
-<td>10,000 items</td>
-<td>~5 min</td>
-<td>Consider parallelization</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition tip">
-<p class="admonition-title">First-call overhead</p>
-<p>The first call loads the sentence-transformer model (~1--2s). Subsequent items are fast (~5ms each for embedding + scoring).</p>
-</div>
-<p>For very large datasets, consider splitting into chunks and processing in parallel:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_batch</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">evaluate_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">):</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="k">return</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">500</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="mi">500</span><span class="p">)]</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    <span class="n">chunk_results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">evaluate_chunk</span><span class="p">,</span> <span class="n">chunks</span><span class="p">))</span>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="n">all_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunk_results</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">]</span>
-</span></code></pre></div>
+<p>The hash chain provides cryptographic evidence the entry was not
+modified between its original logging and the investigation.</p>
+<h2 id="known-limitations-for-ai-rmf-profiling">Known limitations for AI RMF profiling<a class="headerlink" href="#known-limitations-for-ai-rmf-profiling" title="Permanent link">&para;</a></h2>
+<p>Document the following in the deployment's AI RMF profile under MAP
+5.1 and MANAGE 1.1:</p>
+<ol>
+<li><strong>Type III errors not detectable.</strong> Embedding-based methods cannot
+   distinguish within-frame factual errors (e.g. "the capital of
+   Australia is Sydney"). For high-stakes domains, complement with
+   claim-level fact-checking on outputs that pass geometric triage.</li>
+<li><strong>Calibration drift.</strong> The DGI reference direction depends on the
+   underlying language patterns of the calibration corpus. Schedule
+   refresh in line with the deployment's risk appetite.</li>
+<li><strong>Embedding model is a dependency.</strong> The underlying sentence
+   transformer (default: <code>all-MiniLM-L6-v2</code>) is a component of the
+   measurement system. Include it in the model inventory and version-
+   pin it.</li>
+</ol>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>NIST. <em>AI Risk Management Framework (AI RMF 1.0)</em>. NIST AI 100-1.
+  January 2023.
+  <a href="https://www.nist.gov/itl/ai-risk-management-framework">nist.gov/itl/ai-risk-management-framework</a></li>
+<li>Marin, J. (2025). <em>Semantic Grounding Index for LLM Hallucination
+  Detection.</em> arXiv:2512.13771.</li>
+<li>Marin, J. (2026). <em>A Geometric Taxonomy of Hallucinations in Large
+  Language Models.</em> arXiv:2602.13224v3.</li>
+</ul>
 
 
 
