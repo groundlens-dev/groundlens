@@ -256,8 +256,16 @@ class AuditLog:
                payload_json, prev_hash, entry_hash)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (ts, identifier, method, score, int(bool(flagged)),
-             payload_json, prev_hash, entry_hash),
+            (
+                ts,
+                identifier,
+                method,
+                score,
+                int(bool(flagged)),
+                payload_json,
+                prev_hash,
+                entry_hash,
+            ),
         )
         entry_id = cursor.lastrowid
         assert entry_id is not None
