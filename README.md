@@ -49,7 +49,10 @@ Groundlens is **triage** — *pay immediate attention to particular priorities*.
 | **Wrap my LLM provider with auto-scoring** | [Provider guard](#llm-provider-guard) · [Providers docs](https://docs.groundlens.dev/providers/openai/) |
 | **Integrate with LangChain / CrewAI / etc.** | [Integrations](#providers-and-integrations) · [Integration docs](https://docs.groundlens.dev/integrations/langchain/) |
 | **Improve accuracy for my domain** | [Domain calibration](#domain-calibration) · [Calibration guide](https://docs.groundlens.dev/guides/domain-calibration/) |
+| **Deploy in regulated banking** | [Banking deployment guide](https://docs.groundlens.dev/guides/banking-deployment/) |
 | **Comply with the EU AI Act** | [EU AI Act guide](https://docs.groundlens.dev/guides/eu-ai-act/) |
+| **Comply with SR 11-7 (US model risk)** | [SR 11-7 guide](https://docs.groundlens.dev/guides/sr-11-7/) |
+| **Map to NIST AI RMF** | [NIST AI RMF guide](https://docs.groundlens.dev/guides/nist-ai-rmf/) |
 | **Understand the math** | [How it works](https://docs.groundlens.dev/concepts/how-it-works/) · [Research papers](#research) |
 | **Understand what it can and cannot detect** | [Hallucination taxonomy](#taxonomy-of-llm-hallucinations) |
 | **Check my environment is set up correctly** | [`groundlens doctor`](#cli) |

@@ -5,6 +5,47 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.7 -- AI Governance tool uplift
+
+### Added
+
+- **`groundlens.rules`:** Rule-based interpretable layer. Checklist-style
+  rules producing specificity / explanatory linkage / boundary shift
+  sub-scores per evaluation, with per-rule evidence spans surfaced in a
+  multi-line audit explanation. Bundled `banking_rules()` factory covers
+  22 rules across the three sub-scores. Deterministic, no LLM. New
+  public types: `RuleSet`, `ChecklistRule`, `RuleEvidence`, `RuleResult`,
+  `RuleSetResult`.
+- **`groundlens.compliance`:** Standards mapping and audit-report
+  generation. `@maps_to(...)` decorator attaches a `ComplianceMapping`
+  to a function declaring which clauses of SR 11-7, EU AI Act, and NIST
+  AI RMF the implementation was designed to support. Pre-defined
+  mappings for `compute_sgi`, `compute_dgi`, `banking_rules`, and the
+  audit log. `ComplianceReport.to_markdown()` renders an examiner-ready
+  report combining summary statistics and explicit clause references.
+- **`groundlens.audit`:** Hash-chain immutable audit log backed by SQLite.
+  Each entry's SHA-256 hash links to its predecessor; any post-hoc
+  modification breaks `verify_chain()`. `AuditLog.export_jsonl()` produces
+  examiner-ready exports. Single-writer single-process by design.
+- **Banking calibration corpus:** `src/groundlens/data/banking_reference_pairs.csv`
+  with 25 verified pairs across credit, AML, KYC, fraud, sanctions,
+  concentration, and model risk sub-domains. Accessible via
+  `from groundlens.data import banking_reference_pairs_path`.
+- **`docs/guides/sr-11-7.md`:** SR 11-7 compliance guide covering §3
+  Model Validation, §5 Documentation, §6 Vendor Models, and §7 Governance.
+- **`docs/guides/nist-ai-rmf.md`:** NIST AI RMF mapping across the
+  Govern / Map / Measure / Manage functions.
+- **`docs/guides/banking-deployment.md`:** End-to-end deployment guide
+  for regulated banking environments — minimum viable pipeline,
+  hybrid (geometric + rules) flagging, calibration, threshold tuning,
+  self-hosted setup, examiner readiness checklist.
+
+### Changed
+
+- **README:** Added three rows to the "I want to..." table linking to
+  the banking-deployment, SR 11-7, and NIST AI RMF guides.
+- **mkdocs nav:** New guides registered under Guides section.
+
 ## 2026.5.22 -- LangGraph context propagation fix
 
 ### Fixed

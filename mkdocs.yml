@@ -87,7 +87,10 @@ nav:
     - RAG Verification: guides/rag-verification.md
     - Domain Calibration: guides/domain-calibration.md
     - Batch Evaluation: guides/batch-evaluation.md
+    - Banking Deployment: guides/banking-deployment.md
     - EU AI Act Compliance: guides/eu-ai-act.md
+    - SR 11-7 Compliance: guides/sr-11-7.md
+    - NIST AI RMF Mapping: guides/nist-ai-rmf.md
   - Providers:
     - OpenAI: providers/openai.md
     - Anthropic: providers/anthropic.md
