@@ -372,9 +372,7 @@ def _check_numeric_value(
 ) -> RuleEvidence:
     """Did the response include a numeric value (case parameter or threshold)?"""
     ev = _matches_regex(response, _NUMERIC_RE)
-    return RuleEvidence(
-        matched=ev.matched, span=ev.span, explanation="Includes a numeric value"
-    )
+    return RuleEvidence(matched=ev.matched, span=ev.span, explanation="Includes a numeric value")
 
 
 def _check_gate_name(
@@ -401,9 +399,7 @@ def _check_information_gap(
         response,
         ["completeness", "missing", "incomplete", "information gap", "documentation"],
     )
-    return RuleEvidence(
-        matched=ev.matched, span=ev.span, explanation="Names an information gap"
-    )
+    return RuleEvidence(matched=ev.matched, span=ev.span, explanation="Names an information gap")
 
 
 def _check_case_specific_detail(
@@ -439,9 +435,7 @@ def _check_substantive_length(
 ) -> RuleEvidence:
     """Did the response provide substantive length (> 30 tokens)?"""
     matched = len(response.split()) > 30
-    return RuleEvidence(
-        matched=matched, span="", explanation="Substantive length (> 30 tokens)"
-    )
+    return RuleEvidence(matched=matched, span="", explanation="Substantive length (> 30 tokens)")
 
 
 def _check_specificity_language(
@@ -480,9 +474,7 @@ def _check_pending_action(
 ) -> RuleEvidence:
     """Did the response name a pending action?"""
     ev = _matches_any(response, ["pending", "awaiting"])
-    return RuleEvidence(
-        matched=ev.matched, span=ev.span, explanation="Names a pending action"
-    )
+    return RuleEvidence(matched=ev.matched, span=ev.span, explanation="Names a pending action")
 
 
 def _check_causal_connective(
@@ -505,9 +497,7 @@ def _check_epistemic_limit(
     metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response state an epistemic limitation?"""
-    ev = _matches_any(
-        response, ["cannot determine", "insufficient", "unable to"]
-    )
+    ev = _matches_any(response, ["cannot determine", "insufficient", "unable to"])
     return RuleEvidence(
         matched=ev.matched, span=ev.span, explanation="States an epistemic limitation"
     )
@@ -534,9 +524,7 @@ def _check_modal_verb(
 ) -> RuleEvidence:
     """Did the response use a modal verb (would/should/need)?"""
     ev = _matches_any(response, ["would", "should", "need"])
-    return RuleEvidence(
-        matched=ev.matched, span=ev.span, explanation="Uses a modal verb"
-    )
+    return RuleEvidence(matched=ev.matched, span=ev.span, explanation="Uses a modal verb")
 
 
 def _check_minimum_length(
@@ -558,9 +546,7 @@ def _check_temporal_ordering(
 ) -> RuleEvidence:
     """Did the response include temporal ordering (before / prior to / until)?"""
     ev = _matches_any(response, ["before", "prior to", "until"])
-    return RuleEvidence(
-        matched=ev.matched, span=ev.span, explanation="Includes temporal ordering"
-    )
+    return RuleEvidence(matched=ev.matched, span=ev.span, explanation="Includes temporal ordering")
 
 
 def _check_conditional_approval(
@@ -588,9 +574,7 @@ def _check_information_request(
     metadata: dict[str, Any],
 ) -> RuleEvidence:
     """Did the response request additional information?"""
-    ev = _matches_any(
-        response, ["additional information", "further documentation", "more data"]
-    )
+    ev = _matches_any(response, ["additional information", "further documentation", "more data"])
     return RuleEvidence(
         matched=ev.matched, span=ev.span, explanation="Requests additional information"
     )
@@ -687,9 +671,7 @@ def banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> RuleSet:
         ChecklistRule("spec.risk_ref", "risk reference", 0.15, "spec", _check_risk_reference),
         ChecklistRule("spec.numeric", "numeric value", 0.10, "spec", _check_numeric_value),
         ChecklistRule("spec.gate", "gate / threshold", 0.10, "spec", _check_gate_name),
-        ChecklistRule(
-            "spec.info_gap", "information gap", 0.15, "spec", _check_information_gap
-        ),
+        ChecklistRule("spec.info_gap", "information gap", 0.15, "spec", _check_information_gap),
         ChecklistRule(
             "spec.case_detail", "case-specific detail", 0.10, "spec", _check_case_specific_detail
         ),
@@ -708,9 +690,7 @@ def banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> RuleSet:
             "expl.conditional", "conditional structure", 0.20, "expl", _check_conditional_structure
         ),
         ChecklistRule("expl.pending", "pending action", 0.15, "expl", _check_pending_action),
-        ChecklistRule(
-            "expl.causal", "causal connective", 0.15, "expl", _check_causal_connective
-        ),
+        ChecklistRule("expl.causal", "causal connective", 0.15, "expl", _check_causal_connective),
         ChecklistRule(
             "expl.epistemic", "epistemic limitation", 0.15, "expl", _check_epistemic_limit
         ),

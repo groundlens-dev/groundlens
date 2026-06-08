@@ -405,9 +405,7 @@ class ComplianceReport:
         lines.append("")
         lines.append("## Standards mapping")
         lines.append("")
-        lines.append(
-            f"The following groundlens functions are mapped to {self.framework} clauses:"
-        )
+        lines.append(f"The following groundlens functions are mapped to {self.framework} clauses:")
         lines.append("")
         for m in self.mappings:
             clauses = m.clauses_for(self.framework)
@@ -424,10 +422,7 @@ class ComplianceReport:
         lines.append("## Summary")
         lines.append("")
         lines.append(f"- Total evaluations: **{s['total_evaluations']}**")
-        lines.append(
-            f"- Flagged for review: **{s['flagged']}** "
-            f"({s['flagged_rate'] * 100:.1f}%)"
-        )
+        lines.append(f"- Flagged for review: **{s['flagged']}** ({s['flagged_rate'] * 100:.1f}%)")
         if s["by_method"]:
             method_str = ", ".join(f"{k}={v}" for k, v in sorted(s["by_method"].items()))
             lines.append(f"- By method: {method_str}")
