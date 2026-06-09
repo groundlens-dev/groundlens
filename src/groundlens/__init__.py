@@ -35,10 +35,20 @@ References:
     Marin (2026). Rotational Dynamics of Factual Constraint Processing. arXiv:2603.13259.
 """
 
+from groundlens import rules
 from groundlens._version import __version__
 from groundlens.calibrate import CalibrationResult, calibrate
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
+from groundlens.rules import (
+    ChecklistRule,
+    RuleEvidence,
+    RuleResult,
+    RuleSet,
+    RuleSetResult,
+    banking_rules,
+    groundlens_banking_rules,
+)
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
 
@@ -47,15 +57,25 @@ __all__ = [
     # Classes
     "SGI",
     "CalibrationResult",
+    "ChecklistRule",
     "DGIResult",
     "GroundlensScore",
+    "RuleEvidence",
+    "RuleResult",
+    "RuleSet",
+    "RuleSetResult",
     "SGIResult",
     # Meta
     "__version__",
+    # Rule sets
+    "banking_rules",
     "calibrate",
     "compute_dgi",
     # Functions
     "compute_sgi",
     "evaluate",
     "evaluate_batch",
+    "groundlens_banking_rules",
+    # Submodules
+    "rules",
 ]

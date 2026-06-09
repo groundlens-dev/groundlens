@@ -4,7 +4,7 @@
 # Groundlens
 </div>
 
-## Triage for LLM outputs. Geometric, deterministic, auditable.
+## Triage for LLM outputs. Deterministic. Auditable. No second LLM.
 
 <div align="center">
 
@@ -12,7 +12,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![codecov](https://codecov.io/gh/groundlens-dev/groundlens/branch/main/graph/badge.svg)](https://codecov.io/gh/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.4.22-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.9-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Vision](VISION.md) | [Contributing](CONTRIBUTING.md)
@@ -53,6 +53,9 @@ Groundlens is **triage** — *pay immediate attention to particular priorities*.
 | **Comply with the EU AI Act** | [EU AI Act guide](https://docs.groundlens.dev/guides/eu-ai-act/) |
 | **Comply with SR 11-7 (US model risk)** | [SR 11-7 guide](https://docs.groundlens.dev/guides/sr-11-7/) |
 | **Map to NIST AI RMF** | [NIST AI RMF guide](https://docs.groundlens.dev/guides/nist-ai-rmf/) |
+| **Triage with audit-trail rules** | [Rule sets quick start](#rule-sets----audit-trail-triage) · [`groundlens.rules`](https://docs.groundlens.dev/concepts/rules/) |
+| **Build my own rule set for legal / insurance / healthcare** | [Custom rule sets](#custom-rule-sets) · [examples/custom_rules.py](examples/custom_rules.py) |
+| **Map decisions to specific regulatory clauses** | [`groundlens.compliance`](https://docs.groundlens.dev/concepts/compliance/) · [Audit log](https://docs.groundlens.dev/concepts/audit/) |
 | **Understand the math** | [How it works](https://docs.groundlens.dev/concepts/how-it-works/) · [Research papers](#research) |
 | **Understand what it can and cannot detect** | [Hallucination taxonomy](#taxonomy-of-llm-hallucinations) |
 | **Check my environment is set up correctly** | [`groundlens doctor`](#cli) |
@@ -254,6 +257,67 @@ else:
     print(response.text)
 ```
 
+### Rule sets -- audit-trail triage
+
+Geometric scores rank responses by grounding signal. Rule sets complement that with an **auditable per-rule trail** — for each response, every rule that fired or didn't is recorded, with the matched evidence span and a citation to the academic, industrial, or regulatory source that motivates the rule.
+
+```python
+from groundlens import groundlens_banking_rules
+
+ruleset = groundlens_banking_rules()  # 20 rules, 5 sub-scores
+
+result = ruleset.evaluate(
+    question="Should this client be approved for credit?",
+    response=(
+        "Recommend escalation because the AML flag is triggered "
+        "(page 4 of the policy). Bureau A reports risk score 0.75. "
+        "Confidence of 80% pending independent review."
+    ),
+    context="Page 4 of policy: AML flag triggers human review. Bureau A: 0.75 risk score.",
+    metadata={"flags_present": ["AML"]},
+)
+
+print(result.sub_scores)
+# {'groundedness': 0.65, 'completeness': 0.40, 'calibration': 0.55,
+#  'traceability': 0.85, 'robustness': 1.00}
+print(result.flagged)            # False — passes the audit-defensibility floor
+print(result.audit_explanation)  # Human-readable per-rule trail
+```
+
+`groundlens_banking_rules` is the current canonical 20-rule reference set for banking governance (credit, AML, KYC, fraud, sanctions, concentration, model risk). Each rule carries a `citation` field pointing to its provenance source. Sub-scores: **groundedness**, **completeness**, **calibration**, **traceability**, **robustness**. The flag predicate is non-compensatory: weakness in any regulator-non-negotiable dimension flags the response for review.
+
+### Custom rule sets
+
+The rule engine is domain-agnostic. `RuleSet` and `ChecklistRule` are composable primitives — you can build a rule set for any domain by writing pure-Python `check` functions and grouping them under your own sub-score categories.
+
+```python
+from groundlens import ChecklistRule, RuleEvidence, RuleSet
+
+def _check_cites_clause(question, response, context, metadata):
+    matched = "clause" in response.lower() or "§" in response
+    return RuleEvidence(matched=matched, span="clause", explanation="cites a contract clause")
+
+legal_ruleset = RuleSet(
+    name="legal_contract_review_v1",
+    rules=(
+        ChecklistRule(
+            id="legal.cites_clause",
+            description="rationale cites a specific contract clause",
+            weight=0.40,
+            sub_score="traceability",
+            check=_check_cites_clause,
+            citation="ABA Model Rules of Professional Conduct, Rule 1.1 Competence",
+        ),
+        # ... add your own rules
+    ),
+    sub_scores=("groundedness", "traceability"),
+)
+
+result = legal_ruleset.evaluate(question=..., response=..., context=...)
+```
+
+See [examples/custom_rules.py](examples/custom_rules.py) for an end-to-end example.
+
 ## Taxonomy of LLM hallucinations
 
 Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
@@ -339,18 +403,34 @@ result.save("calibration.json")
 
 Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation benchmark (arXiv:2603.13259) reports DGI AUROC 0.958 with domain calibration.
 
+## Domains
+
+Groundlens ships a canonical rule set for **banking governance** today (`groundlens_banking_rules` — 20 rules across credit, AML, KYC, fraud, sanctions, concentration, model risk). The architecture is domain-agnostic: `RuleSet` and `ChecklistRule` are composable primitives, and custom rule sets for any in-house governance framework are supported via `RuleSet(rules=(...))` (see [Custom rule sets](#custom-rule-sets) above).
+
+On the roadmap:
+
+- **Legal** — contract review, regulatory filings, litigation discovery rationale evaluation
+- **Insurance** — claim adjudication, underwriting, fraud investigation rationale evaluation
+- **Healthcare** — clinical decision support, prior authorization, coding rationale evaluation
+
+The geometric layer (SGI/DGI) is already domain-agnostic — `compute_dgi` accepts a `reference_csv` argument for domain calibration. The rule layer's generalization is the active area of work.
+
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│             Public API (evaluate)           │
-├──────────────────┬──────────────────────────┤
-│   SGI (sgi.py)   │       DGI (dgi.py)       │
-├──────────────────┴──────────────────────────┤
-│       _internal (geometry, embeddings)      │
-├─────────────────────────────────────────────┤
-│   sentence-transformers (all-MiniLM-L6-v2)  │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    Public API (evaluate)                        │
+├────────────────────┬────────────────────────────────────────────┤
+│  Geometric layer   │            Rule-based layer                │
+├────────────────────┼──────────────┬──────────────┬──────────────┤
+│ SGI │ DGI          │    rules     │    audit     │  compliance  │
+│ (geometry +        │  (deterministic │  (SHA-256  │ (mapping to  │
+│  embeddings)       │   pattern      │  hash chain │  SR 26-2,    │
+│                    │   matching)    │   log)     │  EU AI Act,  │
+│                    │                │            │  NIST RMF)   │
+├────────────────────┴──────────────┴──────────────┴──────────────┤
+│        sentence-transformers (all-MiniLM-L6-v2)                 │
+└─────────────────────────────────────────────────────────────────┘
          ▲                       ▲
          │                       │
   ┌──────┴──────┐       ┌────────┴─────────┐
@@ -362,11 +442,13 @@ Domain-specific calibration typically reaches AUROC 0.90-0.99. The confabulation
   └─────────────┘       └──────────────────┘
 ```
 
+Two complementary triage layers — geometric (SGI/DGI, sub-second, ranks the bottom percentile by grounding signal) and rule-based (per-rule audit trail with regulatory citations). Both deterministic. Both auditable. No second LLM in either.
+
 See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.md](CLAUDE.md) for AI-assisted development guidelines.
 
 ## Research
 
-groundlens implements the methods described in three research papers:
+groundlens implements the methods described in four research papers:
 
 1. **Semantic Grounding Index (SGI)**
    Marin, J. (2025). *Semantic Grounding Index for LLM Hallucination Detection.*
@@ -379,3 +461,7 @@ groundlens implements the methods described in three research papers:
 3. **Mechanistic Interpretability**
    Marin, J. (2026). *Rotational Dynamics of Factual Constraint Processing in Large Language Models.*
    [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
+
+4. **Multi-source rule provenance for banking governance** *(preprint, draft available on request)*
+   Marin, J. (2026). *Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework.*
+   Underpins the `groundlens_banking_rules` reference set: 20 rules triangulated across peer-reviewed NLP literature, tier-1 bank public reports, banking regulator whitepapers, cross-industry frameworks, and financial-domain NLP benchmarks.
