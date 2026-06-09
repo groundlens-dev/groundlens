@@ -35,9 +35,7 @@ from groundlens import ChecklistRule, RuleEvidence, RuleSet
 
 def check_cites_clause(question, response, context, metadata):
     """Does the rationale cite a specific contract clause?"""
-    matched = bool(
-        re.search(r"\b(clause|article|section|§)\s+\d+", response, re.IGNORECASE)
-    )
+    matched = bool(re.search(r"\b(clause|article|section|§)\s+\d+", response, re.IGNORECASE))
     return RuleEvidence(
         matched=matched,
         span="clause/article/section",
