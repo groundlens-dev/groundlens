@@ -9,6 +9,7 @@ from groundlens.rules import (
     RuleEvidence,
     RuleSet,
     banking_rules,
+    groundlens_banking_rules,
 )
 
 
@@ -203,3 +204,187 @@ class TestSubScoresAreCapped:
         assert result.spec <= 1.0
         assert result.expl <= 1.0
         assert result.bshift <= 1.0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# groundlens_banking_rules — current canonical 5-category ruleset
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TestGroundlensBankingRulesetBasics:
+    """Structural checks on the current canonical banking ruleset."""
+
+    def test_groundlens_banking_ruleset_has_expected_name(self):
+        rs = groundlens_banking_rules()
+        assert rs.name == "groundlens_banking_v1"
+
+    def test_groundlens_banking_ruleset_has_20_rules(self):
+        # 5 groundedness + 3 completeness + 4 calibration + 5 traceability + 3 robustness
+        rs = groundlens_banking_rules()
+        assert len(rs.rules) == 20
+
+    def test_groundlens_banking_ruleset_covers_five_sub_scores(self):
+        rs = groundlens_banking_rules()
+        assert rs.sub_scores == (
+            "groundedness",
+            "completeness",
+            "calibration",
+            "traceability",
+            "robustness",
+        )
+
+    def test_groundlens_banking_rule_distribution(self):
+        rs = groundlens_banking_rules()
+        distribution = {ss: sum(1 for r in rs.rules if r.sub_score == ss) for ss in rs.sub_scores}
+        assert distribution == {
+            "groundedness": 5,
+            "completeness": 3,
+            "calibration": 4,
+            "traceability": 5,
+            "robustness": 3,
+        }
+
+    def test_every_rule_carries_a_citation(self):
+        rs = groundlens_banking_rules()
+        for rule in rs.rules:
+            assert rule.citation != "", f"Rule {rule.id} missing citation"
+
+    def test_weights_per_sub_score_sum_to_one(self):
+        rs = groundlens_banking_rules()
+        for sub in rs.sub_scores:
+            total = sum(r.weight for r in rs.rules if r.sub_score == sub)
+            assert total == pytest.approx(1.0), (
+                f"Sub-score {sub} weights sum to {total}, expected 1.0"
+            )
+
+
+class TestGroundlensBankingEvaluation:
+    """Evaluation behavior of the current canonical banking ruleset."""
+
+    def test_vacuous_response_flagged(self):
+        rs = groundlens_banking_rules()
+        result = rs.evaluate(
+            question="What governance decision applies?",
+            response="Further review needed.",
+        )
+        assert result.flagged is True
+
+    def test_strong_response_with_context_passes(self):
+        rs = groundlens_banking_rules()
+        context = (
+            "Customer has AML flag triggered. Page 4 of policy specifies threshold 50000 EUR. "
+            "Bureau A reports risk score 0.75. Bureau B reports risk score 0.80. "
+            "Counterparty operates in Spain."
+        )
+        response = (
+            "Recommend escalation because the AML flag is present (page 4 of the policy). "
+            "Combined data across bureaus suggests elevated risk for the counterparty. "
+            "Specifically, risk scores 0.75 and 0.80 both exceed the 50000 EUR threshold. "
+            "However, bureau scores disagree on magnitude. "
+            "Confidence of 80% pending independent review."
+        )
+        result = rs.evaluate(
+            question="What governance decision applies to this case?",
+            response=response,
+            context=context,
+            metadata={"flags_present": ["AML"]},
+        )
+        assert result.flagged is False
+        assert result.groundedness > 0.4
+        assert result.calibration >= 0.3
+        assert result.traceability > 0.5
+
+    def test_sub_score_accessors_match_dict(self):
+        rs = groundlens_banking_rules()
+        result = rs.evaluate(question="Q", response="risk score 0.5 because policy requires it.")
+        assert result.groundedness == result.sub_scores.get("groundedness", 0.0)
+        assert result.completeness == result.sub_scores.get("completeness", 0.0)
+        assert result.calibration == result.sub_scores.get("calibration", 0.0)
+        assert result.traceability == result.sub_scores.get("traceability", 0.0)
+        assert result.robustness == result.sub_scores.get("robustness", 0.0)
+
+    def test_legacy_accessors_return_zero(self):
+        """When using the 5-category ruleset, legacy spec/expl/bshift accessors return 0.0."""
+        rs = groundlens_banking_rules()
+        result = rs.evaluate(question="Q", response="risk score 0.5 because policy requires it.")
+        assert result.spec == 0.0
+        assert result.expl == 0.0
+        assert result.bshift == 0.0
+
+
+class TestGroundlensBankingFlagPredicate:
+    """The non-compensatory flag predicate must trigger on regulator-non-negotiable failures."""
+
+    def test_low_groundedness_flags(self):
+        rs = groundlens_banking_rules()
+        # Response with no context-grounded content
+        result = rs.evaluate(
+            question="Q?",
+            response="Unrelated content with no overlap.",
+            context="Specific factual context about a banking case.",
+        )
+        # Low groundedness should flag even if other dimensions are OK
+        assert result.flagged is True
+
+    def test_low_calibration_flags(self):
+        rs = groundlens_banking_rules()
+        # Confident response with no hedging, no abstain, no numeric confidence
+        result = rs.evaluate(
+            question="Q?",
+            response="The decision is clear. The customer should be approved.",
+        )
+        # Calibration < 0.3 should flag
+        assert result.calibration < 0.3
+        assert result.flagged is True
+
+
+class TestGroundlensBankingDeterminism:
+    """Same inputs must produce same outputs across runs."""
+
+    def test_same_inputs_same_output(self):
+        rs = groundlens_banking_rules()
+        q = "What governance decision applies?"
+        r = "Risk score 0.456 with AML flag. Page 12 cites policy clause 3.4 because compliance."
+        r1 = rs.evaluate(question=q, response=r)
+        r2 = rs.evaluate(question=q, response=r)
+        assert r1.sub_scores == r2.sub_scores
+        assert r1.quality == r2.quality
+        assert r1.flagged == r2.flagged
+        assert r1.audit_explanation == r2.audit_explanation
+
+
+class TestGroundlensBankingCitations:
+    """Every rule must carry a citation referencing a paper, regulator, or industry source."""
+
+    def test_citations_reference_real_sources(self):
+        rs = groundlens_banking_rules()
+        # Heuristic check: each citation should mention at least one canonical source name
+        canonical_markers = (
+            "RAGAs",
+            "FactScore",
+            "HaluEval",
+            "NIST",
+            "EU AI Act",
+            "SR 26-2",
+            "PRA SS1/23",
+            "ECB",
+            "EBA",
+            "RGB",
+            "e-SNLI",
+            "REV",
+            "TruthfulQA",
+            "SelfCheckGPT",
+            "G-Eval",
+            "FinanceBench",
+            "FinQA",
+            "ConflictBank",
+            "MAS",
+            "Morgan Stanley",
+            "ISO/IEC",
+            "Hyland",
+            "TRUE",
+        )
+        for rule in rs.rules:
+            assert any(marker in rule.citation for marker in canonical_markers), (
+                f"Rule {rule.id} citation does not reference any canonical source: {rule.citation}"
+            )

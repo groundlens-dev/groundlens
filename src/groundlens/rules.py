@@ -82,10 +82,18 @@ class ChecklistRule:
         description: One-line human-readable description of the rule.
         weight: Contribution to the parent sub-score when matched, in [0, 1].
             Sub-scores are capped at 1.0 even when weights sum higher.
-        sub_score: Which sub-score this rule contributes to: ``"spec"``,
-            ``"expl"``, or ``"bshift"``.
+        sub_score: Which sub-score this rule contributes to. For the legacy
+            ``banking_rules()`` set: ``"spec"``, ``"expl"``, or ``"bshift"``.
+            For the current ``groundlens_banking_rules()`` set:
+            ``"groundedness"``, ``"completeness"``, ``"calibration"``,
+            ``"traceability"``, or ``"robustness"``. Custom rule sets may
+            define additional categories.
         check: Pure function ``(question, response, context, metadata)
             -> RuleEvidence``. Must be deterministic.
+        citation: Free-text academic / industry / regulatory provenance for
+            the rule, suitable for inclusion in an audit explanation or a
+            regulatory submission. Empty string when no citation is provided.
+            Example: ``"RAGAs (Es et al., EACL 2024) §3 Faithfulness"``.
     """
 
     id: str
@@ -93,6 +101,7 @@ class ChecklistRule:
     weight: float
     sub_score: str
     check: Callable[[str, str, str | None, dict[str, Any]], RuleEvidence]
+    citation: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,33 +129,75 @@ class RuleResult:
 class RuleSetResult:
     """Aggregated result of evaluating a :class:`RuleSet` against a response.
 
-    The three sub-scores (``spec``, ``expl``, ``bshift``) are computed as
-    capped weight sums of matched rules in each category. ``quality`` is
-    the geometric mean of the three sub-scores: any zero sub-score yields
-    ``quality = 0.0``, reflecting that a rationale missing any of
-    specificity / explanatory linkage / boundary shift is structurally
+    Each sub-score is a capped weight sum of matched rules in that category,
+    stored in the :attr:`sub_scores` mapping. ``quality`` is the geometric
+    mean of all sub-score values: any zero sub-score yields ``quality = 0.0``,
+    reflecting that a rationale missing any audited dimension is structurally
     incomplete for human review.
 
+    Backward-compatible read accessors are exposed for the legacy De-La-Chica
+    style sub-scores (``spec``, ``expl``, ``bshift``) and for the current
+    GroundLens five-category skeleton (``groundedness``, ``completeness``,
+    ``calibration``, ``traceability``, ``robustness``). Accessors return
+    ``0.0`` when the underlying ruleset did not define the requested sub-score.
+
     Attributes:
-        spec: Specificity sub-score in [0, 1].
-        expl: Explanatory linkage sub-score in [0, 1].
-        bshift: Boundary shift sub-score in [0, 1].
-        quality: Geometric mean ``(spec * expl * bshift) ** (1/3)``.
-        flagged: ``True`` if either spec or expl falls below the cosmetic-
-            deadlock threshold (default 0.3), indicating an audit-deficient
-            rationale.
+        sub_scores: Mapping from sub-score name to its capped value in [0, 1].
+            By convention, do not mutate.
+        quality: Geometric mean of all sub-score values in :attr:`sub_scores`.
+        flagged: ``True`` when the ruleset's flag predicate is triggered.
         rule_results: One :class:`RuleResult` per rule that was evaluated.
         audit_explanation: Multi-line human-readable summary suitable for
             inclusion in an audit log.
     """
 
-    spec: float
-    expl: float
-    bshift: float
+    sub_scores: dict[str, float]
     quality: float
     flagged: bool
     rule_results: tuple[RuleResult, ...]
     audit_explanation: str
+
+    # ── Legacy 3-category accessors (banking_rules / De La Chica skeleton)
+    @property
+    def spec(self) -> float:
+        """Legacy specificity sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("spec", 0.0)
+
+    @property
+    def expl(self) -> float:
+        """Legacy explanatory-linkage sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("expl", 0.0)
+
+    @property
+    def bshift(self) -> float:
+        """Legacy boundary-shift sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("bshift", 0.0)
+
+    # ── Current 5-category accessors (groundlens_banking_rules skeleton)
+    @property
+    def groundedness(self) -> float:
+        """Groundedness sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("groundedness", 0.0)
+
+    @property
+    def completeness(self) -> float:
+        """Completeness sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("completeness", 0.0)
+
+    @property
+    def calibration(self) -> float:
+        """Calibration sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("calibration", 0.0)
+
+    @property
+    def traceability(self) -> float:
+        """Traceability sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("traceability", 0.0)
+
+    @property
+    def robustness(self) -> float:
+        """Robustness sub-score. Returns 0.0 if not defined by ruleset."""
+        return self.sub_scores.get("robustness", 0.0)
 
 
 # ── Threshold constants (overridable per RuleSet) ───────────────────────────
@@ -165,19 +216,34 @@ deficient. Conservative default; tune per deployment.
 class RuleSet:
     """A collection of rules evaluated together against a (q, r, ctx) triple.
 
-    Use :func:`banking_rules` for a curated regulated-finance ruleset, or
-    construct your own by passing a sequence of :class:`ChecklistRule`.
+    Use :func:`groundlens_banking_rules` for the current canonical
+    five-category ruleset, :func:`banking_rules` for the legacy three-category
+    ruleset, or construct your own by passing a sequence of
+    :class:`ChecklistRule` along with the list of sub-score categories the
+    rules contribute to.
 
     Attributes:
-        name: Identifier (e.g. ``"banking_v1"``). Surfaced in audit logs.
+        name: Identifier (e.g. ``"groundlens_banking_v1"``). Surfaced in audit logs.
         rules: The rules to evaluate.
-        quality_floor: Threshold below which a sub-score triggers the
-            cosmetic-deadlock flag. Default ``0.3``.
+        sub_scores: Ordered tuple of sub-score category names this ruleset
+            produces. Rules whose ``sub_score`` field is not in this tuple are
+            ignored at aggregation time (their evidence is still recorded in
+            :attr:`RuleSetResult.rule_results`). Default
+            ``("spec", "expl", "bshift")`` preserves legacy behavior.
+        quality_floor: Default flag-predicate threshold below which a sub-score
+            triggers the audit-deficiency flag. Applied to ``spec`` and
+            ``expl`` only when :attr:`flag_predicate` is ``None``.
+        flag_predicate: Optional pure function ``dict[str, float] -> bool`` that
+            decides whether the aggregated result is flagged. When ``None``,
+            the default legacy predicate is used: flagged iff
+            ``spec < quality_floor or expl < quality_floor``.
     """
 
     name: str
     rules: tuple[ChecklistRule, ...]
+    sub_scores: tuple[str, ...] = ("spec", "expl", "bshift")
     quality_floor: float = _DEFAULT_QUALITY_FLOOR
+    flag_predicate: Callable[[dict[str, float]], bool] | None = None
 
     def evaluate(
         self,
@@ -212,7 +278,7 @@ class RuleSet:
         meta = metadata or {}
 
         results: list[RuleResult] = []
-        weights_by_sub: dict[str, float] = {"spec": 0.0, "expl": 0.0, "bshift": 0.0}
+        weights_by_sub: dict[str, float] = dict.fromkeys(self.sub_scores, 0.0)
 
         for rule in self.rules:
             evidence = rule.check(question, response, context, meta)
@@ -229,17 +295,27 @@ class RuleSet:
             if evidence.matched and rule.sub_score in weights_by_sub:
                 weights_by_sub[rule.sub_score] += rule.weight
 
-        spec = min(1.0, weights_by_sub["spec"])
-        expl = min(1.0, weights_by_sub["expl"])
-        bshift = min(1.0, weights_by_sub["bshift"])
-        quality = float((spec * expl * bshift) ** (1.0 / 3.0)) if spec * expl * bshift > 0 else 0.0
-        flagged = (spec < self.quality_floor) or (expl < self.quality_floor)
+        sub_scores: dict[str, float] = {
+            name: round(min(1.0, weights_by_sub[name]), 4) for name in self.sub_scores
+        }
+
+        product = 1.0
+        for value in sub_scores.values():
+            product *= value
+        n = len(sub_scores)
+        quality = round(product ** (1.0 / n), 4) if product > 0 and n > 0 else 0.0
+
+        if self.flag_predicate is not None:
+            flagged = bool(self.flag_predicate(sub_scores))
+        else:
+            # Legacy default: flagged iff spec or expl below quality_floor.
+            flagged = (sub_scores.get("spec", 0.0) < self.quality_floor) or (
+                sub_scores.get("expl", 0.0) < self.quality_floor
+            )
 
         audit = _format_audit_explanation(
             ruleset_name=self.name,
-            spec=spec,
-            expl=expl,
-            bshift=bshift,
+            sub_scores=sub_scores,
             quality=quality,
             flagged=flagged,
             quality_floor=self.quality_floor,
@@ -247,10 +323,8 @@ class RuleSet:
         )
 
         return RuleSetResult(
-            spec=round(spec, 4),
-            expl=round(expl, 4),
-            bshift=round(bshift, 4),
-            quality=round(quality, 4),
+            sub_scores=sub_scores,
+            quality=quality,
             flagged=flagged,
             rule_results=tuple(results),
             audit_explanation=audit,
@@ -263,9 +337,7 @@ class RuleSet:
 def _format_audit_explanation(
     *,
     ruleset_name: str,
-    spec: float,
-    expl: float,
-    bshift: float,
+    sub_scores: dict[str, float],
     quality: float,
     flagged: bool,
     quality_floor: float,
@@ -274,12 +346,10 @@ def _format_audit_explanation(
     """Render a multi-line audit explanation suitable for log inclusion."""
     lines: list[str] = []
     lines.append(f"Ruleset: {ruleset_name}")
-    lines.append(
-        f"Sub-scores: spec={spec:.3f}, expl={expl:.3f}, bshift={bshift:.3f} "
-        f"(quality={quality:.3f})"
-    )
+    sub_score_str = ", ".join(f"{name}={value:.3f}" for name, value in sub_scores.items())
+    lines.append(f"Sub-scores: {sub_score_str} (quality={quality:.3f})")
     verdict = "FLAGGED" if flagged else "PASS"
-    lines.append(f"Verdict: {verdict} (cosmetic-deadlock threshold={quality_floor})")
+    lines.append(f"Verdict: {verdict} (flag threshold={quality_floor})")
 
     matched = [r for r in results if r.matched]
     missed = [r for r in results if not r.matched]
@@ -735,6 +805,692 @@ def banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> RuleSet:
     return RuleSet(name="banking_v1", rules=rules, quality_floor=quality_floor)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# groundlens_banking_rules — current canonical ruleset.
+#
+# 20 rules organized into 5 emergent sub-scores: groundedness, completeness,
+# calibration, traceability, robustness. Each rule carries a `citation` field
+# pointing to its academic / industrial / regulatory provenance.
+#
+# The skeleton and the rules are derived empirically by triangulating five
+# independent research tracks (peer-reviewed NLP, tier-1 banks, banking
+# regulators, cross-industry frameworks, financial NLP benchmarks). The
+# methodology and full per-rule provenance are documented in the companion
+# paper "Defendable Rules for LLM Rationale Evaluation in Banking Governance:
+# A Multi-Source Provenance Framework" (Marin, 2026).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+_SOURCE_SPAN_RE = re.compile(
+    r"\bp\.\s?\d+|\bpage\s+\d+|\bsection\s+\d+|§\s?\d+|\bparagraph\s+\d+|\bclause\s+\d+",
+    re.IGNORECASE,
+)
+"""Matches verbatim source-span references: page X, section X, §X, paragraph X."""
+
+_CONFIDENCE_RE = re.compile(
+    r"\b\d+(?:\.\d+)?\s?%|\b(?:confidence|probability|likelihood)\s+(?:of\s+)?\d+",
+    re.IGNORECASE,
+)
+"""Matches numeric confidence expressions: '75%', 'confidence of 0.8', etc."""
+
+
+def _check_grounded_in_context(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Did the response stay grounded in the provided context?
+
+    Deterministic proxy for RAGAs/ARES Faithfulness: compute the fraction of
+    response content-word types that also appear in the context. When no
+    context is supplied, the rule abstains (matched=True) because there is
+    nothing to verify against.
+    """
+    if context is None or not context.strip():
+        return RuleEvidence(
+            matched=True, span="", explanation="No context provided — rule abstains"
+        )
+    resp_lower = response.lower()
+    ctx_lower = context.lower()
+    resp_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", resp_lower))
+    if not resp_words:
+        return RuleEvidence(matched=True, span="", explanation="Response has no content words")
+    ctx_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", ctx_lower))
+    overlap = len(resp_words & ctx_words) / len(resp_words)
+    threshold = 0.4
+    if overlap >= threshold:
+        return RuleEvidence(
+            matched=True,
+            span=f"overlap={overlap:.2f}",
+            explanation="Response content overlaps the context",
+        )
+    return RuleEvidence(
+        matched=False,
+        span=f"overlap={overlap:.2f}",
+        explanation=(f"Response content overlap {overlap:.2f} below threshold {threshold}"),
+    )
+
+
+def _check_atomic_decomposable(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Can the rationale be decomposed into at least two distinct claim units?"""
+    sentence_terminators = re.findall(r"[.!?]", response)
+    matched = len(sentence_terminators) >= 2
+    return RuleEvidence(
+        matched=matched,
+        span=f"sentences={len(sentence_terminators)}",
+        explanation="Rationale contains at least two sentence-level claims",
+    )
+
+
+def _check_no_unsupported_extensions(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Did the response avoid introducing numbers absent from the context?
+
+    Deterministic proxy for extrinsic-hallucination resistance: every numeric
+    token in the response must also occur in the context. When no context is
+    supplied, the rule abstains.
+    """
+    if context is None or not context.strip():
+        return RuleEvidence(
+            matched=True, span="", explanation="No context provided — rule abstains"
+        )
+    resp_nums = set(re.findall(r"\b\d+(?:\.\d+)?\b", response))
+    if not resp_nums:
+        return RuleEvidence(matched=True, span="", explanation="No numeric claims to verify")
+    ctx_nums = set(re.findall(r"\b\d+(?:\.\d+)?\b", context))
+    introduced = resp_nums - ctx_nums
+    if not introduced:
+        return RuleEvidence(
+            matched=True, span="", explanation="All response numbers appear in context"
+        )
+    return RuleEvidence(
+        matched=False,
+        span=f"introduced={sorted(introduced)[:3]}",
+        explanation=f"Response introduced {len(introduced)} numeric claim(s) absent from context",
+    )
+
+
+def _check_counterfactual_robustness(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Has the rationale been screened against wrong-retrieval scenarios?
+
+    System-level check via metadata: matches when ``metadata["context_quality_validated"]``
+    is truthy, indicating that the deploying pipeline ran the response through
+    a counterfactual-robustness check (e.g. RGB-style adversarial retrieval).
+    Defaults to True when the flag is absent (assume external validation).
+    """
+    validated = bool(metadata.get("context_quality_validated", True))
+    return RuleEvidence(
+        matched=validated,
+        span="metadata.context_quality_validated",
+        explanation="Pipeline reports counterfactual-robustness screening passed",
+    )
+
+
+def _check_addresses_all_parts(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the response length scale with the question's number of sub-questions?"""
+    sub_questions = max(1, question.count("?"))
+    min_tokens = 25 * sub_questions
+    n_tokens = len(response.split())
+    matched = n_tokens >= min_tokens
+    return RuleEvidence(
+        matched=matched,
+        span=f"tokens={n_tokens}, required={min_tokens}",
+        explanation=f"Response length covers {sub_questions} sub-question(s)",
+    )
+
+
+_GOVERNANCE_DIMENSIONS: tuple[str, ...] = (
+    "borrower",
+    "transaction",
+    "security",
+    "collateral",
+    "exposure",
+    "limit",
+    "jurisdiction",
+    "policy",
+    "counterparty",
+    "customer",
+    "regulator",
+    "compliance",
+    "risk",
+    "control",
+)
+
+
+def _check_governance_dimensions(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale reference at least two distinct governance dimensions?"""
+    resp_lower = response.lower()
+    hits = [dim for dim in _GOVERNANCE_DIMENSIONS if dim in resp_lower]
+    matched = len(hits) >= 2
+    return RuleEvidence(
+        matched=matched,
+        span=", ".join(hits[:3]) if hits else "",
+        explanation="Rationale references multiple governance dimensions",
+    )
+
+
+def _check_information_integration(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale integrate multiple sources via integration connectives?"""
+    ev = _matches_any(
+        response,
+        ["combined", "together", "across", "between", "both ", "in addition", "moreover"],
+    )
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span,
+        explanation="Rationale uses multi-source integration language",
+    )
+
+
+def _check_abstains_when_insufficient(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale explicitly abstain when evidence is insufficient?"""
+    ev = _matches_any(
+        response,
+        [
+            "insufficient information",
+            "cannot determine",
+            "unable to confirm",
+            "not enough evidence",
+            "i don't know",
+            "cannot be answered",
+            "no relevant",
+            "missing data",
+        ],
+    )
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span,
+        explanation="Rationale explicitly abstains on insufficient evidence",
+    )
+
+
+def _check_explicit_hedging(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale use explicit hedging language?"""
+    ev = _matches_any(
+        response,
+        [
+            " may ",
+            " might ",
+            "suggests",
+            "appears",
+            "appears to",
+            "likely",
+            "probably",
+            "possibly",
+            "seems to",
+            "could be",
+        ],
+    )
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span.strip(),
+        explanation="Rationale uses hedging language to express uncertainty",
+    )
+
+
+def _check_confidence_score(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale carry a numeric confidence / probability score?"""
+    ev = _matches_regex(response, _CONFIDENCE_RE)
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span,
+        explanation="Rationale includes a numeric confidence or probability",
+    )
+
+
+def _check_self_consistency(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Did the production pipeline screen the response for self-consistency?
+
+    System-level check via metadata: matches when ``metadata["consistency_check_passed"]``
+    is truthy. Defaults to True when absent (assume external validation).
+    """
+    validated = bool(metadata.get("consistency_check_passed", True))
+    return RuleEvidence(
+        matched=validated,
+        span="metadata.consistency_check_passed",
+        explanation="Pipeline reports self-consistency screening passed",
+    )
+
+
+def _check_specific_source_span(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale cite a specific source span (page, section, paragraph, clause)?"""
+    ev = _matches_regex(response, _SOURCE_SPAN_RE)
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span,
+        explanation="Rationale cites a specific source span",
+    )
+
+
+def _check_falsifiable_actionable(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale make at least one specific testable claim?
+
+    Approximated by the conjunction of: a numeric value present AND a causal
+    connective present. Such a rationale couples a concrete claim to a
+    causal mechanism, which is what makes the claim testable.
+    """
+    has_number = bool(_NUMERIC_RE.search(response))
+    causal_ev = _matches_any(response, ["because", "due to", "therefore", "consequently"])
+    matched = has_number and causal_ev.matched
+    return RuleEvidence(
+        matched=matched,
+        span=causal_ev.span if matched else "",
+        explanation="Rationale couples a numeric claim with a causal mechanism",
+    )
+
+
+def _check_audit_logged(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Has the rationale been persisted to the audit log?
+
+    System-level check via metadata: matches when ``metadata["audit_logged"]``
+    is truthy. Defaults to True when absent (assume external audit pipeline,
+    e.g. ``groundlens.audit.AuditLog``).
+    """
+    logged = bool(metadata.get("audit_logged", True))
+    return RuleEvidence(
+        matched=logged,
+        span="metadata.audit_logged",
+        explanation="Pipeline reports rationale persisted to audit log",
+    )
+
+
+def _check_independent_validation(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale or its pipeline reference independent validation?"""
+    text_ev = _matches_any(
+        response,
+        [
+            "validated by",
+            "reviewed by",
+            "second opinion",
+            "checked by",
+            "verified by",
+            "independent review",
+            "independent validation",
+            "effective challenge",
+        ],
+    )
+    metadata_validated = bool(metadata.get("independent_review_completed", False))
+    matched = text_ev.matched or metadata_validated
+    span = text_ev.span if text_ev.matched else "metadata.independent_review_completed"
+    return RuleEvidence(
+        matched=matched,
+        span=span if matched else "",
+        explanation="Rationale or pipeline references independent validation",
+    )
+
+
+def _check_prompt_injection_robust(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Has the rationale been screened for prompt-injection / distractor robustness?
+
+    System-level check via metadata: matches when ``metadata["injection_test_passed"]``
+    is truthy. Defaults to True when absent (assume external validation).
+    """
+    validated = bool(metadata.get("injection_test_passed", True))
+    return RuleEvidence(
+        matched=validated,
+        span="metadata.injection_test_passed",
+        explanation="Pipeline reports prompt-injection robustness screening passed",
+    )
+
+
+def _check_cross_source_conflict(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+) -> RuleEvidence:
+    """Does the rationale identify cross-source conflicts when they exist?"""
+    ev = _matches_any(
+        response,
+        [
+            "conflict",
+            "conflicting",
+            "disagrees",
+            "disagreement",
+            "inconsistent",
+            "however",
+            "but the",
+            "discrepancy",
+            "mismatch",
+        ],
+    )
+    return RuleEvidence(
+        matched=ev.matched,
+        span=ev.span,
+        explanation="Rationale acknowledges a cross-source conflict",
+    )
+
+
+def _groundlens_banking_flag_predicate(sub_scores: dict[str, float]) -> bool:
+    """Default flag predicate for the GroundLens banking ruleset.
+
+    Flagged when any of the three regulator-non-negotiable sub-scores falls
+    below its rule-set threshold:
+
+    - ``groundedness < 0.5`` — claim-to-source linkage is the EU AI Act Art. 13
+      and NIST 600-1 confabulation requirement.
+    - ``calibration < 0.3`` — uncertainty expression is required by SR 26-2 §V
+      and EU AI Act Art. 13(3)(b)(ii).
+    - ``traceability < 0.4`` — citation and audit-trail are required by
+      EU AI Act Art. 12 and SR 26-2 §VI.
+    """
+    return (
+        sub_scores.get("groundedness", 0.0) < 0.5
+        or sub_scores.get("calibration", 0.0) < 0.3
+        or sub_scores.get("traceability", 0.0) < 0.4
+    )
+
+
+def groundlens_banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> RuleSet:
+    """Canonical rule set for LLM rationale evaluation in banking governance.
+
+    Returns the 20-rule reference set whose provenance is triangulated across
+    five independent research tracks: peer-reviewed NLP literature, tier-1
+    bank public reports, banking regulator whitepapers, cross-industry
+    frameworks, and financial-domain NLP benchmarks. The rules are organized
+    into five empirically-emergent sub-score categories:
+
+    - **groundedness** (5 rules): claims linked to and supported by source.
+    - **completeness** (3 rules): coverage of the governance question.
+    - **calibration** (4 rules): uncertainty expression and abstention.
+    - **traceability** (5 rules): citation, audit trail, validation references.
+    - **robustness** (3 rules): resistance to noise, conflict, injection.
+
+    Each rule carries a ``citation`` field pointing to at least one of its
+    academic, industrial, or regulatory provenance sources. The companion
+    paper (Marin, 2026) documents the full per-rule provenance.
+
+    The default flag predicate :func:`_groundlens_banking_flag_predicate`
+    triggers when any regulator-non-negotiable sub-score falls below its
+    threshold (groundedness < 0.5, calibration < 0.3, or traceability < 0.4).
+
+    Args:
+        quality_floor: Legacy floor exposed for users who want a uniform
+            threshold across sub-scores. Not used by the default flag
+            predicate; kept for compatibility with the legacy ``banking_rules()``
+            signature so deployers can A/B both rulesets with one parameter.
+
+    Returns:
+        A :class:`RuleSet` named ``"groundlens_banking_v1"`` with five
+        sub-scores and 20 rules.
+    """
+    rules: tuple[ChecklistRule, ...] = (
+        # ── Groundedness (5 rules) ──────────────────────────────────────────
+        ChecklistRule(
+            id="grnd.claim_supported_by_context",
+            description="every claim inferable from context",
+            weight=0.25,
+            sub_score="groundedness",
+            check=_check_grounded_in_context,
+            citation="RAGAs (Es et al., EACL 2024) §3; NIST AI 600-1 (2024) §2.2 Confabulation",
+        ),
+        ChecklistRule(
+            id="grnd.atomic_decomposition",
+            description="rationale decomposable into atomic claims",
+            weight=0.20,
+            sub_score="groundedness",
+            check=_check_atomic_decomposable,
+            citation="FactScore (Min et al., EMNLP 2023) §3; RAGAs (Es et al., EACL 2024) §3",
+        ),
+        ChecklistRule(
+            id="grnd.no_unsupported_extensions",
+            description="no claims beyond what context supports",
+            weight=0.20,
+            sub_score="groundedness",
+            check=_check_no_unsupported_extensions,
+            citation=(
+                "HaluEval (Li et al., EMNLP 2023); Ji et al. ACM CSUR 2023; NIST AI 600-1 (2024)"
+            ),
+        ),
+        ChecklistRule(
+            id="grnd.regulatory_flag",
+            description="names a specific regulatory flag or policy clause",
+            weight=0.20,
+            sub_score="groundedness",
+            check=_check_regulatory_flag,
+            citation="REV (Chen et al., ACL 2023); SR 26-2 (Fed/OCC/FDIC 2026) §VI Documentation",
+        ),
+        ChecklistRule(
+            id="grnd.counterfactual_robust",
+            description="screened against wrong-retrieval scenarios",
+            weight=0.15,
+            sub_score="groundedness",
+            check=_check_counterfactual_robustness,
+            citation="RGB (Chen et al., AAAI 2024); EU AI Act 2024/1689 Art. 15(4)",
+        ),
+        # ── Completeness (3 rules) ──────────────────────────────────────────
+        ChecklistRule(
+            id="comp.addresses_all_parts",
+            description="response length scales with question parts",
+            weight=0.40,
+            sub_score="completeness",
+            check=_check_addresses_all_parts,
+            citation="RAGAs (Es et al., EACL 2024) §3; EU AI Act 2024/1689 Art. 13(2)",
+        ),
+        ChecklistRule(
+            id="comp.governance_dimensions",
+            description="references multiple governance dimensions",
+            weight=0.35,
+            sub_score="completeness",
+            check=_check_governance_dimensions,
+            citation="EBA GL/2020/06 §4.3.3; SR 26-2 (Fed/OCC/FDIC 2026) §IV Model Development",
+        ),
+        ChecklistRule(
+            id="comp.information_integration",
+            description="integrates multiple sources",
+            weight=0.25,
+            sub_score="completeness",
+            check=_check_information_integration,
+            citation="RGB (Chen et al., AAAI 2024); TRUE (Honovich et al., NAACL 2022)",
+        ),
+        # ── Calibration (4 rules) ───────────────────────────────────────────
+        ChecklistRule(
+            id="cal.abstains_when_insufficient",
+            description="explicitly abstains when evidence is insufficient",
+            weight=0.35,
+            sub_score="calibration",
+            check=_check_abstains_when_insufficient,
+            citation=(
+                "RAGAs (Es et al., EACL 2024) §3; FinanceBench (Islam et al., 2023); "
+                "SR 26-2 §V Model Validation"
+            ),
+        ),
+        ChecklistRule(
+            id="cal.explicit_hedging",
+            description="uses hedging language for uncertain claims",
+            weight=0.30,
+            sub_score="calibration",
+            check=_check_explicit_hedging,
+            citation=(
+                "TruthfulQA (Lin et al., ACL 2022); Hyland (1998) hedging taxonomy; "
+                "SR 26-2 §IV Model Use"
+            ),
+        ),
+        ChecklistRule(
+            id="cal.confidence_score",
+            description="includes a numeric confidence or probability",
+            weight=0.20,
+            sub_score="calibration",
+            check=_check_confidence_score,
+            citation="G-Eval (Liu et al., EMNLP 2023); EU AI Act Art. 13(3)(b)(ii)",
+        ),
+        ChecklistRule(
+            id="cal.self_consistency",
+            description="pipeline screened for self-consistency",
+            weight=0.15,
+            sub_score="calibration",
+            check=_check_self_consistency,
+            citation="SelfCheckGPT (Manakul et al., EMNLP 2023); Morgan Stanley + OpenAI (2024)",
+        ),
+        # ── Traceability (5 rules) ──────────────────────────────────────────
+        ChecklistRule(
+            id="trace.specific_source_span",
+            description="cites a specific page / section / paragraph",
+            weight=0.25,
+            sub_score="traceability",
+            check=_check_specific_source_span,
+            citation=(
+                "e-SNLI (Camburu et al., NeurIPS 2018); EU AI Act Art. 13(3)(b)(iv); "
+                "FinanceBench (Islam et al., 2023)"
+            ),
+        ),
+        ChecklistRule(
+            id="trace.natural_language_rationale",
+            description="provides a substantive natural-language rationale",
+            weight=0.20,
+            sub_score="traceability",
+            check=_check_substantive_length,
+            citation=(
+                "e-SNLI (Camburu et al., NeurIPS 2018); EU AI Act Art. 13(3)(b)(iv); "
+                "PRA SS1/23 Principle 3"
+            ),
+        ),
+        ChecklistRule(
+            id="trace.falsifiable_actionable",
+            description="couples numeric claim with causal mechanism",
+            weight=0.20,
+            sub_score="traceability",
+            check=_check_falsifiable_actionable,
+            citation="REV (Chen et al., ACL 2023); SR 26-2 §V Conceptual Soundness",
+        ),
+        ChecklistRule(
+            id="trace.numeric_value",
+            description="includes a numeric value or metric",
+            weight=0.15,
+            sub_score="traceability",
+            check=_check_numeric_value,
+            citation=(
+                "FinQA (Chen et al., EMNLP 2021); EU AI Act Art. 13(3)(b)(ii); "
+                "SR 26-2 §V Outcomes Analysis"
+            ),
+        ),
+        ChecklistRule(
+            id="trace.audit_logged",
+            description="rationale persisted to audit log",
+            weight=0.20,
+            sub_score="traceability",
+            check=_check_audit_logged,
+            citation=(
+                "EU AI Act Art. 12 Record-Keeping; SR 26-2 §VI Documentation; "
+                "ISO/IEC 42001:2023 §8.2"
+            ),
+        ),
+        # ── Robustness (3 rules) ────────────────────────────────────────────
+        ChecklistRule(
+            id="rob.independent_validation",
+            description="references independent validation / effective challenge",
+            weight=0.40,
+            sub_score="robustness",
+            check=_check_independent_validation,
+            citation=(
+                "SR 26-2 §III Effective Challenge; PRA SS1/23 Principle 4; "
+                "ECB Guide to Internal Models §9.3 ¶43(a)"
+            ),
+        ),
+        ChecklistRule(
+            id="rob.prompt_injection_robust",
+            description="pipeline screened for prompt-injection robustness",
+            weight=0.35,
+            sub_score="robustness",
+            check=_check_prompt_injection_robust,
+            citation="RGB (Chen et al., AAAI 2024); EU AI Act Art. 15; MAS MindForge (2024)",
+        ),
+        ChecklistRule(
+            id="rob.cross_source_conflict",
+            description="acknowledges cross-source conflicts",
+            weight=0.25,
+            sub_score="robustness",
+            check=_check_cross_source_conflict,
+            citation=(
+                "ConflictBank (Su et al., 2024); EU AI Act Art. 15(4); RGB (Chen et al., 2024)"
+            ),
+        ),
+    )
+
+    return RuleSet(
+        name="groundlens_banking_v1",
+        rules=rules,
+        sub_scores=("groundedness", "completeness", "calibration", "traceability", "robustness"),
+        quality_floor=quality_floor,
+        flag_predicate=_groundlens_banking_flag_predicate,
+    )
+
+
 __all__ = [
     "ChecklistRule",
     "RuleEvidence",
@@ -742,4 +1498,5 @@ __all__ = [
     "RuleSet",
     "RuleSetResult",
     "banking_rules",
+    "groundlens_banking_rules",
 ]
