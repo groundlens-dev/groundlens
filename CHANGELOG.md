@@ -5,6 +5,65 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.9 -- `groundlens_banking_rules`: multi-source provenance rule set
+
+### Added
+
+- **`groundlens_banking_rules()`** factory: a new 20-rule reference set whose
+  provenance is triangulated across five independent research tracks
+  (peer-reviewed NLP literature, tier-1 bank public reports, banking regulator
+  whitepapers, cross-industry frameworks, financial-domain NLP benchmarks).
+  Rules are organized into five empirically-emergent sub-score categories:
+  `groundedness`, `completeness`, `calibration`, `traceability`, `robustness`.
+  Each rule carries a `citation` field pointing to its academic / industrial /
+  regulatory provenance. The methodology and full per-rule provenance are
+  documented in the companion paper *"Defendable Rules for LLM Rationale
+  Evaluation in Banking Governance: A Multi-Source Provenance Framework"*
+  (Marin, 2026).
+- **`ChecklistRule.citation: str`** field (default `""`) for free-text
+  provenance citation. Existing rules in `banking_rules()` retain their
+  empty default; new rules in `groundlens_banking_rules()` populate it.
+- **`RuleSet.sub_scores: tuple[str, ...]`** field (default
+  `("spec", "expl", "bshift")`) makes the list of aggregated sub-score
+  categories explicit and configurable per rule set.
+- **`RuleSet.flag_predicate: Callable[[dict[str, float]], bool] | None`** field
+  enables custom flag predicates per rule set. When `None`, the legacy
+  predicate (`spec < quality_floor or expl < quality_floor`) is used.
+- **`RuleSetResult.sub_scores: dict[str, float]`** canonical store for
+  sub-score values. Convenience read accessors for the legacy categories
+  (`spec`, `expl`, `bshift`) and for the current categories (`groundedness`,
+  `completeness`, `calibration`, `traceability`, `robustness`) all read from
+  this dict and return `0.0` when not defined by the active rule set.
+
+### Changed
+
+- **`RuleSet.evaluate()`** now iterates over `RuleSet.sub_scores` to aggregate
+  weights, instead of hardcoding the three legacy categories. The geometric-
+  mean quality is computed over all configured sub-scores.
+- **`RuleSetResult`** is now a frozen dataclass with a `sub_scores: dict[str, float]`
+  field instead of hardcoded `spec`, `expl`, `bshift` fields. Backward-compatible
+  `@property` accessors preserve the legacy attribute interface — existing
+  user code that reads `result.spec` / `result.expl` / `result.bshift`
+  continues to work without modification.
+
+### Backward compatibility
+
+- **`banking_rules()`** continues to return a 3-category rule set
+  (`spec`/`expl`/`bshift`) with the legacy 22 rules. No call-site changes
+  required. The 20 existing tests in `test_rules.py` pass without modification.
+- **Result-attribute access** via `result.spec`, `result.expl`, `result.bshift`
+  is preserved via `@property` accessors on `RuleSetResult`.
+
+### Notes for deployers
+
+- A response evaluated with `groundlens_banking_rules()` produces a result
+  whose `sub_scores` dict has keys `groundedness`, `completeness`,
+  `calibration`, `traceability`, `robustness`. Legacy accessors
+  (`result.spec`, etc.) return `0.0` because the current ruleset does not
+  define those categories.
+- The default flag predicate triggers on regulator-non-negotiable failures:
+  `groundedness < 0.5 or calibration < 0.3 or traceability < 0.4`.
+
 ## 2026.6.8 -- DGI inline calibration fix + lint hygiene
 
 ### Fixed
