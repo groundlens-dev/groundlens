@@ -5,6 +5,47 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.10 -- `groundlens.agents`: per-agent rule sets for routing, RAG, and specialized agents
+
+### Added
+
+- **`groundlens.agents`** submodule: triage rule sets organized by the agent
+  class they target. Modern AI systems are agentic pipelines, not single
+  models. Each agent class has distinct failure modes and therefore distinct
+  triage needs.
+  - **`routing_rules()`** -- 10 rules across 4 sub-scores (intent_clarity,
+    classification_confidence, fallback_appropriateness,
+    disambiguation_quality) for intent classification agents. Citations
+    include BBVA AI Factory's *Routing the future* (Falcón et al., 14/02/2025)
+    and *AI Evaluation in the Age of Agents* (Torcal et al., 15/04/2026),
+    Sarikaya et al. (IEEE TASLP 2014), Guo et al. (ICML 2017), Rao &
+    Daumé III (ACL 2018), NIST AI RMF.
+  - **`specialized_agent_rules()`** -- 9 rules across 4 sub-scores
+    (entity_groundedness, entity_completeness, entity_calibration,
+    execution_readiness) for tool-using / execution agents. Includes ISO
+    13616 IBAN mod-97 verification and strict flag predicate suitable for
+    agents that execute irreversible operations. Citations include the
+    BBVA AI Factory Blue Eval post, ISO 13616, EBA Guidelines on the
+    security of internet payments, and Federal Reserve SR 26-2.
+  - **`rag_rules(domain="banking")`** -- agent-vocabulary alias for
+    `groundlens_banking_rules()`. Signature forward-compatible with planned
+    verticalizations (legal, healthcare, insurance).
+- **Tagline update.** Package description: *"Triage for AI agents and model
+  outputs. Deterministic. Auditable. No second LLM."*
+
+### Changed
+
+- `__init__.py` now exports `agents` submodule and the three new factories
+  (`routing_rules`, `rag_rules`, `specialized_agent_rules`).
+- README repositioned around "agent triage" while preserving the geometric
+  layer messaging.
+
+### Migration notes
+
+- **Non-breaking.** All existing APIs continue to work unchanged.
+- `rag_rules()` returns the same object as `groundlens_banking_rules()`
+  today; callers can adopt the new name without behavioural change.
+
 ## 2026.6.9 -- `groundlens_banking_rules`: multi-source provenance rule set
 
 ### Added
