@@ -1,6 +1,6 @@
-"""Groundlens — Triage for AI agents and model outputs.
+"""Groundlens — Verifiable agent triage.
 
-Deterministic. Auditable. No second LLM.
+Deterministic. Auditable. No second LLM in the loop.
 
 Groundlens triages outputs from individual LLMs and from multi-agent
 pipelines (routing, RAG, specialized / tool-using agents). Two layers:

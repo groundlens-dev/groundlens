@@ -5,6 +5,38 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.12 -- repositioning: *Verifiable agent triage* + generic-source citations
+
+### Changed
+
+- **Tagline:** *Verifiable agent triage.* Package description and top-level
+  docstring updated. README rewritten from scratch around the positioning that
+  geometry + rules together are what survives a model risk audit; neither
+  layer alone is enough.
+- **README:** new structure — Why geometry AND rules, Quick start (SGI + rules
+  / DGI + rules combined), Built-in rule sets table, SGI/DGI calibration
+  workflow, Build your own rule set, end-to-end LangChain pipeline with
+  hash-chained audit log.
+- **Rule citations in `groundlens.agents`** (customer_support, routing,
+  specialized) reworded from specific industry-author citations to
+  generic-source descriptors (e.g. *"Industry banking RAG evaluation framework
+  — relevance check"*). The underlying rule logic, weights, sub-scores, and
+  flag predicates are unchanged. Audit trails produced by `RuleSet.evaluate`
+  still cite a source per rule; the citation strings are now
+  vendor-/institution-neutral.
+- **Docstrings** in `agents/__init__.py`, `agents/customer_support.py`,
+  `agents/rag.py`, `agents/routing.py`, `agents/specialized.py` updated to
+  drop industry-specific archetype names in favor of generic agent-class
+  descriptors.
+
+### Migration notes
+
+- **Non-breaking.** All public APIs, factory names, rule IDs, sub-scores, and
+  flag predicates are identical to 2026.6.11.
+- Audit trails emitted by `RuleSet.evaluate` will show updated citation
+  strings; downstream code that parses citations literally should be reviewed,
+  but no API contract has changed.
+
 ## 2026.6.11 -- `customer_support_rag_rules`: domain-fit rule set for informational customer-support agents
 
 ### Added
