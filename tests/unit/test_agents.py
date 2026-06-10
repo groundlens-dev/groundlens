@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from groundlens.agents import rag_rules, routing_rules, specialized_agent_rules
+from groundlens.agents import (
+    customer_support_rag_rules,
+    rag_rules,
+    routing_rules,
+    specialized_agent_rules,
+)
 from groundlens.rules import RuleSet
 
 # ── routing_rules ────────────────────────────────────────────────────────────
@@ -296,6 +301,120 @@ class TestRagRules:
         rs2 = rag_rules(domain="banking")
         assert rs1.name == rs2.name
         assert len(rs1.rules) == len(rs2.rules)
+
+    def test_customer_support_domain_returns_csr_ruleset(self) -> None:
+        rs = rag_rules(domain="customer_support")
+        assert rs.name == "customer_support_rag_v1"
+        assert len(rs.rules) == 7
+
+
+# ── customer_support_rag_rules ───────────────────────────────────────────────
+
+
+class TestCustomerSupportRagRules:
+    def test_factory_returns_ruleset(self) -> None:
+        rs = customer_support_rag_rules()
+        assert isinstance(rs, RuleSet)
+        assert rs.name == "customer_support_rag_v1"
+        assert len(rs.rules) == 7
+
+    def test_sub_scores_cover_three_categories(self) -> None:
+        rs = customer_support_rag_rules()
+        assert rs.sub_scores == ("groundedness", "completeness", "no_overreach")
+
+    def test_every_rule_has_citation(self) -> None:
+        rs = customer_support_rag_rules()
+        for rule in rs.rules:
+            assert rule.citation, f"rule {rule.id} missing citation"
+
+    def test_grounded_response_passes(self) -> None:
+        rs = customer_support_rag_rules()
+        result = rs.evaluate(
+            question="What is the Bizum daily limit?",
+            response=(
+                "The Bizum daily limit at BBVA is 1,000 EUR per transaction "
+                "and 2,000 EUR per day in total."
+            ),
+            context=(
+                "The daily Bizum transfer limit at BBVA is 1,000 EUR per "
+                "transaction and 2,000 EUR per day in total. The monthly "
+                "limit is 5,000 EUR."
+            ),
+        )
+        assert not result.flagged
+        assert result.sub_scores["groundedness"] >= 0.5
+        assert result.sub_scores["no_overreach"] >= 0.5
+
+    def test_invented_numbers_flagged(self) -> None:
+        rs = customer_support_rag_rules()
+        result = rs.evaluate(
+            question="What is the Bizum daily limit?",
+            response=(
+                "The Bizum daily limit at BBVA is 500 EUR per transaction. "
+                "Premium clients have a 10,000 EUR daily limit."
+            ),
+            context=(
+                "The daily Bizum transfer limit at BBVA is 1,000 EUR per "
+                "transaction and 2,000 EUR per day in total."
+            ),
+        )
+        rule_ids_failed = {r.rule_id for r in result.rule_results if not r.matched}
+        assert "csr.no_invented_numbers" in rule_ids_failed
+        assert result.flagged
+
+    def test_invented_legal_refs_flagged(self) -> None:
+        rs = customer_support_rag_rules()
+        result = rs.evaluate(
+            question="Tell me about BBVA AML procedures",
+            response=(
+                "BBVA applies AML procedures based on Law 5/2014 and EU Directive 2018/843."
+            ),
+            context=(
+                "BBVA applies AML procedures according to Spanish Law 10/2010 "
+                "and EU Directive 2015/849."
+            ),
+        )
+        rule_ids_failed = {r.rule_id for r in result.rule_results if not r.matched}
+        assert "csr.no_unrequested_legal_refs" in rule_ids_failed
+
+    def test_speculative_procedure_flagged(self) -> None:
+        rs = customer_support_rag_rules()
+        result = rs.evaluate(
+            question="How to open a current account?",
+            response=(
+                "You can complete the process online or by appointment with a BBVA advisor."
+            ),
+            context=(
+                "To open a current account at BBVA, you need a valid Spanish "
+                "DNI or NIE. The process can be completed in any BBVA branch "
+                "or through the official BBVA mobile app."
+            ),
+        )
+        rule_ids_failed = {r.rule_id for r in result.rule_results if not r.matched}
+        assert "csr.no_speculative_procedure" in rule_ids_failed
+
+    def test_under_informative_not_flagged_for_safety(self) -> None:
+        """Vague-but-accurate responses are NOT flagged at safety level.
+
+        completeness drops but groundedness and no_overreach are fine,
+        so flag_predicate (groundedness < 0.5 OR no_overreach < 0.5)
+        does not trip.
+        """
+        rs = customer_support_rag_rules()
+        result = rs.evaluate(
+            question="Credit card fees",
+            response=(
+                "The credit card has an APR of 18.5% and an annual fee. "
+                "ATM withdrawals have a fee."
+            ),
+            context=(
+                "The standard BBVA credit card has an APR of 18.5%, a 35 EUR "
+                "annual fee, and no commission for purchases. Cash withdrawals "
+                "from ATMs have a 4% fee with a 4 EUR minimum."
+            ),
+        )
+        assert not result.flagged  # safety OK
+        # completeness sub-score may be lower — that is UX info, not safety
 
 
 # ── Cross-cutting ────────────────────────────────────────────────────────────

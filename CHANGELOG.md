@@ -5,6 +5,35 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.11 -- `customer_support_rag_rules`: domain-fit rule set for informational customer-support agents
+
+### Added
+
+- **`customer_support_rag_rules()`** factory: a 7-rule set for customer-support
+  RAG agents (the BBVA Blue archetype) across 3 sub-scores: `groundedness`,
+  `completeness`, `no_overreach`. Designed for informational responses over a
+  FAQ knowledge base, where failure modes are fabricated numbers, fabricated
+  proper nouns, and procedural overreach -- not the rationale-cite-source-span
+  pattern that `groundlens_banking_rules` is calibrated for. Flag predicate is
+  non-compensatory on `groundedness` and `no_overreach`; `completeness` is
+  surfaced as UX feedback without tripping the safety flag.
+- **`rag_rules(domain="customer_support")`**: dispatches to the new factory.
+  Existing `rag_rules()` and `rag_rules(domain="banking")` calls continue to
+  return `groundlens_banking_rules()` unchanged.
+- **README:** new "Build your own rule set" section with a 4-step recipe and
+  a full minimal example, plus a guides/custom-rule-sets.md companion.
+
+### Changed
+
+- `groundlens.agents.__init__` exports `customer_support_rag_rules`.
+- Package-level `groundlens.__init__` re-exports the new factory for top-level
+  import.
+
+### Migration notes
+
+- **Non-breaking.** All existing APIs continue to work unchanged. `rag_rules()`
+  still returns the banking ruleset by default.
+
 ## 2026.6.10 -- `groundlens.agents`: per-agent rule sets for routing, RAG, and specialized agents
 
 ### Added

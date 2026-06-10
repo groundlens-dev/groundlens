@@ -12,7 +12,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![codecov](https://codecov.io/gh/groundlens-dev/groundlens/branch/main/graph/badge.svg)](https://codecov.io/gh/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.10-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.11-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Vision](VISION.md) | [Contributing](CONTRIBUTING.md)
@@ -291,37 +291,112 @@ print(result.audit_explanation)  # Human-readable per-rule trail
 
 `groundlens_banking_rules` is the current canonical 20-rule reference set for banking governance (credit, AML, KYC, fraud, sanctions, concentration, model risk). Each rule carries a `citation` field pointing to its provenance source. Sub-scores: **groundedness**, **completeness**, **calibration**, **traceability**, **robustness**. The flag predicate is non-compensatory: weakness in any regulator-non-negotiable dimension flags the response for review.
 
-### Custom rule sets
+### Build your own rule set
 
-The rule engine is domain-agnostic. `RuleSet` and `ChecklistRule` are composable primitives — you can build a rule set for any domain by writing pure-Python `check` functions and grouping them under your own sub-score categories.
+The bundled rule sets fit decision rationales (banking governance), informational customer-support, routing, and tool-use. If your domain doesn't fit any of those — legal review, insurance claims, clinical decision support, internal governance — you build your own. The rule engine is intentionally small and composable.
+
+**Anatomy (5 pieces):**
+
+| Piece | What it is | One-liner |
+|---|---|---|
+| `check` function | Pure function `(question, response, context, metadata) -> RuleEvidence` | Deterministic test you'd run on a response |
+| `RuleEvidence` | `matched: bool, span: str, explanation: str` | What the check observed |
+| `ChecklistRule` | `id, description, weight, sub_score, check, citation` | One rule with a weight on a sub-score |
+| `sub_scores` | tuple like `("groundedness", "traceability")` | The dimensions you aggregate across |
+| `flag_predicate` | `dict[str, float] -> bool` (optional) | When to flag for human review |
+
+**4-step recipe:**
+
+1. **Decide the sub-scores.** What dimensions matter in your domain? (Groundedness, completeness, calibration, traceability, robustness — pick the relevant ones; add domain-specific ones if needed.)
+2. **Write `check` functions.** One per rule. Pure Python, no LLM, returns `RuleEvidence(matched, span, explanation)`.
+3. **Assemble `ChecklistRule` instances.** Give each an `id`, a `weight` on its `sub_score`, and a `citation` to the academic / industrial / regulatory source that motivated it.
+4. **Wrap in a `RuleSet`** with an optional `flag_predicate` for non-compensatory flagging.
+
+**Full minimal example — legal contract review:**
 
 ```python
 from groundlens import ChecklistRule, RuleEvidence, RuleSet
 
-def _check_cites_clause(question, response, context, metadata):
+# Step 1: pick sub-scores
+SUB_SCORES = ("groundedness", "traceability")
+
+# Step 2: write check functions
+def check_cites_clause(question, response, context, metadata):
     matched = "clause" in response.lower() or "§" in response
-    return RuleEvidence(matched=matched, span="clause", explanation="cites a contract clause")
+    return RuleEvidence(
+        matched=matched,
+        span="clause/§",
+        explanation="rationale cites a specific contract clause",
+    )
+
+def check_grounded_in_contract(question, response, context, metadata):
+    if not context:
+        return RuleEvidence(matched=True, span="", explanation="no context — abstains")
+    r_words = set(response.lower().split())
+    c_words = set(context.lower().split())
+    overlap = len(r_words & c_words) / max(len(r_words), 1)
+    return RuleEvidence(
+        matched=overlap >= 0.4,
+        span=f"overlap={overlap:.2f}",
+        explanation="rationale vocabulary overlaps the contract",
+    )
+
+# Step 3: assemble rules with citations
+rules = (
+    ChecklistRule(
+        id="legal.grounded_in_contract",
+        description="rationale vocabulary overlaps the contract",
+        weight=0.50,
+        sub_score="groundedness",
+        check=check_grounded_in_contract,
+        citation="RAGAs (Es et al., EACL 2024) §3 Faithfulness",
+    ),
+    ChecklistRule(
+        id="legal.cites_clause",
+        description="rationale cites a specific contract clause",
+        weight=0.60,
+        sub_score="traceability",
+        check=check_cites_clause,
+        citation="EU AI Act 2024/1689 Art. 13(3)(b)(iv)",
+    ),
+)
+
+# Step 4: wrap in a RuleSet with a non-compensatory flag predicate
+def flag_if_groundedness_collapses(sub_scores):
+    return sub_scores.get("groundedness", 0.0) < 0.5
 
 legal_ruleset = RuleSet(
     name="legal_contract_review_v1",
-    rules=(
-        ChecklistRule(
-            id="legal.cites_clause",
-            description="rationale cites a specific contract clause",
-            weight=0.40,
-            sub_score="traceability",
-            check=_check_cites_clause,
-            citation="ABA Model Rules of Professional Conduct, Rule 1.1 Competence",
-        ),
-        # ... add your own rules
-    ),
-    sub_scores=("groundedness", "traceability"),
+    rules=rules,
+    sub_scores=SUB_SCORES,
+    flag_predicate=flag_if_groundedness_collapses,
 )
 
-result = legal_ruleset.evaluate(question=..., response=..., context=...)
+# Use it
+result = legal_ruleset.evaluate(
+    question="Is this termination notice valid?",
+    response="Under clause 4.2, 30 days notice is sufficient...",
+    context="Section 4.2 Termination. Either party may terminate...",
+)
+print(result.sub_scores)        # {'groundedness': 0.5, 'traceability': 0.6}
+print(result.quality)           # geometric mean
+print(result.flagged)           # False
+print(result.audit_explanation) # per-rule audit trail with citations
 ```
 
-See [examples/custom_rules.py](examples/custom_rules.py) for an end-to-end example.
+**Three things that make a rule set defendable:**
+
+- **Every rule has a citation.** When an auditor asks "why this threshold?", you point at the source. No undocumented heuristics.
+- **The flag predicate is non-compensatory.** A response that fails on `groundedness` doesn't pass because it scored well on `traceability`. Safety dimensions aren't fungible.
+- **Sub-scores aggregate via geometric mean.** Any sub-score at 0 collapses `quality` to 0 — there's no hiding a missing dimension behind high scores on others.
+
+**More examples:**
+
+- [examples/custom_rules.py](examples/custom_rules.py) — runnable end-to-end legal contract review (6 rules, 2 sub-scores).
+- [src/groundlens/agents/customer_support.py](src/groundlens/agents/customer_support.py) — production rule set for customer-support RAG (7 rules, 3 sub-scores). The `customer_support_rag_rules()` factory was built using exactly the 4-step recipe above.
+- [src/groundlens/agents/specialized.py](src/groundlens/agents/specialized.py) — production rule set with strict flag predicate and external validation (ISO 13616 IBAN mod-97). Pattern for any domain where rules need to call out to external validators.
+
+Full guide with troubleshooting and patterns: [docs/guides/custom-rule-sets.md](docs/guides/custom-rule-sets.md).
 
 ## Agents
 
