@@ -295,7 +295,7 @@ The methods Groundlens implements are documented in four research papers:
 1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG.
 2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector.
 3. **Rotational Dynamics of Factual Constraint Processing** — Marin (2026). [arXiv:2603.13259](https://arxiv.org/abs/2603.13259). Mechanistic interpretability of how transformers reject wrong answers.
-4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026). *Preprint, draft available on request.* Underpins `groundlens_banking_rules`: 20 rules triangulated across peer-reviewed NLP literature, banking-regulator whitepapers, tier-1 bank public reports, cross-industry frameworks, and financial-domain NLP benchmarks.
+4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026).[This repo](https://github.com/groundlens-dev/groundlens/blob/3563098e6ec96126ff56682a06f9a3b57d1a1d93/docs/assets/Defendable_Rules_for_LLM_Rationale_Evaluation_in_Banking_Governance.pdf).
 
 ## Compliance mapping
 
