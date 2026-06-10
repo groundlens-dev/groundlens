@@ -53,6 +53,10 @@
          <lastmod>2026-06-10</lastmod>
     </url>
     <url>
+         <loc>https://docs.groundlens.dev/api/groundlens/agents/customer_support/</loc>
+         <lastmod>2026-06-10</lastmod>
+    </url>
+    <url>
          <loc>https://docs.groundlens.dev/api/groundlens/agents/rag/</loc>
          <lastmod>2026-06-10</lastmod>
     </url>
@@ -190,6 +194,10 @@
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/batch-evaluation/</loc>
+         <lastmod>2026-06-10</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.groundlens.dev/guides/custom-rule-sets/</loc>
          <lastmod>2026-06-10</lastmod>
     </url>
     <url>

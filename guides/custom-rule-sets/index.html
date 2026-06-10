@@ -12,7 +12,7 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/api/SUMMARY/">
+        <link rel="canonical" href="https://docs.groundlens.dev/guides/custom-rule-sets/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>SUMMARY - groundlens</title>
+        <title>Build your own rule set - groundlens</title>
       
     
     
@@ -79,6 +79,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#build-your-own-rule-set" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -111,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              SUMMARY
+              Build your own rule set
             
           </span>
         </div>
@@ -305,7 +310,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../guides/rag-verification/" class="md-tabs__link">
+        <a href="../rag-verification/" class="md-tabs__link">
           
   
   
@@ -391,7 +396,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href="../../api/" class="md-tabs__link">
         
   
   
@@ -1108,7 +1113,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/rag-verification/" class="md-nav__link">
+      <a href="../rag-verification/" class="md-nav__link">
         
   
   
@@ -1136,7 +1141,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/domain-calibration/" class="md-nav__link">
+      <a href="../domain-calibration/" class="md-nav__link">
         
   
   
@@ -1164,7 +1169,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/batch-evaluation/" class="md-nav__link">
+      <a href="../batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1192,7 +1197,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/banking-deployment/" class="md-nav__link">
+      <a href="../banking-deployment/" class="md-nav__link">
         
   
   
@@ -1220,7 +1225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/eu-ai-act/" class="md-nav__link">
+      <a href="../eu-ai-act/" class="md-nav__link">
         
   
   
@@ -1248,7 +1253,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/sr-11-7/" class="md-nav__link">
+      <a href="../sr-11-7/" class="md-nav__link">
         
   
   
@@ -1276,7 +1281,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/nist-ai-rmf/" class="md-nav__link">
+      <a href="../nist-ai-rmf/" class="md-nav__link">
         
   
   
@@ -1800,7 +1805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../api/" class="md-nav__link">
         
   
   
@@ -1837,6 +1842,254 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-you-need-a-custom-rule-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When you need a custom rule set
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anatomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anatomy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Anatomy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-check-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. check function
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ruleevidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. RuleEvidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-checklistrule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. ChecklistRule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-sub-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Sub-scores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-flag-predicate-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Flag predicate (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-4-step-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 4-step recipe
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 4-step recipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-decide-the-sub-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Decide the sub-scores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-write-check-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Write check functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-assemble-checklistrule-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Assemble ChecklistRule instances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-wrap-in-a-ruleset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Wrap in a RuleSet
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-validators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External validators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abstention-vs-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstention vs. failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-compensatory-flagging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-compensatory flagging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-score-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-score weights
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common pitfalls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validating-your-rule-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validating your rule set
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1852,65 +2105,234 @@
                   
 
 
+  
+  
 
-  <h1>SUMMARY</h1>
 
+<h1 id="build-your-own-rule-set">Build your own rule set<a class="headerlink" href="#build-your-own-rule-set" title="Permanent link">&para;</a></h1>
+<p>The Groundlens rule engine is intentionally small. <code>RuleSet</code> and <code>ChecklistRule</code> are composable primitives — you write the rules, Groundlens runs them deterministically and produces an audit trail with citations.</p>
+<p>This guide walks through the full workflow: anatomy, the 4-step recipe, a complete worked example, patterns, and common pitfalls.</p>
+<h2 id="when-you-need-a-custom-rule-set">When you need a custom rule set<a class="headerlink" href="#when-you-need-a-custom-rule-set" title="Permanent link">&para;</a></h2>
+<p>The bundled rule sets cover four archetypes:</p>
+<table>
+<thead>
+<tr>
+<th>Bundled set</th>
+<th>Purpose</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>groundlens_banking_rules</code></td>
+<td>Banking decision rationales</td>
+<td>Credit / AML / KYC / fraud / sanctions decisions with auditable rationale</td>
+</tr>
+<tr>
+<td><code>customer_support_rag_rules</code></td>
+<td>Informational customer-support RAG</td>
+<td>FAQ-style assistant, the BBVA Blue archetype</td>
+</tr>
+<tr>
+<td><code>routing_rules</code></td>
+<td>Intent classification agents</td>
+<td>Multi-class routing with fallback and clarify</td>
+</tr>
+<tr>
+<td><code>specialized_agent_rules</code></td>
+<td>Tool-using / execution agents</td>
+<td>Entity capture, transaction execution</td>
+</tr>
+</tbody>
+</table>
+<p>Build your own when none of these fits — legal review, insurance claims, clinical decision support, internal governance, custom verticals. Or extend an existing one with domain-specific reinforcements.</p>
+<h2 id="anatomy">Anatomy<a class="headerlink" href="#anatomy" title="Permanent link">&para;</a></h2>
+<p>A rule set is five pieces.</p>
+<h3 id="1-check-function">1. <code>check</code> function<a class="headerlink" href="#1-check-function" title="Permanent link">&para;</a></h3>
+<p>A pure function with this signature:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_something</span><span class="p">(</span><span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleEvidence</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p>Pure means: same input → same output, no side effects, no LLM calls, no network. Deterministic pattern matching, regex, length checks, presence/absence tests, calls to external deterministic validators (e.g. ISO 13616 IBAN mod-97).</p>
+<p>Return a <code>RuleEvidence</code> describing what was checked.</p>
+<h3 id="2-ruleevidence">2. <code>RuleEvidence</code><a class="headerlink" href="#2-ruleevidence" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">RuleEvidence</span><span class="p">(</span><span class="n">matched</span><span class="o">=</span><span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;&lt;what triggered the match&gt;&quot;</span><span class="p">,</span> <span class="n">explanation</span><span class="o">=</span><span class="s2">&quot;&lt;one short sentence&gt;&quot;</span><span class="p">)</span>
+</span></code></pre></div>
 <ul>
-<li><a href="../groundlens/">groundlens</a><ul>
-<li><a href="../groundlens/agents/">agents</a><ul>
-<li><a href="../groundlens/agents/customer_support/">customer_support</a></li>
-<li><a href="../groundlens/agents/rag/">rag</a></li>
-<li><a href="../groundlens/agents/routing/">routing</a></li>
-<li><a href="../groundlens/agents/specialized/">specialized</a></li>
+<li><code>matched</code> — did the rule fire as a pass?</li>
+<li><code>span</code> — the substring or fact that triggered the match (for audit trail readability)</li>
+<li><code>explanation</code> — one short sentence describing what was checked</li>
 </ul>
-</li>
-<li><a href="../groundlens/audit/">audit</a></li>
-<li><a href="../groundlens/calibrate/">calibrate</a></li>
-<li><a href="../groundlens/cli/">cli</a><ul>
-<li><a href="../groundlens/cli/main/">main</a></li>
+<h3 id="3-checklistrule">3. <code>ChecklistRule</code><a class="headerlink" href="#3-checklistrule" title="Permanent link">&para;</a></h3>
+<p>One rule with a weight on one sub-score.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;legal.cites_clause&quot;</span><span class="p">,</span>           <span class="c1"># stable identifier</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;rationale cites a specific contract clause&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>                       <span class="c1"># weight on the sub_score</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;traceability&quot;</span><span class="p">,</span>          <span class="c1"># which sub-score this rule contributes to</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">check</span><span class="o">=</span><span class="n">check_cites_clause</span><span class="p">,</span>          <span class="c1"># the check function</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;EU AI Act 2024/1689 Art. 13(3)(b)(iv)&quot;</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Citations matter.</strong> Every defendable rule has a citation to an academic, industrial, or regulatory source that motivates it. When an auditor asks "why this threshold?", you point at the source. Empty citation is allowed but discouraged.</p>
+<h3 id="4-sub-scores">4. Sub-scores<a class="headerlink" href="#4-sub-scores" title="Permanent link">&para;</a></h3>
+<p>A tuple of sub-score category names. Rules whose <code>sub_score</code> matches a name in this tuple contribute to that sub-score's aggregated weight. Rules outside the tuple are recorded in the audit but excluded from aggregation.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">sub_scores</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="s2">&quot;traceability&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="5-flag-predicate-optional">5. Flag predicate (optional)<a class="headerlink" href="#5-flag-predicate-optional" title="Permanent link">&para;</a></h3>
+<p>A function that decides whether the aggregated result is flagged for human review.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">flag_predicate</span><span class="p">(</span><span class="n">sub_scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">return</span> <span class="n">sub_scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+</span></code></pre></div>
+<p><strong>Non-compensatory by default.</strong> A typical predicate flags if any one safety-relevant sub-score collapses below a threshold. Don't let high scores on UX dimensions mask low scores on safety dimensions.</p>
+<h2 id="the-4-step-recipe">The 4-step recipe<a class="headerlink" href="#the-4-step-recipe" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-decide-the-sub-scores">Step 1 — Decide the sub-scores<a class="headerlink" href="#step-1-decide-the-sub-scores" title="Permanent link">&para;</a></h3>
+<p>What dimensions matter in your domain? Start from the five-category template:</p>
+<ul>
+<li><code>groundedness</code> — does the response stay anchored in the provided context?</li>
+<li><code>completeness</code> — does the response cover what was asked?</li>
+<li><code>calibration</code> — does the response hedge appropriately?</li>
+<li><code>traceability</code> — can a human auditor reconstruct the reasoning?</li>
+<li><code>robustness</code> — does the response survive adversarial or noisy inputs?</li>
 </ul>
-</li>
-<li><a href="../groundlens/compliance/">compliance</a></li>
-<li><a href="../groundlens/data/">data</a></li>
-<li><a href="../groundlens/dgi/">dgi</a></li>
-<li><a href="../groundlens/evaluate/">evaluate</a></li>
-<li><a href="../groundlens/integrations/">integrations</a><ul>
-<li><a href="../groundlens/integrations/autogen/">autogen</a><ul>
-<li><a href="../groundlens/integrations/autogen/checker/">checker</a></li>
+<p>Add domain-specific dimensions when needed. The customer-support rule set uses <code>(groundedness, completeness, no_overreach)</code>. The routing rule set uses <code>(intent_clarity, classification_confidence, fallback_appropriateness, disambiguation_quality)</code>.</p>
+<h3 id="step-2-write-check-functions">Step 2 — Write check functions<a class="headerlink" href="#step-2-write-check-functions" title="Permanent link">&para;</a></h3>
+<p>One per rule. Keep them small and single-purpose. Each check should be testable in isolation.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_cites_clause</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">metadata</span><span class="p">):</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">matched</span> <span class="o">=</span> <span class="s2">&quot;clause&quot;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;§&quot;</span> <span class="ow">in</span> <span class="n">response</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">return</span> <span class="n">RuleEvidence</span><span class="p">(</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">matched</span><span class="o">=</span><span class="n">matched</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">span</span><span class="o">=</span><span class="s2">&quot;clause/§&quot;</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">explanation</span><span class="o">=</span><span class="s2">&quot;rationale cites a specific contract clause&quot;</span><span class="p">,</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="step-3-assemble-checklistrule-instances">Step 3 — Assemble <code>ChecklistRule</code> instances<a class="headerlink" href="#step-3-assemble-checklistrule-instances" title="Permanent link">&para;</a></h3>
+<p>Give each rule:</p>
+<ul>
+<li>A stable <code>id</code> namespaced to your domain (<code>legal.cites_clause</code>, not just <code>cites_clause</code>)</li>
+<li>A weight summing to roughly 1.0 per sub-score (not strict — sub-scores are capped at 1.0)</li>
+<li>A <code>sub_score</code> that appears in your <code>sub_scores</code> tuple</li>
+<li>A <code>citation</code> to the source that justifies the rule</li>
 </ul>
-</li>
-<li><a href="../groundlens/integrations/crewai/">crewai</a><ul>
-<li><a href="../groundlens/integrations/crewai/tool/">tool</a></li>
+<h3 id="step-4-wrap-in-a-ruleset">Step 4 — Wrap in a <code>RuleSet</code><a class="headerlink" href="#step-4-wrap-in-a-ruleset" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">ruleset</span> <span class="o">=</span> <span class="n">RuleSet</span><span class="p">(</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;legal_contract_review_v1&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="s2">&quot;traceability&quot;</span><span class="p">),</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">flag_predicate</span><span class="o">=</span><span class="n">flag_predicate</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Run it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">ruleset</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;Is this termination valid?&quot;</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Under clause 4.2, 30 days notice is sufficient...&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;Section 4.2 Termination. Either party may terminate...&quot;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">{},</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>You get back a <code>RuleSetResult</code> with:</p>
+<ul>
+<li><code>sub_scores: dict[str, float]</code> — capped weight sums per category</li>
+<li><code>quality: float</code> — geometric mean of all sub-scores</li>
+<li><code>flagged: bool</code> — output of the flag predicate</li>
+<li><code>rule_results: tuple[RuleResult, ...]</code> — one entry per rule, with <code>matched</code>, <code>evidence_span</code>, <code>explanation</code></li>
+<li><code>audit_explanation: str</code> — multi-line human-readable trail suitable for log inclusion</li>
 </ul>
-</li>
-<li><a href="../groundlens/integrations/langchain/">langchain</a><ul>
-<li><a href="../groundlens/integrations/langchain/callback/">callback</a></li>
-<li><a href="../groundlens/integrations/langchain/evaluator/">evaluator</a></li>
+<h2 id="patterns">Patterns<a class="headerlink" href="#patterns" title="Permanent link">&para;</a></h2>
+<h3 id="external-validators">External validators<a class="headerlink" href="#external-validators" title="Permanent link">&para;</a></h3>
+<p>Rules can call out to deterministic external validators — ISO standards, business rules engines, regex libraries. The check function stays pure (deterministic and side-effect-free); the validator does the work.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_iban_valid_format</span><span class="p">(</span><span class="n">iban</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;ISO 13616 mod-97 verification.&quot;&quot;&quot;</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">iban</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[A-Z]</span><span class="si">{2}</span><span class="s2">\d</span><span class="si">{2}</span><span class="s2">[A-Z0-9]{11,30}$&quot;</span><span class="p">,</span> <span class="n">cleaned</span><span class="p">):</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">rearranged</span> <span class="o">=</span> <span class="n">cleaned</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="o">+</span> <span class="n">cleaned</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">converted</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">-</span> <span class="mi">55</span><span class="p">)</span> <span class="k">if</span> <span class="n">ch</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="k">else</span> <span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">rearranged</span><span class="p">)</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">converted</span><span class="p">)</span> <span class="o">%</span> <span class="mi">97</span> <span class="o">==</span> <span class="mi">1</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_iban_format_valid</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">metadata</span><span class="p">):</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="n">iban</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;entities&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iban&quot;</span><span class="p">)</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">iban</span><span class="p">:</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>        <span class="k">return</span> <span class="n">RuleEvidence</span><span class="p">(</span><span class="n">matched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">explanation</span><span class="o">=</span><span class="s2">&quot;no IBAN — rule does not apply&quot;</span><span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    <span class="n">matched</span> <span class="o">=</span> <span class="n">_iban_valid_format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">iban</span><span class="p">))</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>    <span class="k">return</span> <span class="n">RuleEvidence</span><span class="p">(</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>        <span class="n">matched</span><span class="o">=</span><span class="n">matched</span><span class="p">,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>        <span class="n">span</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">iban</span><span class="p">)[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>        <span class="n">explanation</span><span class="o">=</span><span class="s2">&quot;captured IBAN passes ISO 13616 format check&quot;</span><span class="p">,</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="abstention-vs-failure">Abstention vs. failure<a class="headerlink" href="#abstention-vs-failure" title="Permanent link">&para;</a></h3>
+<p>When a rule does not apply (e.g. "IBAN format" rule on a response with no IBAN), return <code>matched=True</code> with an explanation that includes "abstains" or "rule does not apply". Sub-scores cap at 1.0, so abstention does not punish the score.</p>
+<p>A rule should abstain — not fail — when its precondition isn't met.</p>
+<h3 id="non-compensatory-flagging">Non-compensatory flagging<a class="headerlink" href="#non-compensatory-flagging" title="Permanent link">&para;</a></h3>
+<p>Don't average across safety and UX dimensions in your flag predicate. A response that is "75% correct on safety, 100% on UX" should still be flagged.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">flag_predicate</span><span class="p">(</span><span class="n">sub_scores</span><span class="p">):</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="k">return</span> <span class="p">(</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>        <span class="n">sub_scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="ow">or</span> <span class="n">sub_scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;no_overreach&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="sub-score-weights">Sub-score weights<a class="headerlink" href="#sub-score-weights" title="Permanent link">&para;</a></h3>
+<p>Within a sub-score, weights should roughly sum to 1.0. Sub-scores are capped at 1.0 even if matched weights sum higher, so over-weighting is forgiving — under-weighting starves the sub-score.</p>
+<p>If a sub-score has three rules with weights 0.5 + 0.3 + 0.2 = 1.0, all three must match for the sub-score to reach 1.0. If only the 0.5 and 0.3 rules match, the sub-score is 0.8 (capped).</p>
+<h2 id="common-pitfalls">Common pitfalls<a class="headerlink" href="#common-pitfalls" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rule fires on irrelevant cases</td>
+<td>False positives on grounded responses</td>
+<td>Add a precondition check and abstain (<code>matched=True</code>) when the precondition is missing</td>
+</tr>
+<tr>
+<td>Weights don't sum to ~1.0 in a sub-score</td>
+<td>Sub-scores never reach high values</td>
+<td>Audit the weight distribution within each sub-score</td>
+</tr>
+<tr>
+<td>Flag predicate uses geometric mean</td>
+<td>Safety failures masked by UX scores</td>
+<td>Make the predicate non-compensatory: per-sub-score thresholds with <code>OR</code></td>
+</tr>
+<tr>
+<td><code>check</code> function calls an LLM or HTTP</td>
+<td>Non-deterministic verdicts</td>
+<td>Move the LLM out of the check; use rules for pattern verification only</td>
+</tr>
+<tr>
+<td>Empty citations on safety rules</td>
+<td>Rule fails audit</td>
+<td>Cite the source: academic paper, regulation, industry whitepaper</td>
+</tr>
+<tr>
+<td>Rule set used outside its calibrated domain</td>
+<td>Over-flags or under-flags badly</td>
+<td>Build a domain-fit rule set; don't reuse the wrong one</td>
+</tr>
+</tbody>
+</table>
+<h2 id="validating-your-rule-set">Validating your rule set<a class="headerlink" href="#validating-your-rule-set" title="Permanent link">&para;</a></h2>
+<p>Before deploying, run it on a labelled reference set. At minimum:</p>
+<ul>
+<li>5-10 known-good responses (should pass)</li>
+<li>5-10 known-bad responses (should fail with specific rules)</li>
+<li>5-10 known-ambiguous responses (any verdict OK, but the audit trail should be human-readable)</li>
 </ul>
-</li>
-<li><a href="../groundlens/integrations/langgraph/">langgraph</a><ul>
-<li><a href="../groundlens/integrations/langgraph/callback/">callback</a></li>
-<li><a href="../groundlens/integrations/langgraph/report/">report</a></li>
-<li><a href="../groundlens/integrations/langgraph/trace/">trace</a></li>
-</ul>
-</li>
-<li><a href="../groundlens/integrations/semantic_kernel/">semantic_kernel</a><ul>
-<li><a href="../groundlens/integrations/semantic_kernel/filter/">filter</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="../groundlens/providers/">providers</a><ul>
-<li><a href="../groundlens/providers/anthropic/">anthropic</a></li>
-<li><a href="../groundlens/providers/google/">google</a></li>
-<li><a href="../groundlens/providers/openai/">openai</a></li>
-</ul>
-</li>
-<li><a href="../groundlens/rules/">rules</a></li>
-<li><a href="../groundlens/score/">score</a></li>
-<li><a href="../groundlens/sgi/">sgi</a></li>
-</ul>
-</li>
+<p>Inspect the <code>audit_explanation</code> for each case. Read the rules that did not match — are they the right reasons? Read the rules that matched — are they the right reasons?</p>
+<p>A rule set you can read out loud and defend is a rule set you can put in front of an auditor.</p>
+<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../examples/custom_rules.py">examples/custom_rules.py</a> — runnable end-to-end legal contract review</li>
+<li><a href="../../src/groundlens/agents/customer_support.py">src/groundlens/agents/customer_support.py</a> — production customer-support RAG rule set, 7 rules, 3 sub-scores</li>
+<li><a href="../../src/groundlens/agents/routing.py">src/groundlens/agents/routing.py</a> — production routing agent rule set, 10 rules, 4 sub-scores</li>
+<li><a href="../../src/groundlens/agents/specialized.py">src/groundlens/agents/specialized.py</a> — production specialized agent rule set with strict predicate and external validators</li>
+<li><a href="../banking-deployment/">Banking deployment guide</a> — applying the 4-step recipe under SR 26-2 / EU AI Act constraints</li>
 </ul>
 
 
