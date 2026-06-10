@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "groundlens"
-version = "2026.6.9"
-description = "Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable."
+version = "2026.6.10"
+description = "Triage for AI agents and model outputs. Deterministic. Auditable. No second LLM."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

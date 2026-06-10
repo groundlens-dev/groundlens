@@ -4,7 +4,7 @@
 # Groundlens
 </div>
 
-## Triage for LLM outputs. Deterministic. Auditable. No second LLM.
+## Triage for AI agents and model outputs. Deterministic. Auditable. No second LLM.
 
 <div align="center">
 
@@ -12,7 +12,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![codecov](https://codecov.io/gh/groundlens-dev/groundlens/branch/main/graph/badge.svg)](https://codecov.io/gh/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.9-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.10-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) | [Research Papers](#research) | [Examples](examples/) | [Vision](VISION.md) | [Contributing](CONTRIBUTING.md)
@@ -24,6 +24,8 @@
 Most teams evaluate LLM responses with another LLM. That doesn't survive an audit. Groundlens replaces the judge with a geometric scorer: every response gets a deterministic, sub-second grounding score so humans review the bottom percentile, not everything. No second LLM in the loop. Designed for production deployment in regulated industries.
 
 Groundlens is **triage** — *pay immediate attention to particular priorities*. It does not classify responses as right or wrong. It ranks them by grounding signal, exposes the riskiest first, and stays out of the human reviewer's way for the rest.
+
+Modern AI systems are agentic pipelines, not single models. Groundlens triages outputs from individual LLMs **and** from multi-agent deployments: routing / intent agents, RAG / informational agents, and specialized / tool-using agents each get their own rule set.
 
 ## Why triage instead of an LLM judge?
 
@@ -54,6 +56,9 @@ Groundlens is **triage** — *pay immediate attention to particular priorities*.
 | **Comply with SR 11-7 (US model risk)** | [SR 11-7 guide](https://docs.groundlens.dev/guides/sr-11-7/) |
 | **Map to NIST AI RMF** | [NIST AI RMF guide](https://docs.groundlens.dev/guides/nist-ai-rmf/) |
 | **Triage with audit-trail rules** | [Rule sets quick start](#rule-sets----audit-trail-triage) · [`groundlens.rules`](https://docs.groundlens.dev/concepts/rules/) |
+| **Triage a routing / intent agent** | [`routing_rules()`](#agents) · [`groundlens.agents`](https://docs.groundlens.dev/concepts/agents/) |
+| **Triage a RAG / informational agent** | [`rag_rules()`](#agents) · [`groundlens.agents`](https://docs.groundlens.dev/concepts/agents/) |
+| **Triage a specialized / tool-using agent** | [`specialized_agent_rules()`](#agents) · [`groundlens.agents`](https://docs.groundlens.dev/concepts/agents/) |
 | **Build my own rule set for legal / insurance / healthcare** | [Custom rule sets](#custom-rule-sets) · [examples/custom_rules.py](examples/custom_rules.py) |
 | **Map decisions to specific regulatory clauses** | [`groundlens.compliance`](https://docs.groundlens.dev/concepts/compliance/) · [Audit log](https://docs.groundlens.dev/concepts/audit/) |
 | **Understand the math** | [How it works](https://docs.groundlens.dev/concepts/how-it-works/) · [Research papers](#research) |
@@ -318,6 +323,53 @@ result = legal_ruleset.evaluate(question=..., response=..., context=...)
 
 See [examples/custom_rules.py](examples/custom_rules.py) for an end-to-end example.
 
+## Agents
+
+Modern AI systems are agentic pipelines, not single models. A production deployment like BBVA's Blue assistant runs three agent classes in concert — routing, RAG, and specialized — each with distinct failure modes and audit requirements. Groundlens ships one rule set per class:
+
+| Agent class | Factory | Sub-scores | Targets |
+|---|---|---|---|
+| Routing / intent | [`routing_rules()`](src/groundlens/agents/routing.py) | intent_clarity, classification_confidence, fallback_appropriateness, disambiguation_quality | Mis-classification, over-use of fallback, silent routing on tight margins |
+| RAG / informational | [`rag_rules()`](src/groundlens/agents/rag.py) | groundedness, completeness, calibration, traceability, robustness | Fabrication, omission, miscalibration on out-of-knowledge queries |
+| Specialized / tool-using | [`specialized_agent_rules()`](src/groundlens/agents/specialized.py) | entity_groundedness, entity_completeness, entity_calibration, execution_readiness | Entity hallucination (IBAN, amount), premature execution, missing required fields |
+
+Every rule carries a citation to its academic, industrial, or regulatory source — BBVA AI Factory's Blue Eval post, ISO 13616 IBAN standard, EBA Guidelines, Federal Reserve SR 26-2, NIST AI RMF, peer-reviewed NLP literature.
+
+```python
+from groundlens.agents import routing_rules, rag_rules, specialized_agent_rules
+
+# Triage a routing decision
+routing = routing_rules()
+result = routing.evaluate(
+    question="transfer 500 to my brother and check my balance",
+    response="OK.",
+    metadata={
+        "predicted_intent": "transfer",
+        "top1_score": 0.62,
+        "margin": 0.08,
+        "fallback_fired": False,
+        "query_in_scope": True,
+    },
+)
+assert result.flagged  # multi-intent query + low confidence
+
+# Triage an entity-capture decision
+specialized = specialized_agent_rules()
+result = specialized.evaluate(
+    question="send 500 to ES91 2100 0418 4502 0005 1332",
+    response="Transferring 500 EUR.",
+    metadata={
+        "dialog": "send 500 to ES91 2100 0418 4502 0005 1332. yes confirm.",
+        "entities": {"amount": 500, "iban": "ES9121000418450200051332"},
+        "required_entities": ["amount", "iban"],
+        "confirmed": True,
+    },
+)
+assert not result.flagged
+```
+
+The three rule sets compose: a Blue-style three-agent deployment runs all three in parallel, one per agent, aggregating the audit trail across the pipeline.
+
 ## Taxonomy of LLM hallucinations
 
 Not all hallucinations are the same. Groundlens is built on a [geometric taxonomy](https://docs.groundlens.dev/theory/hallucination-taxonomy/) ([arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3)) that classifies hallucinations by their geometric signature in embedding space — which determines whether they are detectable and which scoring method applies.
@@ -429,6 +481,11 @@ The geometric layer (SGI/DGI) is already domain-agnostic — `compute_dgi` accep
 │                    │   matching)    │   log)     │  EU AI Act,  │
 │                    │                │            │  NIST RMF)   │
 ├────────────────────┴──────────────┴──────────────┴──────────────┤
+│                  groundlens.agents                              │
+│  routing_rules   │   rag_rules    │   specialized_agent_rules   │
+│  (intent class.) │ (RAG / informa-│  (entity capture +          │
+│                  │  tional agent) │   tool-use execution)       │
+├─────────────────────────────────────────────────────────────────┤
 │        sentence-transformers (all-MiniLM-L6-v2)                 │
 └─────────────────────────────────────────────────────────────────┘
          ▲                       ▲
@@ -442,7 +499,7 @@ The geometric layer (SGI/DGI) is already domain-agnostic — `compute_dgi` accep
   └─────────────┘       └──────────────────┘
 ```
 
-Two complementary triage layers — geometric (SGI/DGI, sub-second, ranks the bottom percentile by grounding signal) and rule-based (per-rule audit trail with regulatory citations). Both deterministic. Both auditable. No second LLM in either.
+Two complementary triage layers — geometric (SGI/DGI, sub-second, ranks the bottom percentile by grounding signal) and rule-based (per-rule audit trail with regulatory citations). Per-agent factories under `groundlens.agents` adapt the rule-based layer to the three agent classes that appear in most production deployments. All deterministic. All auditable. No second LLM in any of them.
 
 See [AGENTS.md](AGENTS.md) for detailed file-by-file documentation. See [CLAUDE.md](CLAUDE.md) for AI-assisted development guidelines.
 
