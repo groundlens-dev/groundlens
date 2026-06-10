@@ -1963,7 +1963,7 @@
 
         <p>Agent triage — rule sets for the three agent classes in modern AI pipelines.</p>
 <p>Modern AI systems are agentic pipelines, not single models. A production
-deployment like BBVA's Blue assistant runs three agent classes in concert:</p>
+multi-agent deployment runs three agent classes in concert:</p>
 <ul>
 <li><strong>Routing / intent agents</strong> classify the user's query into one of N
   candidate operations and decide whether to clarify or fall back.</li>
@@ -1985,20 +1985,13 @@ needs. This submodule ships one rule set per class:</p>
 </ul>
 <p>All three rule sets follow the same deterministic, no-second-LLM,
 citation-per-rule structure as the rest of Groundlens. They can be
-composed: a Blue-style three-agent pipeline runs all three rule sets
-in parallel, one per agent, and aggregates the audit trail.</p>
+composed: a three-agent pipeline runs all three rule sets in parallel,
+one per agent, and aggregates the audit trail.</p>
 
 
 <details class="references" open>
   <summary>References</summary>
-  <p>Torcal Villadangos, J., Hernández Manzano, P., Falcón Leal, A.,
-    López García-Romeu, A., &amp; Dorado Alfaro, S. (2026). AI Evaluation
-    in the Age of Agents. BBVA AI Factory, 15 April 2026.</p>
-<p>Falcón Leal, A., Torcal Villadangos, J., López García-Romeu, A.,
-    Hernández Manzano, P., &amp; Dorado Alfaro, S. (2025). Routing the
-    future: How an intent agent simplifies banking interactions.
-    BBVA AI Factory, 14 February 2025.</p>
-<p>Marin, J. (2026). Defendable Rules for LLM Rationale Evaluation in
+  <p>Marin, J. (2026). Defendable Rules for LLM Rationale Evaluation in
     Banking Governance: A Multi-Source Provenance Framework.</p>
 </details>
 
@@ -2037,7 +2030,7 @@ in parallel, one per agent, and aggregates the audit trail.</p>
 no_overreach. Each rule carries a citation to its academic, industrial,
 or regulatory source.</p>
 <p>Designed for informational customer-facing assistants over a FAQ-style
-knowledge base — the BBVA Blue archetype. Not appropriate for credit /
+knowledge base — the FAQ-RAG customer-support archetype. Not appropriate for credit /
 AML / KYC decision rationales (use
 :func:<code>groundlens.rules.groundlens_banking_rules</code> instead) nor for
 routing or specialized / tool-using agents (see
@@ -2049,9 +2042,9 @@ routing or specialized / tool-using agents (see
 rs = customer_support_rag_rules()
 result = rs.evaluate(
     question=&quot;What is the Bizum daily limit?&quot;,
-    response=&quot;The Bizum daily limit at BBVA is 1,000 EUR per transaction.&quot;,
+    response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,
     context=(
-        &quot;The daily Bizum transfer limit at BBVA is 1,000 EUR per &quot;
+        &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;
         &quot;transaction and 2,000 EUR per day in total.&quot;
     ),
 )
@@ -2061,8 +2054,7 @@ assert not result.flagged
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/groundlens/agents/customer_support.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-304">304</a></span>
-<span class="normal"><a href="#__codelineno-0-305">305</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-305">305</a></span>
 <span class="normal"><a href="#__codelineno-0-306">306</a></span>
 <span class="normal"><a href="#__codelineno-0-307">307</a></span>
 <span class="normal"><a href="#__codelineno-0-308">308</a></span>
@@ -2158,104 +2150,105 @@ assert not result.flagged
 <span class="normal"><a href="#__codelineno-0-398">398</a></span>
 <span class="normal"><a href="#__codelineno-0-399">399</a></span>
 <span class="normal"><a href="#__codelineno-0-400">400</a></span>
-<span class="normal"><a href="#__codelineno-0-401">401</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="k">def</span><span class="w"> </span><span class="nf">customer_support_rag_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
-</span><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for customer-support RAG / informational agents.</span>
-</span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a>
-</span><span id="__span-0-307"><a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">    Returns a 7-rule set across 3 sub-scores: groundedness, completeness,</span>
-</span><span id="__span-0-308"><a id="__codelineno-0-308" name="__codelineno-0-308"></a><span class="sd">    no_overreach. Each rule carries a citation to its academic, industrial,</span>
-</span><span id="__span-0-309"><a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">    or regulatory source.</span>
-</span><span id="__span-0-310"><a id="__codelineno-0-310" name="__codelineno-0-310"></a>
-</span><span id="__span-0-311"><a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="sd">    Designed for informational customer-facing assistants over a FAQ-style</span>
-</span><span id="__span-0-312"><a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">    knowledge base — the BBVA Blue archetype. Not appropriate for credit /</span>
-</span><span id="__span-0-313"><a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">    AML / KYC decision rationales (use</span>
-</span><span id="__span-0-314"><a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">    :func:`groundlens.rules.groundlens_banking_rules` instead) nor for</span>
-</span><span id="__span-0-315"><a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="sd">    routing or specialized / tool-using agents (see</span>
-</span><span id="__span-0-316"><a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">    :func:`groundlens.agents.routing_rules` and</span>
-</span><span id="__span-0-317"><a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">    :func:`groundlens.agents.specialized_agent_rules`).</span>
-</span><span id="__span-0-318"><a id="__codelineno-0-318" name="__codelineno-0-318"></a>
-</span><span id="__span-0-319"><a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">    Example::</span>
-</span><span id="__span-0-320"><a id="__codelineno-0-320" name="__codelineno-0-320"></a>
-</span><span id="__span-0-321"><a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">        from groundlens.agents import customer_support_rag_rules</span>
-</span><span id="__span-0-322"><a id="__codelineno-0-322" name="__codelineno-0-322"></a>
-</span><span id="__span-0-323"><a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">        rs = customer_support_rag_rules()</span>
-</span><span id="__span-0-324"><a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">        result = rs.evaluate(</span>
-</span><span id="__span-0-325"><a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">            question=&quot;What is the Bizum daily limit?&quot;,</span>
-</span><span id="__span-0-326"><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="sd">            response=&quot;The Bizum daily limit at BBVA is 1,000 EUR per transaction.&quot;,</span>
-</span><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">            context=(</span>
-</span><span id="__span-0-328"><a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">                &quot;The daily Bizum transfer limit at BBVA is 1,000 EUR per &quot;</span>
-</span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">                &quot;transaction and 2,000 EUR per day in total.&quot;</span>
-</span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">            ),</span>
-</span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        )</span>
-</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">        assert not result.flagged</span>
-</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>        <span class="c1"># groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)</span>
-</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_invented_numbers&quot;</span><span class="p">,</span>
-</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;every number in response appears in FAQ or query&quot;</span><span class="p">,</span>
-</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
-</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_invented_numbers</span><span class="p">,</span>
-</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Es et al. RAGAs (EACL 2024) §3 Faithfulness — atomic claim verification&quot;</span><span class="p">,</span>
-</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a>        <span class="p">),</span>
-</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_invented_proper_nouns&quot;</span><span class="p">,</span>
-</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;every proper noun in response appears in FAQ&quot;</span><span class="p">,</span>
-</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_invented_proper_nouns</span><span class="p">,</span>
-</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Min et al. FActScore (EMNLP 2023) — atomic factual precision&quot;</span><span class="p">,</span>
-</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="p">),</span>
-</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.content_overlaps_faq&quot;</span><span class="p">,</span>
-</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response content overlaps FAQ above threshold&quot;</span><span class="p">,</span>
-</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>
-</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_content_overlaps_faq</span><span class="p">,</span>
-</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Marin (2025) SGI arXiv:2512.13771 — surface grounding signal&quot;</span><span class="p">,</span>
-</span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="p">),</span>
-</span><span id="__span-0-360"><a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="c1"># completeness (2 rules, weights 0.7 + 0.3 = 1.0)</span>
-</span><span id="__span-0-361"><a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-362"><a id="__codelineno-0-362" name="__codelineno-0-362"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.addresses_query_topic&quot;</span><span class="p">,</span>
-</span><span id="__span-0-363"><a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response addresses the query topic&quot;</span><span class="p">,</span>
-</span><span id="__span-0-364"><a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.70</span><span class="p">,</span>
-</span><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;completeness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-366"><a id="__codelineno-0-366" name="__codelineno-0-366"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_addresses_query_topic</span><span class="p">,</span>
-</span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) §relevance check&quot;</span><span class="p">),</span>
-</span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a>        <span class="p">),</span>
-</span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.uses_concrete_values&quot;</span><span class="p">,</span>
-</span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response uses concrete values from FAQ&quot;</span><span class="p">,</span>
-</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;completeness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_uses_concrete_values</span><span class="p">,</span>
-</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) §usefulness check&quot;</span><span class="p">),</span>
-</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="p">),</span>
-</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="c1"># no_overreach (2 rules, weights 0.6 + 0.4 = 1.0)</span>
-</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_unrequested_legal_refs&quot;</span><span class="p">,</span>
-</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no legal references in response that are not in FAQ&quot;</span><span class="p">,</span>
-</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
-</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;no_overreach&quot;</span><span class="p">,</span>
-</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_unrequested_legal_refs</span><span class="p">,</span>
-</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;EU AI Act 2024/1689 Art. 13 — transparency on capabilities and limits&quot;</span><span class="p">),</span>
-</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a>        <span class="p">),</span>
-</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_speculative_procedure&quot;</span><span class="p">,</span>
-</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no procedural additions not present in FAQ&quot;</span><span class="p">,</span>
-</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;no_overreach&quot;</span><span class="p">,</span>
-</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_speculative_procedure</span><span class="p">,</span>
-</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Federal Reserve SR 26-2 (Apr 2026) §model output controls&quot;</span><span class="p">,</span>
-</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="p">),</span>
-</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="p">)</span>
-</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>
-</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
-</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;customer_support_rag_v1&quot;</span><span class="p">,</span>
-</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
-</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="s2">&quot;completeness&quot;</span><span class="p">,</span> <span class="s2">&quot;no_overreach&quot;</span><span class="p">),</span>
-</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">customer_support_flag_predicate</span><span class="p">,</span>
-</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-401">401</a></span>
+<span class="normal"><a href="#__codelineno-0-402">402</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a><span class="k">def</span><span class="w"> </span><span class="nf">customer_support_rag_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
+</span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for customer-support RAG / informational agents.</span>
+</span><span id="__span-0-307"><a id="__codelineno-0-307" name="__codelineno-0-307"></a>
+</span><span id="__span-0-308"><a id="__codelineno-0-308" name="__codelineno-0-308"></a><span class="sd">    Returns a 7-rule set across 3 sub-scores: groundedness, completeness,</span>
+</span><span id="__span-0-309"><a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">    no_overreach. Each rule carries a citation to its academic, industrial,</span>
+</span><span id="__span-0-310"><a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">    or regulatory source.</span>
+</span><span id="__span-0-311"><a id="__codelineno-0-311" name="__codelineno-0-311"></a>
+</span><span id="__span-0-312"><a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">    Designed for informational customer-facing assistants over a FAQ-style</span>
+</span><span id="__span-0-313"><a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">    knowledge base — the FAQ-RAG customer-support archetype. Not appropriate for credit /</span>
+</span><span id="__span-0-314"><a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">    AML / KYC decision rationales (use</span>
+</span><span id="__span-0-315"><a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="sd">    :func:`groundlens.rules.groundlens_banking_rules` instead) nor for</span>
+</span><span id="__span-0-316"><a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">    routing or specialized / tool-using agents (see</span>
+</span><span id="__span-0-317"><a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">    :func:`groundlens.agents.routing_rules` and</span>
+</span><span id="__span-0-318"><a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">    :func:`groundlens.agents.specialized_agent_rules`).</span>
+</span><span id="__span-0-319"><a id="__codelineno-0-319" name="__codelineno-0-319"></a>
+</span><span id="__span-0-320"><a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="sd">    Example::</span>
+</span><span id="__span-0-321"><a id="__codelineno-0-321" name="__codelineno-0-321"></a>
+</span><span id="__span-0-322"><a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">        from groundlens.agents import customer_support_rag_rules</span>
+</span><span id="__span-0-323"><a id="__codelineno-0-323" name="__codelineno-0-323"></a>
+</span><span id="__span-0-324"><a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">        rs = customer_support_rag_rules()</span>
+</span><span id="__span-0-325"><a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">        result = rs.evaluate(</span>
+</span><span id="__span-0-326"><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="sd">            question=&quot;What is the Bizum daily limit?&quot;,</span>
+</span><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">            response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,</span>
+</span><span id="__span-0-328"><a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">            context=(</span>
+</span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">                &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;</span>
+</span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">                &quot;transaction and 2,000 EUR per day in total.&quot;</span>
+</span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">            ),</span>
+</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">        )</span>
+</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">        assert not result.flagged</span>
+</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>        <span class="c1"># groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)</span>
+</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_invented_numbers&quot;</span><span class="p">,</span>
+</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;every number in response appears in FAQ or query&quot;</span><span class="p">,</span>
+</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_invented_numbers</span><span class="p">,</span>
+</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Es et al. RAGAs (EACL 2024) §3 Faithfulness — atomic claim verification&quot;</span><span class="p">,</span>
+</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a>        <span class="p">),</span>
+</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_invented_proper_nouns&quot;</span><span class="p">,</span>
+</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;every proper noun in response appears in FAQ&quot;</span><span class="p">,</span>
+</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_invented_proper_nouns</span><span class="p">,</span>
+</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Min et al. FActScore (EMNLP 2023) — atomic factual precision&quot;</span><span class="p">,</span>
+</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="p">),</span>
+</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.content_overlaps_faq&quot;</span><span class="p">,</span>
+</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response content overlaps FAQ above threshold&quot;</span><span class="p">,</span>
+</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>
+</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_content_overlaps_faq</span><span class="p">,</span>
+</span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Marin (2025) SGI arXiv:2512.13771 — surface grounding signal&quot;</span><span class="p">,</span>
+</span><span id="__span-0-360"><a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="p">),</span>
+</span><span id="__span-0-361"><a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="c1"># completeness (2 rules, weights 0.7 + 0.3 = 1.0)</span>
+</span><span id="__span-0-362"><a id="__codelineno-0-362" name="__codelineno-0-362"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-363"><a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.addresses_query_topic&quot;</span><span class="p">,</span>
+</span><span id="__span-0-364"><a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response addresses the query topic&quot;</span><span class="p">,</span>
+</span><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.70</span><span class="p">,</span>
+</span><span id="__span-0-366"><a id="__codelineno-0-366" name="__codelineno-0-366"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;completeness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_addresses_query_topic</span><span class="p">,</span>
+</span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking RAG evaluation framework — relevance check&quot;</span><span class="p">,</span>
+</span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a>        <span class="p">),</span>
+</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.uses_concrete_values&quot;</span><span class="p">,</span>
+</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response uses concrete values from FAQ&quot;</span><span class="p">,</span>
+</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;completeness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_uses_concrete_values</span><span class="p">,</span>
+</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking RAG evaluation framework — usefulness check&quot;</span><span class="p">,</span>
+</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="p">),</span>
+</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="c1"># no_overreach (2 rules, weights 0.6 + 0.4 = 1.0)</span>
+</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_unrequested_legal_refs&quot;</span><span class="p">,</span>
+</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no legal references in response that are not in FAQ&quot;</span><span class="p">,</span>
+</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
+</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;no_overreach&quot;</span><span class="p">,</span>
+</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_unrequested_legal_refs</span><span class="p">,</span>
+</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;EU AI Act 2024/1689 Art. 13 — transparency on capabilities and limits&quot;</span><span class="p">),</span>
+</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>        <span class="p">),</span>
+</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;csr.no_speculative_procedure&quot;</span><span class="p">,</span>
+</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no procedural additions not present in FAQ&quot;</span><span class="p">,</span>
+</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;no_overreach&quot;</span><span class="p">,</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_speculative_procedure</span><span class="p">,</span>
+</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Federal Reserve SR 26-2 (Apr 2026) §model output controls&quot;</span><span class="p">,</span>
+</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="p">),</span>
+</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="p">)</span>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;customer_support_rag_v1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
+</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;groundedness&quot;</span><span class="p">,</span> <span class="s2">&quot;completeness&quot;</span><span class="p">,</span> <span class="s2">&quot;no_overreach&quot;</span><span class="p">),</span>
+</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">customer_support_flag_predicate</span><span class="p">,</span>
+</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2376,9 +2369,9 @@ banking = rag_rules()  # or rag_rules(domain=&quot;banking&quot;)
 cs = rag_rules(domain=&quot;customer_support&quot;)
 result = cs.evaluate(
     question=&quot;What is the Bizum daily limit?&quot;,
-    response=&quot;The Bizum daily limit at BBVA is 1,000 EUR per transaction.&quot;,
+    response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,
     context=(
-        &quot;The daily Bizum transfer limit at BBVA is 1,000 EUR per &quot;
+        &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;
         &quot;transaction and 2,000 EUR per day in total.&quot;
     ),
 )
@@ -2388,7 +2381,10 @@ assert not result.flagged
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/groundlens/agents/rag.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-37">37</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
@@ -2435,60 +2431,57 @@ assert not result.flagged
 <span class="normal"><a href="#__codelineno-0-81">81</a></span>
 <span class="normal"><a href="#__codelineno-0-82">82</a></span>
 <span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="k">def</span><span class="w"> </span><span class="nf">rag_rules</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;banking&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for RAG / informational agents.</span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">rag_rules</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;banking&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for RAG / informational agents.</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    Args:</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">        domain: Which domain flavour to return.</span>
 </span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    Args:</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">        domain: Which domain flavour to return.</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">            - ``&quot;banking&quot;`` (default): credit, AML, KYC, fraud, sanctions</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">              decision rationales. 20 rules across 5 sub-scores</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">              (groundedness, completeness, calibration, traceability,</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">              robustness). Same object as</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">              :func:`groundlens.rules.groundlens_banking_rules`.</span>
-</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">            - ``&quot;customer_support&quot;``: informational customer-support RAG</span>
-</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">              over a FAQ knowledge base. 7 rules across 3 sub-scores</span>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">              (groundedness, completeness, no_overreach). Same object as</span>
-</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">              :func:`groundlens.agents.customer_support_rag_rules`.</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">            - ``&quot;banking&quot;`` (default): credit, AML, KYC, fraud, sanctions</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">              decision rationales. 20 rules across 5 sub-scores</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">              (groundedness, completeness, calibration, traceability,</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">              robustness). Same object as</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">              :func:`groundlens.rules.groundlens_banking_rules`.</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">            - ``&quot;customer_support&quot;``: informational customer-support RAG</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">              over a FAQ knowledge base. 7 rules across 3 sub-scores</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">              (groundedness, completeness, no_overreach). Same object as</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">              :func:`groundlens.agents.customer_support_rag_rules`.</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    Returns:</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        A :class:`RuleSet` calibrated for the requested domain.</span>
 </span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        A :class:`RuleSet` calibrated for the requested domain.</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    Raises:</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        ValueError: If ``domain`` is not one of the supported domains.</span>
 </span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    Raises:</span>
-</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">        ValueError: If ``domain`` is not one of the supported domains.</span>
-</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a>
-</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    Example::</span>
-</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>
-</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        from groundlens.agents import rag_rules</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    Example::</span>
+</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>
+</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">        from groundlens.agents import rag_rules</span>
+</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        # Default: banking decision rationales</span>
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        banking = rag_rules()  # or rag_rules(domain=&quot;banking&quot;)</span>
 </span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a>
-</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        # Default: banking decision rationales</span>
-</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        banking = rag_rules()  # or rag_rules(domain=&quot;banking&quot;)</span>
-</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a>
-</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">        # Customer-support FAQ-RAG</span>
-</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        cs = rag_rules(domain=&quot;customer_support&quot;)</span>
-</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        result = cs.evaluate(</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">            question=&quot;What is the Bizum daily limit?&quot;,</span>
-</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">            response=&quot;The Bizum daily limit at BBVA is 1,000 EUR per transaction.&quot;,</span>
-</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">            context=(</span>
-</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">                &quot;The daily Bizum transfer limit at BBVA is 1,000 EUR per &quot;</span>
-</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">                &quot;transaction and 2,000 EUR per day in total.&quot;</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">            ),</span>
-</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        )</span>
-</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        assert not result.flagged</span>
-</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;banking&quot;</span><span class="p">:</span>
-</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a>        <span class="k">return</span> <span class="n">groundlens_banking_rules</span><span class="p">()</span>
-</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;customer_support&quot;</span><span class="p">:</span>
-</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="k">return</span> <span class="n">customer_support_rag_rules</span><span class="p">()</span>
-</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="sa">f</span><span class="s2">&quot;rag_rules(domain=</span><span class="si">{</span><span class="n">domain</span><span class="si">!r}</span><span class="s2">) — supported domains are &quot;</span>
-</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_SUPPORTED_DOMAINS</span><span class="si">}</span><span class="s2">. Legal, healthcare, and insurance &quot;</span>
-</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="s2">&quot;verticalizations are on the roadmap.&quot;</span>
-</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="p">)</span>
-</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        # Customer-support FAQ-RAG</span>
+</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        cs = rag_rules(domain=&quot;customer_support&quot;)</span>
+</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">        result = cs.evaluate(</span>
+</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">            question=&quot;What is the Bizum daily limit?&quot;,</span>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">            response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">            context=(</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">                &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">                &quot;transaction and 2,000 EUR per day in total.&quot;</span>
+</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">            ),</span>
+</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        )</span>
+</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        assert not result.flagged</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;banking&quot;</span><span class="p">:</span>
+</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="k">return</span> <span class="n">groundlens_banking_rules</span><span class="p">()</span>
+</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;customer_support&quot;</span><span class="p">:</span>
+</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>        <span class="k">return</span> <span class="n">customer_support_rag_rules</span><span class="p">()</span>
+</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>        <span class="sa">f</span><span class="s2">&quot;rag_rules(domain=</span><span class="si">{</span><span class="n">domain</span><span class="si">!r}</span><span class="s2">) — supported domains are &quot;</span>
+</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_SUPPORTED_DOMAINS</span><span class="si">}</span><span class="s2">. Legal, healthcare, and insurance &quot;</span>
+</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="s2">&quot;verticalizations are on the roadmap.&quot;</span>
+</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="p">)</span>
+</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2532,7 +2525,15 @@ assert result.flagged  # low confidence + multi-intent
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/groundlens/agents/routing.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-377">377</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-369">369</a></span>
+<span class="normal"><a href="#__codelineno-0-370">370</a></span>
+<span class="normal"><a href="#__codelineno-0-371">371</a></span>
+<span class="normal"><a href="#__codelineno-0-372">372</a></span>
+<span class="normal"><a href="#__codelineno-0-373">373</a></span>
+<span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span>
+<span class="normal"><a href="#__codelineno-0-377">377</a></span>
 <span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
@@ -2649,136 +2650,132 @@ assert result.flagged  # low confidence + multi-intent
 <span class="normal"><a href="#__codelineno-0-491">491</a></span>
 <span class="normal"><a href="#__codelineno-0-492">492</a></span>
 <span class="normal"><a href="#__codelineno-0-493">493</a></span>
-<span class="normal"><a href="#__codelineno-0-494">494</a></span>
-<span class="normal"><a href="#__codelineno-0-495">495</a></span>
-<span class="normal"><a href="#__codelineno-0-496">496</a></span>
-<span class="normal"><a href="#__codelineno-0-497">497</a></span>
-<span class="normal"><a href="#__codelineno-0-498">498</a></span>
-<span class="normal"><a href="#__codelineno-0-499">499</a></span>
-<span class="normal"><a href="#__codelineno-0-500">500</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="k">def</span><span class="w"> </span><span class="nf">routing_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
-</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for routing / intent classification agents.</span>
-</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a>
-</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">    Returns a 10-rule set across 4 sub-scores: intent_clarity,</span>
-</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">    classification_confidence, fallback_appropriateness,</span>
-</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">    disambiguation_quality. Each rule carries a citation to its</span>
-</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">    academic, industrial, or regulatory source.</span>
-</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>
-</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">    Example::</span>
-</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>
-</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">        from groundlens.agents import routing_rules</span>
-</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>
-</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        rs = routing_rules()</span>
-</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">        result = rs.evaluate(</span>
-</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">            question=&quot;transfer 500 to my brother and check my balance&quot;,</span>
-</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">            response=&quot;I will transfer 500 EUR.&quot;,</span>
-</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">            metadata={</span>
-</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="sd">                &quot;predicted_intent&quot;: &quot;transfer&quot;,</span>
-</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a><span class="sd">                &quot;top1_score&quot;: 0.62,</span>
-</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">                &quot;margin&quot;: 0.08,</span>
-</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">                &quot;fallback_fired&quot;: False,</span>
-</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">                &quot;query_in_scope&quot;: True,</span>
-</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">            },</span>
-</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">        )</span>
-</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="sd">        assert result.flagged  # low confidence + multi-intent</span>
-</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="c1"># intent_clarity (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="k">def</span><span class="w"> </span><span class="nf">routing_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
+</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for routing / intent classification agents.</span>
+</span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a>
+</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="sd">    Returns a 10-rule set across 4 sub-scores: intent_clarity,</span>
+</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">    classification_confidence, fallback_appropriateness,</span>
+</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">    disambiguation_quality. Each rule carries a citation to its</span>
+</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">    academic, industrial, or regulatory source.</span>
+</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a>
+</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">    Example::</span>
+</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a>
+</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        from groundlens.agents import routing_rules</span>
+</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a>
+</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">        rs = routing_rules()</span>
+</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">        result = rs.evaluate(</span>
+</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">            question=&quot;transfer 500 to my brother and check my balance&quot;,</span>
+</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">            response=&quot;I will transfer 500 EUR.&quot;,</span>
+</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">            metadata={</span>
+</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">                &quot;predicted_intent&quot;: &quot;transfer&quot;,</span>
+</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">                &quot;top1_score&quot;: 0.62,</span>
+</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">                &quot;margin&quot;: 0.08,</span>
+</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">                &quot;fallback_fired&quot;: False,</span>
+</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">                &quot;query_in_scope&quot;: True,</span>
+</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">            },</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        )</span>
+</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">        assert result.flagged  # low confidence + multi-intent</span>
+</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="c1"># intent_clarity (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.single_intent_signal&quot;</span><span class="p">,</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;query carries a single intent, not multiple chained operations&quot;</span><span class="p">,</span>
+</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
+</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_single_intent_signal</span><span class="p">,</span>
+</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Sarikaya et al. (IEEE TASLP 2014) — intent detection in spoken NLU&quot;</span><span class="p">,</span>
+</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="p">),</span>
 </span><span id="__span-0-405"><a id="__codelineno-0-405" name="__codelineno-0-405"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.single_intent_signal&quot;</span><span class="p">,</span>
-</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;query carries a single intent, not multiple chained operations&quot;</span><span class="p">,</span>
-</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.no_ambiguous_pronoun_lead&quot;</span><span class="p">,</span>
+</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;query does not start with a bare pronoun without antecedent&quot;</span><span class="p">,</span>
+</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
 </span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
-</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_single_intent_signal</span><span class="p">,</span>
-</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Sarikaya et al. (IEEE TASLP 2014) — intent detection in spoken NLU&quot;</span><span class="p">,</span>
-</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="p">),</span>
-</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.no_ambiguous_pronoun_lead&quot;</span><span class="p">,</span>
-</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;query does not start with a bare pronoun without antecedent&quot;</span><span class="p">,</span>
-</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
-</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_ambiguous_pronoun_lead</span><span class="p">,</span>
-</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Falcón et al. (BBVA AI Factory, 14/02/2025) — routing the future&quot;</span><span class="p">,</span>
-</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="p">),</span>
-</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.intent_shares_query_tokens&quot;</span><span class="p">,</span>
-</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;predicted intent shares at least one content token with the query&quot;</span><span class="p">,</span>
-</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
-</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_intent_shares_query_tokens</span><span class="p">,</span>
-</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Wang et al. (ACL 2020) — intent-slot consistency for joint NLU&quot;</span><span class="p">,</span>
-</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="p">),</span>
-</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="c1"># classification_confidence (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
-</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.top1_confidence_above_threshold&quot;</span><span class="p">,</span>
-</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;top-1 confidence above operational threshold (default 0.7)&quot;</span><span class="p">,</span>
-</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
-</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_top1_confidence_above_threshold</span><span class="p">,</span>
-</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Guo et al. (ICML 2017) — on calibration of modern neural networks&quot;</span><span class="p">,</span>
-</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="p">),</span>
-</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.margin_to_runner_up&quot;</span><span class="p">,</span>
-</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;margin between top-1 and top-2 above floor (default 0.15)&quot;</span><span class="p">,</span>
-</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
-</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_margin_to_runner_up</span><span class="p">,</span>
-</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) — routing eval metrics&quot;</span><span class="p">,</span>
-</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="p">),</span>
-</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.intent_in_allowed_set&quot;</span><span class="p">,</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;predicted intent belongs to the configured allowed set&quot;</span><span class="p">,</span>
-</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
-</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_intent_in_allowed_set</span><span class="p">,</span>
-</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Hendrycks &amp; Gimpel (ICLR 2017) — out-of-distribution detection&quot;</span><span class="p">,</span>
-</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="p">),</span>
-</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="c1"># fallback_appropriateness (2 rules, weights 0.6 + 0.4 = 1.0)</span>
-</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.fallback_when_out_of_scope&quot;</span><span class="p">,</span>
-</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;if fallback fired, the query is actually out of scope&quot;</span><span class="p">,</span>
-</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
-</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_fallback_when_out_of_scope</span><span class="p">,</span>
-</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) §informational agent&quot;</span><span class="p">,</span>
-</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="p">),</span>
-</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.no_silent_fallback&quot;</span><span class="p">,</span>
-</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;fallback responses explain the limit instead of being silent&quot;</span><span class="p">,</span>
-</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_silent_fallback</span><span class="p">,</span>
-</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;NIST AI RMF 1.0 (2023) §Govern 5 — transparency to affected parties&quot;</span><span class="p">,</span>
-</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="p">),</span>
-</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="c1"># disambiguation_quality (2 rules, weights 0.6 + 0.4 = 1.0)</span>
-</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.clarify_when_ambiguous&quot;</span><span class="p">,</span>
-</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;low-margin cases trigger clarification rather than silent routing&quot;</span><span class="p">,</span>
-</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
-</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
-</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_clarify_when_ambiguous</span><span class="p">,</span>
-</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Rao &amp; Daumé III (ACL 2018) — learning to ask good questions&quot;</span><span class="p">,</span>
-</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>        <span class="p">),</span>
-</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.specific_clarify_question&quot;</span><span class="p">,</span>
-</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;clarify question references the two candidate intents specifically&quot;</span><span class="p">,</span>
-</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-484"><a id="__codelineno-0-484" name="__codelineno-0-484"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
-</span><span id="__span-0-485"><a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_specific_clarify_question</span><span class="p">,</span>
-</span><span id="__span-0-486"><a id="__codelineno-0-486" name="__codelineno-0-486"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;De Vries et al. (ACL 2018) — task-oriented dialogue clarification&quot;</span><span class="p">,</span>
-</span><span id="__span-0-487"><a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="p">),</span>
-</span><span id="__span-0-488"><a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="p">)</span>
-</span><span id="__span-0-489"><a id="__codelineno-0-489" name="__codelineno-0-489"></a>
-</span><span id="__span-0-490"><a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
-</span><span id="__span-0-491"><a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;groundlens_routing_v1&quot;</span><span class="p">,</span>
-</span><span id="__span-0-492"><a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
-</span><span id="__span-0-493"><a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-494"><a id="__codelineno-0-494" name="__codelineno-0-494"></a>            <span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
-</span><span id="__span-0-495"><a id="__codelineno-0-495" name="__codelineno-0-495"></a>            <span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
-</span><span id="__span-0-496"><a id="__codelineno-0-496" name="__codelineno-0-496"></a>            <span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-497"><a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
-</span><span id="__span-0-498"><a id="__codelineno-0-498" name="__codelineno-0-498"></a>        <span class="p">),</span>
-</span><span id="__span-0-499"><a id="__codelineno-0-499" name="__codelineno-0-499"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">routing_flag_predicate</span><span class="p">,</span>
-</span><span id="__span-0-500"><a id="__codelineno-0-500" name="__codelineno-0-500"></a>    <span class="p">)</span>
+</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_ambiguous_pronoun_lead</span><span class="p">,</span>
+</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>                <span class="s2">&quot;Industry banking routing-agent design pattern (production deployments, 2025)&quot;</span>
+</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>            <span class="p">),</span>
+</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="p">),</span>
+</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.intent_shares_query_tokens&quot;</span><span class="p">,</span>
+</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;predicted intent shares at least one content token with the query&quot;</span><span class="p">,</span>
+</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
+</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_intent_shares_query_tokens</span><span class="p">,</span>
+</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Wang et al. (ACL 2020) — intent-slot consistency for joint NLU&quot;</span><span class="p">,</span>
+</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="p">),</span>
+</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="c1"># classification_confidence (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
+</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.top1_confidence_above_threshold&quot;</span><span class="p">,</span>
+</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;top-1 confidence above operational threshold (default 0.7)&quot;</span><span class="p">,</span>
+</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
+</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_top1_confidence_above_threshold</span><span class="p">,</span>
+</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Guo et al. (ICML 2017) — on calibration of modern neural networks&quot;</span><span class="p">,</span>
+</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="p">),</span>
+</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.margin_to_runner_up&quot;</span><span class="p">,</span>
+</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;margin between top-1 and top-2 above floor (default 0.15)&quot;</span><span class="p">,</span>
+</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
+</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_margin_to_runner_up</span><span class="p">,</span>
+</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking routing-agent evaluation — top-1 to top-2 margin metric&quot;</span><span class="p">,</span>
+</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>        <span class="p">),</span>
+</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.intent_in_allowed_set&quot;</span><span class="p">,</span>
+</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;predicted intent belongs to the configured allowed set&quot;</span><span class="p">,</span>
+</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
+</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_intent_in_allowed_set</span><span class="p">,</span>
+</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Hendrycks &amp; Gimpel (ICLR 2017) — out-of-distribution detection&quot;</span><span class="p">,</span>
+</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="p">),</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="c1"># fallback_appropriateness (2 rules, weights 0.6 + 0.4 = 1.0)</span>
+</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.fallback_when_out_of_scope&quot;</span><span class="p">,</span>
+</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;if fallback fired, the query is actually out of scope&quot;</span><span class="p">,</span>
+</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
+</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_fallback_when_out_of_scope</span><span class="p">,</span>
+</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking RAG evaluation framework — fallback necessity check&quot;</span><span class="p">,</span>
+</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="p">),</span>
+</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.no_silent_fallback&quot;</span><span class="p">,</span>
+</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;fallback responses explain the limit instead of being silent&quot;</span><span class="p">,</span>
+</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_silent_fallback</span><span class="p">,</span>
+</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;NIST AI RMF 1.0 (2023) §Govern 5 — transparency to affected parties&quot;</span><span class="p">,</span>
+</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="p">),</span>
+</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="c1"># disambiguation_quality (2 rules, weights 0.6 + 0.4 = 1.0)</span>
+</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.clarify_when_ambiguous&quot;</span><span class="p">,</span>
+</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;low-margin cases trigger clarification rather than silent routing&quot;</span><span class="p">,</span>
+</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
+</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
+</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_clarify_when_ambiguous</span><span class="p">,</span>
+</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Rao &amp; Daumé III (ACL 2018) — learning to ask good questions&quot;</span><span class="p">,</span>
+</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="p">),</span>
+</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;routing.specific_clarify_question&quot;</span><span class="p">,</span>
+</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;clarify question references the two candidate intents specifically&quot;</span><span class="p">,</span>
+</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
+</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_specific_clarify_question</span><span class="p">,</span>
+</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;De Vries et al. (ACL 2018) — task-oriented dialogue clarification&quot;</span><span class="p">,</span>
+</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="p">),</span>
+</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="p">)</span>
+</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>
+</span><span id="__span-0-484"><a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
+</span><span id="__span-0-485"><a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;groundlens_routing_v1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-486"><a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
+</span><span id="__span-0-487"><a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-488"><a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="s2">&quot;intent_clarity&quot;</span><span class="p">,</span>
+</span><span id="__span-0-489"><a id="__codelineno-0-489" name="__codelineno-0-489"></a>            <span class="s2">&quot;classification_confidence&quot;</span><span class="p">,</span>
+</span><span id="__span-0-490"><a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="s2">&quot;fallback_appropriateness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-491"><a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="s2">&quot;disambiguation_quality&quot;</span><span class="p">,</span>
+</span><span id="__span-0-492"><a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="p">),</span>
+</span><span id="__span-0-493"><a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">routing_flag_predicate</span><span class="p">,</span>
+</span><span id="__span-0-494"><a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2822,7 +2819,10 @@ result = rs.evaluate(
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/groundlens/agents/specialized.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-420">420</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-417">417</a></span>
+<span class="normal"><a href="#__codelineno-0-418">418</a></span>
+<span class="normal"><a href="#__codelineno-0-419">419</a></span>
+<span class="normal"><a href="#__codelineno-0-420">420</a></span>
 <span class="normal"><a href="#__codelineno-0-421">421</a></span>
 <span class="normal"><a href="#__codelineno-0-422">422</a></span>
 <span class="normal"><a href="#__codelineno-0-423">423</a></span>
@@ -2946,135 +2946,134 @@ result = rs.evaluate(
 <span class="normal"><a href="#__codelineno-0-541">541</a></span>
 <span class="normal"><a href="#__codelineno-0-542">542</a></span>
 <span class="normal"><a href="#__codelineno-0-543">543</a></span>
-<span class="normal"><a href="#__codelineno-0-544">544</a></span>
-<span class="normal"><a href="#__codelineno-0-545">545</a></span>
-<span class="normal"><a href="#__codelineno-0-546">546</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="k">def</span><span class="w"> </span><span class="nf">specialized_agent_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
-</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for specialized / tool-using agents.</span>
+<span class="normal"><a href="#__codelineno-0-544">544</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="k">def</span><span class="w"> </span><span class="nf">specialized_agent_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
+</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for specialized / tool-using agents.</span>
+</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>
+</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">    Returns a 10-rule set across 4 sub-scores: entity_groundedness,</span>
+</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">    entity_completeness, entity_calibration, execution_readiness.</span>
 </span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>
-</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">    Returns a 10-rule set across 4 sub-scores: entity_groundedness,</span>
-</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">    entity_completeness, entity_calibration, execution_readiness.</span>
-</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>
-</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">    The flag predicate is stricter than for RAG agents because</span>
-</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">    specialized agents execute irreversible operations (move money,</span>
-</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">    open accounts, send messages on behalf of the customer).</span>
-</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>
-</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">    Example::</span>
-</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>
-</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        from groundlens.agents import specialized_agent_rules</span>
-</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">        rs = specialized_agent_rules()</span>
-</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">        result = rs.evaluate(</span>
-</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">            question=&quot;send 500 to my brother&quot;,</span>
-</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">            response=&quot;OK, I&#39;ll send 500 EUR to IBAN ES12...&quot;,</span>
-</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">            metadata={</span>
-</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">                &quot;dialog&quot;: &quot;send 500 to my brother. yes go ahead.&quot;,</span>
-</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">                &quot;entities&quot;: {&quot;amount&quot;: 500, &quot;iban&quot;: &quot;ES1234567890123456789012&quot;},</span>
-</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">                &quot;required_entities&quot;: [&quot;amount&quot;, &quot;iban&quot;],</span>
-</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">                &quot;confirmed&quot;: True,</span>
-</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">                &quot;operation&quot;: &quot;wire_transfer&quot;,</span>
-</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">            },</span>
-</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        )</span>
-</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="c1"># entity_groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)</span>
-</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.entities_in_dialog&quot;</span><span class="p">,</span>
-</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;each captured entity appears verbatim in the dialogue&quot;</span><span class="p">,</span>
-</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
-</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_entities_in_dialog</span><span class="p">,</span>
-</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) — entity hallucination metric&quot;</span><span class="p">,</span>
-</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="p">),</span>
-</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.iban_format_valid&quot;</span><span class="p">,</span>
-</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;captured IBANs pass ISO 13616 mod-97 verification&quot;</span><span class="p">,</span>
-</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_iban_format_valid</span><span class="p">,</span>
-</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;ISO 13616:2020 — International Bank Account Number (IBAN)&quot;</span><span class="p">,</span>
-</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="p">),</span>
-</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.amounts_parseable&quot;</span><span class="p">,</span>
-</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;captured amount entities parse as numbers&quot;</span><span class="p">,</span>
-</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>
-</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_amounts_parseable</span><span class="p">,</span>
-</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>                <span class="s2">&quot;EBA Guidelines on the security of internet payments (2019) &quot;</span>
-</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>                <span class="s2">&quot;§Transaction Authentication — exact-amount confirmation&quot;</span>
-</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>            <span class="p">),</span>
-</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="p">),</span>
-</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>        <span class="c1"># entity_completeness (2 rules, weights 0.6 + 0.4 = 1.0)</span>
-</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.required_entities_present&quot;</span><span class="p">,</span>
-</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;all entities required by the operation schema are captured&quot;</span><span class="p">,</span>
-</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
-</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_required_entities_present</span><span class="p">,</span>
-</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Evans (2003) Domain-Driven Design — aggregate root invariants&quot;</span><span class="p">,</span>
-</span><span id="__span-0-484"><a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="p">),</span>
-</span><span id="__span-0-485"><a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-486"><a id="__codelineno-0-486" name="__codelineno-0-486"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_partial_fields&quot;</span><span class="p">,</span>
-</span><span id="__span-0-487"><a id="__codelineno-0-487" name="__codelineno-0-487"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no required entity is partially filled or truncated&quot;</span><span class="p">,</span>
-</span><span id="__span-0-488"><a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-489"><a id="__codelineno-0-489" name="__codelineno-0-489"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-490"><a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_partial_fields</span><span class="p">,</span>
-</span><span id="__span-0-491"><a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Wang &amp; Strong (1996) — beyond accuracy: data quality dimensions&quot;</span><span class="p">,</span>
-</span><span id="__span-0-492"><a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="p">),</span>
-</span><span id="__span-0-493"><a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="c1"># entity_calibration (1 rule, weight 1.0)</span>
-</span><span id="__span-0-494"><a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-495"><a id="__codelineno-0-495" name="__codelineno-0-495"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_phantom_entities&quot;</span><span class="p">,</span>
-</span><span id="__span-0-496"><a id="__codelineno-0-496" name="__codelineno-0-496"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no captured entity is outside the operation schema&quot;</span><span class="p">,</span>
-</span><span id="__span-0-497"><a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span>
-</span><span id="__span-0-498"><a id="__codelineno-0-498" name="__codelineno-0-498"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_calibration&quot;</span><span class="p">,</span>
-</span><span id="__span-0-499"><a id="__codelineno-0-499" name="__codelineno-0-499"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_phantom_entities</span><span class="p">,</span>
-</span><span id="__span-0-500"><a id="__codelineno-0-500" name="__codelineno-0-500"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) — precision of empty entities&quot;</span><span class="p">),</span>
-</span><span id="__span-0-501"><a id="__codelineno-0-501" name="__codelineno-0-501"></a>        <span class="p">),</span>
-</span><span id="__span-0-502"><a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="c1"># execution_readiness (4 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
-</span><span id="__span-0-503"><a id="__codelineno-0-503" name="__codelineno-0-503"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-504"><a id="__codelineno-0-504" name="__codelineno-0-504"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.explicit_confirmation&quot;</span><span class="p">,</span>
-</span><span id="__span-0-505"><a id="__codelineno-0-505" name="__codelineno-0-505"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;dialogue contains an explicit user confirmation before execution&quot;</span><span class="p">,</span>
-</span><span id="__span-0-506"><a id="__codelineno-0-506" name="__codelineno-0-506"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
-</span><span id="__span-0-507"><a id="__codelineno-0-507" name="__codelineno-0-507"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-508"><a id="__codelineno-0-508" name="__codelineno-0-508"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_explicit_confirmation</span><span class="p">,</span>
-</span><span id="__span-0-509"><a id="__codelineno-0-509" name="__codelineno-0-509"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-510"><a id="__codelineno-0-510" name="__codelineno-0-510"></a>                <span class="s2">&quot;EBA Guidelines on the security of internet payments (2019) §27 &quot;</span>
-</span><span id="__span-0-511"><a id="__codelineno-0-511" name="__codelineno-0-511"></a>                <span class="s2">&quot;— Transaction Authentication&quot;</span>
-</span><span id="__span-0-512"><a id="__codelineno-0-512" name="__codelineno-0-512"></a>            <span class="p">),</span>
-</span><span id="__span-0-513"><a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="p">),</span>
-</span><span id="__span-0-514"><a id="__codelineno-0-514" name="__codelineno-0-514"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-515"><a id="__codelineno-0-515" name="__codelineno-0-515"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.eoc_when_complete&quot;</span><span class="p">,</span>
-</span><span id="__span-0-516"><a id="__codelineno-0-516" name="__codelineno-0-516"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;EOC signaled only after the operation is complete&quot;</span><span class="p">,</span>
-</span><span id="__span-0-517"><a id="__codelineno-0-517" name="__codelineno-0-517"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-518"><a id="__codelineno-0-518" name="__codelineno-0-518"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-519"><a id="__codelineno-0-519" name="__codelineno-0-519"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_eoc_when_complete</span><span class="p">,</span>
-</span><span id="__span-0-520"><a id="__codelineno-0-520" name="__codelineno-0-520"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-521"><a id="__codelineno-0-521" name="__codelineno-0-521"></a>                <span class="s2">&quot;Torcal et al. (BBVA AI Factory, 15/04/2026) — end of conversation detection rate&quot;</span>
-</span><span id="__span-0-522"><a id="__codelineno-0-522" name="__codelineno-0-522"></a>            <span class="p">),</span>
-</span><span id="__span-0-523"><a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="p">),</span>
-</span><span id="__span-0-524"><a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
-</span><span id="__span-0-525"><a id="__codelineno-0-525" name="__codelineno-0-525"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_pre_execution_claim&quot;</span><span class="p">,</span>
-</span><span id="__span-0-526"><a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response does not claim execution before user confirmation&quot;</span><span class="p">,</span>
-</span><span id="__span-0-527"><a id="__codelineno-0-527" name="__codelineno-0-527"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
-</span><span id="__span-0-528"><a id="__codelineno-0-528" name="__codelineno-0-528"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-529"><a id="__codelineno-0-529" name="__codelineno-0-529"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_pre_execution_claim</span><span class="p">,</span>
-</span><span id="__span-0-530"><a id="__codelineno-0-530" name="__codelineno-0-530"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-531"><a id="__codelineno-0-531" name="__codelineno-0-531"></a>                <span class="s2">&quot;Federal Reserve SR 26-2 (Apr 2026) — Model Risk Management; model output controls&quot;</span>
-</span><span id="__span-0-532"><a id="__codelineno-0-532" name="__codelineno-0-532"></a>            <span class="p">),</span>
-</span><span id="__span-0-533"><a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="p">),</span>
-</span><span id="__span-0-534"><a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="p">)</span>
-</span><span id="__span-0-535"><a id="__codelineno-0-535" name="__codelineno-0-535"></a>
-</span><span id="__span-0-536"><a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
-</span><span id="__span-0-537"><a id="__codelineno-0-537" name="__codelineno-0-537"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;groundlens_specialized_v1&quot;</span><span class="p">,</span>
-</span><span id="__span-0-538"><a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
-</span><span id="__span-0-539"><a id="__codelineno-0-539" name="__codelineno-0-539"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span>
-</span><span id="__span-0-540"><a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-541"><a id="__codelineno-0-541" name="__codelineno-0-541"></a>            <span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-542"><a id="__codelineno-0-542" name="__codelineno-0-542"></a>            <span class="s2">&quot;entity_calibration&quot;</span><span class="p">,</span>
-</span><span id="__span-0-543"><a id="__codelineno-0-543" name="__codelineno-0-543"></a>            <span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
-</span><span id="__span-0-544"><a id="__codelineno-0-544" name="__codelineno-0-544"></a>        <span class="p">),</span>
-</span><span id="__span-0-545"><a id="__codelineno-0-545" name="__codelineno-0-545"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">specialized_flag_predicate</span><span class="p">,</span>
-</span><span id="__span-0-546"><a id="__codelineno-0-546" name="__codelineno-0-546"></a>    <span class="p">)</span>
+</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">    The flag predicate is stricter than for RAG agents because</span>
+</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">    specialized agents execute irreversible operations (move money,</span>
+</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">    open accounts, send messages on behalf of the customer).</span>
+</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>
+</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">    Example::</span>
+</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>
+</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">        from groundlens.agents import specialized_agent_rules</span>
+</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>
+</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">        rs = specialized_agent_rules()</span>
+</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        result = rs.evaluate(</span>
+</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="sd">            question=&quot;send 500 to my brother&quot;,</span>
+</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">            response=&quot;OK, I&#39;ll send 500 EUR to IBAN ES12...&quot;,</span>
+</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">            metadata={</span>
+</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">                &quot;dialog&quot;: &quot;send 500 to my brother. yes go ahead.&quot;,</span>
+</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">                &quot;entities&quot;: {&quot;amount&quot;: 500, &quot;iban&quot;: &quot;ES1234567890123456789012&quot;},</span>
+</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">                &quot;required_entities&quot;: [&quot;amount&quot;, &quot;iban&quot;],</span>
+</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">                &quot;confirmed&quot;: True,</span>
+</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">                &quot;operation&quot;: &quot;wire_transfer&quot;,</span>
+</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">            },</span>
+</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">        )</span>
+</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="c1"># entity_groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)</span>
+</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.entities_in_dialog&quot;</span><span class="p">,</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;each captured entity appears verbatim in the dialogue&quot;</span><span class="p">,</span>
+</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_entities_in_dialog</span><span class="p">,</span>
+</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking conversational-AI evaluation — entity hallucination metric&quot;</span><span class="p">,</span>
+</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="p">),</span>
+</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.iban_format_valid&quot;</span><span class="p">,</span>
+</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;captured IBANs pass ISO 13616 mod-97 verification&quot;</span><span class="p">,</span>
+</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_iban_format_valid</span><span class="p">,</span>
+</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;ISO 13616:2020 — International Bank Account Number (IBAN)&quot;</span><span class="p">,</span>
+</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="p">),</span>
+</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.amounts_parseable&quot;</span><span class="p">,</span>
+</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;captured amount entities parse as numbers&quot;</span><span class="p">,</span>
+</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>
+</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_amounts_parseable</span><span class="p">,</span>
+</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="s2">&quot;EBA Guidelines on the security of internet payments (2019) &quot;</span>
+</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>                <span class="s2">&quot;§Transaction Authentication — exact-amount confirmation&quot;</span>
+</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="p">),</span>
+</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="p">),</span>
+</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="c1"># entity_completeness (2 rules, weights 0.6 + 0.4 = 1.0)</span>
+</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.required_entities_present&quot;</span><span class="p">,</span>
+</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;all entities required by the operation schema are captured&quot;</span><span class="p">,</span>
+</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
+</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_required_entities_present</span><span class="p">,</span>
+</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Evans (2003) Domain-Driven Design — aggregate root invariants&quot;</span><span class="p">,</span>
+</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="p">),</span>
+</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_partial_fields&quot;</span><span class="p">,</span>
+</span><span id="__span-0-484"><a id="__codelineno-0-484" name="__codelineno-0-484"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no required entity is partially filled or truncated&quot;</span><span class="p">,</span>
+</span><span id="__span-0-485"><a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-486"><a id="__codelineno-0-486" name="__codelineno-0-486"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-487"><a id="__codelineno-0-487" name="__codelineno-0-487"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_partial_fields</span><span class="p">,</span>
+</span><span id="__span-0-488"><a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Wang &amp; Strong (1996) — beyond accuracy: data quality dimensions&quot;</span><span class="p">,</span>
+</span><span id="__span-0-489"><a id="__codelineno-0-489" name="__codelineno-0-489"></a>        <span class="p">),</span>
+</span><span id="__span-0-490"><a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="c1"># entity_calibration (1 rule, weight 1.0)</span>
+</span><span id="__span-0-491"><a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-492"><a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_phantom_entities&quot;</span><span class="p">,</span>
+</span><span id="__span-0-493"><a id="__codelineno-0-493" name="__codelineno-0-493"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;no captured entity is outside the operation schema&quot;</span><span class="p">,</span>
+</span><span id="__span-0-494"><a id="__codelineno-0-494" name="__codelineno-0-494"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span>
+</span><span id="__span-0-495"><a id="__codelineno-0-495" name="__codelineno-0-495"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;entity_calibration&quot;</span><span class="p">,</span>
+</span><span id="__span-0-496"><a id="__codelineno-0-496" name="__codelineno-0-496"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_phantom_entities</span><span class="p">,</span>
+</span><span id="__span-0-497"><a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="n">citation</span><span class="o">=</span><span class="s2">&quot;Industry banking conversational-AI evaluation — precision of empty entities&quot;</span><span class="p">,</span>
+</span><span id="__span-0-498"><a id="__codelineno-0-498" name="__codelineno-0-498"></a>        <span class="p">),</span>
+</span><span id="__span-0-499"><a id="__codelineno-0-499" name="__codelineno-0-499"></a>        <span class="c1"># execution_readiness (4 rules, weights 0.4 + 0.3 + 0.3 = 1.0)</span>
+</span><span id="__span-0-500"><a id="__codelineno-0-500" name="__codelineno-0-500"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-501"><a id="__codelineno-0-501" name="__codelineno-0-501"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.explicit_confirmation&quot;</span><span class="p">,</span>
+</span><span id="__span-0-502"><a id="__codelineno-0-502" name="__codelineno-0-502"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;dialogue contains an explicit user confirmation before execution&quot;</span><span class="p">,</span>
+</span><span id="__span-0-503"><a id="__codelineno-0-503" name="__codelineno-0-503"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.40</span><span class="p">,</span>
+</span><span id="__span-0-504"><a id="__codelineno-0-504" name="__codelineno-0-504"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-505"><a id="__codelineno-0-505" name="__codelineno-0-505"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_explicit_confirmation</span><span class="p">,</span>
+</span><span id="__span-0-506"><a id="__codelineno-0-506" name="__codelineno-0-506"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-507"><a id="__codelineno-0-507" name="__codelineno-0-507"></a>                <span class="s2">&quot;EBA Guidelines on the security of internet payments (2019) §27 &quot;</span>
+</span><span id="__span-0-508"><a id="__codelineno-0-508" name="__codelineno-0-508"></a>                <span class="s2">&quot;— Transaction Authentication&quot;</span>
+</span><span id="__span-0-509"><a id="__codelineno-0-509" name="__codelineno-0-509"></a>            <span class="p">),</span>
+</span><span id="__span-0-510"><a id="__codelineno-0-510" name="__codelineno-0-510"></a>        <span class="p">),</span>
+</span><span id="__span-0-511"><a id="__codelineno-0-511" name="__codelineno-0-511"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-512"><a id="__codelineno-0-512" name="__codelineno-0-512"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.eoc_when_complete&quot;</span><span class="p">,</span>
+</span><span id="__span-0-513"><a id="__codelineno-0-513" name="__codelineno-0-513"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;EOC signaled only after the operation is complete&quot;</span><span class="p">,</span>
+</span><span id="__span-0-514"><a id="__codelineno-0-514" name="__codelineno-0-514"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-515"><a id="__codelineno-0-515" name="__codelineno-0-515"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-516"><a id="__codelineno-0-516" name="__codelineno-0-516"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_eoc_when_complete</span><span class="p">,</span>
+</span><span id="__span-0-517"><a id="__codelineno-0-517" name="__codelineno-0-517"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-518"><a id="__codelineno-0-518" name="__codelineno-0-518"></a>                <span class="s2">&quot;Industry banking conversational-AI evaluation — &quot;</span>
+</span><span id="__span-0-519"><a id="__codelineno-0-519" name="__codelineno-0-519"></a>                <span class="s2">&quot;end-of-conversation detection rate&quot;</span>
+</span><span id="__span-0-520"><a id="__codelineno-0-520" name="__codelineno-0-520"></a>            <span class="p">),</span>
+</span><span id="__span-0-521"><a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="p">),</span>
+</span><span id="__span-0-522"><a id="__codelineno-0-522" name="__codelineno-0-522"></a>        <span class="n">ChecklistRule</span><span class="p">(</span>
+</span><span id="__span-0-523"><a id="__codelineno-0-523" name="__codelineno-0-523"></a>            <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;specialized.no_pre_execution_claim&quot;</span><span class="p">,</span>
+</span><span id="__span-0-524"><a id="__codelineno-0-524" name="__codelineno-0-524"></a>            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;response does not claim execution before user confirmation&quot;</span><span class="p">,</span>
+</span><span id="__span-0-525"><a id="__codelineno-0-525" name="__codelineno-0-525"></a>            <span class="n">weight</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+</span><span id="__span-0-526"><a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="n">sub_score</span><span class="o">=</span><span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-527"><a id="__codelineno-0-527" name="__codelineno-0-527"></a>            <span class="n">check</span><span class="o">=</span><span class="n">check_no_pre_execution_claim</span><span class="p">,</span>
+</span><span id="__span-0-528"><a id="__codelineno-0-528" name="__codelineno-0-528"></a>            <span class="n">citation</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-529"><a id="__codelineno-0-529" name="__codelineno-0-529"></a>                <span class="s2">&quot;Federal Reserve SR 26-2 (Apr 2026) — Model Risk Management; model output controls&quot;</span>
+</span><span id="__span-0-530"><a id="__codelineno-0-530" name="__codelineno-0-530"></a>            <span class="p">),</span>
+</span><span id="__span-0-531"><a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="p">),</span>
+</span><span id="__span-0-532"><a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="p">)</span>
+</span><span id="__span-0-533"><a id="__codelineno-0-533" name="__codelineno-0-533"></a>
+</span><span id="__span-0-534"><a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="k">return</span> <span class="n">RuleSet</span><span class="p">(</span>
+</span><span id="__span-0-535"><a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;groundlens_specialized_v1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-536"><a id="__codelineno-0-536" name="__codelineno-0-536"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">,</span>
+</span><span id="__span-0-537"><a id="__codelineno-0-537" name="__codelineno-0-537"></a>        <span class="n">sub_scores</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-0-538"><a id="__codelineno-0-538" name="__codelineno-0-538"></a>            <span class="s2">&quot;entity_groundedness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-539"><a id="__codelineno-0-539" name="__codelineno-0-539"></a>            <span class="s2">&quot;entity_completeness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-540"><a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="s2">&quot;entity_calibration&quot;</span><span class="p">,</span>
+</span><span id="__span-0-541"><a id="__codelineno-0-541" name="__codelineno-0-541"></a>            <span class="s2">&quot;execution_readiness&quot;</span><span class="p">,</span>
+</span><span id="__span-0-542"><a id="__codelineno-0-542" name="__codelineno-0-542"></a>        <span class="p">),</span>
+</span><span id="__span-0-543"><a id="__codelineno-0-543" name="__codelineno-0-543"></a>        <span class="n">flag_predicate</span><span class="o">=</span><span class="n">specialized_flag_predicate</span><span class="p">,</span>
+</span><span id="__span-0-544"><a id="__codelineno-0-544" name="__codelineno-0-544"></a>    <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
