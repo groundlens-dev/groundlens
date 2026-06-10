@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "groundlens"
-version = "2026.6.11"
-description = "Triage for AI agents and model outputs. Deterministic. Auditable. No second LLM."
+version = "2026.6.12"
+description = "Verifiable agent triage. Geometry + rules. No second LLM in the loop."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
