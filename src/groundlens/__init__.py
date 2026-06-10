@@ -57,7 +57,12 @@ References:
 
 from groundlens import agents, rules
 from groundlens._version import __version__
-from groundlens.agents import rag_rules, routing_rules, specialized_agent_rules
+from groundlens.agents import (
+    customer_support_rag_rules,
+    rag_rules,
+    routing_rules,
+    specialized_agent_rules,
+)
 from groundlens.calibrate import CalibrationResult, calibrate
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
@@ -96,6 +101,7 @@ __all__ = [
     "compute_dgi",
     # Functions
     "compute_sgi",
+    "customer_support_rag_rules",
     "evaluate",
     "evaluate_batch",
     "groundlens_banking_rules",

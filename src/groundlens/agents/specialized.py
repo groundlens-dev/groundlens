@@ -29,9 +29,6 @@ Expected metadata keys (rules abstain when missing):
   operation before execution.
 
 References:
-    Torcal Villadangos, J. et al. (2026). AI Evaluation in the Age of
-        Agents. BBVA AI Factory, 15 April 2026.
-
     ISO 13616 (2020). Financial services — International Bank Account
         Number (IBAN).
 
@@ -254,7 +251,7 @@ def check_no_phantom_entities(
 ) -> RuleEvidence:
     """No captured entity is outside the operation schema.
 
-    The 'precision of empty entities' check from Blue's evaluation
+    The 'precision of empty entities' check from industry banking conversational-AI evaluation
     methodology: the agent must not invent fields that the operation
     schema does not request, even if they happen to be in the dialog.
     """
@@ -452,7 +449,7 @@ def specialized_agent_rules() -> RuleSet:
             weight=0.50,
             sub_score="entity_groundedness",
             check=check_entities_in_dialog,
-            citation="Torcal et al. (BBVA AI Factory, 15/04/2026) — entity hallucination metric",
+            citation="Industry banking conversational-AI evaluation — entity hallucination metric",
         ),
         ChecklistRule(
             id="specialized.iban_format_valid",
@@ -497,7 +494,7 @@ def specialized_agent_rules() -> RuleSet:
             weight=1.00,
             sub_score="entity_calibration",
             check=check_no_phantom_entities,
-            citation=("Torcal et al. (BBVA AI Factory, 15/04/2026) — precision of empty entities"),
+            citation="Industry banking conversational-AI evaluation — precision of empty entities",
         ),
         # execution_readiness (4 rules, weights 0.4 + 0.3 + 0.3 = 1.0)
         ChecklistRule(
@@ -518,7 +515,8 @@ def specialized_agent_rules() -> RuleSet:
             sub_score="execution_readiness",
             check=check_eoc_when_complete,
             citation=(
-                "Torcal et al. (BBVA AI Factory, 15/04/2026) — end of conversation detection rate"
+                "Industry banking conversational-AI evaluation — "
+                "end-of-conversation detection rate"
             ),
         ),
         ChecklistRule(
