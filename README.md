@@ -2,9 +2,10 @@
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Logo_groundlens_new-05.png" alt="groundlens" width="250">
 
 # Groundlens
+## Verifiable agent triage
 </div>
 
-## Verifiable agent triage.
+
 
 <div align="center">
 
