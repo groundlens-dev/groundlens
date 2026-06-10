@@ -42,11 +42,13 @@ References:
 
 from __future__ import annotations
 
+from groundlens.agents.customer_support import customer_support_rag_rules
 from groundlens.agents.rag import rag_rules
 from groundlens.agents.routing import routing_rules
 from groundlens.agents.specialized import specialized_agent_rules
 
 __all__ = [
+    "customer_support_rag_rules",
     "rag_rules",
     "routing_rules",
     "specialized_agent_rules",
