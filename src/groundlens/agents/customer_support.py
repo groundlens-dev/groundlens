@@ -3,6 +3,9 @@
 Customer-support RAG agents retrieve from a knowledge base of FAQs and
 generate responses to customer queries about products, fees, procedures,
 and policies. Their failure modes differ from the credit / AML / KYC decision
+Customer-support RAG agents retrieve from a knowledge base of FAQs and generate
+responses to customer queries about products, fees, procedures, and
+policies. Their failure modes differ from the credit / AML / KYC decision
 rationales that :func:`groundlens.rules.groundlens_banking_rules` is
 calibrated for:
 
@@ -32,6 +35,9 @@ annual fee") are flagged at the sub-score level for UX review but do not
 trip the safety flag.
 
 References:
+    Torcal Villadangos, J. et al. (2026). AI Evaluation in the Age of
+        Agents. BBVA AI Factory, 15 April 2026.
+
     Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2024).
         RAGAs: Automated Evaluation of Retrieval Augmented Generation.
         EACL 2024.
