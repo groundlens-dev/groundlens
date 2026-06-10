@@ -28,14 +28,6 @@ Expected metadata keys (all optional — rules abstain when missing):
   clarify question is disambiguating between.
 
 References:
-    Falcón Leal, A., Torcal Villadangos, J., López García-Romeu, A.,
-        Hernández Manzano, P., & Dorado Alfaro, S. (2025). Routing the
-        future: How an intent agent simplifies banking interactions.
-        BBVA AI Factory, 14 February 2025.
-
-    Torcal Villadangos, J. et al. (2026). AI Evaluation in the Age of
-        Agents. BBVA AI Factory, 15 April 2026.
-
     Sarikaya, R., Hinton, G. E., & Deoras, A. (2014). Application of
         deep belief networks for natural language understanding.
         IEEE/ACM TASLP, 22(4), 778-784.
@@ -291,7 +283,7 @@ def check_clarify_when_ambiguous(
     """If the margin is below floor and no fallback fired, response asks a clarification.
 
     The decision tree the rule audits: low margin + not OOS → clarify.
-    Routing silently on low-margin cases is a known Blue-style failure.
+    Routing silently on low-margin cases is a known production failure mode.
     """
     margin = metadata.get("margin")
     margin_floor = float(metadata.get("margin_floor", 0.15))
@@ -416,7 +408,9 @@ def routing_rules() -> RuleSet:
             weight=0.30,
             sub_score="intent_clarity",
             check=check_no_ambiguous_pronoun_lead,
-            citation="Falcón et al. (BBVA AI Factory, 14/02/2025) — routing the future",
+            citation=(
+                "Industry banking routing-agent design pattern (production deployments, 2025)"
+            ),
         ),
         ChecklistRule(
             id="routing.intent_shares_query_tokens",
@@ -441,7 +435,7 @@ def routing_rules() -> RuleSet:
             weight=0.30,
             sub_score="classification_confidence",
             check=check_margin_to_runner_up,
-            citation="Torcal et al. (BBVA AI Factory, 15/04/2026) — routing eval metrics",
+            citation="Industry banking routing-agent evaluation — top-1 to top-2 margin metric",
         ),
         ChecklistRule(
             id="routing.intent_in_allowed_set",
@@ -458,7 +452,7 @@ def routing_rules() -> RuleSet:
             weight=0.60,
             sub_score="fallback_appropriateness",
             check=check_fallback_when_out_of_scope,
-            citation="Torcal et al. (BBVA AI Factory, 15/04/2026) §informational agent",
+            citation="Industry banking RAG evaluation framework — fallback necessity check",
         ),
         ChecklistRule(
             id="routing.no_silent_fallback",

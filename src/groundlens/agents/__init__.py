@@ -1,7 +1,7 @@
 """Agent triage — rule sets for the three agent classes in modern AI pipelines.
 
 Modern AI systems are agentic pipelines, not single models. A production
-deployment like BBVA's Blue assistant runs three agent classes in concert:
+multi-agent deployment runs three agent classes in concert:
 
 - **Routing / intent agents** classify the user's query into one of N
   candidate operations and decide whether to clarify or fall back.
@@ -23,19 +23,10 @@ needs. This submodule ships one rule set per class:
 
 All three rule sets follow the same deterministic, no-second-LLM,
 citation-per-rule structure as the rest of Groundlens. They can be
-composed: a Blue-style three-agent pipeline runs all three rule sets
-in parallel, one per agent, and aggregates the audit trail.
+composed: a three-agent pipeline runs all three rule sets in parallel,
+one per agent, and aggregates the audit trail.
 
 References:
-    Torcal Villadangos, J., Hernández Manzano, P., Falcón Leal, A.,
-        López García-Romeu, A., & Dorado Alfaro, S. (2026). AI Evaluation
-        in the Age of Agents. BBVA AI Factory, 15 April 2026.
-
-    Falcón Leal, A., Torcal Villadangos, J., López García-Romeu, A.,
-        Hernández Manzano, P., & Dorado Alfaro, S. (2025). Routing the
-        future: How an intent agent simplifies banking interactions.
-        BBVA AI Factory, 14 February 2025.
-
     Marin, J. (2026). Defendable Rules for LLM Rationale Evaluation in
         Banking Governance: A Multi-Source Provenance Framework.
 """

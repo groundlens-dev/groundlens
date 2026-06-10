@@ -11,7 +11,7 @@ agent-vocabulary entry point covers multiple deployment archetypes:
 - ``domain="banking"`` (default) — credit / AML / KYC decision rationales.
   Returns :func:`groundlens.rules.groundlens_banking_rules`.
 - ``domain="customer_support"`` — informational customer-facing
-  assistants over a FAQ knowledge base (the BBVA Blue archetype).
+  assistants over a FAQ knowledge base (FAQ-RAG customer support).
   Returns :func:`groundlens.agents.customer_support_rag_rules`.
 
 References:
@@ -21,9 +21,6 @@ References:
     Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2024).
         RAGAs: Automated Evaluation of Retrieval Augmented Generation.
         EACL 2024.
-
-    Torcal Villadangos, J. et al. (2026). AI Evaluation in the Age of
-        Agents. BBVA AI Factory, 15 April 2026.
 """
 
 from __future__ import annotations
@@ -67,9 +64,9 @@ def rag_rules(domain: str = "banking") -> RuleSet:
         cs = rag_rules(domain="customer_support")
         result = cs.evaluate(
             question="What is the Bizum daily limit?",
-            response="The Bizum daily limit at BBVA is 1,000 EUR per transaction.",
+            response="The Bizum daily limit is 1,000 EUR per transaction.",
             context=(
-                "The daily Bizum transfer limit at BBVA is 1,000 EUR per "
+                "The daily Bizum transfer limit is 1,000 EUR per "
                 "transaction and 2,000 EUR per day in total."
             ),
         )

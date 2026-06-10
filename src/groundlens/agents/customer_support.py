@@ -1,7 +1,9 @@
 """Customer-support RAG triage — rules for informational customer-facing agents.
 
-Customer-support RAG agents retrieve from a knowledge base of FAQs (BBVA's
-Blue assistant is a real-world deployment of this pattern) and generate
+Customer-support RAG agents retrieve from a knowledge base of FAQs and
+generate responses to customer queries about products, fees, procedures,
+and policies. Their failure modes differ from the credit / AML / KYC decision
+Customer-support RAG agents retrieve from a knowledge base of FAQs and generate
 responses to customer queries about products, fees, procedures, and
 policies. Their failure modes differ from the credit / AML / KYC decision
 rationales that :func:`groundlens.rules.groundlens_banking_rules` is
@@ -64,7 +66,6 @@ _NUM_RE = re.compile(
 
 _STOPWORDS = frozenset(
     {
-        "BBVA",
         "Spanish",
         "European",
         "EUR",
@@ -309,7 +310,7 @@ def customer_support_rag_rules() -> RuleSet:
     or regulatory source.
 
     Designed for informational customer-facing assistants over a FAQ-style
-    knowledge base — the BBVA Blue archetype. Not appropriate for credit /
+    knowledge base — the FAQ-RAG customer-support archetype. Not appropriate for credit /
     AML / KYC decision rationales (use
     :func:`groundlens.rules.groundlens_banking_rules` instead) nor for
     routing or specialized / tool-using agents (see
@@ -323,9 +324,9 @@ def customer_support_rag_rules() -> RuleSet:
         rs = customer_support_rag_rules()
         result = rs.evaluate(
             question="What is the Bizum daily limit?",
-            response="The Bizum daily limit at BBVA is 1,000 EUR per transaction.",
+            response="The Bizum daily limit is 1,000 EUR per transaction.",
             context=(
-                "The daily Bizum transfer limit at BBVA is 1,000 EUR per "
+                "The daily Bizum transfer limit is 1,000 EUR per "
                 "transaction and 2,000 EUR per day in total."
             ),
         )
@@ -364,7 +365,7 @@ def customer_support_rag_rules() -> RuleSet:
             weight=0.70,
             sub_score="completeness",
             check=check_addresses_query_topic,
-            citation=("Torcal et al. (BBVA AI Factory, 15/04/2026) §relevance check"),
+            citation="Industry banking RAG evaluation framework — relevance check",
         ),
         ChecklistRule(
             id="csr.uses_concrete_values",
@@ -372,7 +373,7 @@ def customer_support_rag_rules() -> RuleSet:
             weight=0.30,
             sub_score="completeness",
             check=check_uses_concrete_values,
-            citation=("Torcal et al. (BBVA AI Factory, 15/04/2026) §usefulness check"),
+            citation="Industry banking RAG evaluation framework — usefulness check",
         ),
         # no_overreach (2 rules, weights 0.6 + 0.4 = 1.0)
         ChecklistRule(
