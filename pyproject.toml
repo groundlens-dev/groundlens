@@ -56,7 +56,7 @@ langchain = ["langchain-core>=0.3.0", "langsmith>=0.1.0"]
 langgraph = ["langgraph>=0.2.0", "langchain-core>=0.3.0"]
 crewai = ["crewai>=0.80.0"]
 semantic-kernel = ["semantic-kernel>=1.0.0"]
-autogen = ["autogen-agentchat>=0.4.0"]
+autogen = ["autogen-agentchat>=0.7.5"]
 
 # Bundles
 providers = ["groundlens[openai,anthropic,google]"]
