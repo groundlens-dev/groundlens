@@ -77,7 +77,7 @@ dev = [
 # Documentation
 docs = [
     "mkdocs-material>=9.5",
-    "mkdocstrings[python]>=0.25",
+    "mkdocstrings[python]>=1.0.4",
     "mkdocs-gen-files>=0.5",
     "mkdocs-literate-nav>=0.6",
 ]
