@@ -58,8 +58,9 @@ References:
 from groundlens import agents, rules
 from groundlens._version import __version__
 from groundlens.agents import (
-    customer_support_rag_rules,
-    rag_rules,
+    customer_support_rag_rules,  # deprecated alias
+    customer_support_rules,
+    rag_rules,  # deprecated dispatcher
     routing_rules,
     specialized_agent_rules,
 )
@@ -73,6 +74,7 @@ from groundlens.rules import (
     RuleSet,
     RuleSetResult,
     banking_rules,
+    decision_rationale_rules,
     groundlens_banking_rules,
 )
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
@@ -101,12 +103,14 @@ __all__ = [
     "compute_dgi",
     # Functions
     "compute_sgi",
-    "customer_support_rag_rules",
+    "customer_support_rag_rules",  # deprecated
+    "customer_support_rules",
+    "decision_rationale_rules",
     "evaluate",
     "evaluate_batch",
-    "groundlens_banking_rules",
+    "groundlens_banking_rules",  # deprecated
     # Agent-class rule sets
-    "rag_rules",
+    "rag_rules",  # deprecated
     "routing_rules",
     "rules",
     "specialized_agent_rules",

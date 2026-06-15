@@ -1,13 +1,9 @@
-"""Customer-support RAG triage — rules for informational customer-facing agents.
+"""Customer-support triage — rules for informational customer-facing agents.
 
-Customer-support RAG agents retrieve from a knowledge base of FAQs and
-generate responses to customer queries about products, fees, procedures,
-and policies. Their failure modes differ from the credit / AML / KYC decision
-Customer-support RAG agents retrieve from a knowledge base of FAQs and generate
-responses to customer queries about products, fees, procedures, and
-policies. Their failure modes differ from the credit / AML / KYC decision
-rationales that :func:`groundlens.rules.groundlens_banking_rules` is
-calibrated for:
+Customer-support agents answer questions over a knowledge base (RAG mode) or
+chat without retrieved context (no-RAG mode). Their failure modes differ from
+the credit / AML / KYC decision rationales that
+:func:`groundlens.rules.decision_rationale_rules` is calibrated for:
 
 - **Fabricated numbers.** A wrong Bizum limit, a wrong APR, a wrong
   document requirement — these are operational hazards for the customer.
@@ -17,22 +13,41 @@ calibrated for:
   with advisor"), inventing pricing tiers ("premium clients"), citing
   legal references not in the FAQ.
 
-The rule set below evaluates a customer-support RAG response across three
+The rule set evaluates a customer-support response across up to three
 sub-scores:
 
 - ``groundedness`` — every number and every proper noun in the response
-  appears in the FAQ context or the customer's query.
+  appears in the FAQ context or the customer's query. *Only present when
+  ``rag=True``; the rules require a context to compare against.*
 - ``completeness`` — the response addresses the query topic and uses
   concrete values from the FAQ when relevant.
 - ``no_overreach`` — the response does not add legal references or
   procedural details that are not in the FAQ.
 
-The flag predicate is intentionally non-compensatory on ``groundedness``
-and ``no_overreach``: a response that fabricates facts or invents
-procedures is not partially safe. ``completeness`` is informational —
-under-informative-but-accurate responses (e.g. "the credit card has an
-annual fee") are flagged at the sub-score level for UX review but do not
+The flag predicate is intentionally non-compensatory: a response that
+fabricates facts or invents procedures is not partially safe.
+``completeness`` is informational — under-informative-but-accurate
+responses are flagged at the sub-score level for UX review but do not
 trip the safety flag.
+
+API
+---
+
+The canonical factory is :func:`customer_support_rules`. It accepts three
+keyword arguments — ``rag``, ``domain``, ``language`` — that select the
+right rule set for the deployment without renaming the function:
+
+- ``rag=True`` (default) returns the full 7-rule, 3-sub-score set.
+- ``rag=False`` omits the ``groundedness`` rules (no context to verify
+  against) and returns a 4-rule, 2-sub-score set.
+- ``domain`` extends the stopword / speculative-marker vocabulary with
+  domain-specific surface forms ("finance", "healthcare", "legal", or
+  the default "general").
+- ``language`` adds Spanish or multilingual speculative markers and
+  legal-reference patterns (defaults to "en").
+
+The legacy alias :func:`customer_support_rag_rules` is preserved as a
+``DeprecationWarning`` shim for at least three releases.
 
 References:
     Torcal Villadangos, J. et al. (2026). AI Evaluation in the Age of
@@ -52,9 +67,18 @@ References:
 from __future__ import annotations
 
 import re
+import warnings
+from functools import partial
 from typing import Any
 
 from groundlens.rules import ChecklistRule, RuleEvidence, RuleSet
+
+# ── Public catalogues (dimensions accepted by customer_support_rules) ──────
+
+
+_VALID_DOMAINS: tuple[str, ...] = ("general", "finance", "healthcare", "legal")
+_VALID_LANGUAGES: tuple[str, ...] = ("en", "es", "multi")
+
 
 # ── Extractors ──────────────────────────────────────────────────────────────
 
@@ -64,7 +88,9 @@ _NUM_RE = re.compile(
     re.IGNORECASE,
 )
 
-_STOPWORDS = frozenset(
+# Default stopwords (covers en + general banking-ish lexicon kept for
+# backwards compatibility with the 2026.6.11 rule set).
+_STOPWORDS_BASE: frozenset[str] = frozenset(
     {
         "Spanish",
         "European",
@@ -79,7 +105,25 @@ _STOPWORDS = frozenset(
     }
 )
 
-_SPECULATIVE_MARKERS = (
+# Domain-specific stopword extensions.
+_DOMAIN_STOPWORDS: dict[str, frozenset[str]] = {
+    "general": frozenset(),
+    "finance": frozenset({"TAE", "TIN", "Bizum", "SEPA", "SWIFT", "FROB", "CNMV", "AEAT"}),
+    "healthcare": frozenset({"HSA", "FSA", "CPT", "NPI", "HIPAA"}),
+    "legal": frozenset({"BOE", "BORME", "RD", "LO", "GDPR", "RGPD", "CCAA"}),
+}
+
+# Language-specific stopwords (proper-noun surface forms that should not be
+# flagged as fabricated).
+_LANG_STOPWORDS: dict[str, frozenset[str]] = {
+    "en": frozenset(),
+    "es": frozenset({"España", "Europea", "Reino", "Madrid", "Barcelona"}),
+    "multi": frozenset({"España", "Europea", "Reino", "Madrid", "Barcelona"}),
+}
+
+
+# Default speculative markers (en).
+_SPECULATIVE_MARKERS_BASE: tuple[str, ...] = (
     "appointment with",
     "by email",
     "via mail",
@@ -92,10 +136,69 @@ _SPECULATIVE_MARKERS = (
     "as a courtesy",
 )
 
-_LEGAL_REF_RE = re.compile(
+# Domain-specific markers extending the speculative-procedure check.
+_DOMAIN_MARKERS: dict[str, tuple[str, ...]] = {
+    "general": (),
+    "finance": ("private banking tier", "concierge service", "wealth advisor"),
+    "healthcare": ("co-pay tier", "out-of-network", "concierge medicine"),
+    "legal": ("retainer agreement", "fee waiver", "expedited filing"),
+}
+
+# Language-specific markers.
+_LANG_MARKERS: dict[str, tuple[str, ...]] = {
+    "en": (),
+    "es": (
+        "cita previa con",
+        "asesor personal",
+        "horario comercial",
+        "cliente premium",
+        "atención preferente",
+        "normalmente tarda",
+    ),
+    "multi": (
+        "cita previa con",
+        "asesor personal",
+        "horario comercial",
+        "cliente premium",
+        "atención preferente",
+        "normalmente tarda",
+    ),
+}
+
+
+# Legal-reference regex per language. English keywords + Spanish keywords +
+# multi (union) cover the cases we have seen in regulated FAQs.
+_LEGAL_REF_RE_EN = re.compile(
     r"\b(?:Law|Directive|Modelo|Regulation|Act|Article|Rule)\s+\d",
     re.IGNORECASE,
 )
+_LEGAL_REF_RE_ES = re.compile(
+    r"\b(?:Ley|Real\s+Decreto|RD|Orden|Reglamento|Art[ií]culo|Modelo)\s+\d",
+    re.IGNORECASE,
+)
+_LEGAL_REF_RE_MULTI = re.compile(
+    r"\b(?:Law|Directive|Modelo|Regulation|Act|Article|Rule|Ley|Real\s+Decreto|RD|Orden|Reglamento|Art[ií]culo)\s+\d",
+    re.IGNORECASE,
+)
+
+
+def _legal_ref_re(language: str) -> re.Pattern[str]:
+    if language == "es":
+        return _LEGAL_REF_RE_ES
+    if language == "multi":
+        return _LEGAL_REF_RE_MULTI
+    return _LEGAL_REF_RE_EN
+
+
+def _build_stopwords(domain: str, language: str) -> frozenset[str]:
+    return _STOPWORDS_BASE | _DOMAIN_STOPWORDS[domain] | _LANG_STOPWORDS[language]
+
+
+def _build_speculative_markers(domain: str, language: str) -> tuple[str, ...]:
+    return _SPECULATIVE_MARKERS_BASE + _DOMAIN_MARKERS[domain] + _LANG_MARKERS[language]
+
+
+# ── Helpers (pure, deterministic) ───────────────────────────────────────────
 
 
 def _extract_numbers(text: str) -> set[str]:
@@ -104,10 +207,10 @@ def _extract_numbers(text: str) -> set[str]:
     return {re.sub(r"[^\d]", "", n.lower()) for n in raw if re.sub(r"[^\d]", "", n)}
 
 
-def _extract_proper_nouns(text: str) -> set[str]:
-    """Extract capitalized tokens longer than 3 chars, minus a stopword list."""
+def _extract_proper_nouns(text: str, stopwords: frozenset[str]) -> set[str]:
+    """Extract capitalized tokens longer than 3 chars, minus the stopword list."""
     candidates = re.findall(r"\b[A-Z][a-zA-Z]+\b", text)
-    return {c for c in candidates if c not in _STOPWORDS and len(c) > 3}
+    return {c for c in candidates if c not in stopwords and len(c) > 3}
 
 
 def _content_words(text: str, min_len: int = 4) -> set[str]:
@@ -115,19 +218,13 @@ def _content_words(text: str, min_len: int = 4) -> set[str]:
     return set(re.findall(rf"\b[a-z]{{{min_len},}}\b", text.lower()))
 
 
-# ── Check functions ────────────────────────────────────────────────────────
+# ── Check function implementations ─────────────────────────────────────────
 
 
-def check_no_invented_numbers(
+def _check_no_invented_numbers(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
-    """Every number in the response appears in the FAQ context or the query.
-
-    This is the single most useful anti-fabrication check for
-    informational customer-support responses: wrong numbers (fees,
-    limits, deadlines, document counts) are the most common and most
-    operationally dangerous form of fabrication in this domain.
-    """
+    """Every number in the response appears in the FAQ context or the query."""
     resp_nums = _extract_numbers(response)
     if not resp_nums:
         return RuleEvidence(matched=True, span="", explanation="no numbers in response — abstains")
@@ -147,15 +244,16 @@ def check_no_invented_numbers(
     )
 
 
-def check_no_invented_proper_nouns(
-    question: str, response: str, context: str | None, metadata: dict[str, Any]
+def _check_no_invented_proper_nouns_impl(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+    *,
+    stopwords: frozenset[str],
 ) -> RuleEvidence:
-    """Every proper noun in the response appears in the FAQ context.
-
-    Catches fabricated organizations ("Bank of Spain Financial Crime
-    Unit"), fabricated regulators, fabricated procedure names.
-    """
-    resp_p = _extract_proper_nouns(response)
+    """Every proper noun in the response appears in the FAQ context."""
+    resp_p = _extract_proper_nouns(response, stopwords=stopwords)
     if not resp_p:
         return RuleEvidence(matched=True, span="", explanation="no proper nouns — abstains")
     ctx_lower = (context or "").lower()
@@ -173,15 +271,10 @@ def check_no_invented_proper_nouns(
     )
 
 
-def check_content_overlaps_faq(
+def _check_content_overlaps_faq(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
-    """Content-word overlap between response and FAQ above 0.30.
-
-    Cheap surface-level grounding signal. A response that shares almost
-    no content vocabulary with the FAQ has either changed topic or
-    ignored the retrieved context.
-    """
+    """Content-word overlap between response and FAQ above 0.30."""
     if not context:
         return RuleEvidence(matched=True, span="", explanation="no context — abstains")
     r_words = _content_words(response)
@@ -196,7 +289,7 @@ def check_content_overlaps_faq(
     )
 
 
-def check_addresses_query_topic(
+def _check_addresses_query_topic(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
     """Response shares content words with the customer's query."""
@@ -212,15 +305,10 @@ def check_addresses_query_topic(
     )
 
 
-def check_uses_concrete_values(
+def _check_uses_concrete_values(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
-    """If the FAQ has numbers, the response includes at least one of them.
-
-    Catches the "vague but accurate" failure mode: a response that says
-    "the credit card has an annual fee" when the FAQ specifies the exact
-    amount (35 EUR) is under-informative.
-    """
+    """If the FAQ has numbers, the response includes at least one of them."""
     ctx_nums = _extract_numbers(context or "")
     if not ctx_nums:
         return RuleEvidence(matched=True, span="", explanation="FAQ has no numbers — abstains")
@@ -233,19 +321,19 @@ def check_uses_concrete_values(
     )
 
 
-def check_no_unrequested_legal_refs(
-    question: str, response: str, context: str | None, metadata: dict[str, Any]
+def _check_no_unrequested_legal_refs_impl(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+    *,
+    legal_ref_re: re.Pattern[str],
 ) -> RuleEvidence:
-    """No legal / regulatory references in the response that are not in the FAQ.
-
-    Catches fabricated law numbers and directive references — a common
-    failure when the model fills procedural responses with plausible-sounding
-    but invented citations.
-    """
-    resp_refs = set(_LEGAL_REF_RE.findall(response))
+    """No legal references in the response that are not in the FAQ."""
+    resp_refs = set(legal_ref_re.findall(response))
     if not resp_refs:
         return RuleEvidence(matched=True, span="", explanation="no legal references — abstains")
-    ctx_refs = set(_LEGAL_REF_RE.findall(context or ""))
+    ctx_refs = set(legal_ref_re.findall(context or ""))
     unrequested = resp_refs - ctx_refs
     if unrequested:
         return RuleEvidence(
@@ -260,17 +348,18 @@ def check_no_unrequested_legal_refs(
     )
 
 
-def check_no_speculative_procedure(
-    question: str, response: str, context: str | None, metadata: dict[str, Any]
+def _check_no_speculative_procedure_impl(
+    question: str,
+    response: str,
+    context: str | None,
+    metadata: dict[str, Any],
+    *,
+    speculative_markers: tuple[str, ...],
 ) -> RuleEvidence:
-    """No procedural additions in the response that are not in the FAQ.
-
-    Catches "appointment with advisor", "premium clients", and other
-    plausible-but-invented procedural details that drift from the FAQ.
-    """
+    """No procedural additions in the response that are not in the FAQ."""
     ctx_lower = (context or "").lower()
     resp_lower = response.lower()
-    hits = [m for m in _SPECULATIVE_MARKERS if m in resp_lower and m not in ctx_lower]
+    hits = [m for m in speculative_markers if m in resp_lower and m not in ctx_lower]
     if hits:
         return RuleEvidence(
             matched=False,
@@ -284,44 +373,126 @@ def check_no_speculative_procedure(
     )
 
 
-# ── Flag predicate ──────────────────────────────────────────────────────────
+# ── Backwards-compatible top-level wrappers ────────────────────────────────
+#
+# The 2026.6.11 public API exported `check_*` functions with no kwargs.
+# Downstream rule sets that imported those names directly should keep
+# working. Internally they call the *_impl variants with the default
+# (general, en) stopwords / markers / legal-ref pattern.
+
+
+def check_no_invented_numbers(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_no_invented_numbers(question, response, context, metadata)
+
+
+def check_no_invented_proper_nouns(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_no_invented_proper_nouns_impl(
+        question, response, context, metadata, stopwords=_STOPWORDS_BASE
+    )
+
+
+def check_content_overlaps_faq(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_content_overlaps_faq(question, response, context, metadata)
+
+
+def check_addresses_query_topic(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_addresses_query_topic(question, response, context, metadata)
+
+
+def check_uses_concrete_values(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_uses_concrete_values(question, response, context, metadata)
+
+
+def check_no_unrequested_legal_refs(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_no_unrequested_legal_refs_impl(
+        question, response, context, metadata, legal_ref_re=_LEGAL_REF_RE_EN
+    )
+
+
+def check_no_speculative_procedure(
+    question: str, response: str, context: str | None, metadata: dict[str, Any]
+) -> RuleEvidence:
+    return _check_no_speculative_procedure_impl(
+        question, response, context, metadata, speculative_markers=_SPECULATIVE_MARKERS_BASE
+    )
+
+
+# ── Flag predicates ────────────────────────────────────────────────────────
 
 
 def customer_support_flag_predicate(sub_scores: dict[str, float]) -> bool:
-    """Flag iff groundedness or no_overreach collapse.
-
-    Completeness is intentionally not in the predicate: a response that
-    is correct but vague (e.g. "the credit card has an annual fee") is a
-    UX issue, not a safety issue. Under-informative responses are
-    surfaced via the completeness sub-score for human review without
-    tripping the auto-flag.
-    """
+    """Flag iff groundedness or no_overreach collapse (RAG mode)."""
     return sub_scores.get("groundedness", 0.0) < 0.5 or sub_scores.get("no_overreach", 0.0) < 0.5
+
+
+def _customer_support_no_rag_flag_predicate(sub_scores: dict[str, float]) -> bool:
+    """Flag iff no_overreach collapses (no-RAG mode — no groundedness to check)."""
+    return sub_scores.get("no_overreach", 0.0) < 0.5
 
 
 # ── The rule set ────────────────────────────────────────────────────────────
 
 
-def customer_support_rag_rules() -> RuleSet:
-    """Rule set for customer-support RAG / informational agents.
+def customer_support_rules(
+    rag: bool = True,
+    domain: str = "general",
+    language: str = "en",
+) -> RuleSet:
+    """Rule set for customer-support informational agents.
 
-    Returns a 7-rule set across 3 sub-scores: groundedness, completeness,
-    no_overreach. Each rule carries a citation to its academic, industrial,
-    or regulatory source.
+    Designed for informational customer-facing assistants. Selects between
+    the RAG and no-RAG sub-score taxonomies and adjusts the
+    stopword / speculative-marker vocabulary to the deployment domain and
+    language.
 
-    Designed for informational customer-facing assistants over a FAQ-style
-    knowledge base — the FAQ-RAG customer-support archetype. Not appropriate for credit /
-    AML / KYC decision rationales (use
-    :func:`groundlens.rules.groundlens_banking_rules` instead) nor for
-    routing or specialized / tool-using agents (see
-    :func:`groundlens.agents.routing_rules` and
-    :func:`groundlens.agents.specialized_agent_rules`).
+    Args:
+        rag: Whether the agent retrieves context (FAQ) before answering.
 
-    Example::
+            - ``True`` (default) — full 7-rule, 3-sub-score set
+              (``groundedness``, ``completeness``, ``no_overreach``).
+            - ``False`` — 4-rule, 2-sub-score set (``completeness``,
+              ``no_overreach``). The three groundedness rules are omitted
+              because there is no context to compare against. The flag
+              predicate adapts.
+        domain: Deployment domain. Affects stopwords and
+            speculative-procedure markers; does not add or remove rules.
 
-        from groundlens.agents import customer_support_rag_rules
+            One of: ``"general"`` (default), ``"finance"``,
+            ``"healthcare"``, ``"legal"``.
+        language: Deployment language. Affects stopwords,
+            speculative-procedure markers, and the legal-reference
+            regular expression.
 
-        rs = customer_support_rag_rules()
+            One of: ``"en"`` (default), ``"es"``, ``"multi"``.
+
+    Returns:
+        A :class:`RuleSet` whose name encodes the active configuration:
+        ``customer_support_v2_{domain}_{language}_{rag|norag}``.
+
+    Raises:
+        ValueError: If ``domain`` is not in :data:`_VALID_DOMAINS` or
+            ``language`` is not in :data:`_VALID_LANGUAGES`.
+
+    Examples
+    --------
+
+    Default — FAQ-RAG, general domain, English::
+
+        from groundlens.agents import customer_support_rules
+
+        rs = customer_support_rules()
         result = rs.evaluate(
             question="What is the Bizum daily limit?",
             response="The Bizum daily limit is 1,000 EUR per transaction.",
@@ -331,15 +502,42 @@ def customer_support_rag_rules() -> RuleSet:
             ),
         )
         assert not result.flagged
+
+    No-RAG chat in Spanish finance vocabulary::
+
+        rs = customer_support_rules(rag=False, domain="finance", language="es")
+        assert "completeness" in rs.sub_scores
+        assert "groundedness" not in rs.sub_scores
     """
-    rules = (
-        # groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)
+    if domain not in _VALID_DOMAINS:
+        msg = (
+            f"customer_support_rules(domain={domain!r}) — supported domains are "
+            f"{_VALID_DOMAINS}."
+        )
+        raise ValueError(msg)
+    if language not in _VALID_LANGUAGES:
+        msg = (
+            f"customer_support_rules(language={language!r}) — supported languages are "
+            f"{_VALID_LANGUAGES}."
+        )
+        raise ValueError(msg)
+
+    stopwords = _build_stopwords(domain=domain, language=language)
+    markers = _build_speculative_markers(domain=domain, language=language)
+    legal_ref_re = _legal_ref_re(language=language)
+
+    # Bind the domain/language-specific knobs into the check callables.
+    proper_nouns_check = partial(_check_no_invented_proper_nouns_impl, stopwords=stopwords)
+    legal_refs_check = partial(_check_no_unrequested_legal_refs_impl, legal_ref_re=legal_ref_re)
+    speculative_check = partial(_check_no_speculative_procedure_impl, speculative_markers=markers)
+
+    grounded_rules: tuple[ChecklistRule, ...] = (
         ChecklistRule(
             id="csr.no_invented_numbers",
             description="every number in response appears in FAQ or query",
             weight=0.50,
             sub_score="groundedness",
-            check=check_no_invented_numbers,
+            check=_check_no_invented_numbers,
             citation="Es et al. RAGAs (EACL 2024) §3 Faithfulness — atomic claim verification",
         ),
         ChecklistRule(
@@ -347,7 +545,7 @@ def customer_support_rag_rules() -> RuleSet:
             description="every proper noun in response appears in FAQ",
             weight=0.30,
             sub_score="groundedness",
-            check=check_no_invented_proper_nouns,
+            check=proper_nouns_check,
             citation="Min et al. FActScore (EMNLP 2023) — atomic factual precision",
         ),
         ChecklistRule(
@@ -355,16 +553,17 @@ def customer_support_rag_rules() -> RuleSet:
             description="response content overlaps FAQ above threshold",
             weight=0.20,
             sub_score="groundedness",
-            check=check_content_overlaps_faq,
+            check=_check_content_overlaps_faq,
             citation="Marin (2025) SGI arXiv:2512.13771 — surface grounding signal",
         ),
-        # completeness (2 rules, weights 0.7 + 0.3 = 1.0)
+    )
+    completeness_rules: tuple[ChecklistRule, ...] = (
         ChecklistRule(
             id="csr.addresses_query_topic",
             description="response addresses the query topic",
             weight=0.70,
             sub_score="completeness",
-            check=check_addresses_query_topic,
+            check=_check_addresses_query_topic,
             citation="Industry banking RAG evaluation framework — relevance check",
         ),
         ChecklistRule(
@@ -372,31 +571,72 @@ def customer_support_rag_rules() -> RuleSet:
             description="response uses concrete values from FAQ",
             weight=0.30,
             sub_score="completeness",
-            check=check_uses_concrete_values,
+            check=_check_uses_concrete_values,
             citation="Industry banking RAG evaluation framework — usefulness check",
         ),
-        # no_overreach (2 rules, weights 0.6 + 0.4 = 1.0)
+    )
+    overreach_rules: tuple[ChecklistRule, ...] = (
         ChecklistRule(
             id="csr.no_unrequested_legal_refs",
             description="no legal references in response that are not in FAQ",
             weight=0.60,
             sub_score="no_overreach",
-            check=check_no_unrequested_legal_refs,
-            citation=("EU AI Act 2024/1689 Art. 13 — transparency on capabilities and limits"),
+            check=legal_refs_check,
+            citation="EU AI Act 2024/1689 Art. 13 — transparency on capabilities and limits",
         ),
         ChecklistRule(
             id="csr.no_speculative_procedure",
             description="no procedural additions not present in FAQ",
             weight=0.40,
             sub_score="no_overreach",
-            check=check_no_speculative_procedure,
+            check=speculative_check,
             citation="Federal Reserve SR 26-2 (Apr 2026) §model output controls",
         ),
     )
 
+    rag_tag = "rag" if rag else "norag"
+    name = f"customer_support_v2_{domain}_{language}_{rag_tag}"
+
+    if rag:
+        rules = grounded_rules + completeness_rules + overreach_rules
+        return RuleSet(
+            name=name,
+            rules=rules,
+            sub_scores=("groundedness", "completeness", "no_overreach"),
+            flag_predicate=customer_support_flag_predicate,
+        )
+    rules = completeness_rules + overreach_rules
     return RuleSet(
-        name="customer_support_rag_v1",
+        name=name,
         rules=rules,
-        sub_scores=("groundedness", "completeness", "no_overreach"),
-        flag_predicate=customer_support_flag_predicate,
+        sub_scores=("completeness", "no_overreach"),
+        flag_predicate=_customer_support_no_rag_flag_predicate,
     )
+
+
+def customer_support_rag_rules() -> RuleSet:
+    """Deprecated alias — use :func:`customer_support_rules` (with ``rag=True``).
+
+    Preserved for one or more releases for backwards compatibility with
+    code written against groundlens 2026.6.11 / 2026.6.12. The returned
+    rule set is byte-for-byte identical to
+    ``customer_support_rules(rag=True, domain="general", language="en")``
+    except for the ``RuleSet.name`` field, which keeps the legacy
+    ``"customer_support_rag_v1"`` value so existing audit logs continue to
+    match.
+
+    .. deprecated:: 2026.6.13
+        Use :func:`customer_support_rules` instead.
+    """
+    warnings.warn(
+        "customer_support_rag_rules() is deprecated; "
+        "use customer_support_rules(rag=True) instead. "
+        "The legacy alias will be removed in a future release.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    rs = customer_support_rules(rag=True, domain="general", language="en")
+    # Preserve the legacy name so downstream code that asserts on rs.name
+    # (e.g. the cookbook notebook's `ruleset.name` check) does not break.
+    object.__setattr__(rs, "name", "customer_support_rag_v1")
+    return rs

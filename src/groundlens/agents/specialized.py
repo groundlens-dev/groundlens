@@ -414,7 +414,14 @@ def specialized_flag_predicate(sub_scores: dict[str, float]) -> bool:
 # ── The rule set ────────────────────────────────────────────────────────────
 
 
-def specialized_agent_rules() -> RuleSet:
+_VALID_SPECIALIZED_DOMAINS: tuple[str, ...] = ("general", "finance", "healthcare", "legal")
+_VALID_SPECIALIZED_TOOLS: tuple[str, ...] = ("iban_validator", "amount_parser", "card_validator")
+
+
+def specialized_agent_rules(
+    domain: str = "general",
+    tools: tuple[str, ...] = (),
+) -> RuleSet:
     """Rule set for specialized / tool-using agents.
 
     Returns a 10-rule set across 4 sub-scores: entity_groundedness,
@@ -423,6 +430,34 @@ def specialized_agent_rules() -> RuleSet:
     The flag predicate is stricter than for RAG agents because
     specialized agents execute irreversible operations (move money,
     open accounts, send messages on behalf of the customer).
+
+    Args:
+        domain: Deployment domain. Today this kwarg is accepted for API
+            symmetry with the other archetype factories; the bundled
+            rules check structural properties (entity groundedness,
+            schema completeness, execution readiness) that hold across
+            verticals. Reserved for domain-specific entity validators in
+            a future release.
+
+            One of: ``"general"`` (default), ``"finance"``,
+            ``"healthcare"``, ``"legal"``.
+        tools: Optional tuple of validator keys. Today the bundled rule
+            set ships IBAN, amount, and card-number checks
+            unconditionally — they abstain when the corresponding
+            metadata field is absent. The kwarg is reserved for future
+            releases that will let deployments opt in to additional
+            domain-specific validators (e.g. NPI for healthcare,
+            DNI/NIE for Spain). Currently a non-empty value is validated
+            against :data:`_VALID_SPECIALIZED_TOOLS` but has no
+            behavioural effect.
+
+    Returns:
+        A :class:`RuleSet` named ``"groundlens_specialized_v1"``.
+
+    Raises:
+        ValueError: If ``domain`` is not in
+            :data:`_VALID_SPECIALIZED_DOMAINS` or any of ``tools`` is not
+            in :data:`_VALID_SPECIALIZED_TOOLS`.
 
     Example::
 
@@ -441,6 +476,19 @@ def specialized_agent_rules() -> RuleSet:
             },
         )
     """
+    if domain not in _VALID_SPECIALIZED_DOMAINS:
+        msg = (
+            f"specialized_agent_rules(domain={domain!r}) — supported domains are "
+            f"{_VALID_SPECIALIZED_DOMAINS}."
+        )
+        raise ValueError(msg)
+    unknown_tools = tuple(t for t in tools if t not in _VALID_SPECIALIZED_TOOLS)
+    if unknown_tools:
+        msg = (
+            f"specialized_agent_rules(tools={tools!r}) — unknown tools "
+            f"{unknown_tools}. Known tools: {_VALID_SPECIALIZED_TOOLS}."
+        )
+        raise ValueError(msg)
     rules = (
         # entity_groundedness (3 rules, weights 0.5 + 0.3 + 0.2 = 1.0)
         ChecklistRule(

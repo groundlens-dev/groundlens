@@ -104,6 +104,8 @@ nav:
   - Benchmarks:
     - Overview: benchmarks/overview.md
     - Results: benchmarks/results.md
+  - Design Decisions:
+    - "ADR 0001 — Rule-set API": adr/0001-rule-set-architecture.md
   - API Reference: api/index.md
 
 markdown_extensions:
