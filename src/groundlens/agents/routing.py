@@ -366,13 +366,34 @@ def routing_flag_predicate(sub_scores: dict[str, float]) -> bool:
 # ── The rule set ────────────────────────────────────────────────────────────
 
 
-def routing_rules() -> RuleSet:
+_VALID_ROUTING_DOMAINS: tuple[str, ...] = ("general", "finance", "healthcare", "legal")
+
+
+def routing_rules(domain: str = "general") -> RuleSet:
     """Rule set for routing / intent classification agents.
 
     Returns a 10-rule set across 4 sub-scores: intent_clarity,
     classification_confidence, fallback_appropriateness,
     disambiguation_quality. Each rule carries a citation to its
     academic, industrial, or regulatory source.
+
+    Args:
+        domain: Deployment domain. Currently the routing rule set is
+            domain-agnostic by design — the rules check structural
+            properties of routing decisions (single intent, top-1 margin,
+            fallback appropriateness, clarification quality) that hold
+            across verticals. The kwarg is accepted for API symmetry with
+            the other archetype factories and to leave a slot for
+            domain-specific routing extensions in a future release.
+
+            One of: ``"general"`` (default), ``"finance"``,
+            ``"healthcare"``, ``"legal"``.
+
+    Returns:
+        A :class:`RuleSet` named ``"groundlens_routing_v1"``.
+
+    Raises:
+        ValueError: If ``domain`` is not in :data:`_VALID_ROUTING_DOMAINS`.
 
     Example::
 
@@ -392,6 +413,12 @@ def routing_rules() -> RuleSet:
         )
         assert result.flagged  # low confidence + multi-intent
     """
+    if domain not in _VALID_ROUTING_DOMAINS:
+        msg = (
+            f"routing_rules(domain={domain!r}) — supported domains are "
+            f"{_VALID_ROUTING_DOMAINS}."
+        )
+        raise ValueError(msg)
     rules = (
         # intent_clarity (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)
         ChecklistRule(

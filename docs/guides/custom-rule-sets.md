@@ -6,14 +6,23 @@ This guide walks through the full workflow: anatomy, the 4-step recipe, a comple
 
 ## When you need a custom rule set
 
-The bundled rule sets cover four archetypes:
+The bundled rule sets cover four agent archetypes. The naming convention since release **2026.6.13** follows ADR 0001: the **archetype** is in the function name, the **deployment dimensions** are keyword arguments.
 
 | Bundled set | Purpose | Use when |
 |---|---|---|
-| `groundlens_banking_rules` | Banking decision rationales | Credit / AML / KYC / fraud / sanctions decisions with auditable rationale |
-| `customer_support_rag_rules` | Informational customer-support RAG | FAQ-style assistant, the BBVA Blue archetype |
-| `routing_rules` | Intent classification agents | Multi-class routing with fallback and clarify |
-| `specialized_agent_rules` | Tool-using / execution agents | Entity capture, transaction execution |
+| `decision_rationale_rules(domain="finance", regulations=())` | Decision rationales | Credit / AML / KYC / fraud / sanctions decisions with auditable rationale |
+| `customer_support_rules(rag=True, domain="general", language="en")` | Informational customer-facing agents | FAQ-RAG (`rag=True`) or chat-without-context (`rag=False`). Domain widens the stopword vocabulary; language switches the speculative-marker + legal-reference patterns. |
+| `routing_rules(domain="general")` | Intent classification agents | Multi-class routing with fallback and clarify |
+| `specialized_agent_rules(domain="general", tools=())` | Tool-using / execution agents | Entity capture, transaction execution |
+
+**Deprecated aliases preserved for backwards compatibility:**
+
+| Legacy name | New canonical call |
+|---|---|
+| `customer_support_rag_rules()` | `customer_support_rules(rag=True)` |
+| `groundlens_banking_rules()` | `decision_rationale_rules(domain="finance")` |
+| `rag_rules(domain="banking")` | `decision_rationale_rules(domain="finance")` |
+| `rag_rules(domain="customer_support")` | `customer_support_rules(rag=True)` |
 
 Build your own when none of these fits — legal review, insurance claims, clinical decision support, internal governance, custom verticals. Or extend an existing one with domain-specific reinforcements.
 

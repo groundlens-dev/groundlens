@@ -5,6 +5,79 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.13 -- archetype as function, dimensions as kwargs (Phases 1 + 2)
+
+### Changed (no behaviour change for current call sites)
+
+- **`customer_support_rag_rules()` → `customer_support_rules()`.**
+  The canonical name drops the `_rag_` infix because RAG vs no-RAG is now a
+  kwarg. `customer_support_rag_rules()` is preserved as a
+  `DeprecationWarning` alias that returns a `RuleSet` byte-for-byte
+  identical to the legacy 2026.6.11 / 2026.6.12 output (same name field
+  `"customer_support_rag_v1"`, same rules, same weights, same flag
+  predicate). Cookbook deployers can keep their import for now; the
+  warning points at the new name.
+
+- **`groundlens_banking_rules()` → `decision_rationale_rules()`.**
+  The 20-rule banking decision-rationale set is reachable under its
+  archetype name. `groundlens_banking_rules()` continues to work and
+  returns the same `RuleSet` with the legacy `"groundlens_banking_v1"`
+  name; the new factory returns the same rules under
+  `"decision_rationale_v1_finance"`. Both are exported at the top level.
+
+- **`rag_rules()` deprecated.** The semantically confusing dispatcher
+  (`rag_rules(domain="banking")` returned a *decision-rationale* set, not
+  a *RAG* set) is preserved as a deprecated alias that redirects to the
+  appropriate archetype factory and emits a `DeprecationWarning`.
+
+### Added
+
+- **`customer_support_rules(rag=True, domain="general", language="en")`.**
+  - `rag=False` shrinks the produced sub-scores to
+    `("completeness", "no_overreach")` because there is no context to
+    verify against. The flag predicate adapts to the smaller taxonomy.
+  - `domain="finance" | "healthcare" | "legal"` extends the stopword and
+    speculative-procedure marker vocabulary so the no-overreach check
+    catches domain-specific patterns ("co-pay tier", "retainer agreement",
+    "private banking tier", etc.). Does not add or remove rules.
+  - `language="es" | "multi"` adds Spanish speculative markers and a
+    Spanish-aware legal-reference regex (`Ley`, `Real Decreto`,
+    `Artículo`, etc.).
+
+- **`decision_rationale_rules(domain="finance", regulations=(), quality_floor=0.3)`.**
+  - `domain` validated against `("finance",)`; non-finance verticals
+    raise `ValueError` rather than silently returning the finance set.
+  - `regulations` accepts validated keys
+    (`"eu_ai_act"`, `"sr_26_2"`, `"sr_11_7"`, `"nist_ai_600_1"`,
+    `"nist_ai_rmf"`, `"iso_42001"`, `"ecb_internal_models"`,
+    `"eba_gl_2020_06"`, `"pra_ss1_23"`, `"hipaa"`, `"gdpr"`).
+    *Implementation note*: in 2026.6.13 the kwarg is accepted and
+    validated, but the provenance-filtered rendering of
+    `audit_explanation` is reserved for a follow-up release. A
+    `UserWarning` is emitted when the kwarg is non-empty.
+
+- **`routing_rules(domain="general")`** and
+  **`specialized_agent_rules(domain="general", tools=())`** accept the
+  new kwargs for API symmetry. No behavioural change.
+
+- **ADR 0001** (`docs/adr/0001-rule-set-architecture.md`) documenting the
+  decision rationale, the alternatives considered, and the deprecation
+  schedule.
+
+### Migration
+
+- Non-breaking. Every call site that compiled against 2026.6.11 / 2026.6.12
+  still compiles and produces identical output. The only observable
+  difference is the `DeprecationWarning` on legacy factory names.
+- Recommended migration order for deployers:
+  1. Replace `customer_support_rag_rules()` with `customer_support_rules()`.
+  2. Replace `groundlens_banking_rules()` with
+     `decision_rationale_rules(domain="finance")`.
+  3. Replace `rag_rules(domain="banking")` with
+     `decision_rationale_rules(domain="finance")`, and
+     `rag_rules(domain="customer_support")` with
+     `customer_support_rules(rag=True)`.
+
 ## 2026.6.12 -- repositioning: *Verifiable agent triage* + generic-source citations
 
 ### Changed

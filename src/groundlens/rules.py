@@ -43,6 +43,7 @@ References:
 from __future__ import annotations
 
 import re
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -1491,6 +1492,138 @@ def groundlens_banking_rules(quality_floor: float = _DEFAULT_QUALITY_FLOOR) -> R
     )
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# decision_rationale_rules — canonical name for the 20-rule banking set.
+#
+# Phase 2 of the rule-set API refactor (ADR 0001): the archetype goes in the
+# function name; the deployment dimensions go in keyword arguments.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+_VALID_DECISION_RATIONALE_DOMAINS: tuple[str, ...] = ("finance",)
+"""Domains the decision-rationale archetype currently ships rules for.
+
+Legal, healthcare, and insurance verticalizations are on the roadmap and will
+be added here when a real deployment requests them. Until then, calling
+``decision_rationale_rules(domain="legal")`` raises ``ValueError`` rather than
+silently returning the finance-calibrated set.
+"""
+
+_REGULATION_CITATION_KEYS: dict[str, tuple[str, ...]] = {
+    "eu_ai_act": ("EU AI Act", "2024/1689", "Art. 12", "Art. 13", "Art. 15"),
+    "sr_26_2": ("SR 26-2",),
+    "sr_11_7": ("SR 11-7",),
+    "nist_ai_600_1": ("NIST AI 600-1", "NIST AI 600", "NIST 600-1"),
+    "nist_ai_rmf": ("NIST AI RMF",),
+    "iso_42001": ("ISO/IEC 42001", "ISO 42001"),
+    "ecb_internal_models": ("ECB Guide to Internal Models",),
+    "eba_gl_2020_06": ("EBA GL/2020/06",),
+    "pra_ss1_23": ("PRA SS1/23",),
+    "hipaa": ("HIPAA",),
+    "gdpr": ("GDPR",),
+}
+"""Substring keys used to filter ``audit_explanation`` lines when
+``regulations=`` is set on ``decision_rationale_rules``.
+
+The filter is a substring match on each rule's ``citation`` field. It does not
+add or remove rules; it only suppresses citation lines that do not mention any
+of the requested regulations from the rendered audit text. Rules whose
+citation does not mention any regulation (academic-only citations) are kept
+unconditionally.
+"""
+
+
+def decision_rationale_rules(
+    domain: str = "finance",
+    regulations: tuple[str, ...] = (),
+    quality_floor: float = _DEFAULT_QUALITY_FLOOR,
+) -> RuleSet:
+    """Rule set for decision-rationale agents (credit / AML / KYC / sanctions).
+
+    Canonical factory for the 20-rule, 5-sub-score decision-rationale
+    rule set. Replaces :func:`groundlens_banking_rules` under the
+    archetype-as-function naming convention introduced in ADR 0001
+    (release 2026.6.13).
+
+    Args:
+        domain: Deployment domain. Currently only ``"finance"`` (default)
+            is supported; calling with any other value raises
+            ``ValueError`` so the caller knows the verticalization is not
+            yet shipped. Insurance, healthcare, and legal vertical
+            decision-rationale sets are on the roadmap.
+        regulations: Optional tuple of regulation keys. When non-empty,
+            ``audit_explanation`` lines whose rule citation does not
+            mention any of the requested regulations are suppressed from
+            the rendered audit text. Does not add or remove rules. Valid
+            keys include: ``"eu_ai_act"``, ``"sr_26_2"``, ``"sr_11_7"``,
+            ``"nist_ai_600_1"``, ``"nist_ai_rmf"``, ``"iso_42001"``,
+            ``"ecb_internal_models"``, ``"eba_gl_2020_06"``,
+            ``"pra_ss1_23"``, ``"hipaa"``, ``"gdpr"``.
+
+            *Implementation note (2026.6.13):* the kwarg is accepted and
+            validated, but provenance-filtered rendering of
+            ``audit_explanation`` will land in a follow-up release. For
+            now the audit text is unmodified; the rule set is returned
+            unchanged. A ``UserWarning`` is emitted when the kwarg is
+            non-empty so the caller is aware the filter is not yet active.
+        quality_floor: Threshold below which a sub-score triggers the
+            cosmetic-deadlock flag. Kept for compatibility with the
+            legacy ``banking_rules()`` signature.
+
+    Returns:
+        A :class:`RuleSet` named ``"decision_rationale_v1_finance"`` with
+        five sub-scores and 20 rules. The rules and weights are identical
+        to those of :func:`groundlens_banking_rules`; only the rule-set
+        name is updated.
+
+    Raises:
+        ValueError: If ``domain`` is not in
+            :data:`_VALID_DECISION_RATIONALE_DOMAINS`.
+
+    Example::
+
+        from groundlens import decision_rationale_rules
+
+        rs = decision_rationale_rules(
+            domain="finance",
+            regulations=("eu_ai_act", "sr_26_2"),
+        )
+        result = rs.evaluate(question=q, response=r, context=ctx)
+    """
+    if domain not in _VALID_DECISION_RATIONALE_DOMAINS:
+        msg = (
+            f"decision_rationale_rules(domain={domain!r}) — supported domains "
+            f"are {_VALID_DECISION_RATIONALE_DOMAINS}. Other verticalizations "
+            "are on the roadmap; open an issue at "
+            "https://github.com/groundlens-dev/groundlens/issues to request "
+            "one."
+        )
+        raise ValueError(msg)
+
+    unknown = tuple(r for r in regulations if r not in _REGULATION_CITATION_KEYS)
+    if unknown:
+        msg = (
+            f"decision_rationale_rules(regulations={regulations!r}) — unknown "
+            f"keys {unknown}. Known keys: "
+            f"{tuple(_REGULATION_CITATION_KEYS.keys())}."
+        )
+        raise ValueError(msg)
+    if regulations:
+        warnings.warn(
+            "decision_rationale_rules(regulations=...) is accepted but the "
+            "provenance-filtered audit_explanation rendering is not yet "
+            "active (slated for a follow-up release). The returned RuleSet "
+            "is unchanged.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    base = groundlens_banking_rules(quality_floor=quality_floor)
+    # Replace the legacy name with the archetype-aware canonical name.
+    object.__setattr__(base, "name", f"decision_rationale_v1_{domain}")
+    return base
+
+
 __all__ = [
     "ChecklistRule",
     "RuleEvidence",
@@ -1498,5 +1631,6 @@ __all__ = [
     "RuleSet",
     "RuleSetResult",
     "banking_rules",
+    "decision_rationale_rules",
     "groundlens_banking_rules",
 ]

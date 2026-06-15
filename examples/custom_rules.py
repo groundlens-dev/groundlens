@@ -1,7 +1,8 @@
 """Custom rule set example: legal contract review.
 
 Demonstrates how to build a domain-specific rule set with `groundlens.rules`
-when the bundled `groundlens_banking_rules` doesn't fit your use case.
+when the bundled `decision_rationale_rules(domain="finance")` doesn't fit your
+use case (i.e. you need a different domain, archetype, or sub-score taxonomy).
 
 The `RuleSet` engine is domain-agnostic:
 

@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import warnings
+
 import pytest
 
 from groundlens.agents import (
     customer_support_rag_rules,
+    customer_support_rules,
     rag_rules,
     routing_rules,
     specialized_agent_rules,
 )
-from groundlens.rules import RuleSet
+from groundlens.rules import RuleSet, decision_rationale_rules, groundlens_banking_rules
 
 # ── routing_rules ────────────────────────────────────────────────────────────
 
@@ -436,3 +439,162 @@ class TestAgentRuleSetsCrossCutting:
         # Within each ruleset, ids must be unique; across rulesets we expect
         # distinct namespacing (routing.* vs specialized.* vs banking.*/eu_ai_act.*/etc.).
         assert len(all_ids) == len(set(all_ids))
+
+
+# ── New API (2026.6.13): customer_support_rules + decision_rationale_rules ─
+
+
+class TestCustomerSupportRulesNewAPI:
+    """Phase 1 of the rule-set API refactor (ADR 0001)."""
+
+    def test_default_kwargs_match_legacy_rules_and_subscores(self) -> None:
+        rs = customer_support_rules()
+        assert rs.sub_scores == ("groundedness", "completeness", "no_overreach")
+        assert len(rs.rules) == 7
+        assert rs.name == "customer_support_v2_general_en_rag"
+
+    def test_rule_ids_unchanged_from_legacy(self) -> None:
+        rs_new = customer_support_rules()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            rs_legacy = customer_support_rag_rules()
+        assert sorted(r.id for r in rs_new.rules) == sorted(r.id for r in rs_legacy.rules)
+
+    def test_rag_false_shrinks_sub_scores(self) -> None:
+        rs = customer_support_rules(rag=False)
+        assert rs.sub_scores == ("completeness", "no_overreach")
+        assert len(rs.rules) == 4
+        assert rs.name == "customer_support_v2_general_en_norag"
+
+    def test_rag_false_flag_predicate_does_not_require_groundedness(self) -> None:
+        rs = customer_support_rules(rag=False)
+        # Empty groundedness key should not trip the flag predicate
+        # (the rag=False predicate only looks at no_overreach).
+        assert rs.flag_predicate is not None
+        assert rs.flag_predicate({"completeness": 1.0, "no_overreach": 1.0}) is False
+
+    @pytest.mark.parametrize("domain", ["general", "finance", "healthcare", "legal"])
+    def test_domain_accepted(self, domain: str) -> None:
+        rs = customer_support_rules(domain=domain)
+        assert domain in rs.name
+
+    @pytest.mark.parametrize("language", ["en", "es", "multi"])
+    def test_language_accepted(self, language: str) -> None:
+        rs = customer_support_rules(language=language)
+        assert language in rs.name
+
+    def test_unknown_domain_raises(self) -> None:
+        with pytest.raises(ValueError, match="supported domains"):
+            customer_support_rules(domain="aerospace")
+
+    def test_unknown_language_raises(self) -> None:
+        with pytest.raises(ValueError, match="supported languages"):
+            customer_support_rules(language="klingon")
+
+    def test_legacy_alias_emits_deprecation_warning(self) -> None:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            customer_support_rag_rules()
+        assert any(issubclass(rec.category, DeprecationWarning) for rec in w)
+
+    def test_legacy_alias_preserves_legacy_name(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            rs = customer_support_rag_rules()
+        # Backwards compat: downstream notebooks may assert on rs.name.
+        assert rs.name == "customer_support_rag_v1"
+
+    def test_legacy_alias_byte_for_byte_identical_outputs(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            rs_legacy = customer_support_rag_rules()
+        rs_new = customer_support_rules()
+        # Same inputs, same outputs across both factories.
+        q = "What is the Bizum daily limit?"
+        r = "The Bizum daily limit at BBVA is 1,000 EUR per transaction."
+        ctx = "The daily Bizum transfer limit is 1,000 EUR per transaction."
+        res_legacy = rs_legacy.evaluate(question=q, response=r, context=ctx)
+        res_new = rs_new.evaluate(question=q, response=r, context=ctx)
+        assert res_legacy.sub_scores == res_new.sub_scores
+        assert res_legacy.flagged == res_new.flagged
+
+
+class TestDecisionRationaleRulesNewAPI:
+    """Phase 2 of the rule-set API refactor (ADR 0001)."""
+
+    def test_default_returns_finance_ruleset(self) -> None:
+        rs = decision_rationale_rules()
+        assert rs.name == "decision_rationale_v1_finance"
+        assert len(rs.rules) == 20
+        assert rs.sub_scores == (
+            "groundedness",
+            "completeness",
+            "calibration",
+            "traceability",
+            "robustness",
+        )
+
+    def test_rule_ids_unchanged_from_legacy(self) -> None:
+        rs_new = decision_rationale_rules()
+        rs_legacy = groundlens_banking_rules()
+        assert sorted(r.id for r in rs_new.rules) == sorted(r.id for r in rs_legacy.rules)
+
+    def test_legacy_banking_alias_preserves_legacy_name(self) -> None:
+        rs = groundlens_banking_rules()
+        # groundlens_banking_rules is preserved verbatim (not deprecated yet).
+        assert rs.name == "groundlens_banking_v1"
+
+    def test_unknown_domain_raises(self) -> None:
+        with pytest.raises(ValueError, match="supported domains"):
+            decision_rationale_rules(domain="aerospace")
+
+    def test_unknown_regulation_key_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown"):
+            decision_rationale_rules(regulations=("made_up_reg",))
+
+    def test_valid_regulations_accepted_with_user_warning(self) -> None:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            rs = decision_rationale_rules(regulations=("eu_ai_act", "sr_26_2"))
+        assert any(issubclass(rec.category, UserWarning) for rec in w)
+        # Rules are unchanged; only the audit_explanation filter is reserved.
+        assert len(rs.rules) == 20
+
+
+class TestRoutingRulesNewAPI:
+    @pytest.mark.parametrize("domain", ["general", "finance", "healthcare", "legal"])
+    def test_domain_accepted(self, domain: str) -> None:
+        rs = routing_rules(domain=domain)
+        assert rs.name == "groundlens_routing_v1"
+
+    def test_unknown_domain_raises(self) -> None:
+        with pytest.raises(ValueError, match="supported domains"):
+            routing_rules(domain="nonsense")
+
+
+class TestSpecializedAgentRulesNewAPI:
+    def test_domain_and_tools_kwargs_accepted(self) -> None:
+        rs = specialized_agent_rules(domain="finance", tools=("iban_validator",))
+        assert rs.name == "groundlens_specialized_v1"
+
+    def test_unknown_domain_raises(self) -> None:
+        with pytest.raises(ValueError, match="supported domains"):
+            specialized_agent_rules(domain="nonsense")
+
+    def test_unknown_tool_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown tools"):
+            specialized_agent_rules(tools=("made_up_tool",))
+
+
+class TestRagRulesDeprecation:
+    def test_banking_domain_emits_deprecation_warning(self) -> None:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            rag_rules(domain="banking")
+        assert any(issubclass(rec.category, DeprecationWarning) for rec in w)
+
+    def test_customer_support_domain_emits_deprecation_warning(self) -> None:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            rag_rules(domain="customer_support")
+        assert any(issubclass(rec.category, DeprecationWarning) for rec in w)

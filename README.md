@@ -52,14 +52,14 @@ pip install groundlens
 
 ```python
 from groundlens import compute_sgi
-from groundlens.agents import customer_support_rag_rules
+from groundlens.agents import customer_support_rules
 
 question = "What is the Bizum daily limit?"
 context  = "The daily Bizum transfer limit is 1,000 EUR per transaction and 2,000 EUR per day."
 response = "The Bizum daily limit is 500 EUR per transaction. Premium clients have 10,000 EUR."
 
 sgi   = compute_sgi(question=question, context=context, response=response)
-rules = customer_support_rag_rules().evaluate(
+rules = customer_support_rules().evaluate(
     question=question, response=response, context=context,
 )
 
@@ -68,11 +68,11 @@ print(rules.flagged)               # True  — rule csr.no_invented_numbers trig
 print(rules.audit_explanation)     # full per-rule trail with citations
 ```
 
-**Closed-context triage — DGI + rules.** When no retrieval context is available (chat, agent self-verification). DGI compares the response's semantic direction against a domain-calibrated `mu_hat`.
+**Closed-context triage — DGI + rules.** When no retrieval context is available (chat, agent self-verification). DGI compares the response's semantic direction against a domain-calibrated `mu_hat`. Pass `rag=False` to `customer_support_rules` so the rule set drops the groundedness sub-score (nothing to ground against).
 
 ```python
 from groundlens import DGI
-from groundlens.agents import customer_support_rag_rules
+from groundlens.agents import customer_support_rules
 
 # Calibrate DGI with verified (question, response) pairs from your domain.
 # The reference distribution is what "grounded" means for your specific deployment.
@@ -80,8 +80,8 @@ dgi = DGI()
 dgi.calibrate(pairs=[(q, r) for q, r in verified_grounded_logs])  # 20-50 pairs
 
 dgi_score = dgi.score(question, response)
-rules     = customer_support_rag_rules().evaluate(
-    question=question, response=response, context=context,
+rules     = customer_support_rules(rag=False).evaluate(
+    question=question, response=response,
 )
 
 flagged = dgi_score.flagged or rules.flagged
@@ -93,16 +93,23 @@ The flag combiner is a deployer decision: `OR` for recall (more flags to human r
 
 Every rule carries a citation to its source — academic paper, industry whitepaper, or regulatory clause. Pick the rule set that matches the agent class you are triaging.
 
+From release **2026.6.13** the rule-set API follows a single convention: **the archetype is the function name, the deployment dimensions are keyword arguments**. See [ADR 0001](docs/adr/0001-rule-set-architecture.md) for the rationale.
+
 | Rule set | Use it for | Sub-scores | Rules |
 |---|---|---|---|
-| [`routing_rules()`](src/groundlens/agents/routing.py) | Intent-classification agents (multi-class routing, fallback, clarify) | intent_clarity, classification_confidence, fallback_appropriateness, disambiguation_quality | 10 |
-| [`customer_support_rag_rules()`](src/groundlens/agents/customer_support.py) | FAQ-RAG informational agents (the most common production archetype) | groundedness, completeness, no_overreach | 7 |
-| [`groundlens_banking_rules()`](src/groundlens/rules.py) | Banking decision rationales (credit, AML, KYC, fraud, sanctions) | groundedness, completeness, calibration, traceability, robustness | 20 |
-| [`specialized_agent_rules()`](src/groundlens/agents/specialized.py) | Tool-using / execution agents (entity capture, transaction execution) | entity_groundedness, entity_completeness, entity_calibration, execution_readiness | 9 |
-| [`banking_rules()`](src/groundlens/rules.py) (legacy) | Mechanical-enforcement skeleton from De La Chica & Martí-González (2026) | spec, expl, bshift | 12 |
-| [`rag_rules(domain="banking" \| "customer_support")`](src/groundlens/agents/rag.py) | Vocabulary-consistent dispatcher; returns the banking or customer-support set | — | — |
+| [`routing_rules(domain="general")`](src/groundlens/agents/routing.py) | Intent-classification agents (multi-class routing, fallback, clarify) | intent_clarity, classification_confidence, fallback_appropriateness, disambiguation_quality | 10 |
+| [`customer_support_rules(rag=True, domain="general", language="en")`](src/groundlens/agents/customer_support.py) | Informational customer-facing agents (FAQ-RAG and chat-without-context) | groundedness, completeness, no_overreach (RAG) / completeness, no_overreach (no-RAG) | 7 / 4 |
+| [`decision_rationale_rules(domain="finance", regulations=())`](src/groundlens/rules.py) | Decision rationales (credit, AML, KYC, fraud, sanctions) | groundedness, completeness, calibration, traceability, robustness | 20 |
+| [`specialized_agent_rules(domain="general", tools=())`](src/groundlens/agents/specialized.py) | Tool-using / execution agents (entity capture, transaction execution) | entity_groundedness, entity_completeness, entity_calibration, execution_readiness | 9 |
+| [`banking_rules()`](src/groundlens/rules.py) (legacy) | Mechanical-enforcement skeleton from De La Chica & Martí-González (2026) | spec, expl, bshift | 22 |
 
-For legal, insurance, healthcare, or any in-house governance framework, write your own (see below).
+**Deprecated, kept as aliases for one or more releases:**
+
+- `customer_support_rag_rules()` → use `customer_support_rules(rag=True)`.
+- `groundlens_banking_rules()` → use `decision_rationale_rules(domain="finance")`.
+- `rag_rules(domain="banking" | "customer_support")` → call the canonical archetype factory directly. The dispatcher emits a `DeprecationWarning`.
+
+For legal, insurance, healthcare, or any in-house governance framework, extend an existing factory (`domain="..."` slot) or write your own (see below).
 
 ## Calibrating SGI and DGI
 
@@ -194,7 +201,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from groundlens import compute_sgi
-from groundlens.agents import customer_support_rag_rules
+from groundlens.agents import customer_support_rules
 from groundlens.audit import open_log
 
 # 1. Standard LangChain RAG -----------------------------------------------
@@ -214,7 +221,7 @@ rag_chain = (
 )
 
 # 2. Groundlens triage on every response ----------------------------------
-ruleset       = customer_support_rag_rules()
+ruleset       = customer_support_rules()
 SGI_THRESHOLD = 0.85   # calibrated from your grounded reference distribution
 
 def triage(question: str) -> dict:
@@ -273,9 +280,13 @@ For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom)
 │             sentence-transformers (all-MiniLM-L6-v2 default)            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                          groundlens.agents                              │
-│  routing_rules    │   rag_rules(domain=…)    │  specialized_agent_rules │
-│  (intent class.)  │   (banking / FAQ-RAG)    │  (tool-use + execution)  │
+│  routing_rules     │  customer_support_rules  │ specialized_agent_rules │
+│  (intent class.)   │  (rag=True/False,        │ (tool-use + execution)  │
+│                    │   domain=…, language=…)  │                         │
 └─────────────────────────────────────────────────────────────────────────┘
+
+       + decision_rationale_rules(domain="finance", regulations=…)
+         in groundlens.rules — credit / AML / KYC / sanctions
          ▲                                                ▲
          │                                                │
    ┌─────┴──────┐                                ┌────────┴─────────┐
@@ -295,7 +306,7 @@ The methods Groundlens implements are documented in four research papers:
 1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG.
 2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/pdf/2602.13224v3). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector.
 3. **Rotational Dynamics of Factual Constraint Processing** — Marin (2026). [arXiv:2603.13259](https://arxiv.org/abs/2603.13259). Mechanistic interpretability of how transformers reject wrong answers.
-4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026).[This repo](https://github.com/groundlens-dev/groundlens/blob/3563098e6ec96126ff56682a06f9a3b57d1a1d93/docs/assets/Defendable_Rules_for_LLM_Rationale_Evaluation_in_Banking_Governance.pdf).
+4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026). *Preprint, draft available on request.* Underpins `decision_rationale_rules(domain="finance")`: 20 rules triangulated across peer-reviewed NLP literature, banking-regulator whitepapers, tier-1 bank public reports, cross-industry frameworks, and financial-domain NLP benchmarks.
 
 ## Compliance mapping
 
