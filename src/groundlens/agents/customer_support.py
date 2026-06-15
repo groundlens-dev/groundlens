@@ -516,8 +516,7 @@ def customer_support_rules(
     """
     if domain not in _VALID_DOMAINS:
         msg = (
-            f"customer_support_rules(domain={domain!r}) — supported domains are "
-            f"{_VALID_DOMAINS}."
+            f"customer_support_rules(domain={domain!r}) — supported domains are {_VALID_DOMAINS}."
         )
         raise ValueError(msg)
     if language not in _VALID_LANGUAGES:

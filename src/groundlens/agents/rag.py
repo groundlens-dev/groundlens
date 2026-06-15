@@ -67,7 +67,7 @@ def rag_rules(domain: str = "banking") -> RuleSet:
     if domain == "banking":
         warnings.warn(
             'rag_rules(domain="banking") is deprecated; use '
-            "decision_rationale_rules(domain=\"finance\") from groundlens.rules instead. "
+            'decision_rationale_rules(domain="finance") from groundlens.rules instead. '
             "The dispatcher will be removed in a future release.",
             DeprecationWarning,
             stacklevel=2,
