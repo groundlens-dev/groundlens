@@ -395,6 +395,28 @@
   
   
   
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adr/0001-rule-set-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Design Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../../api/" class="md-tabs__link">
         
@@ -1804,6 +1826,99 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0001-rule-set-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001 — Rule-set API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../api/" class="md-nav__link">
         
@@ -2113,7 +2228,7 @@
 <p>The Groundlens rule engine is intentionally small. <code>RuleSet</code> and <code>ChecklistRule</code> are composable primitives — you write the rules, Groundlens runs them deterministically and produces an audit trail with citations.</p>
 <p>This guide walks through the full workflow: anatomy, the 4-step recipe, a complete worked example, patterns, and common pitfalls.</p>
 <h2 id="when-you-need-a-custom-rule-set">When you need a custom rule set<a class="headerlink" href="#when-you-need-a-custom-rule-set" title="Permanent link">&para;</a></h2>
-<p>The bundled rule sets cover four archetypes:</p>
+<p>The bundled rule sets cover four agent archetypes. The naming convention since release <strong>2026.6.13</strong> follows ADR 0001: the <strong>archetype</strong> is in the function name, the <strong>deployment dimensions</strong> are keyword arguments.</p>
 <table>
 <thead>
 <tr>
@@ -2124,24 +2239,51 @@
 </thead>
 <tbody>
 <tr>
-<td><code>groundlens_banking_rules</code></td>
-<td>Banking decision rationales</td>
+<td><code>decision_rationale_rules(domain="finance", regulations=())</code></td>
+<td>Decision rationales</td>
 <td>Credit / AML / KYC / fraud / sanctions decisions with auditable rationale</td>
 </tr>
 <tr>
-<td><code>customer_support_rag_rules</code></td>
-<td>Informational customer-support RAG</td>
-<td>FAQ-style assistant, the BBVA Blue archetype</td>
+<td><code>customer_support_rules(rag=True, domain="general", language="en")</code></td>
+<td>Informational customer-facing agents</td>
+<td>FAQ-RAG (<code>rag=True</code>) or chat-without-context (<code>rag=False</code>). Domain widens the stopword vocabulary; language switches the speculative-marker + legal-reference patterns.</td>
 </tr>
 <tr>
-<td><code>routing_rules</code></td>
+<td><code>routing_rules(domain="general")</code></td>
 <td>Intent classification agents</td>
 <td>Multi-class routing with fallback and clarify</td>
 </tr>
 <tr>
-<td><code>specialized_agent_rules</code></td>
+<td><code>specialized_agent_rules(domain="general", tools=())</code></td>
 <td>Tool-using / execution agents</td>
 <td>Entity capture, transaction execution</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Deprecated aliases preserved for backwards compatibility:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Legacy name</th>
+<th>New canonical call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>customer_support_rag_rules()</code></td>
+<td><code>customer_support_rules(rag=True)</code></td>
+</tr>
+<tr>
+<td><code>groundlens_banking_rules()</code></td>
+<td><code>decision_rationale_rules(domain="finance")</code></td>
+</tr>
+<tr>
+<td><code>rag_rules(domain="banking")</code></td>
+<td><code>decision_rationale_rules(domain="finance")</code></td>
+</tr>
+<tr>
+<td><code>rag_rules(domain="customer_support")</code></td>
+<td><code>customer_support_rules(rag=True)</code></td>
 </tr>
 </tbody>
 </table>

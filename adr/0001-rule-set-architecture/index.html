@@ -12,13 +12,13 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/integrations/semantic-kernel/">
+        <link rel="canonical" href="https://docs.groundlens.dev/adr/0001-rule-set-architecture/">
       
       
-        <link rel="prev" href="../crewai/">
+        <link rel="prev" href="../../benchmarks/results/">
       
       
-        <link rel="next" href="../autogen/">
+        <link rel="next" href="../../api/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Semantic Kernel - groundlens</title>
+        <title>ADR 0001 — Rule-set API - groundlens</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#semantic-kernel-integration" class="md-skip">
+        <a href="#adr-0001-rule-set-architecture-archetype-as-function-dimensions-as-kwargs" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Semantic Kernel
+              ADR 0001 — Rule-set API
             
           </span>
         </div>
@@ -354,13 +354,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../langgraph/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../integrations/langgraph/" class="md-tabs__link">
           
   
   
@@ -400,11 +398,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../adr/0001-rule-set-architecture/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -1494,10 +1494,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -1515,22 +1513,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -1548,7 +1545,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1566,7 +1563,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../langgraph/" class="md-nav__link">
+      <a href="../../integrations/langgraph/" class="md-nav__link">
         
   
   
@@ -1594,7 +1591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../langchain/" class="md-nav__link">
+      <a href="../../integrations/langchain/" class="md-nav__link">
         
   
   
@@ -1622,7 +1619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../crewai/" class="md-nav__link">
+      <a href="../../integrations/crewai/" class="md-nav__link">
         
   
   
@@ -1647,37 +1644,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Semantic Kernel
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../integrations/semantic-kernel/" class="md-nav__link">
         
   
   
@@ -1693,103 +1663,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-it-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How It Works
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-scores" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Scores
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#complete-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Complete Example
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1802,7 +1675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../autogen/" class="md-nav__link">
+      <a href="../../integrations/autogen/" class="md-nav__link">
         
   
   
@@ -1957,8 +1830,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1968,21 +1843,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
-        
-          
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -2000,7 +1876,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2015,10 +1891,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../adr/0001-rule-set-architecture/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001 — Rule-set API
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2034,6 +1937,198 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heuristic-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heuristic table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#approach-1-single-generic-factory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 1 — Single generic factory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approach-2-functional-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 2 — Functional composition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approach-4-minimal-kwargs-keep-current-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 4 — Minimal kwargs, keep current names
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-release-2026613" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 (release 2026.6.13)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-same-release-2026613" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 (same release 2026.6.13)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cookbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cookbook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 (future)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-decisions-left-for-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-decisions (left for later)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2100,10 +2195,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Context
       
     </span>
   </a>
@@ -2111,10 +2206,149 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start
+        Decision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heuristic-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heuristic table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#approach-1-single-generic-factory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 1 — Single generic factory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approach-2-functional-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 2 — Functional composition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approach-4-minimal-kwargs-keep-current-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach 4 — Minimal kwargs, keep current names
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-release-2026613" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 (release 2026.6.13)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-same-release-2026613" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 (same release 2026.6.13)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cookbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cookbook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 (future)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-decisions-left-for-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-decisions (left for later)
       
     </span>
   </a>
@@ -2122,54 +2356,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-it-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How It Works
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-scores" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Scores
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#complete-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Complete Example
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
+        References
       
     </span>
   </a>
@@ -2196,115 +2386,161 @@
   
 
 
-<h1 id="semantic-kernel-integration">Semantic Kernel Integration<a class="headerlink" href="#semantic-kernel-integration" title="Permanent link">&para;</a></h1>
-<p><code>GroundlensFilter</code> is a function invocation filter for Microsoft Semantic Kernel that automatically evaluates function results for hallucination risk.</p>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;groundlens[semantic-kernel]&quot;</span>
+<h1 id="adr-0001-rule-set-architecture-archetype-as-function-dimensions-as-kwargs">ADR 0001 — Rule set architecture: archetype as function, dimensions as kwargs<a class="headerlink" href="#adr-0001-rule-set-architecture-archetype-as-function-dimensions-as-kwargs" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Accepted
+<strong>Date:</strong> 2026-06-15
+<strong>Deciders:</strong> Javier Marín
+<strong>Releases affected:</strong> 2026.6.13 (Phase 1 + 2)</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>Groundlens ships rule sets in <code>groundlens.agents</code> for the three agent classes
+in production AI pipelines (routing, RAG/informational, specialized/tool-using)
+plus a decision-rationale set in <code>groundlens.rules</code>
+(<code>groundlens_banking_rules</code>). The earlier naming convention encoded both the
+<strong>agent archetype</strong> and the <strong>deployment dimension</strong> in the function name:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>customer_support_rag_rules()    # archetype + modality (RAG/no-RAG) baked in
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>groundlens_banking_rules()      # archetype + domain (banking) baked in
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>rag_rules(domain=...)           # dispatcher that returned the banking set by default
 </span></code></pre></div>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.integrations.semantic_kernel</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroundlensFilter</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">filt</span> <span class="o">=</span> <span class="n">GroundlensFilter</span><span class="p">()</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Register with Semantic Kernel</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">kernel</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;function_invocation&quot;</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
+<p>Two real cases (BBVA Blue RAG, Santander decision rationales — both in the
+cookbook) confirmed the current rule sets work, but they also surfaced three
+problems:</p>
+<ol>
+<li><strong>Proliferation pressure.</strong> Adding insurance, healthcare, legal coverage
+   under the current convention would require one new factory per domain.</li>
+<li><strong>Confusing dispatch.</strong> <code>rag_rules(domain="banking")</code> returned a
+   decision-rationale set, not a RAG set. The name and the semantics
+   disagreed.</li>
+<li><strong>Modality baked in.</strong> <code>customer_support_rag_rules</code> could not be reused
+   for the no-RAG case (chat without retrieved context) without cloning.</li>
+</ol>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p><strong>Archetype is the function name. Dimensions are kwargs.</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">customer_support_rules</span><span class="p">(</span><span class="n">rag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;general&quot;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">decision_rationale_rules</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s2">&quot;finance&quot;</span><span class="p">,</span> <span class="n">regulations</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;eu_ai_act&quot;</span><span class="p">,))</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">routing_rules</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s2">&quot;general&quot;</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">specialized_agent_rules</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s2">&quot;finance&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">())</span>
 </span></code></pre></div>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">filt</span> <span class="o">=</span> <span class="n">GroundlensFilter</span><span class="p">(</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">groundlens_model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>  <span class="c1"># Embedding model</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">input_key</span><span class="o">=</span><span class="s2">&quot;input&quot;</span><span class="p">,</span>                    <span class="c1"># Key for question in function args</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">context_key</span><span class="o">=</span><span class="s2">&quot;context&quot;</span><span class="p">,</span>                <span class="c1"># Key for context in function args</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
-</span></code></pre></div>
+<ul>
+<li>One factory <strong>per agent archetype</strong> (routing, customer support, decision
+  rationale, specialized).</li>
+<li>Dimensions that the archetype legitimately varies over become <strong>keyword
+  arguments</strong> on that factory.</li>
+<li>Heuristic for adding a new factory: only when the new agent class has a
+  <strong>structurally distinct sub-score taxonomy</strong>. Same sub-scores with a
+  different vocabulary is a kwarg, not a function.</li>
+</ul>
+<h3 id="heuristic-table">Heuristic table<a class="headerlink" href="#heuristic-table" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
+<th>Change</th>
+<th>Action</th>
+<th>Why</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>groundlens_model</code></td>
-<td><code>"all-MiniLM-L6-v2"</code></td>
-<td>Sentence-transformer for scoring</td>
+<td>New agent <strong>archetype</strong> (different sub-scores)</td>
+<td>New factory</td>
+<td>Structurally distinct</td>
 </tr>
 <tr>
-<td><code>input_key</code></td>
-<td><code>"input"</code></td>
-<td>Key to extract question from function arguments</td>
+<td>New <strong>domain</strong> (banking → insurance → healthcare)</td>
+<td><code>domain=</code> kwarg</td>
+<td>Sub-scores stable; vocabulary changes</td>
 </tr>
 <tr>
-<td><code>context_key</code></td>
-<td><code>"context"</code></td>
-<td>Key to extract context from function arguments</td>
+<td>New <strong>regulation</strong> (EU AI Act → SR 26-2 → HIPAA)</td>
+<td><code>regulations=</code> filter on <code>audit_explanation</code></td>
+<td>Rules unchanged; only citation provenance changes</td>
+</tr>
+<tr>
+<td>New <strong>language</strong> (en → es → multi)</td>
+<td><code>language=</code> kwarg</td>
+<td>Stopword / speculative-marker surface only</td>
+</tr>
+<tr>
+<td><strong>RAG present vs absent</strong></td>
+<td><code>rag=</code> kwarg</td>
+<td>Same archetype, different evidence available</td>
 </tr>
 </tbody>
 </table>
-<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
-<p>The filter operates as an async function invocation interceptor:</p>
-<ol>
-<li>The filter calls <code>await next(context)</code> to execute the actual function.</li>
-<li>It extracts the question from <code>context.arguments[input_key]</code>.</li>
-<li>It extracts the result from <code>context.result.value</code>.</li>
-<li>It optionally extracts context from <code>context.arguments[context_key]</code>.</li>
-<li>It evaluates the result with groundlens (SGI if context is present, DGI otherwise).</li>
-<li>It attaches the score to <code>context.metadata["groundlens_score"]</code>.</li>
-<li>It stores the score in <code>filt.scores</code> for later inspection.</li>
-</ol>
-<h2 id="accessing-scores">Accessing Scores<a class="headerlink" href="#accessing-scores" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">filt</span> <span class="o">=</span> <span class="n">GroundlensFilter</span><span class="p">()</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">kernel</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;function_invocation&quot;</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># ... run functions ...</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Inspect scores after execution</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">for</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">filt</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;FLAGGED&quot;</span> <span class="k">if</span> <span class="n">score</span><span class="o">.</span><span class="n">flagged</span> <span class="k">else</span> <span class="s2">&quot;PASS&quot;</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<h2 id="alternatives-considered">Alternatives considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">&para;</a></h2>
+<h3 id="approach-1-single-generic-factory">Approach 1 — Single generic factory<a class="headerlink" href="#approach-1-single-generic-factory" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">rule_set</span><span class="p">(</span><span class="n">archetype</span><span class="o">=</span><span class="s2">&quot;customer_support&quot;</span><span class="p">,</span> <span class="n">rag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;finance&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">semantic_kernel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sk</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">semantic_kernel.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">kernel_function</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.integrations.semantic_kernel</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroundlensFilter</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Create kernel and register filter</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">kernel</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">Kernel</span><span class="p">()</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">filt</span> <span class="o">=</span> <span class="n">GroundlensFilter</span><span class="p">()</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">kernel</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;function_invocation&quot;</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># Define a semantic function</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">QAPlugin</span><span class="p">:</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="nd">@kernel_function</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;answer_question&quot;</span><span class="p">)</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        <span class="c1"># This would normally call an LLM</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="k">return</span> <span class="s2">&quot;The answer based on the provided context...&quot;</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="n">kernel</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">QAPlugin</span><span class="p">(),</span> <span class="s2">&quot;qa&quot;</span><span class="p">)</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="c1"># Invoke -- the filter automatically scores the result</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">kernel</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>    <span class="s2">&quot;qa&quot;</span><span class="p">,</span>
-</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="s2">&quot;answer_question&quot;</span><span class="p">,</span>
-</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;What is the treatment for condition X?&quot;</span><span class="p">,</span>
-</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;Treatment guidelines state...&quot;</span><span class="p">,</span>
-</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="p">)</span>
-</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>
-</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="c1"># Check the groundlens score</span>
-</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="k">for</span> <span class="n">fn_name</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">filt</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
-</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fn_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<p>Rejected: less discoverable. IDE autocomplete on a function name gives the
+deployer the archetype catalogue immediately; autocomplete on a kwarg of a
+generic factory doesn't.</p>
+<h3 id="approach-2-functional-composition">Approach 2 — Functional composition<a class="headerlink" href="#approach-2-functional-composition" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">customer_support_base_rules</span><span class="p">()</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">finance_extension</span><span class="p">())</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">eu_ai_act_extension</span><span class="p">())</span>
 </span></code></pre></div>
-<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
-<p>The filter logs at two levels:</p>
+<p>Rejected: more verbose at the call site. The 95% path should be one line, not
+three. Composition is Pythonic but punishes the deployer reading a notebook at
+11 PM. Could be reintroduced as a power-user API later.</p>
+<h3 id="approach-4-minimal-kwargs-keep-current-names">Approach 4 — Minimal kwargs, keep current names<a class="headerlink" href="#approach-4-minimal-kwargs-keep-current-names" title="Permanent link">&para;</a></h3>
+<p>Rejected by the maintainer on UX grounds: keeping both
+<code>customer_support_rag_rules</code> and a hypothetical <code>customer_support_rules</code>
+factory side by side is worse than collapsing them into one with <code>rag=</code> as a
+parameter. The cost of the refactor is justified by the UX win.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-release-2026613">Phase 1 (release 2026.6.13)<a class="headerlink" href="#phase-1-release-2026613" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>WARNING</strong>: When a function result is flagged for hallucination risk</li>
-<li><strong>INFO</strong>: When a function result passes verification</li>
+<li><code>customer_support_rag_rules()</code> → <code>customer_support_rules(rag=True, domain="general", language="en")</code>.</li>
+<li>Old name preserved as a <code>DeprecationWarning</code> alias for at least three
+  releases.</li>
+<li><code>rag=False</code> shrinks the produced sub-scores: <code>groundedness</code> is omitted
+  (no context to verify against); the result carries <code>completeness</code> and
+  <code>no_overreach</code> only. The flag predicate adapts.</li>
+<li><code>domain</code> and <code>language</code> extend stopwords / speculative markers; they do
+  not add rules.</li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># GroundlensFilter events now appear in logs</span>
-</span></code></pre></div>
+<h3 id="phase-2-same-release-2026613">Phase 2 (same release 2026.6.13)<a class="headerlink" href="#phase-2-same-release-2026613" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>groundlens_banking_rules()</code> → <code>decision_rationale_rules(domain="finance", regulations=("eu_ai_act", "sr_26_2"))</code>.</li>
+<li>Old name preserved as a <code>DeprecationWarning</code> alias.</li>
+<li><code>regulations=</code> filters the citation lines that appear in
+  <code>audit_explanation</code>; it does not add or remove rules.</li>
+<li><code>rag_rules()</code> (the old dispatcher) is preserved as a deprecated alias that
+  redirects to <code>customer_support_rules(rag=True)</code> for the <code>customer_support</code>
+  case and <code>decision_rationale_rules(domain="finance")</code> for the <code>banking</code>
+  case.</li>
+<li><code>routing_rules()</code> gains a <code>domain="general"</code> kwarg for symmetry; no
+  behavioural change yet.</li>
+<li><code>specialized_agent_rules()</code> gains <code>domain="general"</code> and <code>tools=()</code>
+  kwargs.</li>
+</ul>
+<h3 id="cookbook">Cookbook<a class="headerlink" href="#cookbook" title="Permanent link">&para;</a></h3>
+<p>Both notebooks (<code>customer_support_rag_eval_clean.ipynb</code>,
+<code>decision_rationale_eval.ipynb</code>) are updated to use the new factory names.
+The deprecated calls would still work but emit a warning.</p>
+<h3 id="phase-3-future">Phase 3 (future)<a class="headerlink" href="#phase-3-future" title="Permanent link">&para;</a></h3>
+<p>Removal of deprecated aliases is deferred to a future release. No date set;
+will follow an explicit notice on the changelog.</p>
+<h2 id="non-decisions-left-for-later">Non-decisions (left for later)<a class="headerlink" href="#non-decisions-left-for-later" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>template=</code> parameter for <code>compute_sgi</code> / <code>compute_dgi</code></strong> is orthogonal
+  to this refactor. It belongs to the geometric layer, not the rule layer.
+  Tracked separately.</li>
+<li><strong>Power-user composition API</strong> (<code>.extend()</code>) is not introduced here.
+  Reconsider only if a real case requires it.</li>
+<li><strong><code>register_domain()</code> extension hook</strong> is not introduced here. Reconsider
+  if community contributions start arriving.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cookbook notebook 1 (BBVA RAG Blue replication):
+  <code>customer_support_rag_eval_clean.ipynb</code></li>
+<li>Cookbook notebook 2 (Santander decision rationale replication):
+  <code>decision_rationale_eval.ipynb</code></li>
+<li>Marin (2025). <em>Semantic Grounding Index for LLM Hallucination Detection.</em>
+  arXiv:2512.13771.</li>
+<li>Marin (2026). <em>A Geometric Taxonomy of Hallucinations in Large Language
+  Models.</em> arXiv:2602.13224.</li>
+<li>Marin (2026). <em>Defendable Rules for LLM Rationale Evaluation in Banking
+  Governance: A Multi-Source Provenance Framework.</em></li>
+</ul>
 
 
 

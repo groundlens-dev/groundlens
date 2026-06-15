@@ -395,6 +395,28 @@
   
   
   
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../adr/0001-rule-set-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Design Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../../../" class="md-tabs__link">
         
@@ -1804,6 +1826,99 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/0001-rule-set-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001 — Rule-set API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../../" class="md-nav__link">
         
@@ -1939,30 +2054,27 @@
 
     <div class="doc doc-contents first">
 
-        <p>RAG agent triage — rule set for retrieval-augmented informational agents.</p>
-<p>RAG agents retrieve from a knowledge base and generate a grounded
-response. Their failure modes are well-studied: fabrication of facts
-not in retrieved context, omission of relevant context, miscalibration
-on out-of-knowledge queries, and missing citations.</p>
-<p>:func:<code>rag_rules</code> dispatches on a <code>domain</code> argument so the same
-agent-vocabulary entry point covers multiple deployment archetypes:</p>
+        <p>RAG agent triage — deprecated dispatcher kept for backwards compatibility.</p>
+<p>The 2026.6.11 / 2026.6.12 API exposed a :func:<code>rag_rules</code> dispatcher that
+returned different rule sets depending on the <code>domain</code> argument:</p>
 <ul>
-<li><code>domain="banking"</code> (default) — credit / AML / KYC decision rationales.
-  Returns :func:<code>groundlens.rules.groundlens_banking_rules</code>.</li>
-<li><code>domain="customer_support"</code> — informational customer-facing
-  assistants over a FAQ knowledge base (FAQ-RAG customer support).
-  Returns :func:<code>groundlens.agents.customer_support_rag_rules</code>.</li>
+<li><code>rag_rules(domain="banking")</code> returned the 20-rule decision-rationale set
+  (now :func:<code>groundlens.rules.decision_rationale_rules</code>).</li>
+<li><code>rag_rules(domain="customer_support")</code> returned the 7-rule customer-support
+  set (now :func:<code>groundlens.agents.customer_support_rules</code>).</li>
+</ul>
+<p>That dispatch was semantically confusing: the banking branch returned a
+<em>decision-rationale</em> set, not a <em>RAG</em> set. Phase 2 of the rule-set API
+refactor (ADR 0001, release 2026.6.13) introduces archetype-named factories
+and demotes :func:<code>rag_rules</code> to a deprecated alias.</p>
+<p>New code should call the canonical factory directly:</p>
+<ul>
+<li>For informational FAQ-RAG agents:
+  :func:<code>groundlens.agents.customer_support_rules</code> (with <code>rag=True</code>).</li>
+<li>For credit / AML / KYC / sanctions decision rationales:
+  :func:<code>groundlens.rules.decision_rationale_rules</code> (with <code>domain="finance"</code>).</li>
 </ul>
 
-
-<details class="references" open>
-  <summary>References</summary>
-  <p>Marin, J. (2026). Defendable Rules for LLM Rationale Evaluation in
-    Banking Governance: A Multi-Source Provenance Framework.</p>
-<p>Es, S., James, J., Espinosa-Anke, L., &amp; Schockaert, S. (2024).
-    RAGAs: Automated Evaluation of Retrieval Augmented Generation.
-    EACL 2024.</p>
-</details>
 
 
 
@@ -1994,7 +2106,7 @@ agent-vocabulary entry point covers multiple deployment archetypes:</p>
 
     <div class="doc doc-contents ">
 
-        <p>Rule set for RAG / informational agents.</p>
+        <p>Deprecated dispatcher — use the archetype-named factories directly.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2017,18 +2129,11 @@ agent-vocabulary entry point covers multiple deployment archetypes:</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Which domain flavour to return.</p>
-<ul>
-<li><code>"banking"</code> (default): credit, AML, KYC, fraud, sanctions
-  decision rationales. 20 rules across 5 sub-scores
-  (groundedness, completeness, calibration, traceability,
-  robustness). Same object as
-  :func:<code>groundlens.rules.groundlens_banking_rules</code>.</li>
-<li><code>"customer_support"</code>: informational customer-support RAG
-  over a FAQ knowledge base. 7 rules across 3 sub-scores
-  (groundedness, completeness, no_overreach). Same object as
-  :func:<code>groundlens.agents.customer_support_rag_rules</code>.</li>
-</ul>
+                <p><code>"banking"</code> (default) returns
+:func:<code>groundlens.rules.decision_rationale_rules</code> (the 20-rule
+decision-rationale set). <code>"customer_support"</code> returns
+:func:<code>groundlens.agents.customer_support_rules</code> with <code>rag=True</code>
+(the 7-rule informational-agent set).</p>
               </div>
             </td>
             <td>
@@ -2043,13 +2148,13 @@ agent-vocabulary entry point covers multiple deployment archetypes:</p>
     <table>
       <thead>
         <tr>
-<th>Name</th>          <th>Type</th>
+          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>A</code></td>            <td>
+            <td>
                   <code><a class="autorefs autorefs-internal" title="RuleSet(name: str, rules: tuple[ChecklistRule, ...], sub_scores: tuple[str, ...] = ('spec', 'expl', 'bshift'), quality_floor: float = _DEFAULT_QUALITY_FLOOR, flag_predicate: Callable[[dict[str, float]], bool] | None = None)
 
   
@@ -2058,7 +2163,7 @@ agent-vocabulary entry point covers multiple deployment archetypes:</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>class:<code>RuleSet</code> calibrated for the requested domain.</p>
+                <p>The selected :class:<code>RuleSet</code>.</p>
               </div>
             </td>
           </tr>
@@ -2081,30 +2186,19 @@ agent-vocabulary entry point covers multiple deployment archetypes:</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <code>domain</code> is not one of the supported domains.</p>
+                <p>If <code>domain</code> is not in :data:<code>_SUPPORTED_DOMAINS</code>.</p>
               </div>
             </td>
           </tr>
       </tbody>
     </table>
-        <p>Example::</p>
-<div class="language-text highlight"><pre><span></span><code>from groundlens.agents import rag_rules
-
-# Default: banking decision rationales
-banking = rag_rules()  # or rag_rules(domain=&quot;banking&quot;)
-
-# Customer-support FAQ-RAG
-cs = rag_rules(domain=&quot;customer_support&quot;)
-result = cs.evaluate(
-    question=&quot;What is the Bizum daily limit?&quot;,
-    response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,
-    context=(
-        &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;
-        &quot;transaction and 2,000 EUR per day in total.&quot;
-    ),
-)
-assert not result.flagged
-</code></pre></div>
+        <p>.. deprecated:: 2026.6.13
+    Call the canonical factory directly:
+    :func:<code>groundlens.rules.decision_rationale_rules</code> for credit / AML /
+    KYC decision rationales, or
+    :func:<code>groundlens.agents.customer_support_rules</code> for informational
+    FAQ-RAG agents. The :func:<code>rag_rules</code> dispatcher will be removed in a
+    future release.</p>
 
 
             <details class="mkdocstrings-source">
@@ -2159,57 +2253,75 @@ assert not result.flagged
 <span class="normal"><a href="#__codelineno-0-81">81</a></span>
 <span class="normal"><a href="#__codelineno-0-82">82</a></span>
 <span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">rag_rules</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;banking&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule set for RAG / informational agents.</span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span>
+<span class="normal"><a href="#__codelineno-0-85">85</a></span>
+<span class="normal"><a href="#__codelineno-0-86">86</a></span>
+<span class="normal"><a href="#__codelineno-0-87">87</a></span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span>
+<span class="normal"><a href="#__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#__codelineno-0-90">90</a></span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span>
+<span class="normal"><a href="#__codelineno-0-92">92</a></span>
+<span class="normal"><a href="#__codelineno-0-93">93</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">rag_rules</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;banking&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleSet</span><span class="p">:</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated dispatcher — use the archetype-named factories directly.</span>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>
 </span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    Args:</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">        domain: Which domain flavour to return.</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">            - ``&quot;banking&quot;`` (default): credit, AML, KYC, fraud, sanctions</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">              decision rationales. 20 rules across 5 sub-scores</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">              (groundedness, completeness, calibration, traceability,</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">              robustness). Same object as</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">              :func:`groundlens.rules.groundlens_banking_rules`.</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">            - ``&quot;customer_support&quot;``: informational customer-support RAG</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">              over a FAQ knowledge base. 7 rules across 3 sub-scores</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">              (groundedness, completeness, no_overreach). Same object as</span>
-</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">              :func:`groundlens.agents.customer_support_rag_rules`.</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">        domain: ``&quot;banking&quot;`` (default) returns</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">            :func:`groundlens.rules.decision_rationale_rules` (the 20-rule</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">            decision-rationale set). ``&quot;customer_support&quot;`` returns</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">            :func:`groundlens.agents.customer_support_rules` with ``rag=True``</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">            (the 7-rule informational-agent set).</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Returns:</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">        The selected :class:`RuleSet`.</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    Raises:</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        ValueError: If ``domain`` is not in :data:`_SUPPORTED_DOMAINS`.</span>
 </span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        A :class:`RuleSet` calibrated for the requested domain.</span>
-</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    Raises:</span>
-</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        ValueError: If ``domain`` is not one of the supported domains.</span>
-</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    Example::</span>
-</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>
-</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">        from groundlens.agents import rag_rules</span>
-</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>
-</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        # Default: banking decision rationales</span>
-</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        banking = rag_rules()  # or rag_rules(domain=&quot;banking&quot;)</span>
-</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a>
-</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        # Customer-support FAQ-RAG</span>
-</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        cs = rag_rules(domain=&quot;customer_support&quot;)</span>
-</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">        result = cs.evaluate(</span>
-</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">            question=&quot;What is the Bizum daily limit?&quot;,</span>
-</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">            response=&quot;The Bizum daily limit is 1,000 EUR per transaction.&quot;,</span>
-</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">            context=(</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">                &quot;The daily Bizum transfer limit is 1,000 EUR per &quot;</span>
-</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">                &quot;transaction and 2,000 EUR per day in total.&quot;</span>
-</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">            ),</span>
-</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        )</span>
-</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        assert not result.flagged</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;banking&quot;</span><span class="p">:</span>
-</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="k">return</span> <span class="n">groundlens_banking_rules</span><span class="p">()</span>
-</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;customer_support&quot;</span><span class="p">:</span>
-</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>        <span class="k">return</span> <span class="n">customer_support_rag_rules</span><span class="p">()</span>
-</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>        <span class="sa">f</span><span class="s2">&quot;rag_rules(domain=</span><span class="si">{</span><span class="n">domain</span><span class="si">!r}</span><span class="s2">) — supported domains are &quot;</span>
-</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_SUPPORTED_DOMAINS</span><span class="si">}</span><span class="s2">. Legal, healthcare, and insurance &quot;</span>
-</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="s2">&quot;verticalizations are on the roadmap.&quot;</span>
-</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="p">)</span>
-</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    .. deprecated:: 2026.6.13</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        Call the canonical factory directly:</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        :func:`groundlens.rules.decision_rationale_rules` for credit / AML /</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        KYC decision rationales, or</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        :func:`groundlens.agents.customer_support_rules` for informational</span>
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">        FAQ-RAG agents. The :func:`rag_rules` dispatcher will be removed in a</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">        future release.</span>
+</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_SUPPORTED_DOMAINS</span><span class="p">:</span>
+</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>            <span class="sa">f</span><span class="s2">&quot;rag_rules(domain=</span><span class="si">{</span><span class="n">domain</span><span class="si">!r}</span><span class="s2">) — supported domains are &quot;</span>
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_SUPPORTED_DOMAINS</span><span class="si">}</span><span class="s2">. The dispatcher is also deprecated; &quot;</span>
+</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a>            <span class="s2">&quot;prefer decision_rationale_rules() or customer_support_rules() &quot;</span>
+</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a>            <span class="s2">&quot;directly.&quot;</span>
+</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a>        <span class="p">)</span>
+</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;banking&quot;</span><span class="p">:</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a>        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a>            <span class="s1">&#39;rag_rules(domain=&quot;banking&quot;) is deprecated; use &#39;</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>            <span class="s2">&quot;decision_rationale_rules(domain=</span><span class="se">\&quot;</span><span class="s2">finance</span><span class="se">\&quot;</span><span class="s2">) from groundlens.rules instead. &quot;</span>
+</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a>            <span class="s2">&quot;The dispatcher will be removed in a future release.&quot;</span><span class="p">,</span>
+</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>        <span class="p">)</span>
+</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="c1"># Return the legacy-named ruleset for backwards compatibility with</span>
+</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="c1"># downstream code that asserts on `rs.name`.</span>
+</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a>        <span class="k">return</span> <span class="n">groundlens_banking_rules</span><span class="p">()</span>
+</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>
+</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="c1"># domain == &quot;customer_support&quot;</span>
+</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="s1">&#39;rag_rules(domain=&quot;customer_support&quot;) is deprecated; use &#39;</span>
+</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="s2">&quot;customer_support_rules(rag=True) from groundlens.agents instead. &quot;</span>
+</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="s2">&quot;The dispatcher will be removed in a future release.&quot;</span><span class="p">,</span>
+</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="p">)</span>
+</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="c1"># Use the legacy alias so the returned RuleSet keeps its legacy name</span>
+</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="c1"># (&quot;customer_support_rag_v1&quot;) for backwards compatibility.</span>
+</span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+</span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="c1"># Suppress the inner DeprecationWarning emitted by the legacy alias —</span>
+</span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a>        <span class="c1"># the outer one above is the one the caller should see.</span>
+</span><span id="__span-0-92"><a id="__codelineno-0-92" name="__codelineno-0-92"></a>        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+</span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="k">return</span> <span class="n">customer_support_rag_rules</span><span class="p">()</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
