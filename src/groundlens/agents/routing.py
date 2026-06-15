@@ -414,10 +414,7 @@ def routing_rules(domain: str = "general") -> RuleSet:
         assert result.flagged  # low confidence + multi-intent
     """
     if domain not in _VALID_ROUTING_DOMAINS:
-        msg = (
-            f"routing_rules(domain={domain!r}) — supported domains are "
-            f"{_VALID_ROUTING_DOMAINS}."
-        )
+        msg = f"routing_rules(domain={domain!r}) — supported domains are {_VALID_ROUTING_DOMAINS}."
         raise ValueError(msg)
     rules = (
         # intent_clarity (3 rules, weights 0.4 + 0.3 + 0.3 = 1.0)
