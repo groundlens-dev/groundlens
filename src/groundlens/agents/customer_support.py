@@ -384,12 +384,14 @@ def _check_no_speculative_procedure_impl(
 def check_no_invented_numbers(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper for :func:`_check_no_invented_numbers`."""
     return _check_no_invented_numbers(question, response, context, metadata)
 
 
 def check_no_invented_proper_nouns(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper using the default (en, general) stopwords."""
     return _check_no_invented_proper_nouns_impl(
         question, response, context, metadata, stopwords=_STOPWORDS_BASE
     )
@@ -398,24 +400,28 @@ def check_no_invented_proper_nouns(
 def check_content_overlaps_faq(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper for :func:`_check_content_overlaps_faq`."""
     return _check_content_overlaps_faq(question, response, context, metadata)
 
 
 def check_addresses_query_topic(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper for :func:`_check_addresses_query_topic`."""
     return _check_addresses_query_topic(question, response, context, metadata)
 
 
 def check_uses_concrete_values(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper for :func:`_check_uses_concrete_values`."""
     return _check_uses_concrete_values(question, response, context, metadata)
 
 
 def check_no_unrequested_legal_refs(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper using the default (en) legal-reference regex."""
     return _check_no_unrequested_legal_refs_impl(
         question, response, context, metadata, legal_ref_re=_LEGAL_REF_RE_EN
     )
@@ -424,6 +430,7 @@ def check_no_unrequested_legal_refs(
 def check_no_speculative_procedure(
     question: str, response: str, context: str | None, metadata: dict[str, Any]
 ) -> RuleEvidence:
+    """Backwards-compatible wrapper using the default (en, general) speculative markers."""
     return _check_no_speculative_procedure_impl(
         question, response, context, metadata, speculative_markers=_SPECULATIVE_MARKERS_BASE
     )
@@ -485,29 +492,27 @@ def customer_support_rules(
         ValueError: If ``domain`` is not in :data:`_VALID_DOMAINS` or
             ``language`` is not in :data:`_VALID_LANGUAGES`.
 
-    Examples
-    --------
+    Examples:
+        Default — FAQ-RAG, general domain, English::
 
-    Default — FAQ-RAG, general domain, English::
+            from groundlens.agents import customer_support_rules
 
-        from groundlens.agents import customer_support_rules
+            rs = customer_support_rules()
+            result = rs.evaluate(
+                question="What is the Bizum daily limit?",
+                response="The Bizum daily limit is 1,000 EUR per transaction.",
+                context=(
+                    "The daily Bizum transfer limit is 1,000 EUR per "
+                    "transaction and 2,000 EUR per day in total."
+                ),
+            )
+            assert not result.flagged
 
-        rs = customer_support_rules()
-        result = rs.evaluate(
-            question="What is the Bizum daily limit?",
-            response="The Bizum daily limit is 1,000 EUR per transaction.",
-            context=(
-                "The daily Bizum transfer limit is 1,000 EUR per "
-                "transaction and 2,000 EUR per day in total."
-            ),
-        )
-        assert not result.flagged
+        No-RAG chat in Spanish finance vocabulary::
 
-    No-RAG chat in Spanish finance vocabulary::
-
-        rs = customer_support_rules(rag=False, domain="finance", language="es")
-        assert "completeness" in rs.sub_scores
-        assert "groundedness" not in rs.sub_scores
+            rs = customer_support_rules(rag=False, domain="finance", language="es")
+            assert "completeness" in rs.sub_scores
+            assert "groundedness" not in rs.sub_scores
     """
     if domain not in _VALID_DOMAINS:
         msg = (
