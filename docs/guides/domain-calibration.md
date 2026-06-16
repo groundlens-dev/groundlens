@@ -10,6 +10,9 @@ Domain calibration replaces the generic reference direction $\hat{\boldsymbol{\m
 
 You need 20--100 verified (question, response) pairs where the response is known to be factually correct and grounded. Quality matters more than quantity.
 
+!!! tip "Starting from zero pairs"
+    If you don't have a labelled set yet, use [`DGI.propose_labels`](active-learning.md) to bootstrap one. It generates candidate pairs under five confabulation strategies, scores them with the current DGI `mu_hat`, and ranks the most uncertain for a human reviewer — exactly the pairs that will sharpen `mu_hat` the most when added to the calibration set.
+
 ### Sources of Calibration Pairs
 
 | Source | Pros | Cons |

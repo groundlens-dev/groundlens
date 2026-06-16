@@ -51,7 +51,11 @@ from groundlens._internal.thresholds import DGI_PASS, normalize_dgi
 from groundlens.score import DGIResult
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
+
+    from groundlens.propose import PropositionBatch
 
 logger = logging.getLogger(__name__)
 
@@ -321,4 +325,159 @@ class DGI:
             response=response,
             model=self.model,
             reference_csv=self.reference_csv,
+        )
+
+    def propose_labels(
+        self,
+        *,
+        faq_corpus: list[str],
+        seed_pairs: list[tuple[str, str]],
+        llm_generate: Callable[[str], str],
+        n_candidates: int = 200,
+        n_to_label: int = 20,
+        strategies: str | tuple = "default",
+        diverse_fraction: float = 0.3,
+        seed: int = 42,
+    ) -> PropositionBatch:
+        """Active-learning bootstrap of a verified-grounded calibration set.
+
+        Generates candidate (question, response) pairs via ``llm_generate``
+        under the named confabulation strategies, scores each candidate
+        with this DGI, and returns the ``n_to_label`` most useful pairs
+        for a human reviewer.
+
+        This method DOES NOT label and DOES NOT calibrate. The human
+        reviewer assigns the labels; the caller then passes the labelled
+        pairs to :meth:`calibrate`. The loop is non-circular by design.
+
+        Args:
+            faq_corpus: The deployment's FAQ corpus. Each entry is a
+                short paragraph in the deployment's domain.
+            seed_pairs: 10-50 verified ``(question, grounded_response)``
+                tuples. Used both as anchors for candidate generation
+                and to estimate the acquisition threshold.
+            llm_generate: A callable ``(prompt: str) -> str`` that the
+                user provides (OpenAI / Anthropic / local LLM wrapper).
+                groundlens does not embed an LLM.
+            n_candidates: Total candidates to generate across all
+                strategies. Default 200.
+            n_to_label: How many candidates the batch should contain.
+                Default 20. The rest are returned in
+                ``batch.all_candidates`` for audit.
+            strategies: ``"default"`` (all five strategies from
+                ``groundlens-dev/grounding-benchmark``), or a tuple of
+                strategy names, or a tuple of ``(name, prompt_template)``
+                custom pairs. Templates accept the slots ``{context}``,
+                ``{question}``, ``{grounded}``.
+            diverse_fraction: Fraction of the batch reserved for
+                strategy diversity (the rest is filled by uncertainty).
+                Default 0.3.
+            seed: Random seed for sampling FAQ contexts and seed pairs.
+                Determinism is required for reproducible audits.
+
+        Returns:
+            A :class:`groundlens.PropositionBatch` ready for human review.
+
+        Raises:
+            ValueError: If ``seed_pairs`` is empty or ``n_candidates`` < 1.
+            TypeError: If ``llm_generate`` is not callable.
+        """
+        import random
+        import warnings
+
+        from groundlens._internal.strategies import resolve_strategies
+        from groundlens.propose import (
+            ProposedLabel,
+            PropositionBatch,
+            _uncertainty,
+            build_review_template,
+            rank_for_labelling,
+        )
+
+        if not seed_pairs:
+            msg = "seed_pairs must contain at least one verified-grounded pair."
+            raise ValueError(msg)
+        if n_candidates < 1:
+            msg = "n_candidates must be >= 1."
+            raise ValueError(msg)
+        if not callable(llm_generate):
+            msg = "llm_generate must be a callable (prompt: str) -> str."
+            raise TypeError(msg)
+
+        resolved_strategies = resolve_strategies(strategies)
+        if not resolved_strategies:
+            msg = "At least one strategy must be specified."
+            raise ValueError(msg)
+
+        # Threshold: median DGI score on the seed grounded pairs. This is
+        # a reasonable proxy for the boundary between grounded and
+        # ungrounded when no calibrated threshold is available yet.
+        seed_scores = [self.score(q, r).normalized for q, r in seed_pairs]
+        sorted_scores = sorted(seed_scores)
+        n = len(sorted_scores)
+        median = (
+            sorted_scores[n // 2]
+            if n % 2 == 1
+            else 0.5 * (sorted_scores[n // 2 - 1] + sorted_scores[n // 2])
+        )
+        threshold = float(median)
+
+        rng = random.Random(seed)
+
+        # Round-robin across strategies; for each candidate, sample a
+        # (context, seed_pair) and call the user's LLM with the strategy
+        # template.
+        candidates: list[ProposedLabel] = []
+        per_strategy = max(1, n_candidates // len(resolved_strategies))
+        for strat_name, template in resolved_strategies:
+            for _ in range(per_strategy):
+                if len(candidates) >= n_candidates:
+                    break
+                context = rng.choice(faq_corpus)
+                anchor_q, anchor_g = rng.choice(seed_pairs)
+                prompt = template.format(
+                    context=context,
+                    question=anchor_q,
+                    grounded=anchor_g,
+                )
+                try:
+                    candidate_resp = llm_generate(prompt)
+                except Exception as exc:
+                    msg = (
+                        f"llm_generate raised {type(exc).__name__}: {exc}. "
+                        "Skipping this candidate."
+                    )
+                    warnings.warn(msg, RuntimeWarning, stacklevel=2)
+                    continue
+
+                if not isinstance(candidate_resp, str) or not candidate_resp.strip():
+                    continue
+
+                score = self.score(anchor_q, candidate_resp).normalized
+                candidates.append(
+                    ProposedLabel(
+                        question=anchor_q,
+                        candidate_response=candidate_resp.strip(),
+                        dgi_score=float(score),
+                        strategy=strat_name,
+                        context_excerpt=context,
+                        uncertainty=_uncertainty(float(score), threshold),
+                    )
+                )
+
+        # Rank for labelling (uncertainty + diversity).
+        ranked = rank_for_labelling(
+            candidates,
+            n_to_label=n_to_label,
+            diverse_fraction=diverse_fraction,
+        )
+
+        # Audit: keep all candidates, ordered by uncertainty.
+        all_ordered = sorted(candidates, key=lambda c: c.uncertainty)
+
+        return PropositionBatch(
+            items=tuple(ranked),
+            review_template=build_review_template(ranked),
+            all_candidates=tuple(all_ordered),
+            strategies_used=tuple(name for name, _ in resolved_strategies),
         )
