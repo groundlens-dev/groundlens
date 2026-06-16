@@ -5,6 +5,73 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.15 -- bundled calibration upgrade, dependency pin fix, banking-corpus removal
+
+### Changed
+
+- **Bundled `reference_pairs.csv` upgraded from 20 to 212 verified pairs.**
+  The new corpus is the open `groundlens-dev/grounding-benchmark`
+  dataset (CC BY 4.0) covering nine domains: python_coding (47),
+  finance (40), medical (40), science (21), typescript_coding (18),
+  history (14), law (11), general (11), geography (10). Each row is a
+  ``(question, grounded_response, fabricated_response)`` triple with
+  the fabricated response written by a non-expert human from memory
+  (human confabulations, not LLM-generated). The previous 20-pair
+  bundled corpus was too narrow to act as a generic ``mu_hat``
+  reference direction; the new corpus reaches a more representative
+  ``mu_hat`` out of the box.
+- **`_load_bundled_csv` now auto-detects delimiter** (comma or
+  semicolon) using the same heuristic as the user CSV loader. The
+  upgraded `reference_pairs.csv` is comma-delimited (the previous
+  bundled CSV was semicolon-delimited); user CSVs in either delimiter
+  continue to load unchanged.
+- **`sentence-transformers` upper bound raised**
+  (`>=2.7.0,<6.0.0` from `>=2.7.0,<4.0.0`). The previous upper bound
+  forced a cascade downgrade of `transformers`, `huggingface-hub`, and
+  `sentence-transformers` when installing on Python environments that
+  already had the current major releases. The new bound covers
+  versions 4.x and 5.x without breaking changes observed in
+  groundlens's usage of the encoder (`encode(..., convert_to_numpy=True,
+  normalize_embeddings=False)`).
+
+### Removed
+
+- **`groundlens.data.banking_reference_pairs_path` and the bundled
+  `banking_reference_pairs.csv`** (the 26-pair banking corpus shipped
+  in 2026.6.7). The corpus was too small to be useful as a
+  banking-domain calibration on its own, and shipping it created an
+  impression of out-of-the-box banking accuracy that the corpus could
+  not back. Banking deployments should build their own
+  verified-grounded calibration corpus (100–500 pairs per sub-domain)
+  and pass it via ``reference_csv=`` to ``compute_dgi`` /
+  ``compute_sgi`` / ``DGI``. The migration is a one-line code change.
+
+### Migration notes
+
+- **Breaking change for callers of `banking_reference_pairs_path`.**
+  Replace
+  ``compute_dgi(..., reference_csv=str(banking_reference_pairs_path()))``
+  with
+  ``compute_dgi(..., reference_csv="/path/to/your/banking_calibration.csv")``
+  pointing at a deployment-specific verified-grounded corpus. If you
+  need a temporary fallback, omit ``reference_csv`` to use the bundled
+  cross-domain corpus — a generic starting point, not a substitute for
+  a banking-specific corpus.
+- **Non-breaking for users of `reference_pairs_path()` and
+  `compute_dgi(reference_csv=None)`.** The default ``mu_hat`` now
+  reflects 212 cross-domain grounded pairs instead of 20. Numeric
+  scores will shift; recalibrate threshold percentiles on a current
+  production sample after upgrading.
+- **Non-breaking for the `sentence-transformers` pin change.** All
+  versions in `[2.7.0, 6.0.0)` are accepted.
+
+### References
+
+- Marin, J. (2026). *A Methodology for Building Human-Confabulated
+  Hallucination Benchmarks*.
+  [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark).
+  CC BY 4.0.
+
 ## 2026.6.14 -- multilingual encoder constants for European customer-attention deployments
 
 ### Added
