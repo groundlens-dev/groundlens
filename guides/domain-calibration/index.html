@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://docs.groundlens.dev/guides/domain-calibration/">
       
       
-        <link rel="prev" href="../rag-verification/">
+        <link rel="prev" href="../active-learning/">
       
       
         <link rel="next" href="../batch-evaluation/">
@@ -1089,6 +1089,8 @@
       
         
       
+        
+      
     
     
     
@@ -1152,6 +1154,34 @@
     
   
     RAG Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../active-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active-Learning Bootstrap (propose_labels)
   
 
     
@@ -2414,6 +2444,10 @@
 <p>Domain calibration replaces the generic reference direction <span class="arithmatex">\(\hat{\boldsymbol{\mu}}\)</span> with one computed from verified (question, response) pairs from your specific domain. This typically improves AUROC from ~0.76 to 0.90--0.99.</p>
 <h2 id="step-1-collect-calibration-pairs">Step 1: Collect Calibration Pairs<a class="headerlink" href="#step-1-collect-calibration-pairs" title="Permanent link">&para;</a></h2>
 <p>You need 20--100 verified (question, response) pairs where the response is known to be factually correct and grounded. Quality matters more than quantity.</p>
+<div class="admonition tip">
+<p class="admonition-title">Starting from zero pairs</p>
+<p>If you don't have a labelled set yet, use <a href="../active-learning/"><code>DGI.propose_labels</code></a> to bootstrap one. It generates candidate pairs under five confabulation strategies, scores them with the current DGI <code>mu_hat</code>, and ranks the most uncertain for a human reviewer — exactly the pairs that will sharpen <code>mu_hat</code> the most when added to the calibration set.</p>
+</div>
 <h3 id="sources-of-calibration-pairs">Sources of Calibration Pairs<a class="headerlink" href="#sources-of-calibration-pairs" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
