@@ -141,24 +141,28 @@ checking on the outputs that pass both signals.
 
 ## Calibration for banking domain
 
-The bundled banking calibration corpus covers seven sub-domains:
+A banking deployment supplies its own verified-grounded calibration
+corpus via the ``reference_csv=`` argument:
 
 ```python
 from groundlens import compute_dgi
-from groundlens.data import banking_reference_pairs_path
 
 result = compute_dgi(
     question="What triggers a SAR filing under the Bank Secrecy Act?",
     response=llm_output,
-    reference_csv=str(banking_reference_pairs_path()),
+    reference_csv="/path/to/your/banking_calibration.csv",
 )
 ```
 
-For deployment-specific calibration, extend the bundled corpus with
-verified pairs from the deployment's own workflow. A starting target
-is 100-200 pairs per sub-domain to reach AUROC > 0.95. See the
-[domain calibration guide](domain-calibration.md) for the calibration
-procedure.
+If no ``reference_csv`` is passed, ``compute_dgi`` falls back to the
+bundled cross-domain corpus (212 pairs across nine domains including
+finance), which is a generic starting point — not a substitute for a
+banking-specific corpus. Build a deployment-specific calibration
+spanning the sub-domains relevant to your operating context (credit,
+AML, KYC, fraud, sanctions, concentration, model risk). A starting
+target is 100–200 pairs per sub-domain to reach AUROC > 0.95 on a
+held-out test set drawn from the same distribution. See the
+[domain calibration guide](domain-calibration.md) for the procedure.
 
 **Calibration data sourcing:** for banking deployments, sources include
 internal model validation test cases, compliance committee post-mortems

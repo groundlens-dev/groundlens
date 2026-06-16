@@ -80,17 +80,21 @@ hallucination detection:
 
 ```python
 from groundlens import compute_dgi
-from groundlens.data import banking_reference_pairs_path
 
+# Pass reference_csv= to use a deployment-specific verified-grounded corpus.
+# If omitted, compute_dgi falls back to the bundled cross-domain corpus
+# (212 pairs across nine domains) as a generic starting point.
 result = compute_dgi(
     question="What triggers a SAR filing under the Bank Secrecy Act?",
     response=llm_output,
-    reference_csv=str(banking_reference_pairs_path()),
+    reference_csv="/path/to/your/banking_calibration.csv",
 )
 ```
 
-The bundled banking corpus covers seven sub-domains (credit, AML, KYC,
-fraud, sanctions, concentration, model risk). Deployments should
+A regulated banking deployment should build its own verified-grounded
+calibration corpus covering the sub-domains relevant to its operating
+context (credit, AML, KYC, fraud, sanctions, concentration, model
+risk). Deployments should
 extend this with deployment-specific verified pairs to reflect their
 exact operating context — see the
 [domain calibration guide](domain-calibration.md).

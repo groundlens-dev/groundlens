@@ -50,13 +50,21 @@ def load_reference_pairs(
 
 
 def _load_bundled_csv() -> list[tuple[str, str]]:
-    """Load the bundled reference dataset from package data."""
+    """Load the bundled reference dataset from package data.
+
+    Auto-detects the delimiter (comma or semicolon) from the file header
+    so the loader is robust to dataset format changes between releases.
+    """
     pairs: list[tuple[str, str]] = []
 
     ref = resources.files("groundlens.data").joinpath("reference_pairs.csv")
     raw = ref.read_text(encoding="utf-8-sig")
 
-    reader = csv.DictReader(raw.splitlines(), delimiter=";")
+    # Auto-detect delimiter from the first 1024 chars (same heuristic as user loader).
+    sample = raw[:1024]
+    delimiter = ";" if sample.count(";") > sample.count(",") else ","
+
+    reader = csv.DictReader(raw.splitlines(), delimiter=delimiter)
 
     for row in reader:
         q = row.get("question", "").strip()
