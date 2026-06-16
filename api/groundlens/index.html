@@ -1977,6 +1977,56 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#groundlens-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attributes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#groundlens.DEFAULT_MODEL" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEFAULT_MODEL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groundlens.MULTILINGUAL_E5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MULTILINGUAL_E5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groundlens.MULTILINGUAL_MINI" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MULTILINGUAL_MINI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#groundlens-classes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2699,7 +2749,83 @@ Marin (2026). Defendable Rules for LLM Rationale Evaluation in Banking Governanc
 
 
 
+<h3 id="groundlens-attributes">Attributes<a href="#groundlens-attributes" class="headerlink" title="Permanent link">&para;</a></h3>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="groundlens.DEFAULT_MODEL" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DEFAULT_MODEL</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all-MiniLM-L6-v2&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#groundlens.DEFAULT_MODEL" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Default sentence transformer model. Fast and accurate for English.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="groundlens.MULTILINGUAL_E5" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MULTILINGUAL_E5</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;intfloat/multilingual-e5-large&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#groundlens.MULTILINGUAL_E5" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Multilingual E5 (560M params, 1024 dims, 100+ languages). Higher
+quality than <code>MULTILINGUAL_MINI</code> at ~5x the inference cost. Choose
+when latency budget allows it (e.g. batch evaluation, audit replay) and
+the deployment domain has shown weak separation under MiniLM. Requires
+prefixing queries with <code>"query: "</code> and passages with <code>"passage: "</code>
+to match the encoder's training recipe; see model card on HuggingFace.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="groundlens.MULTILINGUAL_MINI" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MULTILINGUAL_MINI</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;paraphrase-multilingual-MiniLM-L12-v2&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#groundlens.MULTILINGUAL_MINI" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Multilingual MiniLM (118M params, 384 dims, 50+ languages including
+Spanish, Catalan, Galician, English). Sub-second on CPU. Recommended
+default for European-bank customer-support deployments where the
+WhatsApp / app channel receives queries across the bank's operating
+languages. Calibrate <code>mu_hat</code> and SGI threshold on a multilingual
+verified-grounded corpus for the expected query distribution.</p>
+
+    </div>
+
+</div>
 
 <h3 id="groundlens-classes">Classes<a href="#groundlens-classes" class="headerlink" title="Permanent link">&para;</a></h3>
 
@@ -3092,7 +3218,11 @@ result = dgi.score(question="...", response="...")</p>
               </div>
             </td>
             <td>
-                  <code><span title="groundlens._internal.embeddings.DEFAULT_MODEL">DEFAULT_MODEL</span></code>
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+
+  
+      module-attribute
+   (groundlens._internal.embeddings.DEFAULT_MODEL)" href="#groundlens.DEFAULT_MODEL">DEFAULT_MODEL</a></code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5221,7 +5351,11 @@ False</p>
               </div>
             </td>
             <td>
-                  <code><span title="groundlens._internal.embeddings.DEFAULT_MODEL">DEFAULT_MODEL</span></code>
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+
+  
+      module-attribute
+   (groundlens._internal.embeddings.DEFAULT_MODEL)" href="#groundlens.DEFAULT_MODEL">DEFAULT_MODEL</a></code>
             </td>
           </tr>
       </tbody>
@@ -7256,7 +7390,11 @@ result = rs.evaluate(
               </div>
             </td>
             <td>
-                  <code><span title="groundlens._internal.embeddings.DEFAULT_MODEL">DEFAULT_MODEL</span></code>
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+
+  
+      module-attribute
+   (groundlens._internal.embeddings.DEFAULT_MODEL)" href="#groundlens.DEFAULT_MODEL">DEFAULT_MODEL</a></code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7544,7 +7682,11 @@ optionally context.</p>
               </div>
             </td>
             <td>
-                  <code><span title="groundlens._internal.embeddings.DEFAULT_MODEL">DEFAULT_MODEL</span></code>
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+
+  
+      module-attribute
+   (groundlens._internal.embeddings.DEFAULT_MODEL)" href="#groundlens.DEFAULT_MODEL">DEFAULT_MODEL</a></code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -9117,7 +9259,11 @@ signature so deployers can A/B both rulesets with one parameter.</p>
               </div>
             </td>
             <td>
-                  <code><span title="groundlens._internal.embeddings.DEFAULT_MODEL">DEFAULT_MODEL</span></code>
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+
+  
+      module-attribute
+   (groundlens._internal.embeddings.DEFAULT_MODEL)" href="#groundlens.DEFAULT_MODEL">DEFAULT_MODEL</a></code>
             </td>
           </tr>
       </tbody>
