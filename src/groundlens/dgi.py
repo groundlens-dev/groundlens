@@ -335,7 +335,7 @@ class DGI:
         llm_generate: Callable[[str], str],
         n_candidates: int = 200,
         n_to_label: int = 20,
-        strategies: str | tuple = "default",
+        strategies: str | tuple[str | tuple[str, str], ...] = "default",
         diverse_fraction: float = 0.3,
         seed: int = 42,
     ) -> PropositionBatch:
