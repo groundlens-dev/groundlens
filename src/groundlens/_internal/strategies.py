@@ -126,7 +126,7 @@ def get_template(strategy: str) -> str:
 
 
 def resolve_strategies(
-    strategies: str | tuple,
+    strategies: str | tuple[str | tuple[str, str], ...],
 ) -> tuple[tuple[str, str], ...]:
     """Resolve a ``strategies`` argument into a tuple of (name, template).
 
