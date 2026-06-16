@@ -2503,11 +2503,15 @@ implementation, and validation procedures are public and inspectable.
 The acquiring bank does not need to take vendor documentation on
 faith — every line of code is available for independent review at
 <a href="https://github.com/groundlens-dev/groundlens">github.com/groundlens-dev/groundlens</a>.</p>
-<p>The bundled calibration corpus is also open: see
-<a href="../domain-calibration/"><code>groundlens.data.banking_reference_pairs_path</code></a>
-for the banking-specific corpus shipped with the library, and the
-<a href="../domain-calibration/">calibration guide</a> for extending it with
-deployment-specific pairs while keeping documentation transparent.</p>
+<p>The bundled calibration corpus is open: see
+<a href="../domain-calibration/"><code>groundlens.data.reference_pairs_path</code></a>
+for the cross-domain corpus shipped with the library (212 verified
+<code>(question, grounded_response, fabricated_response)</code> triples across
+nine domains, sourced from the open
+<code>groundlens-dev/grounding-benchmark</code> repository under CC BY 4.0).
+A regulated deployment extends it with deployment-specific verified
+pairs; see the <a href="../domain-calibration/">calibration guide</a> for the
+procedure.</p>
 <h2 id="7-governance-policies-and-controls">§7 Governance, Policies, and Controls<a class="headerlink" href="#7-governance-policies-and-controls" title="Permanent link">&para;</a></h2>
 <p>Thresholds and policy are explicit and version-controlled in the
 codebase:</p>
