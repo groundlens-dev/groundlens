@@ -5,6 +5,40 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.14 -- multilingual encoder constants for European customer-attention deployments
+
+### Added
+
+- **`MULTILINGUAL_MINI`** = `"paraphrase-multilingual-MiniLM-L12-v2"`. Named
+  constant for the recommended multilingual sentence-transformer model for
+  European-bank customer-attention channels (WhatsApp, mobile app, web chat)
+  that operate across Spanish, Catalan, Galician, Basque, and English. 118M
+  params, 384 dims, 50+ languages. Sub-second on CPU. Pass it as
+  `DGI(model=MULTILINGUAL_MINI)` or `compute_sgi(..., model=MULTILINGUAL_MINI)`.
+- **`MULTILINGUAL_E5`** = `"intfloat/multilingual-e5-large"`. Named constant
+  for the higher-quality multilingual encoder (560M params, 1024 dims,
+  100+ languages). ~5x inference cost vs `MULTILINGUAL_MINI`; recommended
+  for batch evaluation, audit replay, or environments where the latency
+  budget allows it. Note the model card recipe (`"query: "` / `"passage: "`
+  prefixes) must be applied at the call site if used.
+- **`DEFAULT_MODEL`** is now also re-exported at the top level for symmetry
+  with the multilingual constants (the constant existed in
+  `groundlens._internal.embeddings` but was not importable from
+  `groundlens`).
+
+### Changed
+
+- **`__all__`** in `groundlens.__init__` extended with `DEFAULT_MODEL`,
+  `MULTILINGUAL_MINI`, `MULTILINGUAL_E5`.
+
+### Migration notes
+
+- **Non-breaking.** The constants are additive. The string values they expose
+  have always been accepted as `model=...` arguments to `compute_sgi`,
+  `compute_dgi`, and `DGI` -- this release only assigns them named identifiers
+  and documents the recommended deployment recipe for multilingual customer
+  attention.
+
 ## 2026.6.13 -- archetype as function, dimensions as kwargs (Phases 1 + 2)
 
 ### Changed (no behaviour change for current call sites)

@@ -34,6 +34,22 @@ logger = logging.getLogger(__name__)
 DEFAULT_MODEL: str = "all-MiniLM-L6-v2"
 """Default sentence transformer model. Fast and accurate for English."""
 
+MULTILINGUAL_MINI: str = "paraphrase-multilingual-MiniLM-L12-v2"
+"""Multilingual MiniLM (118M params, 384 dims, 50+ languages including
+Spanish, Catalan, Galician, English). Sub-second on CPU. Recommended
+default for European-bank customer-support deployments where the
+WhatsApp / app channel receives queries across the bank's operating
+languages. Calibrate ``mu_hat`` and SGI threshold on a multilingual
+verified-grounded corpus for the expected query distribution."""
+
+MULTILINGUAL_E5: str = "intfloat/multilingual-e5-large"
+"""Multilingual E5 (560M params, 1024 dims, 100+ languages). Higher
+quality than ``MULTILINGUAL_MINI`` at ~5x the inference cost. Choose
+when latency budget allows it (e.g. batch evaluation, audit replay) and
+the deployment domain has shown weak separation under MiniLM. Requires
+prefixing queries with ``"query: "`` and passages with ``"passage: "``
+to match the encoder's training recipe; see model card on HuggingFace."""
+
 # ── Module-level cache ──────────��────────────────────────────────────────────
 
 _encoder: SentenceTransformer | None = None
