@@ -72,6 +72,7 @@ from groundlens.agents import (
 from groundlens.calibrate import CalibrationResult, calibrate
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
+from groundlens.propose import ProposedLabel, PropositionBatch
 from groundlens.rules import (
     ChecklistRule,
     RuleEvidence,
@@ -96,6 +97,8 @@ __all__ = [
     "ChecklistRule",
     "DGIResult",
     "GroundlensScore",
+    "ProposedLabel",
+    "PropositionBatch",
     "RuleEvidence",
     "RuleResult",
     "RuleSet",

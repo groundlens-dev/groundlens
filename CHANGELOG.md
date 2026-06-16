@@ -5,6 +5,60 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.16 -- active-learning bootstrap (`DGI.propose_labels`)
+
+### Added
+
+- **`DGI.propose_labels()` — bootstrap a verified-grounded calibration
+  set with active learning.** New method on the `DGI` class that
+  generates candidate `(question, response)` pairs via a user-supplied
+  `llm_generate` callable, scores them with the current DGI `mu_hat`,
+  and returns the `n_to_label` most useful candidates for a human
+  reviewer. Acquisition combines 70% uncertainty (distance to the
+  median seed score) with 30% strategy diversity. The method does NOT
+  label and does NOT calibrate -- the human reviewer assigns labels,
+  and the caller passes the labelled pairs back to `DGI.calibrate()`.
+  This keeps the loop non-circular by design.
+- **Five confabulation strategies from
+  ``groundlens-dev/grounding-benchmark``** (CC BY 4.0) shipped as
+  `groundlens._internal.strategies.DEFAULT_STRATEGIES`:
+  `redefinition`, `mechanism_inversion`, `entity_composition`,
+  `polysemy`, `template_filling`. Each strategy preserves a different
+  subset of the distributional properties that embedding models
+  encode while violating referential truth. Custom strategies are
+  supported via `(name, prompt_template)` tuples.
+- **New public dataclasses `ProposedLabel` and `PropositionBatch`**
+  exposed from the top-level package. `PropositionBatch.review_template`
+  is a ready-to-send Markdown checklist for the human reviewer.
+
+### API
+
+```python
+from groundlens import DGI
+
+dgi = DGI()  # bundled cross-domain calibration
+batch = dgi.propose_labels(
+    faq_corpus=[...],            # the deployment's FAQ paragraphs
+    seed_pairs=[(q, a), ...],    # 10-50 verified grounded pairs
+    llm_generate=my_llm_call,    # any callable (prompt: str) -> str
+    n_candidates=200,
+    n_to_label=20,
+    strategies="default",        # or tuple of names or custom pairs
+)
+# Hand batch.review_template to a human reviewer; collect labels;
+# pass the labelled grounded pairs to dgi.calibrate(pairs=...) for the
+# next round.
+```
+
+### Notes
+
+- `propose_labels` is a method on `DGI` (not a top-level function and
+  not a `bootstrap` submodule). SGI is a geometric ratio with no
+  calibration parameter, so the active-learning loop applies only to
+  DGI.
+- `llm_generate` failures surface as `RuntimeWarning` and the failed
+  candidate is skipped; the batch returns whatever succeeded.
+
 ## 2026.6.15 -- bundled calibration upgrade, dependency pin fix, banking-corpus removal
 
 ### Changed

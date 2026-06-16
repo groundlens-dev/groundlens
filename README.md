@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.12-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.16-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) · [Research](#research) · [Examples](examples/) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
@@ -110,6 +110,44 @@ From release **2026.6.13** the rule-set API follows a single convention: **the a
 - `rag_rules(domain="banking" | "customer_support")` → call the canonical archetype factory directly. The dispatcher emits a `DeprecationWarning`.
 
 For legal, insurance, healthcare, or any in-house governance framework, extend an existing factory (`domain="..."` slot) or write your own (see below).
+
+## Bootstrap your calibration set ⭐ NEW (`DGI.propose_labels`)
+
+Calibrating DGI on a new deployment requires 20–50 verified-grounded `(question, response)` pairs. Curating that corpus from scratch is the practical bottleneck most teams hit first. `DGI.propose_labels` is the active-learning loop that breaks it.
+
+Given a FAQ corpus, a small seed of verified-grounded pairs, and any LLM you already use, it generates candidate `(question, response)` pairs, scores them with the current DGI `mu_hat`, and returns the most uncertain candidates ranked for a human reviewer. The reviewer assigns the labels; the labelled grounded pairs go back into `DGI.calibrate()`. The loop is **non-circular by design**: DGI orders the candidates, the human owns the labels.
+
+```python
+from groundlens import DGI
+
+def my_llm(prompt: str) -> str:
+    # any OpenAI / Anthropic / local LLM wrapper you already use
+    ...
+
+dgi = DGI()  # starts from the bundled cross-domain calibration
+
+batch = dgi.propose_labels(
+    faq_corpus=public_faqs,           # the deployment's FAQ paragraphs
+    seed_pairs=verified_grounded,     # 10-50 verified (q, grounded_response) pairs
+    llm_generate=my_llm,
+    n_candidates=200,
+    n_to_label=20,
+    strategies="default",             # all 5 confabulation strategies from
+                                      # groundlens-dev/grounding-benchmark
+)
+
+# Hand the Markdown checklist to a human reviewer
+print(batch.review_template)
+
+# Two reviewers, reconcile, then feed the grounded subset back to calibrate:
+dgi.calibrate(pairs=reviewer_grounded_pairs)
+```
+
+The five built-in strategies (`redefinition`, `mechanism_inversion`, `entity_composition`, `polysemy`, `template_filling`) come from the human-confabulation taxonomy in [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark) (CC BY 4.0). They preserve the distributional properties that fool embedding-based detectors while violating referential truth — exactly the failures DGI needs labelled examples of. Custom strategies are supported via `(name, prompt_template)` tuples.
+
+`PropositionBatch` returns `items` (the top-ranked candidates), `review_template` (a ready-to-send Markdown checklist), `all_candidates` (full audit set), and `strategies_used`. Full guide: [docs/guides/active-learning.md](docs/guides/active-learning.md).
+
+> **Important.** `propose_labels` does NOT label and does NOT calibrate. SGI is a geometric ratio with no calibration parameter, so this loop applies only to DGI.
 
 ## Calibrating SGI and DGI
 
@@ -265,39 +303,33 @@ For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom)
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         Public API (evaluate)                           │
-├──────────────────────────┬──────────────────────────────────────────────┤
-│     Geometric layer      │              Rule-based layer                │
-│      (continuous)        │       (deterministic + citable)              │
-├──────────┬───────────────┼─────────┬──────────────┬─────────────────────┤
-│   SGI    │      DGI      │  rules  │    audit     │     compliance      │
-│ (with    │ (no context,  │ (per-   │  (SHA-256    │ (SR 26-2, EU AI Act,│
-│  context)│  calibrated   │  rule   │   hash-chain │  NIST AI RMF clause │
-│          │  mu_hat)      │  trail) │   log)       │  mapping)           │
-├──────────┴───────────────┴─────────┴──────────────┴─────────────────────┤
-│             sentence-transformers (all-MiniLM-L6-v2 default)            │
-├─────────────────────────────────────────────────────────────────────────┤
-│                          groundlens.agents                              │
-│  routing_rules     │  customer_support_rules  │ specialized_agent_rules │
-│  (intent class.)   │  (rag=True/False,        │ (tool-use + execution)  │
-│                    │   domain=…, language=…)  │                         │
-└─────────────────────────────────────────────────────────────────────────┘
+Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deterministic, citable). Triage is the combination. Calibration data is what makes both layers useful — `propose_labels` is the active-learning helper that produces it.
 
-       + decision_rationale_rules(domain="finance", regulations=…)
-         in groundlens.rules — credit / AML / KYC / sanctions
-         ▲                                                ▲
-         │                                                │
-   ┌─────┴──────┐                                ┌────────┴─────────┐
-   │ Providers  │                                │   Integrations   │
-   │ (OpenAI,   │                                │   (LangChain,    │
-   │ Anthropic, │                                │    LangGraph,    │
-   │ Google)    │                                │    CrewAI, …)    │
-   └────────────┘                                └──────────────────┘
-```
+![Topology of groundlens (Score + Rules + propose_labels)](docs/assets/groundlens_topology.png)
 
-Continuous geometric score for ranking. Per-rule audit trail with citations. Hash-chained log for reproducibility. Compliance mapping for the model risk packet. No second LLM in any of them.
+### Table 1 — Layers and what's in each
+
+| Layer | Module | Inputs | Output | Calibrable? | Bundled defaults | Custom extension |
+|---|---|---|---|---|---|---|
+| **Score — geometry** | `groundlens.sgi`, `groundlens.dgi` | `(question, response[, context])` + sentence-transformer embedding | continuous `normalized` ∈ ℝ, `flagged` ∈ {True, False} | **DGI yes** (via `mu_hat`). SGI no — geometric ratio with no parameter. | bundled `reference_pairs.csv` (212 cross-domain pairs from `grounding-benchmark`) | `DGI.calibrate(pairs=…)` or `reference_csv=…` |
+| **Score — encoder** | `groundlens._internal.embeddings` | text | unit-norm vector | n/a | `all-MiniLM-L6-v2` for English, `MULTILINGUAL_MINI` / `MULTILINGUAL_E5` for multilingual | any sentence-transformers model |
+| **Rules** | `groundlens.rules`, `groundlens.agents.*` | `(question, response, context, metadata)` | per-rule pass/fail with citation + sub-scores + `audit_explanation` | n/a (deterministic) | `routing_rules`, `customer_support_rules(rag=…)`, `specialized_agent_rules`, `decision_rationale_rules(domain=…, regulations=…)` | `RuleSet(rules=(ChecklistRule(...), ...))` |
+| **Audit** | `groundlens.audit` | every triage output | SHA-256 hash-chained sqlite log | n/a | `open_log("triage.db")` | append-only, replay-verifiable |
+| **Compliance mapping** | `groundlens.compliance` | rule IDs | clause IDs (SR 26-2, EU AI Act, NIST AI RMF) | n/a | included for built-in rule sets | extend in your own rule set's `citation` field |
+
+### Table 2 — Lifecycle: from zero calibration to production triage
+
+| # | Step | What you do | Groundlens API | Output |
+|---|---|---|---|---|
+| 0 | **Seed** | Hand-curate 10–50 verified-grounded `(question, response)` pairs from your domain | — | seed CSV / list |
+| 1 | **Bootstrap** ⭐ NEW | Active-learning loop generates candidates, scores them with current DGI, returns most uncertain for human review | `DGI.propose_labels(faq_corpus=…, seed_pairs=…, llm_generate=…)` | `PropositionBatch` (items, `review_template` Markdown) |
+| 2 | **Label** | Two human reviewers label the batch independently, reconcile disagreements | external (the review template is the prompt) | labelled set: `{grounded, fabricated, out_of_scope}` |
+| 3 | **Calibrate** | Feed the labelled grounded subset back to DGI; threshold the score distribution | `DGI.calibrate(pairs=…)` then `np.percentile(scores, 20)` | calibrated `mu_hat` + threshold |
+| 4 | **Triage** | For every agent output, compute score + run the relevant rule set | `compute_sgi(...)` / `DGI.score(...)`, `ruleset.evaluate(...)` | continuous score + per-rule trail |
+| 5 | **Audit** | Persist every triage to the hash-chained log | `groundlens.audit.open_log("triage.db")` | replayable SR 26-2 / EU AI Act packet |
+| 6 | **Recalibrate** | When drift exceeds threshold, return to step 1 with the recent traffic as `faq_corpus` | `DGI.propose_labels(...)` again | next-round batch |
+
+The loop is intentionally non-circular: DGI scores propose ordering, humans own labels, calibrated DGI scores production traffic. Continuous geometric score for ranking. Per-rule audit trail with citations. Hash-chained log for reproducibility. Compliance mapping for the model risk packet. No second LLM in any of them.
 
 ## Research
 
