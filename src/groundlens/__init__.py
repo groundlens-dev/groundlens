@@ -56,6 +56,11 @@ References:
 """
 
 from groundlens import agents, rules
+from groundlens._internal.embeddings import (
+    DEFAULT_MODEL,
+    MULTILINGUAL_E5,
+    MULTILINGUAL_MINI,
+)
 from groundlens._version import __version__
 from groundlens.agents import (
     customer_support_rag_rules,  # deprecated alias
@@ -81,7 +86,10 @@ from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
 
 __all__ = [
+    "DEFAULT_MODEL",
     "DGI",
+    "MULTILINGUAL_E5",
+    "MULTILINGUAL_MINI",
     # Classes
     "SGI",
     "CalibrationResult",
