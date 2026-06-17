@@ -5,6 +5,77 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.17 -- `DGI.propose_labels` redesign with `SeedExample` (BREAKING)
+
+### Breaking changes
+
+- **`DGI.propose_labels` signature replaced.** The previous shape
+  ``faq_corpus: list[str]`` + ``seed_pairs: list[tuple[str, str]]`` is
+  gone. The new shape takes ``seeds: list[SeedExample]`` where each
+  ``SeedExample(context=..., question=..., grounded=...)`` bundles the
+  FAQ paragraph, the question, and the verified-grounded response. No
+  deprecation alias -- the previous shape was released two days ago and
+  was found to generate incoherent candidates in practice.
+
+  **Why.** Under the old API, the candidate-generation loop sampled
+  ``context`` and ``seed_pairs`` independently and at random. The
+  resulting prompt routinely mixed a FAQ paragraph about one topic
+  (e.g., hipoteca) with a seed pair about another (e.g., Bizum), and
+  the LLM produced out-of-scope candidates that a human reviewer (or
+  an LLM judge) labelled as junk. The fix binds the three fields
+  together so the prompt is always coherent by construction. A
+  regression test (`test_prompt_receives_matched_context_and_seed`)
+  pins this behaviour.
+
+- **Defaults adjusted.** ``n_candidates`` from 200 → 50 and
+  ``n_to_label`` from 20 → 10. The new defaults take ≈5 minutes at
+  4 s/call on OpenAI rather than ~15 minutes, which matters for the
+  first interactive use of the API.
+
+### Added
+
+- **`SeedExample` dataclass.** Frozen, validated. Empty or
+  whitespace-only fields raise ``ValueError`` at construction time,
+  before any LLM calls are issued. Exposed at the top of the package
+  alongside ``ProposedLabel`` and ``PropositionBatch``.
+
+### Changed
+
+- **`docs/guides/active-learning.md` rewritten** from scratch in
+  plain language with a three-step flow (gather seeds → call
+  ``propose_labels`` → label and calibrate), an explicit
+  troubleshooting section, and a "stop when AUROC plateaus" rule.
+- **README "Bootstrap your calibration set" section condensed** to
+  one snippet around `SeedExample`, with a three-sentence mental
+  model up front.
+
+### Migration
+
+```python
+# Before (2026.6.16, removed)
+batch = dgi.propose_labels(
+    faq_corpus=[paragraph_a, paragraph_b, ...],
+    seed_pairs=[(q1, r1), (q2, r2), ...],
+    llm_generate=my_llm,
+    n_candidates=200,
+    n_to_label=20,
+)
+
+# After (2026.6.17)
+from groundlens import SeedExample
+
+batch = dgi.propose_labels(
+    seeds=[
+        SeedExample(context=paragraph_a, question=q1, grounded=r1),
+        SeedExample(context=paragraph_b, question=q2, grounded=r2),
+        # ...
+    ],
+    llm_generate=my_llm,
+    n_candidates=50,    # new default
+    n_to_label=10,      # new default
+)
+```
+
 ## 2026.6.16 -- active-learning bootstrap (`DGI.propose_labels`)
 
 ### Added

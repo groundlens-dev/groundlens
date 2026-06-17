@@ -1,137 +1,153 @@
-# Active-learning bootstrap (`DGI.propose_labels`)
+# Cómo enseñarle a DGI tu dominio en una tarde
 
-This guide walks through using `DGI.propose_labels()` to bootstrap a verified-grounded calibration set for a new deployment. It is the practical step that turns "I don't have labelled data" into "I have 20 labelled pairs ready for `DGI.calibrate()`."
+Esta guía explica `DGI.propose_labels()` en lenguaje sencillo. Si después de leerla algo te parece complicado, **abre un issue**: la opacidad es un bug, no una característica.
 
-## When to use this
+## El problema
 
-You should reach for `propose_labels` when:
+DGI mide si una respuesta está bien anclada en una fuente. Para hacerlo necesita saber cómo se ven las respuestas correctas **en tu dominio**. Esa información vive en un vector llamado `mu_hat` que DGI compara con cada respuesta nueva.
 
-- You are deploying groundlens in a new domain (banking, legal, healthcare, internal IT, etc.) and the bundled cross-domain `mu_hat` is not specific enough.
-- You have a small seed of verified-grounded pairs (10–50) and want to grow the calibration set deliberately rather than by random sampling.
-- You want the confabulated examples in your evaluation set to cover the failure modes embedding-based detectors actually miss, not the easy ones.
+Groundlens trae un `mu_hat` por defecto (212 pares en nueve dominios). Es un buen punto de partida, no una configuración de producción. La primera tarea en cualquier despliegue serio es construir tu propio `mu_hat`. Para eso necesitas 20–50 pares `(pregunta, respuesta correcta)` verificados de tu dominio.
 
-You should NOT use it for:
+El cuello de botella siempre es el mismo: nadie tiene esos 20–50 pares listos. `propose_labels` los genera con la ayuda de un LLM y un revisor humano.
 
-- SGI. SGI is a geometric ratio with no calibration parameter. `propose_labels` is a method on `DGI`, not `SGI`.
-- Auto-labelling. The method does NOT label and does NOT calibrate. A human reviewer assigns the labels.
-- Replacing real production data. The synthetic candidates are starting fuel for the calibration set; over time you should mix in verified-grounded pairs from your actual traffic.
+## La idea, en tres frases
 
-## Anti-circularity by design
+Le das a DGI unos pocos ejemplos correctos de tu FAQ. DGI le pide a un LLM que escriba versiones incorrectas de esas respuestas en cinco formas distintas, y te enseña las que más le confunden. Tú confirmas cuáles son realmente incorrectas, y DGI usa esa información para afinarse.
 
-A natural worry: "If I use DGI to score the candidates and then use those scored candidates to calibrate DGI, isn't that circular?" Two things keep the loop honest:
+## Tres pasos
 
-1. **DGI orders the candidates; the human assigns the labels.** The acquisition function (uncertainty + diversity) picks which candidates the reviewer sees, but the `grounded` / `fabricated` decision is made by the human, not by the model. The same human-supplied labels are what go into `DGI.calibrate()`.
-2. **The confabulations come from a separate generation step.** `llm_generate` is a callable you provide — typically OpenAI, Anthropic, or a local model. groundlens does not embed an LLM. The candidates are generated under explicit confabulation strategies that target the failure modes embedding models miss, so the labelling task is informative rather than padded with trivial negatives.
+### Paso 1 — Reúne 10-20 ejemplos buenos
 
-A second guardrail: **two reviewers labelling the same batch independently, then reconciling disagreements**. This is the most defensible practice for a regulated deployment. The Markdown checklist in `PropositionBatch.review_template` is designed to be copied directly into a shared review document.
+Un ejemplo es un `SeedExample`. Tres campos. Todos obligatorios.
 
-## The five confabulation strategies
+```python
+from groundlens import SeedExample
 
-The default `strategies="default"` argument selects all five strategies from the human-confabulation taxonomy in [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark) (CC BY 4.0). Each strategy preserves a different subset of the distributional properties that embedding models encode while violating referential truth.
+seed = SeedExample(
+    context="Bizum permite enviar y recibir dinero entre cuentas de bancos "
+            "espanoles usando el numero de telefono movil del destinatario. "
+            "El limite por transaccion es de 1.000 EUR para particulares.",
+    question="Cual es el limite por transaccion de Bizum para particulares?",
+    grounded="El limite por transaccion de Bizum para particulares es de 1.000 EUR.",
+)
+```
 
-| Strategy | What it does | Why it matters for DGI |
-|---|---|---|
-| `redefinition` | Redefines a key term in the grounded response while keeping vocabulary and register identical. | Targets cosine-similarity detectors: the embeddings look right, the facts are wrong. |
-| `mechanism_inversion` | Reverses the underlying causal direction while preserving local sentence transitions. | Each sub-clause sounds plausible in isolation; only the global meaning is wrong. |
-| `entity_composition` | Combines real institutions / procedures / agencies into a fictitious mechanism. | Every entity is real; the composition is invented. Hard for entity-based checks. |
-| `polysemy` | Picks a word with multiple senses and shifts the response to the wrong sense, with consistent supporting context. | Tests whether DGI distinguishes sense disambiguation, not just topical proximity. |
-| `template_filling` | Preserves the discourse structure (introduction, claim, justification, qualifier) while replacing every concrete fact with a plausible-but-wrong substitute. | Models the "right-shaped, wrong-fact" failure mode common in FAQ-RAG. |
+- `context` — el párrafo de tu FAQ del que sale la respuesta. Tal cual aparece en tu corpus.
+- `question` — una pregunta concreta cuya respuesta esté en ese párrafo.
+- `grounded` — la respuesta correcta, redactada como te gustaría que tu LLM responda en producción.
 
-Custom strategies are supported via `(name, prompt_template)` tuples; templates take the slots `{context}`, `{question}`, `{grounded}`.
+Cada `SeedExample` se valida por sí mismo: si dejas cualquier campo vacío salta un `ValueError` antes de hacer ninguna llamada al LLM.
 
-## Minimal example
+**Por qué se piden los tres juntos.** En versiones anteriores el `context` y la pregunta se combinaban al azar dentro del bucle, y el LLM acababa recibiendo "Contexto: hipoteca / Pregunta: Bizum", produciendo basura que el revisor humano marcaba como `out_of_scope`. Hoy cada `SeedExample` viaja entero al prompt, así que la generación queda coherente por construcción.
+
+**Cuántos seeds.** 10 es el mínimo razonable para que la mediana del threshold sea estable. 20 es el sweet spot. Más allá de 50 no ayuda — lo que ayuda son más rondas, no más seeds.
+
+### Paso 2 — Pide propuestas a DGI
 
 ```python
 from groundlens import DGI
 
+dgi = DGI()  # arranca desde el mu_hat genérico
+
 def my_llm(prompt: str) -> str:
-    # any OpenAI / Anthropic / local LLM wrapper you already use
+    # tu wrapper de OpenAI / Anthropic / local LLM
     ...
 
-dgi = DGI()  # starts from the bundled cross-domain calibration
-
-seed_pairs = [
-    ("What is the Bizum daily limit?",
-     "The Bizum daily limit is 1,000 EUR per transaction and 2,000 EUR per day."),
-    ("How do I increase my credit card limit?",
-     "Request a credit-line increase from the app under Cards → Limit, subject to a credit review."),
-    # ... 10-50 verified-grounded pairs total
-]
-
 batch = dgi.propose_labels(
-    faq_corpus=public_faqs,           # list[str], the deployment's FAQ paragraphs
-    seed_pairs=seed_pairs,
+    seeds=my_seeds,                # tu lista de SeedExample
     llm_generate=my_llm,
-    n_candidates=200,
-    n_to_label=20,
-    strategies="default",
-    seed=42,                          # determinism is required for audits
+    n_candidates=50,               # default; ≈5 min a 4 s/llamada
+    n_to_label=10,                 # default; cuántos ve el revisor
+    strategies="default",          # las 5 del paper grounding-benchmark
+    seed=42,                       # determinismo para auditorías
 )
-
-# Hand the Markdown checklist to a human reviewer (or two).
-print(batch.review_template)
-
-# After review, feed the labelled grounded subset back to calibrate:
-reviewer_grounded = [
-    (q, r) for (q, r, label) in reviewed_items if label == "grounded"
-]
-dgi.calibrate(pairs=reviewer_grounded)
 ```
 
-The `seed=42` argument is not cosmetic — passing the same `seed`, `faq_corpus`, and `seed_pairs` produces an identical batch. This is required for reproducible audits.
+Lo que pasa por dentro, en cuatro viñetas, sin matemáticas:
 
-## What `PropositionBatch` returns
+1. DGI calcula la **mediana** de sus propios scores sobre tus seeds. Esa mediana es el "punto medio" provisional entre correcto e incorrecto.
+2. DGI sortea un seed, mete su `(context, question, grounded)` en una de las cinco plantillas de confabulación, y se lo manda al LLM. Repite `n_candidates` veces, distribuyendo entre las cinco estrategias.
+3. Para cada respuesta confabulada, DGI calcula su propio score y mide cuánto se aleja de la mediana. Cuanto menos se aleja, más "duda" DGI sobre si es correcta o no.
+4. Devuelve los `n_to_label` candidatos sobre los que más duda (70%) + algunos extra para que aparezcan las cinco estrategias (30%).
 
-| Field | Type | Use |
-|---|---|---|
-| `items` | `tuple[ProposedLabel, ...]` | Top-ranked candidates for human review. Length ≤ `n_to_label`. |
-| `review_template` | `str` | Markdown checklist with `[ ] grounded / [ ] fabricated / [ ] out_of_scope` per item, ready to copy into your review document. |
-| `all_candidates` | `tuple[ProposedLabel, ...]` | Every candidate generated in the round, ordered by acquisition score. Useful for audit. |
-| `strategies_used` | `tuple[str, ...]` | The strategy names actually used. |
+Devuelve un `PropositionBatch` con cuatro atributos. Sólo `items` y `review_template` te hacen falta hoy; los otros dos son para auditoría posterior:
 
-Each `ProposedLabel` carries `question`, `candidate_response`, `dgi_score`, `strategy`, `context_excerpt`, and `uncertainty`. All fields are immutable (frozen dataclass).
+| Atributo | Para qué sirve |
+|---|---|
+| `batch.items` | Los `n_to_label` candidatos seleccionados, ordenados de más a menos dudoso |
+| `batch.review_template` | Markdown listo para pegar a un revisor humano |
+| `batch.all_candidates` | Los `n_candidates` completos, ordenados por incertidumbre (auditoría) |
+| `batch.strategies_used` | Nombres de las estrategias que se usaron en esta ronda |
 
-## Acquisition function
+### Paso 3 — Etiqueta y calibra
 
-The default mixes two signals:
+Pasa `batch.review_template` a un revisor humano. Lo ideal: dos revisores en paralelo, reconcilias desacuerdos.
 
-- **Uncertainty (70%)** — the candidates with the smallest distance to the decision threshold. These are the candidates the current model finds hardest to classify, so a label on them shifts `mu_hat` the most.
-- **Diversity (30%)** — remaining slots are filled with candidates from strategies under-represented in the uncertainty subset, ensuring all strategies surface in the batch.
+```markdown
+### Item 1/10 — strategy: redefinition
+> FAQ context excerpt: Bizum permite enviar...
+**Question:** Cual es el limite por transaccion de Bizum?
+**Candidate response:** Bizum permite enviar dinero ilimitadamente a particulares.
+[ ] grounded   [x] fabricated   [ ] out_of_scope
+```
 
-The threshold is the **median DGI score on the seed grounded pairs** — a reasonable proxy for the grounded/ungrounded boundary when no calibrated threshold is available yet. You can change the uncertainty/diversity mix with `diverse_fraction`:
+Una vez tengas las etiquetas, te quedas con los `grounded` y los pasas a `DGI.calibrate()` junto con tus seeds originales:
 
 ```python
-batch = dgi.propose_labels(..., diverse_fraction=0.5)  # 50% uncertainty / 50% diversity
+reviewer_grounded = [
+    (item.question, item.candidate_response)
+    for item, label in zip(batch.items, human_labels, strict=True)
+    if label == "grounded"
+]
+
+calibration_pairs = [(s.question, s.grounded) for s in my_seeds] + reviewer_grounded
+dgi.calibrate(pairs=calibration_pairs)
 ```
 
-## Error handling
+Tu DGI ya está más afinado. Si quieres una ronda más, repite el paso 2 con el nuevo `mu_hat` activo.
 
-| Situation | What groundlens does |
-|---|---|
-| `seed_pairs=[]` | `ValueError` immediately. |
-| `n_candidates < 1` | `ValueError` immediately. |
-| `llm_generate` not callable | `TypeError` immediately. |
-| `llm_generate` raises an exception | The failed candidate is skipped, a `RuntimeWarning` is emitted with the exception type and message, and the round continues. |
-| `llm_generate` returns empty / whitespace | The candidate is silently skipped. |
+## Qué hacer cuando algo va mal
 
-These choices keep the loop resilient to flaky LLM endpoints without hiding systematic failures from the operator.
+**El revisor dice `out_of_scope` en casi todo.**
+Casi siempre significa que el encoder no entiende tu idioma. El default `all-MiniLM-L6-v2` es mayoritariamente inglés. Para español o multilingüe:
 
-## Recommended workflow
+```python
+from groundlens import DGI, MULTILINGUAL_MINI
+dgi = DGI(model=MULTILINGUAL_MINI)
+```
 
-1. **Seed.** Hand-curate 10–50 verified-grounded pairs from your domain. If you have nothing, start by writing them yourself from the FAQ corpus — even 10 pairs is enough to bootstrap.
-2. **Round 1.** Call `propose_labels(n_candidates=200, n_to_label=20)`. Two reviewers label the batch independently, reconcile.
-3. **Calibrate.** Pass the reconciled grounded subset to `DGI.calibrate(pairs=…)`. Threshold via `np.percentile(scores, 20)` (or your operational percentile).
-4. **Round 2.** Call `propose_labels` again with the new `mu_hat` baked in. The uncertainty signal is now sharper, so the batch surfaces harder cases.
-5. **Stop when AUROC plateaus.** Hold out a labelled evaluation set and stop adding pairs when AUROC on the held-out set stops improving for two consecutive rounds.
-6. **Recalibrate on drift.** When DGI score distribution on production traffic shifts beyond a tolerance you set, run `propose_labels` again on the recent traffic as `faq_corpus`.
+Si seguía después de eso, revisa que tu `grounded` sea realmente correcto frente al `context`. Si el seed está mal, todos los confabulados serán raros.
 
-## References
+**AUROC no mejora tras calibrar.**
+Necesitas más rondas, más seeds, o seeds más diversos. La regla simple: si dos rondas seguidas no mueven AUROC más de ±0.02 en tu held-out set, has plateado.
 
-- Marin, J. (2026). *A Methodology for Building Human-Confabulated Hallucination Benchmarks*. [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark). CC BY 4.0.
+**AUROC baja tras calibrar.**
+Síntoma clásico de seeds inconsistentes. Revisa que todos tus `SeedExample.grounded` digan lo mismo que el `context` afirma. Un seed contradictorio envenena `mu_hat`.
+
+**Tarda demasiado.**
+`n_candidates=50` con OpenAI cuesta unos 4-5 minutos a 4 segundos por llamada. Si necesitas iterar más rápido, baja `n_candidates` a 20 para una primera vuelta exploratoria, luego sube.
+
+## Cuándo parar
+
+Cuando dos rondas seguidas no mejoren AUROC en tu held-out set por encima de ±0.02. A partir de ahí estás pagando llamadas al LLM y tiempo de revisor para ganar ruido.
+
+Una vez en producción, recalibra cuando la distribución de DGI scores sobre tu tráfico real se desvíe del rango de calibración. Eso quiere decir que tu dominio se está moviendo (nuevos temas, nuevos productos) y `mu_hat` tiene que moverse con él.
+
+## Detalles para los curiosos
+
+Si has llegado hasta aquí y quieres entender el resto del mecanismo:
+
+- **Las cinco estrategias** vienen de [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark) (CC BY 4.0). Cada una conserva una propiedad distinta del embedding mientras viola la verdad referencial: `redefinition`, `mechanism_inversion`, `entity_composition`, `polysemy`, `template_filling`.
+- **Acquisition function.** Mix 70% incertidumbre (distancia a la mediana del threshold) + 30% diversidad de estrategia. Lo puedes ajustar con `diverse_fraction`.
+- **Estrategias custom.** Pasa una tupla `((name, prompt_template), ...)` en `strategies`. Las plantillas aceptan los slots `{context}`, `{question}`, `{grounded}`.
+- **No-circularidad.** DGI ordena los candidatos por incertidumbre; el humano asigna las etiquetas. Las etiquetas que vuelven a calibrar `mu_hat` nunca las puso DGI.
+
+## Referencias
+
+- Marin, J. (2026). *A Methodology for Building Human-Confabulated Hallucination Benchmarks*. [groundlens-dev/grounding-benchmark](https://github.com/groundlens-dev/grounding-benchmark). CC BY 4.0.
 - Marin, J. (2026). *A Geometric Taxonomy of Hallucinations in LLMs*. arXiv:2602.13224v3.
 
-## See also
+## Ver también
 
-- [Domain calibration](domain-calibration.md) — what to do with the labelled pairs once you have them.
-- [Banking deployment](banking-deployment.md) — full deployment pattern including audit log and compliance mapping.
-- [Custom rule sets](custom-rule-sets.md) — the rules side of the triage layer.
+- [Domain Calibration](domain-calibration.md) — qué hacer con los pares ya etiquetados.
+- [Banking Deployment](banking-deployment.md) — patrón completo de despliegue con audit log + compliance.
