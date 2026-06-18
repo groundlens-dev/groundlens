@@ -2295,7 +2295,7 @@ result = dgi.score(question="...", response="...")</p>
               </div>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'Snowflake/snowflake-arctic-embed-l-v2.0'
 
   
       module-attribute
@@ -2722,7 +2722,7 @@ sentinel.</p>
 
 
 <h6 id="groundlens.dgi.DGI.propose_labels" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">propose_labels</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">faq_corpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">seed_pairs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">llm_generate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span> <span class="n">n_candidates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">n_to_label</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">strategies</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">diverse_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropositionBatch</span></code>
+            <code class="highlight language-python"><span class="n">propose_labels</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">seeds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SeedExample</span><span class="p">],</span> <span class="n">llm_generate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span> <span class="n">n_candidates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">n_to_label</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">strategies</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">diverse_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropositionBatch</span></code>
 
 <a href="#groundlens.dgi.DGI.propose_labels" class="headerlink" title="Permanent link">&para;</a></h6>
 
@@ -2730,13 +2730,23 @@ sentinel.</p>
     <div class="doc doc-contents ">
 
         <p>Active-learning bootstrap of a verified-grounded calibration set.</p>
-<p>Generates candidate (question, response) pairs via <code>llm_generate</code>
-under the named confabulation strategies, scores each candidate
-with this DGI, and returns the <code>n_to_label</code> most useful pairs
-for a human reviewer.</p>
-<p>This method DOES NOT label and DOES NOT calibrate. The human
+<p>Given 10-50 verified-grounded :class:<code>SeedExample</code> triples and a
+text-generation callable, this method:</p>
+<ol>
+<li>Picks a seed at random for each candidate and rewrites its
+   <code>grounded</code> response under one of the named confabulation
+   strategies, using the seed's own <code>context</code> as the source
+   of truth in the prompt. Coherence is preserved by design --
+   the prompt never sees a mismatched context+question pair.</li>
+<li>Scores each generated candidate with this DGI.</li>
+<li>Ranks candidates by acquisition score (70% uncertainty /
+   30% strategy diversity) and returns the top <code>n_to_label</code>
+   for a human reviewer.</li>
+</ol>
+<p>The method DOES NOT label and DOES NOT calibrate. The human
 reviewer assigns the labels; the caller then passes the labelled
-pairs to :meth:<code>calibrate</code>. The loop is non-circular by design.</p>
+grounded subset to :meth:<code>calibrate</code>. The loop is non-circular
+by design.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2752,33 +2762,21 @@ pairs to :meth:<code>calibrate</code>. The loop is non-circular by design.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>faq_corpus</code>
+                <code>seeds</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The deployment's FAQ corpus. Each entry is a
-short paragraph in the deployment's domain.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed_pairs</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="tuple">tuple</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="SeedExample(context: str, question: str, grounded: str)
+
+  
+      dataclass
+   (groundlens.propose.SeedExample)" href="../propose/#groundlens.propose.SeedExample">SeedExample</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>10-50 verified <code>(question, grounded_response)</code>
-tuples. Used both as anchors for candidate generation
-and to estimate the acquisition threshold.</p>
+                <p>10-50 verified-grounded :class:<code>SeedExample</code> triples.
+Each carries its own <code>context</code>, <code>question</code> and
+<code>grounded</code> response, so the generation prompt is
+always coherent.</p>
               </div>
             </td>
             <td>
@@ -2795,8 +2793,8 @@ and to estimate the acquisition threshold.</p>
             <td>
               <div class="doc-md-description">
                 <p>A callable <code>(prompt: str) -&gt; str</code> that the
-user provides (OpenAI / Anthropic / local LLM wrapper).
-groundlens does not embed an LLM.</p>
+user provides (an OpenAI / Anthropic / local LLM
+wrapper). groundlens does not embed an LLM.</p>
               </div>
             </td>
             <td>
@@ -2813,11 +2811,11 @@ groundlens does not embed an LLM.</p>
             <td>
               <div class="doc-md-description">
                 <p>Total candidates to generate across all
-strategies. Default 200.</p>
+strategies. Default 50 (≈5 minutes at 4 s/call).</p>
               </div>
             </td>
             <td>
-                  <code>200</code>
+                  <code>50</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -2830,12 +2828,12 @@ strategies. Default 200.</p>
             <td>
               <div class="doc-md-description">
                 <p>How many candidates the batch should contain.
-Default 20. The rest are returned in
+Default 10. The rest are returned in
 <code>batch.all_candidates</code> for audit.</p>
               </div>
             </td>
             <td>
-                  <code>20</code>
+                  <code>10</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -2885,7 +2883,7 @@ Default 0.3.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Random seed for sampling FAQ contexts and seed pairs.
+                <p>Random seed for sampling seeds across rounds.
 Determinism is required for reproducible audits.</p>
               </div>
             </td>
@@ -2939,7 +2937,7 @@ Determinism is required for reproducible audits.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <code>seed_pairs</code> is empty or <code>n_candidates</code> &lt; 1.</p>
+                <p>If <code>seeds</code> is empty or <code>n_candidates</code> &lt; 1.</p>
               </div>
             </td>
           </tr>
@@ -2949,7 +2947,8 @@ Determinism is required for reproducible audits.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <code>llm_generate</code> is not callable.</p>
+                <p>If <code>llm_generate</code> is not callable, or any
+element of <code>seeds</code> is not a <code>SeedExample</code>.</p>
               </div>
             </td>
           </tr>
@@ -3112,160 +3111,188 @@ Determinism is required for reproducible audits.</p>
 <span class="normal"><a href="#__codelineno-0-480">480</a></span>
 <span class="normal"><a href="#__codelineno-0-481">481</a></span>
 <span class="normal"><a href="#__codelineno-0-482">482</a></span>
-<span class="normal"><a href="#__codelineno-0-483">483</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="k">def</span><span class="w"> </span><span class="nf">propose_labels</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span>
+<span class="normal"><a href="#__codelineno-0-487">487</a></span>
+<span class="normal"><a href="#__codelineno-0-488">488</a></span>
+<span class="normal"><a href="#__codelineno-0-489">489</a></span>
+<span class="normal"><a href="#__codelineno-0-490">490</a></span>
+<span class="normal"><a href="#__codelineno-0-491">491</a></span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="k">def</span><span class="w"> </span><span class="nf">propose_labels</span><span class="p">(</span>
 </span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a>    <span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="n">faq_corpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="n">seed_pairs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
-</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">llm_generate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
-</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="n">n_candidates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
-</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="n">n_to_label</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
-</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>    <span class="n">strategies</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
-</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>    <span class="n">diverse_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
-</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
-</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropositionBatch</span><span class="p">:</span>
-</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Active-learning bootstrap of a verified-grounded calibration set.</span>
-</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a>
-</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">    Generates candidate (question, response) pairs via ``llm_generate``</span>
-</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    under the named confabulation strategies, scores each candidate</span>
-</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="sd">    with this DGI, and returns the ``n_to_label`` most useful pairs</span>
-</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">    for a human reviewer.</span>
-</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a>
-</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    This method DOES NOT label and DOES NOT calibrate. The human</span>
-</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    reviewer assigns the labels; the caller then passes the labelled</span>
-</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    pairs to :meth:`calibrate`. The loop is non-circular by design.</span>
-</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a>
-</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">    Args:</span>
-</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">        faq_corpus: The deployment&#39;s FAQ corpus. Each entry is a</span>
-</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">            short paragraph in the deployment&#39;s domain.</span>
-</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        seed_pairs: 10-50 verified ``(question, grounded_response)``</span>
-</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">            tuples. Used both as anchors for candidate generation</span>
-</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a><span class="sd">            and to estimate the acquisition threshold.</span>
-</span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a><span class="sd">        llm_generate: A callable ``(prompt: str) -&gt; str`` that the</span>
-</span><span id="__span-0-360"><a id="__codelineno-0-360" name="__codelineno-0-360"></a><span class="sd">            user provides (OpenAI / Anthropic / local LLM wrapper).</span>
-</span><span id="__span-0-361"><a id="__codelineno-0-361" name="__codelineno-0-361"></a><span class="sd">            groundlens does not embed an LLM.</span>
-</span><span id="__span-0-362"><a id="__codelineno-0-362" name="__codelineno-0-362"></a><span class="sd">        n_candidates: Total candidates to generate across all</span>
-</span><span id="__span-0-363"><a id="__codelineno-0-363" name="__codelineno-0-363"></a><span class="sd">            strategies. Default 200.</span>
-</span><span id="__span-0-364"><a id="__codelineno-0-364" name="__codelineno-0-364"></a><span class="sd">        n_to_label: How many candidates the batch should contain.</span>
-</span><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="sd">            Default 20. The rest are returned in</span>
-</span><span id="__span-0-366"><a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="sd">            ``batch.all_candidates`` for audit.</span>
-</span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="sd">        strategies: ``&quot;default&quot;`` (all five strategies from</span>
-</span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">            ``groundlens-dev/grounding-benchmark``), or a tuple of</span>
-</span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">            strategy names, or a tuple of ``(name, prompt_template)``</span>
-</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="sd">            custom pairs. Templates accept the slots ``{context}``,</span>
-</span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">            ``{question}``, ``{grounded}``.</span>
-</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="sd">        diverse_fraction: Fraction of the batch reserved for</span>
-</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">            strategy diversity (the rest is filled by uncertainty).</span>
-</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">            Default 0.3.</span>
-</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">        seed: Random seed for sampling FAQ contexts and seed pairs.</span>
-</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">            Determinism is required for reproducible audits.</span>
-</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a>
-</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        A :class:`groundlens.PropositionBatch` ready for human review.</span>
-</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a>
-</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">    Raises:</span>
-</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">        ValueError: If ``seed_pairs`` is empty or ``n_candidates`` &lt; 1.</span>
-</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">        TypeError: If ``llm_generate`` is not callable.</span>
-</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="n">seeds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SeedExample</span><span class="p">],</span>
+</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="n">llm_generate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">n_candidates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="n">n_to_label</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="n">strategies</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>    <span class="n">diverse_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropositionBatch</span><span class="p">:</span>
+</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Active-learning bootstrap of a verified-grounded calibration set.</span>
+</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a>
+</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    Given 10-50 verified-grounded :class:`SeedExample` triples and a</span>
+</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">    text-generation callable, this method:</span>
+</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a>
+</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="sd">    1. Picks a seed at random for each candidate and rewrites its</span>
+</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">       ``grounded`` response under one of the named confabulation</span>
+</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">       strategies, using the seed&#39;s own ``context`` as the source</span>
+</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">       of truth in the prompt. Coherence is preserved by design --</span>
+</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">       the prompt never sees a mismatched context+question pair.</span>
+</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    2. Scores each generated candidate with this DGI.</span>
+</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">    3. Ranks candidates by acquisition score (70% uncertainty /</span>
+</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">       30% strategy diversity) and returns the top ``n_to_label``</span>
+</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">       for a human reviewer.</span>
+</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a>
+</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">    The method DOES NOT label and DOES NOT calibrate. The human</span>
+</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">    reviewer assigns the labels; the caller then passes the labelled</span>
+</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a><span class="sd">    grounded subset to :meth:`calibrate`. The loop is non-circular</span>
+</span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a><span class="sd">    by design.</span>
+</span><span id="__span-0-360"><a id="__codelineno-0-360" name="__codelineno-0-360"></a>
+</span><span id="__span-0-361"><a id="__codelineno-0-361" name="__codelineno-0-361"></a><span class="sd">    Args:</span>
+</span><span id="__span-0-362"><a id="__codelineno-0-362" name="__codelineno-0-362"></a><span class="sd">        seeds: 10-50 verified-grounded :class:`SeedExample` triples.</span>
+</span><span id="__span-0-363"><a id="__codelineno-0-363" name="__codelineno-0-363"></a><span class="sd">            Each carries its own ``context``, ``question`` and</span>
+</span><span id="__span-0-364"><a id="__codelineno-0-364" name="__codelineno-0-364"></a><span class="sd">            ``grounded`` response, so the generation prompt is</span>
+</span><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="sd">            always coherent.</span>
+</span><span id="__span-0-366"><a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="sd">        llm_generate: A callable ``(prompt: str) -&gt; str`` that the</span>
+</span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="sd">            user provides (an OpenAI / Anthropic / local LLM</span>
+</span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">            wrapper). groundlens does not embed an LLM.</span>
+</span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">        n_candidates: Total candidates to generate across all</span>
+</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="sd">            strategies. Default 50 (≈5 minutes at 4 s/call).</span>
+</span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">        n_to_label: How many candidates the batch should contain.</span>
+</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="sd">            Default 10. The rest are returned in</span>
+</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">            ``batch.all_candidates`` for audit.</span>
+</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">        strategies: ``&quot;default&quot;`` (all five strategies from</span>
+</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">            ``groundlens-dev/grounding-benchmark``), or a tuple of</span>
+</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">            strategy names, or a tuple of ``(name, prompt_template)``</span>
+</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">            custom pairs. Templates accept the slots ``{context}``,</span>
+</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">            ``{question}``, ``{grounded}``.</span>
+</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        diverse_fraction: Fraction of the batch reserved for</span>
+</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">            strategy diversity (the rest is filled by uncertainty).</span>
+</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">            Default 0.3.</span>
+</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">        seed: Random seed for sampling seeds across rounds.</span>
+</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">            Determinism is required for reproducible audits.</span>
+</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>
+</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">    Returns:</span>
+</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        A :class:`groundlens.PropositionBatch` ready for human review.</span>
 </span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>
-</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">groundlens._internal.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_strategies</span>
-</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.propose</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="n">ProposedLabel</span><span class="p">,</span>
-</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a>        <span class="n">PropositionBatch</span><span class="p">,</span>
-</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="n">_uncertainty</span><span class="p">,</span>
-</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="n">build_review_template</span><span class="p">,</span>
-</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="n">rank_for_labelling</span><span class="p">,</span>
-</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="p">)</span>
-</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>
-</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">seed_pairs</span><span class="p">:</span>
-</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;seed_pairs must contain at least one verified-grounded pair.&quot;</span>
-</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="k">if</span> <span class="n">n_candidates</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;n_candidates must be &gt;= 1.&quot;</span>
-</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">llm_generate</span><span class="p">):</span>
-</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;llm_generate must be a callable (prompt: str) -&gt; str.&quot;</span>
-</span><span id="__span-0-405"><a id="__codelineno-0-405" name="__codelineno-0-405"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>
-</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>    <span class="n">resolved_strategies</span> <span class="o">=</span> <span class="n">resolve_strategies</span><span class="p">(</span><span class="n">strategies</span><span class="p">)</span>
-</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">resolved_strategies</span><span class="p">:</span>
-</span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;At least one strategy must be specified.&quot;</span>
-</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>
-</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="c1"># Threshold: median DGI score on the seed grounded pairs. This is</span>
-</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="c1"># a reasonable proxy for the boundary between grounded and</span>
-</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>    <span class="c1"># ungrounded when no calibrated threshold is available yet.</span>
-</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="n">seed_scores</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span> <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">seed_pairs</span><span class="p">]</span>
-</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>    <span class="n">sorted_scores</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seed_scores</span><span class="p">)</span>
-</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_scores</span><span class="p">)</span>
-</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="n">median</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
-</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
-</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="k">else</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
-</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="p">)</span>
-</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">median</span><span class="p">)</span>
-</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>
-</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="n">rng</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">    Raises:</span>
+</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        ValueError: If ``seeds`` is empty or ``n_candidates`` &lt; 1.</span>
+</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">        TypeError: If ``llm_generate`` is not callable, or any</span>
+</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">            element of ``seeds`` is not a ``SeedExample``.</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">groundlens._internal.strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_strategies</span>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.propose</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>        <span class="n">ProposedLabel</span><span class="p">,</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">PropositionBatch</span><span class="p">,</span>
+</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">SeedExample</span><span class="p">,</span>
+</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="n">_uncertainty</span><span class="p">,</span>
+</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>        <span class="n">build_review_template</span><span class="p">,</span>
+</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>        <span class="n">rank_for_labelling</span><span class="p">,</span>
+</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>    <span class="p">)</span>
+</span><span id="__span-0-405"><a id="__codelineno-0-405" name="__codelineno-0-405"></a>
+</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">seeds</span><span class="p">:</span>
+</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;seeds must contain at least one SeedExample.&quot;</span>
+</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">SeedExample</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seeds</span><span class="p">):</span>
+</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>            <span class="s2">&quot;Every item in seeds must be a SeedExample(context=..., &quot;</span>
+</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>            <span class="s2">&quot;question=..., grounded=...) instance.&quot;</span>
+</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="p">)</span>
+</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="k">if</span> <span class="n">n_candidates</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;n_candidates must be &gt;= 1.&quot;</span>
+</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">llm_generate</span><span class="p">):</span>
+</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;llm_generate must be a callable (prompt: str) -&gt; str.&quot;</span>
+</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>
+</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="n">resolved_strategies</span> <span class="o">=</span> <span class="n">resolve_strategies</span><span class="p">(</span><span class="n">strategies</span><span class="p">)</span>
+</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">resolved_strategies</span><span class="p">:</span>
+</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;At least one strategy must be specified.&quot;</span>
+</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>
-</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="c1"># Round-robin across strategies; for each candidate, sample a</span>
-</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="c1"># (context, seed_pair) and call the user&#39;s LLM with the strategy</span>
-</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="c1"># template.</span>
-</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProposedLabel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="n">per_strategy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_candidates</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved_strategies</span><span class="p">))</span>
-</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="k">for</span> <span class="n">strat_name</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">resolved_strategies</span><span class="p">:</span>
-</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">per_strategy</span><span class="p">):</span>
-</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">n_candidates</span><span class="p">:</span>
-</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>                <span class="k">break</span>
-</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">context</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">faq_corpus</span><span class="p">)</span>
-</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="n">anchor_q</span><span class="p">,</span> <span class="n">anchor_g</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">seed_pairs</span><span class="p">)</span>
-</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="n">prompt</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>                <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
-</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>                <span class="n">question</span><span class="o">=</span><span class="n">anchor_q</span><span class="p">,</span>
-</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>                <span class="n">grounded</span><span class="o">=</span><span class="n">anchor_g</span><span class="p">,</span>
-</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="p">)</span>
-</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>                <span class="n">candidate_resp</span> <span class="o">=</span> <span class="n">llm_generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
-</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>                    <span class="sa">f</span><span class="s2">&quot;llm_generate raised </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">. &quot;</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>                    <span class="s2">&quot;Skipping this candidate.&quot;</span>
-</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>                <span class="p">)</span>
-</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>                <span class="k">continue</span>
-</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_resp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">candidate_resp</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>                <span class="k">continue</span>
-</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>
-</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">anchor_q</span><span class="p">,</span> <span class="n">candidate_resp</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span>
-</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>                <span class="n">ProposedLabel</span><span class="p">(</span>
-</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>                    <span class="n">question</span><span class="o">=</span><span class="n">anchor_q</span><span class="p">,</span>
-</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>                    <span class="n">candidate_response</span><span class="o">=</span><span class="n">candidate_resp</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>                    <span class="n">dgi_score</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">score</span><span class="p">),</span>
-</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>                    <span class="n">strategy</span><span class="o">=</span><span class="n">strat_name</span><span class="p">,</span>
-</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>                    <span class="n">context_excerpt</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
-</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>                    <span class="n">uncertainty</span><span class="o">=</span><span class="n">_uncertainty</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">score</span><span class="p">),</span> <span class="n">threshold</span><span class="p">),</span>
-</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>                <span class="p">)</span>
-</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>            <span class="p">)</span>
-</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>
-</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>    <span class="c1"># Rank for labelling (uncertainty + diversity).</span>
-</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="n">ranked</span> <span class="o">=</span> <span class="n">rank_for_labelling</span><span class="p">(</span>
-</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="n">candidates</span><span class="p">,</span>
-</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="n">n_to_label</span><span class="o">=</span><span class="n">n_to_label</span><span class="p">,</span>
-</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">diverse_fraction</span><span class="o">=</span><span class="n">diverse_fraction</span><span class="p">,</span>
-</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="p">)</span>
-</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>
-</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="c1"># Audit: keep all candidates, ordered by uncertainty.</span>
-</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="n">all_ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">uncertainty</span><span class="p">)</span>
-</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>
-</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="k">return</span> <span class="n">PropositionBatch</span><span class="p">(</span>
-</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>        <span class="n">items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ranked</span><span class="p">),</span>
-</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>        <span class="n">review_template</span><span class="o">=</span><span class="n">build_review_template</span><span class="p">(</span><span class="n">ranked</span><span class="p">),</span>
-</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="n">all_candidates</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">all_ordered</span><span class="p">),</span>
-</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="n">strategies_used</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">resolved_strategies</span><span class="p">),</span>
-</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="p">)</span>
+</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="c1"># Threshold: median DGI score on the seed grounded pairs. This is</span>
+</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="c1"># a reasonable proxy for the boundary between grounded and</span>
+</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="c1"># ungrounded when no calibrated threshold is available yet.</span>
+</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="n">seed_scores</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">question</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">grounded</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seeds</span><span class="p">]</span>
+</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="n">sorted_scores</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seed_scores</span><span class="p">)</span>
+</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_scores</span><span class="p">)</span>
+</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="n">median</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>        <span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="k">else</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sorted_scores</span><span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
+</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="p">)</span>
+</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">median</span><span class="p">)</span>
+</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>
+</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">rng</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="c1"># Round-robin across strategies. For each candidate, sample ONE</span>
+</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="c1"># seed and pass its OWN (context, question, grounded) through</span>
+</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="c1"># the strategy template. No more mismatched context/seed pairs.</span>
+</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProposedLabel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="n">per_strategy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_candidates</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved_strategies</span><span class="p">))</span>
+</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">for</span> <span class="n">strat_name</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">resolved_strategies</span><span class="p">:</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">per_strategy</span><span class="p">):</span>
+</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">n_candidates</span><span class="p">:</span>
+</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>                <span class="k">break</span>
+</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">anchor</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">seeds</span><span class="p">)</span>
+</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">prompt</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>                <span class="n">context</span><span class="o">=</span><span class="n">anchor</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>                <span class="n">question</span><span class="o">=</span><span class="n">anchor</span><span class="o">.</span><span class="n">question</span><span class="p">,</span>
+</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>                <span class="n">grounded</span><span class="o">=</span><span class="n">anchor</span><span class="o">.</span><span class="n">grounded</span><span class="p">,</span>
+</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="p">)</span>
+</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>                <span class="n">candidate_resp</span> <span class="o">=</span> <span class="n">llm_generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>                    <span class="sa">f</span><span class="s2">&quot;llm_generate raised </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">. &quot;</span>
+</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>                    <span class="s2">&quot;Skipping this candidate.&quot;</span>
+</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>                <span class="p">)</span>
+</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>                <span class="k">continue</span>
+</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>
+</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_resp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">candidate_resp</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>                <span class="k">continue</span>
+</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>
+</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">anchor</span><span class="o">.</span><span class="n">question</span><span class="p">,</span> <span class="n">candidate_resp</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span>
+</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>                <span class="n">ProposedLabel</span><span class="p">(</span>
+</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>                    <span class="n">question</span><span class="o">=</span><span class="n">anchor</span><span class="o">.</span><span class="n">question</span><span class="p">,</span>
+</span><span id="__span-0-474"><a id="__codelineno-0-474" name="__codelineno-0-474"></a>                    <span class="n">candidate_response</span><span class="o">=</span><span class="n">candidate_resp</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+</span><span id="__span-0-475"><a id="__codelineno-0-475" name="__codelineno-0-475"></a>                    <span class="n">dgi_score</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">score</span><span class="p">),</span>
+</span><span id="__span-0-476"><a id="__codelineno-0-476" name="__codelineno-0-476"></a>                    <span class="n">strategy</span><span class="o">=</span><span class="n">strat_name</span><span class="p">,</span>
+</span><span id="__span-0-477"><a id="__codelineno-0-477" name="__codelineno-0-477"></a>                    <span class="n">context_excerpt</span><span class="o">=</span><span class="n">anchor</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+</span><span id="__span-0-478"><a id="__codelineno-0-478" name="__codelineno-0-478"></a>                    <span class="n">uncertainty</span><span class="o">=</span><span class="n">_uncertainty</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">score</span><span class="p">),</span> <span class="n">threshold</span><span class="p">),</span>
+</span><span id="__span-0-479"><a id="__codelineno-0-479" name="__codelineno-0-479"></a>                <span class="p">)</span>
+</span><span id="__span-0-480"><a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="p">)</span>
+</span><span id="__span-0-481"><a id="__codelineno-0-481" name="__codelineno-0-481"></a>
+</span><span id="__span-0-482"><a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="c1"># Rank for labelling (uncertainty + diversity).</span>
+</span><span id="__span-0-483"><a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="n">ranked</span> <span class="o">=</span> <span class="n">rank_for_labelling</span><span class="p">(</span>
+</span><span id="__span-0-484"><a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="n">candidates</span><span class="p">,</span>
+</span><span id="__span-0-485"><a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="n">n_to_label</span><span class="o">=</span><span class="n">n_to_label</span><span class="p">,</span>
+</span><span id="__span-0-486"><a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="n">diverse_fraction</span><span class="o">=</span><span class="n">diverse_fraction</span><span class="p">,</span>
+</span><span id="__span-0-487"><a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="p">)</span>
+</span><span id="__span-0-488"><a id="__codelineno-0-488" name="__codelineno-0-488"></a>
+</span><span id="__span-0-489"><a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="c1"># Audit: keep all candidates, ordered by uncertainty.</span>
+</span><span id="__span-0-490"><a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="n">all_ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">uncertainty</span><span class="p">)</span>
+</span><span id="__span-0-491"><a id="__codelineno-0-491" name="__codelineno-0-491"></a>
+</span><span id="__span-0-492"><a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="k">return</span> <span class="n">PropositionBatch</span><span class="p">(</span>
+</span><span id="__span-0-493"><a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ranked</span><span class="p">),</span>
+</span><span id="__span-0-494"><a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="n">review_template</span><span class="o">=</span><span class="n">build_review_template</span><span class="p">(</span><span class="n">ranked</span><span class="p">),</span>
+</span><span id="__span-0-495"><a id="__codelineno-0-495" name="__codelineno-0-495"></a>        <span class="n">all_candidates</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">all_ordered</span><span class="p">),</span>
+</span><span id="__span-0-496"><a id="__codelineno-0-496" name="__codelineno-0-496"></a>        <span class="n">strategies_used</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">resolved_strategies</span><span class="p">),</span>
+</span><span id="__span-0-497"><a id="__codelineno-0-497" name="__codelineno-0-497"></a>    <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3351,7 +3378,7 @@ Determinism is required for reproducible audits.</p>
               </div>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'all-MiniLM-L6-v2'
+                  <code><a class="autorefs autorefs-internal" title="DEFAULT_MODEL: str = 'Snowflake/snowflake-arctic-embed-l-v2.0'
 
   
       module-attribute
