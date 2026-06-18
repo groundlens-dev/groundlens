@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.17-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.18-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) · [Research](#research) · [Examples](examples/) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
@@ -41,6 +41,20 @@ Each layer answers a different question. Both questions get asked in a real audi
 | Rule-based audit | "Which specific fact, citation, or procedural element is missing or fabricated, and on what authority do we say so?" | Binary verdicts; doesn't capture semantic drift outside the rule patterns |
 
 Rules give you the **citation-backed audit trail** an auditor needs to reproduce a decision two years from now. Geometry gives you the **continuous score** an operations team needs to triage the bottom 5% of a million daily outputs. Without rules, you can't defend the decision. Without geometry, you can't scale the review. Groundlens ships both, and a hash-chained audit log that ties them together.
+
+## What groundlens detects (and what it doesn't)
+
+The geometric layer rests on three peer-reviewed papers that explicitly characterize which kinds of hallucinations angular geometry of contrastive sentence encoders can and cannot separate. Honest scope is the most important thing this README can give a Head of Model Risk reading it for the first time:
+
+| Hallucination type | What it looks like | Detectable by groundlens? |
+|---|---|---|
+| **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. Validated on HaluEval QA (AUC ≈ 0.81 averaged across five encoders) |
+| **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI** with domain calibration. Validated on ExpertQA (DGI beats NLI by Δ = 0.243, p < .001) and 212-pair human-confabulated dataset (87.8% on declarative-knowledge domains) |
+| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by angular geometry. Documented as a *negative result* on TruthfulQA in Marin (2025), AUC = 0.478 — *below random*. For Type III, combine groundlens with NLI specific to your domain and/or KG verification |
+
+References for the taxonomy: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771), Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224), Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
+
+**For regulated-industry deployments**: Type III is precisely the most dangerous class of errors in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The honest combination — SGI/DGI for Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
 
 ## Quick start
 
@@ -317,7 +331,7 @@ Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deter
 | Layer | Module | Inputs | Output | Calibrable? | Bundled defaults | Custom extension |
 |---|---|---|---|---|---|---|
 | **Score — geometry** | `groundlens.sgi`, `groundlens.dgi` | `(question, response[, context])` + sentence-transformer embedding | continuous `normalized` ∈ ℝ, `flagged` ∈ {True, False} | **DGI yes** (via `mu_hat`). SGI no — geometric ratio with no parameter. | bundled `reference_pairs.csv` (212 cross-domain pairs from `grounding-benchmark`) | `DGI.calibrate(pairs=…)` or `reference_csv=…` |
-| **Score — encoder** | `groundlens._internal.embeddings` | text | unit-norm vector | n/a | `all-MiniLM-L6-v2` for English, `MULTILINGUAL_MINI` / `MULTILINGUAL_E5` for multilingual | any sentence-transformers model |
+| **Score — encoder** | `groundlens._internal.embeddings` | text | unit-norm vector | n/a | `Snowflake/snowflake-arctic-embed-l-v2.0` (default since 2026.6.18, multilingual, 1024 dims), or `LIGHTWEIGHT_MINILM` / `MULTILINGUAL_MINI` / `MULTILINGUAL_E5` | any sentence-transformers model |
 | **Rules** | `groundlens.rules`, `groundlens.agents.*` | `(question, response, context, metadata)` | per-rule pass/fail with citation + sub-scores + `audit_explanation` | n/a (deterministic) | `routing_rules`, `customer_support_rules(rag=…)`, `specialized_agent_rules`, `decision_rationale_rules(domain=…, regulations=…)` | `RuleSet(rules=(ChecklistRule(...), ...))` |
 | **Audit** | `groundlens.audit` | every triage output | SHA-256 hash-chained sqlite log | n/a | `open_log("triage.db")` | append-only, replay-verifiable |
 | **Compliance mapping** | `groundlens.compliance` | rule IDs | clause IDs (SR 26-2, EU AI Act, NIST AI RMF) | n/a | included for built-in rule sets | extend in your own rule set's `citation` field |

@@ -6,9 +6,15 @@ calls. The model is loaded lazily on first use — importing groundlens does
 not trigger a download or GPU allocation.
 
 Supported models (any sentence-transformers model works):
-    - ``all-MiniLM-L6-v2`` (default): 384 dims, 22M params, fast.
-    - ``all-mpnet-base-v2``: 768 dims, 109M params, higher quality.
-    - ``gte-small``: 384 dims, Alibaba DAMO, multilingual.
+    - ``Snowflake/snowflake-arctic-embed-l-v2.0`` (default): 1024 dims, 568M
+      params, multilingual (100+ languages), 8192 token context window.
+      Snowflake's flagship retrieval encoder. Slightly heavier than smaller
+      defaults but produces materially better grounding signal across SGI/DGI
+      benchmarks (verified on RAGTruth + RAGBench, see CHANGELOG 2026.6.18).
+    - ``all-MiniLM-L6-v2`` (legacy default through 2026.6.17): 384 dims,
+      22M params, fast English-only. Available for lightweight deployments.
+    - ``all-mpnet-base-v2``: 768 dims, 109M params, higher quality English.
+    - ``MULTILINGUAL_MINI`` / ``MULTILINGUAL_E5``: see constants below.
     - Any model on HuggingFace Hub compatible with sentence-transformers.
 
 Thread safety:
@@ -31,8 +37,40 @@ logger = logging.getLogger(__name__)
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-DEFAULT_MODEL: str = "all-MiniLM-L6-v2"
-"""Default sentence transformer model. Fast and accurate for English."""
+DEFAULT_MODEL: str = "Snowflake/snowflake-arctic-embed-l-v2.0"
+"""Default sentence transformer model.
+
+Snowflake Arctic Embed L v2.0 — 1024 dims, 568M params, multilingual
+(100+ languages including Spanish/Catalan/Galician/English/Portuguese),
+8192 token context window. Requires ``trust_remote_code=True`` on load
+(the model ships custom pooling code).
+
+Why this is the default:
+
+  - Verified on RAGTruth (n=2,700) and RAGBench (n=8,838) with consistent
+    SGI/DGI behavior; calibrations in cookbooks ship against this encoder.
+  - L2-normalizes embeddings naturally (contrastive training), which keeps
+    the canonical angular SGI formulation numerically stable.
+  - Multilingual out-of-the-box — relevant for European bank deployments.
+
+When to override:
+
+  - Lightweight deployment (CPU-only, latency-critical): use
+    ``LIGHTWEIGHT_MINILM = "all-MiniLM-L6-v2"`` (22M params, 384 dims).
+    The previous default through 2026.6.17.
+  - Spanish/multilingual smaller footprint: use ``MULTILINGUAL_MINI``
+    (118M params, 384 dims).
+  - Higher quality multilingual at higher cost: use ``MULTILINGUAL_E5``
+    (560M params, 1024 dims) with required "query: "/"passage: " prefixes.
+
+To override globally, pass ``model="..."`` to ``compute_sgi``,
+``compute_dgi``, or the corresponding scorer classes.
+"""
+
+LIGHTWEIGHT_MINILM: str = "all-MiniLM-L6-v2"
+"""Lightweight English-only encoder (22M params, 384 dims). Was the default
+through groundlens 2026.6.17. Use for latency-critical CPU-only deployments
+where the trade-off in grounding signal quality is acceptable."""
 
 MULTILINGUAL_MINI: str = "paraphrase-multilingual-MiniLM-L12-v2"
 """Multilingual MiniLM (118M params, 384 dims, 50+ languages including

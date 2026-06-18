@@ -5,6 +5,71 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.18 -- SGI bug fix + Snowflake default + paper alignment
+
+### Fixed
+
+- **`compute_sgi` now matches paper canonical formulation.** Previous
+  implementation computed SGI as a Euclidean ratio over raw (non-normalized)
+  embeddings:
+  ```
+  SGI_old = ||r - q|| / ||r - c||
+  ```
+  The published paper (arXiv:2512.13771, Algorithm 1) defines SGI as a ratio
+  of **angular** distances over **L2-normalized** embeddings on the unit
+  hypersphere:
+  ```
+  SGI = arccos(r_hat . q_hat) / arccos(r_hat . c_hat)
+  ```
+  The implementation has been corrected. Verified on RAGTruth (n=2,700) and
+  RAGBench (n=8,838) with preserved embeddings: the two formulations produce
+  rankings that differ by Δ AUROC ≤ 0.005 on contrastive encoders
+  (Snowflake-L, MPNet, MiniLM, BGE, GTE). In practice flag decisions on these
+  encoders were equivalent because contrastive training produces near
+  unit-norm embeddings, making `2 sin(theta/2)` monotone in `theta`. The fix
+  matters for non-contrastive or non-normalized encoders and aligns with the
+  published algorithm.
+
+### Changed
+
+- **Default encoder is now `Snowflake/snowflake-arctic-embed-l-v2.0`.**
+  Previous default was `all-MiniLM-L6-v2`. Snowflake Arctic Embed L v2.0 is:
+
+  - **Multilingual** (100+ languages including Spanish/Catalan/Galician/
+    English/Portuguese) — relevant for European bank deployments
+  - **1024 dims, 568M params, 8192-token context** — better signal in
+    long-context RAG scenarios
+  - **Naturally L2-normalized output** — keeps the canonical angular SGI
+    formulation numerically stable
+  - **Calibrated in shipped cookbooks** and validated on RAGTruth + RAGBench
+
+  The previous default is still exported as `LIGHTWEIGHT_MINILM` for
+  CPU-only / latency-critical deployments. Override at scorer level:
+  ```python
+  from groundlens import SGI, LIGHTWEIGHT_MINILM
+  sgi = SGI(model=LIGHTWEIGHT_MINILM)
+  ```
+
+### Removed
+
+- **PGI (Perpendicular Grounding Index)** primitive was developed in
+  intermediate builds of 2026.6.18 and **removed before release**.
+  Cross-domain validation on RAGBench showed PGI does not generalize beyond
+  RAGTruth-style hallucinations, and the underlying motivation (a precision
+  "ceiling" of SGI ≈ 0.40 on RAGTruth) was traced to a structural property
+  of the test dataset (mix of Type I and Type III hallucinations) rather
+  than the primitive. The geometric taxonomy of Marin (2026,
+  arXiv:2602.13224v3) predicts this: Type III (within-frame factual errors)
+  are not detectable by angular geometry. See documented negative result on
+  TruthfulQA in the SGI paper (AUC = 0.478).
+
+### Docs
+
+- README "What groundlens detects" section added with Type I/II/III taxonomy
+  and citations to the three founding papers.
+- Cookbook list reorganized: SGI/HaluEval-style examples vs DGI/calibrated
+  examples vs Type III negative-result honest-limits documentation.
+
 ## 2026.6.17 -- `DGI.propose_labels` redesign with `SeedExample` (BREAKING)
 
 ### Breaking changes

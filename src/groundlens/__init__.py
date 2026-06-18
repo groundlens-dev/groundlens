@@ -58,6 +58,7 @@ References:
 from groundlens import agents, rules
 from groundlens._internal.embeddings import (
     DEFAULT_MODEL,
+    LIGHTWEIGHT_MINILM,
     MULTILINGUAL_E5,
     MULTILINGUAL_MINI,
 )
@@ -89,6 +90,7 @@ from groundlens.sgi import SGI, compute_sgi
 __all__ = [
     "DEFAULT_MODEL",
     "DGI",
+    "LIGHTWEIGHT_MINILM",
     "MULTILINGUAL_E5",
     "MULTILINGUAL_MINI",
     # Classes

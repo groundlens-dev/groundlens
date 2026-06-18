@@ -126,8 +126,10 @@ class TestSGIClass:
         assert sgi.model == "custom-model"
 
     def test_default_model(self) -> None:
+        from groundlens._internal.embeddings import DEFAULT_MODEL
+
         sgi = SGI()
-        assert sgi.model == "all-MiniLM-L6-v2"
+        assert sgi.model == DEFAULT_MODEL
 
 
 # ---------------------------------------------------------------------------
