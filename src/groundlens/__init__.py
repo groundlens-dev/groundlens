@@ -58,6 +58,7 @@ References:
 from groundlens import agents, rules
 from groundlens._internal.embeddings import (
     DEFAULT_MODEL,
+    LIGHTWEIGHT_MINILM,
     MULTILINGUAL_E5,
     MULTILINGUAL_MINI,
 )
@@ -72,7 +73,7 @@ from groundlens.agents import (
 from groundlens.calibrate import CalibrationResult, calibrate
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
-from groundlens.propose import ProposedLabel, PropositionBatch
+from groundlens.propose import ProposedLabel, PropositionBatch, SeedExample
 from groundlens.rules import (
     ChecklistRule,
     RuleEvidence,
@@ -89,6 +90,7 @@ from groundlens.sgi import SGI, compute_sgi
 __all__ = [
     "DEFAULT_MODEL",
     "DGI",
+    "LIGHTWEIGHT_MINILM",
     "MULTILINGUAL_E5",
     "MULTILINGUAL_MINI",
     # Classes
@@ -104,6 +106,7 @@ __all__ = [
     "RuleSet",
     "RuleSetResult",
     "SGIResult",
+    "SeedExample",
     # Meta
     "__version__",
     # Submodules

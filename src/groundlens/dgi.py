@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
-    from groundlens.propose import PropositionBatch
+    from groundlens.propose import PropositionBatch, SeedExample
 
 logger = logging.getLogger(__name__)
 
@@ -330,39 +330,46 @@ class DGI:
     def propose_labels(
         self,
         *,
-        faq_corpus: list[str],
-        seed_pairs: list[tuple[str, str]],
+        seeds: list[SeedExample],
         llm_generate: Callable[[str], str],
-        n_candidates: int = 200,
-        n_to_label: int = 20,
+        n_candidates: int = 50,
+        n_to_label: int = 10,
         strategies: str | tuple[str | tuple[str, str], ...] = "default",
         diverse_fraction: float = 0.3,
         seed: int = 42,
     ) -> PropositionBatch:
         """Active-learning bootstrap of a verified-grounded calibration set.
 
-        Generates candidate (question, response) pairs via ``llm_generate``
-        under the named confabulation strategies, scores each candidate
-        with this DGI, and returns the ``n_to_label`` most useful pairs
-        for a human reviewer.
+        Given 10-50 verified-grounded :class:`SeedExample` triples and a
+        text-generation callable, this method:
 
-        This method DOES NOT label and DOES NOT calibrate. The human
+        1. Picks a seed at random for each candidate and rewrites its
+           ``grounded`` response under one of the named confabulation
+           strategies, using the seed's own ``context`` as the source
+           of truth in the prompt. Coherence is preserved by design --
+           the prompt never sees a mismatched context+question pair.
+        2. Scores each generated candidate with this DGI.
+        3. Ranks candidates by acquisition score (70% uncertainty /
+           30% strategy diversity) and returns the top ``n_to_label``
+           for a human reviewer.
+
+        The method DOES NOT label and DOES NOT calibrate. The human
         reviewer assigns the labels; the caller then passes the labelled
-        pairs to :meth:`calibrate`. The loop is non-circular by design.
+        grounded subset to :meth:`calibrate`. The loop is non-circular
+        by design.
 
         Args:
-            faq_corpus: The deployment's FAQ corpus. Each entry is a
-                short paragraph in the deployment's domain.
-            seed_pairs: 10-50 verified ``(question, grounded_response)``
-                tuples. Used both as anchors for candidate generation
-                and to estimate the acquisition threshold.
+            seeds: 10-50 verified-grounded :class:`SeedExample` triples.
+                Each carries its own ``context``, ``question`` and
+                ``grounded`` response, so the generation prompt is
+                always coherent.
             llm_generate: A callable ``(prompt: str) -> str`` that the
-                user provides (OpenAI / Anthropic / local LLM wrapper).
-                groundlens does not embed an LLM.
+                user provides (an OpenAI / Anthropic / local LLM
+                wrapper). groundlens does not embed an LLM.
             n_candidates: Total candidates to generate across all
-                strategies. Default 200.
+                strategies. Default 50 (≈5 minutes at 4 s/call).
             n_to_label: How many candidates the batch should contain.
-                Default 20. The rest are returned in
+                Default 10. The rest are returned in
                 ``batch.all_candidates`` for audit.
             strategies: ``"default"`` (all five strategies from
                 ``groundlens-dev/grounding-benchmark``), or a tuple of
@@ -372,15 +379,16 @@ class DGI:
             diverse_fraction: Fraction of the batch reserved for
                 strategy diversity (the rest is filled by uncertainty).
                 Default 0.3.
-            seed: Random seed for sampling FAQ contexts and seed pairs.
+            seed: Random seed for sampling seeds across rounds.
                 Determinism is required for reproducible audits.
 
         Returns:
             A :class:`groundlens.PropositionBatch` ready for human review.
 
         Raises:
-            ValueError: If ``seed_pairs`` is empty or ``n_candidates`` < 1.
-            TypeError: If ``llm_generate`` is not callable.
+            ValueError: If ``seeds`` is empty or ``n_candidates`` < 1.
+            TypeError: If ``llm_generate`` is not callable, or any
+                element of ``seeds`` is not a ``SeedExample``.
         """
         import random
         import warnings
@@ -389,14 +397,21 @@ class DGI:
         from groundlens.propose import (
             ProposedLabel,
             PropositionBatch,
+            SeedExample,
             _uncertainty,
             build_review_template,
             rank_for_labelling,
         )
 
-        if not seed_pairs:
-            msg = "seed_pairs must contain at least one verified-grounded pair."
+        if not seeds:
+            msg = "seeds must contain at least one SeedExample."
             raise ValueError(msg)
+        if not all(isinstance(s, SeedExample) for s in seeds):
+            msg = (
+                "Every item in seeds must be a SeedExample(context=..., "
+                "question=..., grounded=...) instance."
+            )
+            raise TypeError(msg)
         if n_candidates < 1:
             msg = "n_candidates must be >= 1."
             raise ValueError(msg)
@@ -412,7 +427,7 @@ class DGI:
         # Threshold: median DGI score on the seed grounded pairs. This is
         # a reasonable proxy for the boundary between grounded and
         # ungrounded when no calibrated threshold is available yet.
-        seed_scores = [self.score(q, r).normalized for q, r in seed_pairs]
+        seed_scores = [self.score(s.question, s.grounded).normalized for s in seeds]
         sorted_scores = sorted(seed_scores)
         n = len(sorted_scores)
         median = (
@@ -424,21 +439,20 @@ class DGI:
 
         rng = random.Random(seed)
 
-        # Round-robin across strategies; for each candidate, sample a
-        # (context, seed_pair) and call the user's LLM with the strategy
-        # template.
+        # Round-robin across strategies. For each candidate, sample ONE
+        # seed and pass its OWN (context, question, grounded) through
+        # the strategy template. No more mismatched context/seed pairs.
         candidates: list[ProposedLabel] = []
         per_strategy = max(1, n_candidates // len(resolved_strategies))
         for strat_name, template in resolved_strategies:
             for _ in range(per_strategy):
                 if len(candidates) >= n_candidates:
                     break
-                context = rng.choice(faq_corpus)
-                anchor_q, anchor_g = rng.choice(seed_pairs)
+                anchor = rng.choice(seeds)
                 prompt = template.format(
-                    context=context,
-                    question=anchor_q,
-                    grounded=anchor_g,
+                    context=anchor.context,
+                    question=anchor.question,
+                    grounded=anchor.grounded,
                 )
                 try:
                     candidate_resp = llm_generate(prompt)
@@ -453,14 +467,14 @@ class DGI:
                 if not isinstance(candidate_resp, str) or not candidate_resp.strip():
                     continue
 
-                score = self.score(anchor_q, candidate_resp).normalized
+                score = self.score(anchor.question, candidate_resp).normalized
                 candidates.append(
                     ProposedLabel(
-                        question=anchor_q,
+                        question=anchor.question,
                         candidate_response=candidate_resp.strip(),
                         dgi_score=float(score),
                         strategy=strat_name,
-                        context_excerpt=context,
+                        context_excerpt=anchor.context,
                         uncertainty=_uncertainty(float(score), threshold),
                     )
                 )

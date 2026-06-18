@@ -11,7 +11,7 @@ import warnings
 import numpy as np
 import pytest
 
-from groundlens import DGI, ProposedLabel, PropositionBatch
+from groundlens import DGI, ProposedLabel, PropositionBatch, SeedExample
 from groundlens._internal.strategies import DEFAULT_STRATEGIES, resolve_strategies
 from groundlens.propose import (
     _uncertainty,
@@ -114,6 +114,40 @@ class TestRankForLabelling:
         assert strategies == {"a", "b"}
 
 
+# ── SeedExample validation ───────────────────────────────────────────
+
+
+class TestSeedExample:
+    def test_valid_seed(self) -> None:
+        s = SeedExample(
+            context="Bizum permite enviar dinero...",
+            question="Cual es el limite?",
+            grounded="1000 EUR por transaccion.",
+        )
+        assert s.context.startswith("Bizum")
+        assert s.question.endswith("?")
+        assert s.grounded.endswith(".")
+
+    def test_seed_is_frozen(self) -> None:
+        s = SeedExample(context="c", question="q", grounded="g")
+        with pytest.raises(Exception):  # noqa: B017, PT011  (FrozenInstanceError)
+            s.context = "other"  # type: ignore[misc]
+
+    @pytest.mark.parametrize("field", ["context", "question", "grounded"])
+    def test_empty_field_raises(self, field: str) -> None:
+        kwargs = {"context": "c", "question": "q", "grounded": "g"}
+        kwargs[field] = ""
+        with pytest.raises(ValueError, match=f"SeedExample.{field}"):
+            SeedExample(**kwargs)
+
+    @pytest.mark.parametrize("field", ["context", "question", "grounded"])
+    def test_whitespace_field_raises(self, field: str) -> None:
+        kwargs = {"context": "c", "question": "q", "grounded": "g"}
+        kwargs[field] = "   "
+        with pytest.raises(ValueError, match=f"SeedExample.{field}"):
+            SeedExample(**kwargs)
+
+
 # ── DGI.propose_labels with mocked DGI.score ─────────────────────────
 
 
@@ -121,6 +155,10 @@ class _FakeDGIResult:
     def __init__(self, normalized: float) -> None:
         self.normalized = normalized
         self.flagged = normalized < 0.5
+
+
+def _seed(context: str = "ctx", question: str = "q", grounded: str = "g") -> SeedExample:
+    return SeedExample(context=context, question=question, grounded=grounded)
 
 
 class TestProposeLabels:
@@ -153,8 +191,10 @@ class TestProposeLabels:
             return f"resp_{len(calls)}"
 
         batch = dgi.propose_labels(
-            faq_corpus=["FAQ entry one.", "FAQ entry two."],
-            seed_pairs=[("q1", "a1"), ("q2", "a2")],
+            seeds=[
+                _seed("FAQ one.", "q1", "a1"),
+                _seed("FAQ two.", "q2", "a2"),
+            ],
             llm_generate=fake_llm,
             n_candidates=10,
             n_to_label=4,
@@ -171,6 +211,47 @@ class TestProposeLabels:
         for i in range(1, len(batch.items) + 1):
             assert f"Item {i}/{len(batch.items)}" in batch.review_template
 
+    def test_prompt_receives_matched_context_and_seed(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The bug fixed in 2026.6.17: context and seed must come from the
+        SAME SeedExample, never randomly paired."""
+        dgi = self._make_dgi(monkeypatch)
+        captured_prompts: list[str] = []
+
+        def capture_llm(prompt: str) -> str:
+            captured_prompts.append(prompt)
+            return "x"
+
+        seeds = [
+            _seed("CONTEXT_BIZUM", "Q_BIZUM", "G_BIZUM"),
+            _seed("CONTEXT_HIPOTECA", "Q_HIPOTECA", "G_HIPOTECA"),
+        ]
+
+        dgi.propose_labels(
+            seeds=seeds,
+            llm_generate=capture_llm,
+            n_candidates=10,
+            n_to_label=2,
+            strategies=("redefinition",),
+            seed=0,
+        )
+
+        # Every prompt must carry context+question+grounded from the SAME seed.
+        for prompt in captured_prompts:
+            if "CONTEXT_BIZUM" in prompt:
+                assert "Q_BIZUM" in prompt
+                assert "G_BIZUM" in prompt
+                assert "Q_HIPOTECA" not in prompt
+                assert "G_HIPOTECA" not in prompt
+            elif "CONTEXT_HIPOTECA" in prompt:
+                assert "Q_HIPOTECA" in prompt
+                assert "G_HIPOTECA" in prompt
+                assert "Q_BIZUM" not in prompt
+                assert "G_BIZUM" not in prompt
+            else:
+                pytest.fail(f"prompt has neither context: {prompt[:120]}")
+
     def test_all_strategies_appear_with_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
         dgi = self._make_dgi(monkeypatch)
 
@@ -178,8 +259,7 @@ class TestProposeLabels:
             return "x" * (np.random.default_rng(42).integers(10, 90))
 
         batch = dgi.propose_labels(
-            faq_corpus=["FAQ entry"],
-            seed_pairs=[("q", "a")],
+            seeds=[_seed()],
             llm_generate=fake_llm,
             n_candidates=50,
             n_to_label=20,
@@ -196,8 +276,7 @@ class TestProposeLabels:
             return "fixed_response"
 
         batch = dgi.propose_labels(
-            faq_corpus=["FAQ"],
-            seed_pairs=[("q", "a")],
+            seeds=[_seed()],
             llm_generate=fake_llm,
             n_candidates=4,
             n_to_label=4,
@@ -209,12 +288,20 @@ class TestProposeLabels:
         )
         assert set(batch.strategies_used) == {"custom_a", "custom_b"}
 
-    def test_empty_seed_pairs_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_empty_seeds_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
         dgi = self._make_dgi(monkeypatch)
-        with pytest.raises(ValueError, match="seed_pairs"):
+        with pytest.raises(ValueError, match="seeds"):
             dgi.propose_labels(
-                faq_corpus=["FAQ"],
-                seed_pairs=[],
+                seeds=[],
+                llm_generate=lambda p: "r",
+                n_candidates=5,
+            )
+
+    def test_non_seed_item_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        dgi = self._make_dgi(monkeypatch)
+        with pytest.raises(TypeError, match="SeedExample"):
+            dgi.propose_labels(
+                seeds=[("q", "g")],  # type: ignore[list-item]
                 llm_generate=lambda p: "r",
                 n_candidates=5,
             )
@@ -223,8 +310,7 @@ class TestProposeLabels:
         dgi = self._make_dgi(monkeypatch)
         with pytest.raises(ValueError, match="n_candidates"):
             dgi.propose_labels(
-                faq_corpus=["FAQ"],
-                seed_pairs=[("q", "a")],
+                seeds=[_seed()],
                 llm_generate=lambda p: "r",
                 n_candidates=0,
             )
@@ -233,8 +319,7 @@ class TestProposeLabels:
         dgi = self._make_dgi(monkeypatch)
         with pytest.raises(TypeError, match="callable"):
             dgi.propose_labels(
-                faq_corpus=["FAQ"],
-                seed_pairs=[("q", "a")],
+                seeds=[_seed()],
                 llm_generate="not_a_function",  # type: ignore[arg-type]
                 n_candidates=5,
             )
@@ -252,8 +337,7 @@ class TestProposeLabels:
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
             batch = dgi.propose_labels(
-                faq_corpus=["FAQ"],
-                seed_pairs=[("q", "a")],
+                seeds=[_seed()],
                 llm_generate=flaky_llm,
                 n_candidates=10,
                 n_to_label=10,
@@ -274,8 +358,7 @@ class TestProposeLabels:
             return "   "
 
         batch = dgi.propose_labels(
-            faq_corpus=["FAQ"],
-            seed_pairs=[("q", "a")],
+            seeds=[_seed()],
             llm_generate=empty_llm,
             n_candidates=5,
             n_to_label=5,

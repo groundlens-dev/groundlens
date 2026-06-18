@@ -40,7 +40,7 @@ DGI_PASS: float = 0.30
 """DGI score indicating alignment with grounded reference direction. Green zone."""
 
 
-# ── Normalization ──────────────────��─────────────────────────────────────────
+# ── Normalization ───────────────────────────────────────────────────────────
 
 
 def normalize_sgi(raw_sgi: float) -> float:

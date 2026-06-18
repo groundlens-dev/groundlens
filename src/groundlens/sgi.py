@@ -4,17 +4,18 @@ SGI evaluates whether an LLM response engaged with provided source
 context or stayed semantically anchored to the question. It requires
 three inputs: question, context, and response.
 
-Mathematical formulation:
+Mathematical formulation (paper canonical, arXiv:2512.13771 Algorithm 1):
 
-    SGI = dist(phi(response), phi(question)) / dist(phi(response), phi(context))
+    SGI = theta(r, q) / theta(r, c)
+        = arccos(r_hat . q_hat) / arccos(r_hat . c_hat)
 
-where phi is the sentence embedding function and dist is Euclidean distance
-in the embedding space R^n.
+where r_hat, q_hat, c_hat are L2-normalized sentence embeddings on the unit
+hypersphere S^(d-1), and theta is the geodesic (angular) distance.
 
 Geometric interpretation:
 
-    - SGI > 1: response is closer to context than to question (grounded).
-    - SGI < 1: response is closer to question than to context (risk).
+    - SGI > 1: response is angularly closer to context than to question (grounded).
+    - SGI < 1: response is angularly closer to question than to context (risk).
     - SGI = 1: response is equidistant (ambiguous).
 
 Use cases:
@@ -23,21 +24,49 @@ Use cases:
     - Document Q&A: verify answers cite the source material.
     - Summarization: confirm the summary reflects the input document.
 
+Validated on HaluEval QA (n=5,000), AUC 0.806 averaged across five
+embedding architectures. Documented negative result on TruthfulQA
+(AUC=0.478): angular geometry measures topical engagement, not factual
+accuracy.
+
 References:
-    Marin (2025). *Semantic Grounding Index for LLM Hallucination Detection*.
-    arXiv:2512.13771.
+    Marin (2025). *Semantic Grounding Index: Geometric Bounds on Context
+        Engagement in RAG Systems*. arXiv:2512.13771.
 """
 
 from __future__ import annotations
 
 import logging
+import math
+
+import numpy as np
 
 from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
-from groundlens._internal.geometry import euclidean_distance
 from groundlens._internal.thresholds import SGI_REVIEW, normalize_sgi
 from groundlens.score import SGIResult
 
 logger = logging.getLogger(__name__)
+
+_EPS = 1e-8
+
+
+def _angular_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """Geodesic distance on the unit hypersphere.
+
+    Assumes a and b are L2-normalized vectors. Returns arccos(a . b),
+    clipped to [-1, 1] for numerical safety. The result lies in [0, pi].
+    """
+    dot = float(np.dot(a, b))
+    dot = max(-1.0, min(1.0, dot))
+    return math.acos(dot)
+
+
+def _l2_normalize(v: np.ndarray) -> np.ndarray:
+    """Project vector onto the unit hypersphere. Returns v if ||v|| < eps."""
+    norm = float(np.linalg.norm(v))
+    if norm < _EPS:
+        return v
+    return v / norm
 
 
 def compute_sgi(
@@ -84,11 +113,17 @@ def compute_sgi(
     embeddings = encode_texts([question, context, response], model_name=model)
     q_emb, ctx_emb, resp_emb = embeddings[0], embeddings[1], embeddings[2]
 
-    q_dist = euclidean_distance(resp_emb, q_emb)
-    ctx_dist = euclidean_distance(resp_emb, ctx_emb)
+    # L2-normalize to project onto the unit hypersphere (paper Algorithm 1).
+    q_hat = _l2_normalize(q_emb)
+    c_hat = _l2_normalize(ctx_emb)
+    r_hat = _l2_normalize(resp_emb)
 
-    # Degenerate case: response identical to context.
-    if ctx_dist < 1e-8:
+    # Angular (geodesic) distances on S^(d-1).
+    q_dist = _angular_distance(r_hat, q_hat)
+    ctx_dist = _angular_distance(r_hat, c_hat)
+
+    # Degenerate case: response identical to context (theta(r, c) ≈ 0).
+    if ctx_dist < _EPS:
         return SGIResult(
             value=10.0,
             normalized=1.0,
@@ -97,8 +132,8 @@ def compute_sgi(
             ctx_dist=round(ctx_dist, 4),
         )
 
-    # Degenerate case: response identical to question.
-    if q_dist < 1e-8:
+    # Degenerate case: response identical to question (theta(r, q) ≈ 0).
+    if q_dist < _EPS:
         return SGIResult(
             value=0.0,
             normalized=0.0,

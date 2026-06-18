@@ -4,10 +4,10 @@ A new deployment needs a verified-grounded corpus before
 :func:`groundlens.compute_dgi` can produce meaningful scores. Curating
 that corpus from scratch is the practical bottleneck most teams hit
 first. This module implements the *propose* half of an
-active-learning loop: given a FAQ corpus, a small seed of verified
-grounded pairs, and a text-generation callable, it produces a ranked
-batch of candidate ``(question, response)`` pairs for a human reviewer
-to label.
+active-learning loop: given a list of self-contained
+``SeedExample(context, question, grounded)`` triples and a text-generation
+callable, it produces a ranked batch of candidate ``(question, response)``
+pairs for a human reviewer to label.
 
 The loop is intentionally non-circular: the DGI score *orders* the
 candidates by uncertainty, but the *label* is supplied by the human at
@@ -17,11 +17,13 @@ that proposed the next batch.
 Public types
 ------------
 
+- :class:`SeedExample` -- one verified-grounded triple
+  ``(context, question, grounded)`` you supply as input.
 - :class:`ProposedLabel` -- one candidate ready for review.
 - :class:`PropositionBatch` -- the batch returned by
   :meth:`groundlens.DGI.propose_labels`.
 
-Both are exposed at the top of the package.
+All three are exposed at the top of the package.
 
 References:
 ----------
@@ -33,6 +35,42 @@ CC BY 4.0.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class SeedExample:
+    """One verified-grounded triple you supply to ``DGI.propose_labels``.
+
+    A ``SeedExample`` binds a FAQ paragraph (``context``) to a question
+    that paragraph answers (``question``) and the verified-grounded
+    response to that question (``grounded``). Bundling the three
+    together is what keeps the candidate generation coherent: the
+    confabulation prompt receives the *same* context, question and
+    grounded answer rather than randomly-paired pieces.
+
+    Attributes:
+        context: A paragraph from the deployment's FAQ corpus that
+            supports the grounded response.
+        question: A question whose answer is contained in ``context``.
+        grounded: The verified-grounded response to ``question`` given
+            ``context``. The confabulation strategies rewrite this
+            response under specific failure modes.
+
+    Raises:
+        ValueError: If any field is empty or whitespace-only.
+    """
+
+    context: str
+    question: str
+    grounded: str
+
+    def __post_init__(self) -> None:
+        """Validate that every field is a non-empty, non-whitespace string."""
+        for name in ("context", "question", "grounded"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                msg = f"SeedExample.{name} must be a non-empty string."
+                raise ValueError(msg)
 
 
 @dataclass(frozen=True)
