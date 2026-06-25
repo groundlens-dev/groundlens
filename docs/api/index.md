@@ -26,6 +26,18 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 
 ::: groundlens.calibrate.calibrate
 
+### fit_thresholds
+
+::: groundlens.calibrate.fit_thresholds
+
+### set_default_encoder
+
+::: groundlens._internal.embeddings.set_default_encoder
+
+### get_default_encoder
+
+::: groundlens._internal.embeddings.get_default_encoder
+
 ## Core Classes
 
 ### SGI
@@ -53,6 +65,10 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 ### CalibrationResult
 
 ::: groundlens.calibrate.CalibrationResult
+
+### ThresholdFit
+
+::: groundlens.calibrate.ThresholdFit
 
 ## Providers
 
@@ -120,4 +136,6 @@ For auto-generated documentation from source docstrings, ensure `mkdocstrings` i
 | `DGIResult` | DGI computation result | `value`, `normalized`, `flagged` |
 | `GroundlensScore` | Unified evaluation result | `value`, `normalized`, `flagged`, `method`, `explanation`, `detail` |
 | `CalibrationResult` | DGI calibration output | `model`, `n_pairs`, `embedding_dim`, `mu_hat`, `concentration` |
+| `ThresholdFit` | Fitted SGI/DGI thresholds | `sgi_review`, `dgi_pass`, `n`, `model`, `metric` |
+| `EmbeddingFn` | Bring-your-own encoder callable type | `Callable[[list[str]], NDArray[np.float32]]` |
 | `LLMResponse` | Provider response wrapper | `text`, `model`, `usage`, `groundlens_score` |

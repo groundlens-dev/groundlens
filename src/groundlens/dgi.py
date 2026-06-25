@@ -47,7 +47,11 @@ import numpy as np
 from groundlens._internal.csv_loader import load_reference_pairs
 from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
 from groundlens._internal.geometry import displacement_vector, unit_normalize
-from groundlens._internal.thresholds import DGI_PASS, normalize_dgi
+from groundlens._internal.thresholds import (
+    DGI_PASS,
+    _warn_default_thresholds_with_custom_encoder,
+    normalize_dgi,
+)
 from groundlens.score import DGIResult
 
 if TYPE_CHECKING:
@@ -55,18 +59,21 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
+    from groundlens._internal.embeddings import EmbeddingFn
     from groundlens.propose import PropositionBatch, SeedExample
 
 logger = logging.getLogger(__name__)
 
 # ── Module-level reference direction cache ───────────────────────────────────
 
-_mu_hat_cache: dict[tuple[str, str], NDArray[np.float32]] = {}
+_mu_hat_cache: dict[tuple[str, str, int | None], NDArray[np.float32]] = {}
 
 
 def _compute_reference_direction(
     pairs: list[tuple[str, str]],
     model_name: str = DEFAULT_MODEL,
+    *,
+    encoder: EmbeddingFn | None = None,
 ) -> NDArray[np.float32]:
     """Compute the mean grounded displacement direction (mu_hat).
 
@@ -83,6 +90,8 @@ def _compute_reference_direction(
     Args:
         pairs: List of (question, response) string tuples.
         model_name: Sentence transformer model.
+        encoder: Optional bring-your-own-embeddings callable. When set,
+            sentence-transformers is bypassed (no torch required).
 
     Returns:
         Unit-normalized mean direction vector, shape ``(d,)``.
@@ -91,7 +100,7 @@ def _compute_reference_direction(
     for q, r in pairs:
         texts.extend([q, r])
 
-    embeddings = encode_texts(texts, model_name=model_name)
+    embeddings = encode_texts(texts, model_name=model_name, encoder=encoder)
 
     displacements: list[NDArray[np.float32]] = []
     for i in range(len(pairs)):
@@ -114,20 +123,29 @@ def _compute_reference_direction(
 def _get_mu_hat(
     model_name: str = DEFAULT_MODEL,
     reference_csv: str | None = None,
+    *,
+    encoder: EmbeddingFn | None = None,
 ) -> NDArray[np.float32]:
     """Get the cached reference direction, computing on first access.
 
-    Caches by ``(model_name, reference_csv)`` key. Using different CSV
-    paths produces independent reference directions.
+    Caches by ``(model_name, reference_csv, encoder identity)`` key. Using
+    different CSV paths or a custom encoder produces independent reference
+    directions, so a custom encoder never reuses a stale bundled mu_hat.
 
     Args:
         model_name: Sentence transformer model.
         reference_csv: Path to user CSV, or ``None`` for bundled data.
+        encoder: Optional bring-your-own-embeddings callable. Its identity
+            is folded into the cache key.
 
     Returns:
         Unit-normalized reference direction, shape ``(d,)``.
     """
-    cache_key = (model_name, reference_csv or "__bundled__")
+    cache_key = (
+        model_name,
+        reference_csv or "__bundled__",
+        id(encoder) if encoder is not None else None,
+    )
 
     if cache_key not in _mu_hat_cache:
         # The inline sentinel only resolves via cache; there is no on-disk
@@ -145,7 +163,7 @@ def _get_mu_hat(
             reference_csv or "bundled",
         )
         pairs = load_reference_pairs(reference_csv)
-        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name)
+        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name, encoder=encoder)
         logger.info(
             "DGI reference direction ready (dims=%d, pairs=%d).",
             _mu_hat_cache[cache_key].shape[0],
@@ -161,6 +179,7 @@ def compute_dgi(
     *,
     model: str = DEFAULT_MODEL,
     reference_csv: str | None = None,
+    encoder: EmbeddingFn | None = None,
 ) -> DGIResult:
     """Compute the Directional Grounding Index for a response.
 
@@ -170,6 +189,9 @@ def compute_dgi(
         model: Sentence transformer model name.
         reference_csv: Path to domain-specific calibration CSV.
             If ``None``, uses the bundled dataset.
+        encoder: Optional bring-your-own-embeddings callable taking
+            ``list[str]`` and returning an ``(n, d)`` array. Bypasses
+            sentence-transformers (no torch required) when provided.
 
     Returns:
         DGIResult with raw score, normalized score, and flag status.
@@ -193,8 +215,11 @@ def compute_dgi(
         msg = "response must be a non-empty string."
         raise ValueError(msg)
 
-    mu_hat = _get_mu_hat(model, reference_csv)
-    embeddings = encode_texts([question, response], model_name=model)
+    if (encoder is not None or model != DEFAULT_MODEL) and reference_csv is None:
+        _warn_default_thresholds_with_custom_encoder("compute_dgi", model, encoder is not None)
+
+    mu_hat = _get_mu_hat(model, reference_csv, encoder=encoder)
+    embeddings = encode_texts([question, response], model_name=model, encoder=encoder)
     q_emb, r_emb = embeddings[0], embeddings[1]
 
     delta = displacement_vector(q_emb, r_emb)
@@ -248,15 +273,20 @@ class DGI:
         self,
         model: str = DEFAULT_MODEL,
         reference_csv: str | None = None,
+        encoder: EmbeddingFn | None = None,
     ) -> None:
         """Initialize DGI scorer.
 
         Args:
             model: Sentence transformer model name.
             reference_csv: Path to domain-specific calibration CSV.
+            encoder: Optional bring-your-own-embeddings callable. When set,
+                both calibration and scoring bypass sentence-transformers
+                (no torch required).
         """
         self.model = model
         self.reference_csv = reference_csv
+        self.encoder = encoder
 
     def calibrate(
         self,
@@ -275,17 +305,19 @@ class DGI:
         Raises:
             ValueError: If neither ``pairs`` nor ``csv_path`` is provided.
         """
+        enc_id = id(self.encoder) if self.encoder is not None else None
+
         if csv_path is not None:
             self.reference_csv = csv_path
             # Force recomputation on next score() call.
-            cache_key = (self.model, csv_path)
+            cache_key = (self.model, csv_path, enc_id)
             _mu_hat_cache.pop(cache_key, None)
             return
 
         if pairs is not None:
             # Compute and cache the reference direction directly.
-            mu = _compute_reference_direction(pairs, self.model)
-            cache_key = (self.model, "__inline__")
+            mu = _compute_reference_direction(pairs, self.model, encoder=self.encoder)
+            cache_key = (self.model, "__inline__", enc_id)
             _mu_hat_cache[cache_key] = mu
             self.reference_csv = "__inline__"
             return
@@ -311,7 +343,8 @@ class DGI:
         if self.reference_csv == "__inline__":
             # Guard: the inline mu_hat must already be in the cache, since
             # there is no on-disk CSV to fall back to.
-            cache_key = (self.model, "__inline__")
+            enc_id = id(self.encoder) if self.encoder is not None else None
+            cache_key = (self.model, "__inline__", enc_id)
             if cache_key not in _mu_hat_cache:
                 msg = "Call calibrate() before score() when using inline pairs."
                 raise RuntimeError(msg)
@@ -325,6 +358,7 @@ class DGI:
             response=response,
             model=self.model,
             reference_csv=self.reference_csv,
+            encoder=self.encoder,
         )
 
     def propose_labels(

@@ -85,6 +85,7 @@ nav:
     - Confabulation Boundary: theory/confabulation-boundary.md
   - Guides:
     - RAG Verification: guides/rag-verification.md
+    - Custom Encoders / No-Torch: guides/custom-encoders.md
     - Active-Learning Bootstrap (propose_labels): guides/active-learning.md
     - Domain Calibration: guides/domain-calibration.md
     - Batch Evaluation: guides/batch-evaluation.md

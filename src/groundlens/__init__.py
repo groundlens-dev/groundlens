@@ -61,6 +61,9 @@ from groundlens._internal.embeddings import (
     LIGHTWEIGHT_MINILM,
     MULTILINGUAL_E5,
     MULTILINGUAL_MINI,
+    EmbeddingFn,
+    get_default_encoder,
+    set_default_encoder,
 )
 from groundlens._version import __version__
 from groundlens.agents import (
@@ -70,7 +73,12 @@ from groundlens.agents import (
     routing_rules,
     specialized_agent_rules,
 )
-from groundlens.calibrate import CalibrationResult, calibrate
+from groundlens.calibrate import (
+    CalibrationResult,
+    ThresholdFit,
+    calibrate,
+    fit_thresholds,
+)
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
 from groundlens.propose import ProposedLabel, PropositionBatch, SeedExample
@@ -98,6 +106,7 @@ __all__ = [
     "CalibrationResult",
     "ChecklistRule",
     "DGIResult",
+    "EmbeddingFn",
     "GroundlensScore",
     "ProposedLabel",
     "PropositionBatch",
@@ -107,6 +116,7 @@ __all__ = [
     "RuleSetResult",
     "SGIResult",
     "SeedExample",
+    "ThresholdFit",
     # Meta
     "__version__",
     # Submodules
@@ -122,10 +132,13 @@ __all__ = [
     "decision_rationale_rules",
     "evaluate",
     "evaluate_batch",
+    "fit_thresholds",
+    "get_default_encoder",
     "groundlens_banking_rules",  # deprecated
     # Agent-class rule sets
     "rag_rules",  # deprecated
     "routing_rules",
     "rules",
+    "set_default_encoder",
     "specialized_agent_rules",
 ]
