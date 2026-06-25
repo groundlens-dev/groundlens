@@ -986,6 +986,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fitting-decision-thresholds-fit_thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fitting decision thresholds (fit_thresholds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1250,6 +1261,8 @@
       
         
       
+        
+      
     
     
     
@@ -1312,6 +1325,34 @@
     
   
     RAG Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-encoders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Encoders / No-Torch
   
 
     
@@ -2264,6 +2305,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fitting-decision-thresholds-fit_thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fitting decision thresholds (fit_thresholds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2478,6 +2530,44 @@
 <div class="admonition warning">
 <p class="admonition-title">Model consistency</p>
 <p>The calibration must use the same embedding model as the scoring. If you calibrate with <code>all-MiniLM-L6-v2</code>, you must score with <code>all-MiniLM-L6-v2</code>. Mixing models produces undefined behavior because the embedding spaces are geometrically different.</p>
+</div>
+<h2 id="fitting-decision-thresholds-fit_thresholds">Fitting decision thresholds (<code>fit_thresholds</code>)<a class="headerlink" href="#fitting-decision-thresholds-fit_thresholds" title="Permanent link">&para;</a></h2>
+<p>Calibrating <code>mu_hat</code> sets the <em>reference direction</em>. Choosing the <strong>cutoff</strong>
+at which a score flags for review is a separate decision. <code>fit_thresholds</code>
+fits both the SGI review threshold and the DGI pass threshold from a small
+labeled set by maximizing <a href="https://en.wikipedia.org/wiki/Youden%27s_J_statistic">Youden's
+J</a> for the rule
+"<code>value &gt;= threshold</code> implies grounded".</p>
+<p>Each example is a mapping with <code>question</code>, <code>response</code>, and <code>label</code>
+(<code>1</code> = ungrounded / hallucinated, <code>0</code> = grounded). Add <code>context</code> to also fit
+an SGI threshold:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_thresholds</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">examples</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="p">{</span><span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Q?&quot;</span><span class="p">,</span> <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;C.&quot;</span><span class="p">,</span> <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;grounded A.&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="p">{</span><span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Q?&quot;</span><span class="p">,</span> <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;C.&quot;</span><span class="p">,</span> <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;off-topic A.&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="c1"># ... ideally 20+ examples spanning both classes</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">]</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">fit</span> <span class="o">=</span> <span class="n">fit_thresholds</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="n">fit</span><span class="o">.</span><span class="n">dgi_pass</span>     <span class="c1"># fitted DGI cutoff</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">fit</span><span class="o">.</span><span class="n">sgi_review</span>   <span class="c1"># fitted SGI cutoff (None if no contexts were supplied)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">fit</span><span class="o">.</span><span class="n">n</span>            <span class="c1"># number of examples used</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="n">fit</span><span class="o">.</span><span class="n">metric</span>       <span class="c1"># &quot;youden_j&quot;</span>
+</span></code></pre></div>
+<p><code>fit_thresholds</code> accepts the same <code>model=</code>, <code>reference_csv=</code>, and <code>encoder=</code>
+arguments as the scoring functions, so you can fit thresholds with the exact
+encoder and reference direction you score with. It raises <code>ValueError</code> if
+both classes are not present.</p>
+<div class="admonition warning">
+<p class="admonition-title">Thresholds and <code>mu_hat</code> are encoder-specific</p>
+<p>The bundled SGI/DGI thresholds and the bundled DGI <code>mu_hat</code> are
+calibrated for the <strong>default</strong> encoder. If you change the encoder or
+model, you <strong>must</strong> re-fit: pass your encoder to both <code>calibrate(...)</code>
+(for <code>mu_hat</code>) and <code>fit_thresholds(...)</code> (for the cutoffs). groundlens
+emits a one-time <code>UserWarning</code> when you score with a non-default
+encoder/model against the bundled constants. See the
+<a href="../../guides/custom-encoders/">Custom Encoders guide</a>.</p>
 </div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>

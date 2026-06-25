@@ -12,27 +12,31 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/api/groundlens/providers/">
+        <link rel="canonical" href="https://docs.groundlens.dev/guides/custom-encoders/">
       
       
+        <link rel="prev" href="../rag-verification/">
+      
+      
+        <link rel="next" href="../active-learning/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Index - groundlens</title>
+        <title>Custom Encoders / No-Torch - groundlens</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#groundlens.providers" class="md-skip">
+        <a href="#custom-encoders-running-without-torch" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +100,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="groundlens" class="md-header__button md-logo" aria-label="groundlens" data-md-component="logo">
+    <a href="../.." title="groundlens" class="md-header__button md-logo" aria-label="groundlens" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              Custom Encoders / No-Torch
             
           </span>
         </div>
@@ -223,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -244,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../getting-started/installation/" class="md-tabs__link">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -266,7 +270,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../concepts/how-it-works/" class="md-tabs__link">
+        <a href="../../concepts/how-it-works/" class="md-tabs__link">
           
   
   
@@ -288,7 +292,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../theory/hallucination-taxonomy/" class="md-tabs__link">
+        <a href="../../theory/hallucination-taxonomy/" class="md-tabs__link">
           
   
   
@@ -306,11 +310,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../guides/rag-verification/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../rag-verification/" class="md-tabs__link">
           
   
   
@@ -332,7 +338,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../providers/openai/" class="md-tabs__link">
+        <a href="../../providers/openai/" class="md-tabs__link">
           
   
   
@@ -354,7 +360,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../integrations/langgraph/" class="md-tabs__link">
+        <a href="../../integrations/langgraph/" class="md-tabs__link">
           
   
   
@@ -376,7 +382,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../benchmarks/overview/" class="md-tabs__link">
+        <a href="../../benchmarks/overview/" class="md-tabs__link">
           
   
   
@@ -398,7 +404,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../adr/0001-rule-set-architecture/" class="md-tabs__link">
+        <a href="../../adr/0001-rule-set-architecture/" class="md-tabs__link">
           
   
   
@@ -418,7 +424,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../../api/" class="md-tabs__link">
         
   
   
@@ -459,7 +465,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="groundlens" class="md-nav__button md-logo" aria-label="groundlens" data-md-component="logo">
+    <a href="../.." title="groundlens" class="md-nav__button md-logo" aria-label="groundlens" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -489,7 +495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -578,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/installation/" class="md-nav__link">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -606,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/quickstart/" class="md-nav__link">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -634,7 +640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/cli/" class="md-nav__link">
+      <a href="../../getting-started/cli/" class="md-nav__link">
         
   
   
@@ -733,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../concepts/how-it-works/" class="md-nav__link">
+      <a href="../../concepts/how-it-works/" class="md-nav__link">
         
   
   
@@ -761,7 +767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../concepts/sgi/" class="md-nav__link">
+      <a href="../../concepts/sgi/" class="md-nav__link">
         
   
   
@@ -789,7 +795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../concepts/dgi/" class="md-nav__link">
+      <a href="../../concepts/dgi/" class="md-nav__link">
         
   
   
@@ -817,7 +823,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../concepts/calibration/" class="md-nav__link">
+      <a href="../../concepts/calibration/" class="md-nav__link">
         
   
   
@@ -918,7 +924,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../theory/hallucination-taxonomy/" class="md-nav__link">
+      <a href="../../theory/hallucination-taxonomy/" class="md-nav__link">
         
   
   
@@ -946,7 +952,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../theory/embedding-geometry/" class="md-nav__link">
+      <a href="../../theory/embedding-geometry/" class="md-nav__link">
         
   
   
@@ -974,7 +980,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../theory/sgi-mathematics/" class="md-nav__link">
+      <a href="../../theory/sgi-mathematics/" class="md-nav__link">
         
   
   
@@ -1002,7 +1008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../theory/dgi-mathematics/" class="md-nav__link">
+      <a href="../../theory/dgi-mathematics/" class="md-nav__link">
         
   
   
@@ -1030,7 +1036,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../theory/confabulation-boundary/" class="md-nav__link">
+      <a href="../../theory/confabulation-boundary/" class="md-nav__link">
         
   
   
@@ -1062,8 +1068,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1089,21 +1097,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1121,7 +1130,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1139,7 +1148,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/rag-verification/" class="md-nav__link">
+      <a href="../rag-verification/" class="md-nav__link">
         
   
   
@@ -1164,10 +1173,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../guides/custom-encoders/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Encoders / No-Torch
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1183,6 +1219,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-encoder-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The encoder contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-call-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-call injection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-global-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process-global injection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#precomputed-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precomputed embeddings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-without-torch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running without torch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1195,7 +1317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/active-learning/" class="md-nav__link">
+      <a href="../active-learning/" class="md-nav__link">
         
   
   
@@ -1223,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/domain-calibration/" class="md-nav__link">
+      <a href="../domain-calibration/" class="md-nav__link">
         
   
   
@@ -1251,7 +1373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/batch-evaluation/" class="md-nav__link">
+      <a href="../batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1279,7 +1401,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/banking-deployment/" class="md-nav__link">
+      <a href="../banking-deployment/" class="md-nav__link">
         
   
   
@@ -1307,7 +1429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/eu-ai-act/" class="md-nav__link">
+      <a href="../eu-ai-act/" class="md-nav__link">
         
   
   
@@ -1335,7 +1457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/sr-11-7/" class="md-nav__link">
+      <a href="../sr-11-7/" class="md-nav__link">
         
   
   
@@ -1363,7 +1485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/nist-ai-rmf/" class="md-nav__link">
+      <a href="../nist-ai-rmf/" class="md-nav__link">
         
   
   
@@ -1460,7 +1582,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../providers/openai/" class="md-nav__link">
+      <a href="../../providers/openai/" class="md-nav__link">
         
   
   
@@ -1488,7 +1610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../providers/anthropic/" class="md-nav__link">
+      <a href="../../providers/anthropic/" class="md-nav__link">
         
   
   
@@ -1516,7 +1638,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../providers/google/" class="md-nav__link">
+      <a href="../../providers/google/" class="md-nav__link">
         
   
   
@@ -1617,7 +1739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integrations/langgraph/" class="md-nav__link">
+      <a href="../../integrations/langgraph/" class="md-nav__link">
         
   
   
@@ -1645,7 +1767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integrations/langchain/" class="md-nav__link">
+      <a href="../../integrations/langchain/" class="md-nav__link">
         
   
   
@@ -1673,7 +1795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integrations/crewai/" class="md-nav__link">
+      <a href="../../integrations/crewai/" class="md-nav__link">
         
   
   
@@ -1701,7 +1823,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integrations/semantic-kernel/" class="md-nav__link">
+      <a href="../../integrations/semantic-kernel/" class="md-nav__link">
         
   
   
@@ -1729,7 +1851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integrations/autogen/" class="md-nav__link">
+      <a href="../../integrations/autogen/" class="md-nav__link">
         
   
   
@@ -1824,7 +1946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../benchmarks/overview/" class="md-nav__link">
+      <a href="../../benchmarks/overview/" class="md-nav__link">
         
   
   
@@ -1852,7 +1974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../benchmarks/results/" class="md-nav__link">
+      <a href="../../benchmarks/results/" class="md-nav__link">
         
   
   
@@ -1945,7 +2067,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../adr/0001-rule-set-architecture/" class="md-nav__link">
+      <a href="../../adr/0001-rule-set-architecture/" class="md-nav__link">
         
   
   
@@ -1980,7 +2102,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../../api/" class="md-nav__link">
         
   
   
@@ -2017,6 +2139,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2025,103 +2149,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#groundlens.providers" class="md-nav__link">
+  <a href="#the-encoder-contract" class="md-nav__link">
     <span class="md-ellipsis">
       
-        providers
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="providers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Classes
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers.BaseLLMProvider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BaseLLMProvider
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="BaseLLMProvider">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers.BaseLLMProvider-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Methods:
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Methods:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers.BaseLLMProvider.complete" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        complete
+        The encoder contract
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers.BaseLLMProvider.chat" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#per-call-injection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        chat
+        Per-call injection
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.providers.LLMResponse" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#process-global-injection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        LLMResponse
+        Process-global injection
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#precomputed-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precomputed embeddings
+      
+    </span>
+  </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#running-without-torch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running without torch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2145,498 +2234,106 @@
   
 
 
-  <h1>Index</h1>
-
-<div class="doc doc-object doc-module">
-
-
-
-<h2 id="groundlens.providers" class="doc doc-heading">
-            <code>groundlens.providers</code>
-
-
-<a href="#groundlens.providers" class="headerlink" title="Permanent link">&para;</a></h2>
-
-    <div class="doc doc-contents first">
-
-        <p>LLM provider wrappers with built-in groundlens scoring.</p>
-<p>Each provider wraps a third-party LLM SDK and automatically evaluates
-every response for hallucination risk using SGI (when context is provided)
-or DGI (context-free).</p>
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-<h3 id="groundlens.providers-classes">Classes<a href="#groundlens.providers-classes" class="headerlink" title="Permanent link">&para;</a></h3>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h4 id="groundlens.providers.BaseLLMProvider" class="doc doc-heading">
-            <code>BaseLLMProvider</code>
-
-
-<a href="#groundlens.providers.BaseLLMProvider" class="headerlink" title="Permanent link">&para;</a></h4>
-
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><span title="typing.Protocol">Protocol</span></code></p>
-
-
-
-        <p>Protocol defining the interface all groundlens providers implement.</p>
-<p>Providers wrap third-party LLM SDKs and automatically attach a
-<code>GroundlensScore</code> to every response, enabling inline hallucination
-detection without changing application code.</p>
-
-
-<details class="example" open>
-  <summary>Example</summary>
-  <blockquote>
-<blockquote>
-<blockquote>
-<p>def use_provider(provider: BaseLLMProvider) -&gt; None:
-...     resp = provider.complete("Summarize this.", context="Source text.")
-...     if resp.groundlens_score and resp.groundlens_score.flagged:
-...         print("Review recommended!")</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</details>
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-<h5 id="groundlens.providers.BaseLLMProvider-functions">Methods:<a href="#groundlens.providers.BaseLLMProvider-functions" class="headerlink" title="Permanent link">&para;</a></h5>
-
-<div class="doc doc-object doc-function">
-
-
-<h6 id="groundlens.providers.BaseLLMProvider.complete" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">complete</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span></code>
-
-<a href="#groundlens.providers.BaseLLMProvider.complete" class="headerlink" title="Permanent link">&para;</a></h6>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Generate a completion for the given prompt.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>prompt</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The user prompt or instruction.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>context</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional source document for grounded evaluation.
-When provided, SGI scoring is used; otherwise DGI.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="LLMResponse(text: str, model: str, usage: dict[str, Any] = dict(), groundlens_score: GroundlensScore | None = None)
-
-  
-      dataclass
-   (groundlens.providers._base.LLMResponse)" href="#groundlens.providers.LLMResponse">LLMResponse</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>LLMResponse with generated text and groundlens score.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/groundlens/providers/_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span>
-<span class="normal"><a href="#__codelineno-0-56">56</a></span>
-<span class="normal"><a href="#__codelineno-0-57">57</a></span>
-<span class="normal"><a href="#__codelineno-0-58">58</a></span>
-<span class="normal"><a href="#__codelineno-0-59">59</a></span>
-<span class="normal"><a href="#__codelineno-0-60">60</a></span>
-<span class="normal"><a href="#__codelineno-0-61">61</a></span>
-<span class="normal"><a href="#__codelineno-0-62">62</a></span>
-<span class="normal"><a href="#__codelineno-0-63">63</a></span>
-<span class="normal"><a href="#__codelineno-0-64">64</a></span>
-<span class="normal"><a href="#__codelineno-0-65">65</a></span>
-<span class="normal"><a href="#__codelineno-0-66">66</a></span>
-<span class="normal"><a href="#__codelineno-0-67">67</a></span>
-<span class="normal"><a href="#__codelineno-0-68">68</a></span>
-<span class="normal"><a href="#__codelineno-0-69">69</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span>
-</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="bp">self</span><span class="p">,</span>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span><span class="p">:</span>
-</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a completion for the given prompt.</span>
-</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>
-</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    Args:</span>
-</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">        prompt: The user prompt or instruction.</span>
-</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        context: Optional source document for grounded evaluation.</span>
-</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">            When provided, SGI scoring is used; otherwise DGI.</span>
-</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a>
-</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        LLMResponse with generated text and groundlens score.</span>
-</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="o">...</span>
-</span></code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
+<h1 id="custom-encoders-running-without-torch">Custom encoders / running without torch<a class="headerlink" href="#custom-encoders-running-without-torch" title="Permanent link">&para;</a></h1>
+<p>groundlens defaults to loading a <code>sentence-transformers</code> model
+(<code>Snowflake/snowflake-arctic-embed-l-v2.0</code>) on first use. You can override
+this entirely by supplying <strong>your own embedding function</strong>. This lets you:</p>
+<ul>
+<li>bring an encoder groundlens does not load itself (a hosted embedding API,
+  a quantized local model, an in-house model);</li>
+<li>reuse <strong>precomputed embeddings</strong> without re-encoding;</li>
+<li>run SGI/DGI <strong>without installing torch</strong> — the custom-encoder path never
+  imports <code>sentence-transformers</code>.</li>
+</ul>
+<h2 id="the-encoder-contract">The encoder contract<a class="headerlink" href="#the-encoder-contract" title="Permanent link">&para;</a></h2>
+<p>An encoder is <em>a callable taking <code>list[str]</code> and returning an <code>(n, d)</code>
+array</em> (numpy or array-like; it is coerced to <code>float32</code>). The type alias
+<code>groundlens.EmbeddingFn</code> captures this:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">EmbeddingFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="s2">&quot;NDArray[np.float32]&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<p>Two common shapes satisfy it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># 1. A SentenceTransformer&#39;s bound .encode method.</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sentence_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SentenceTransformer</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># 2. A plain function (here a hosted embedding API).</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">encoder</span><span class="p">(</span><span class="n">texts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">vectors</span> <span class="o">=</span> <span class="n">my_embedding_api</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>  <span class="c1"># returns list[list[float]]</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="per-call-injection">Per-call injection<a class="headerlink" href="#per-call-injection" title="Permanent link">&para;</a></h2>
+<p>Pass <code>encoder=</code> to any scoring entry point — <code>compute_sgi</code>, <code>compute_dgi</code>,
+the <code>SGI</code> / <code>DGI</code> classes, <code>calibrate</code>, and <code>fit_thresholds</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">SGI</span><span class="p">,</span> <span class="n">DGI</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">compute_sgi</span><span class="p">(</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France&#39;s capital is Paris.&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="n">compute_dgi</span><span class="p">(</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons?&quot;</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s axial tilt.&quot;</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">)</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="c1"># Reusable scorers store the encoder once.</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">)</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">DGI</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="process-global-injection">Process-global injection<a class="headerlink" href="#process-global-injection" title="Permanent link">&para;</a></h2>
+<p>If every call in your process uses the same encoder, register it once with
+<code>set_default_encoder</code>. This works regardless of how scoring functions were
+imported (no monkeypatching):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">groundlens</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">groundlens</span><span class="o">.</span><span class="n">set_default_encoder</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># No encoder= needed anymore; both layers route through it.</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">groundlens</span><span class="o">.</span><span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">groundlens</span><span class="o">.</span><span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">groundlens</span><span class="o">.</span><span class="n">set_default_encoder</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># restore the default path</span>
+</span></code></pre></div>
+<p><code>groundlens.get_default_encoder()</code> returns the currently registered callable
+(or <code>None</code>).</p>
+<h2 id="precomputed-embeddings">Precomputed embeddings<a class="headerlink" href="#precomputed-embeddings" title="Permanent link">&para;</a></h2>
+<p>If you already have vectors, wrap a lookup in a closure so groundlens never
+re-encodes:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">cache</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;What is X?&quot;</span><span class="p">:</span> <span class="n">vec_q</span><span class="p">,</span> <span class="s2">&quot;X is Y.&quot;</span><span class="p">:</span> <span class="n">vec_r</span><span class="p">}</span>  <span class="c1"># text -&gt; np.float32 vector</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">precomputed</span><span class="p">(</span><span class="n">texts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">cache</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">groundlens</span><span class="o">.</span><span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="n">precomputed</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="running-without-torch">Running without torch<a class="headerlink" href="#running-without-torch" title="Permanent link">&para;</a></h2>
+<p>The custom-encoder path does <strong>not</strong> import <code>sentence-transformers</code> (and
+therefore not torch). If your encoder is itself torch-free (a hosted API, a
+numpy model, or precomputed vectors), you can score with only <code>numpy</code>
+installed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Bundled thresholds are encoder-specific</p>
+<p>The bundled SGI/DGI thresholds and the bundled DGI <code>mu_hat</code> are
+calibrated for the <strong>default</strong> encoder. When you supply a custom encoder
+(or a non-default model) while relying on the bundled constants,
+groundlens emits a one-time <code>UserWarning</code>. Re-fit your decision
+thresholds with <a href="../../concepts/calibration/"><code>fit_thresholds</code></a> and your
+DGI reference direction with <code>calibrate</code>, both of which accept the same
+<code>encoder=</code> argument.</p>
 </div>
-
-<div class="doc doc-object doc-function">
-
-
-<h6 id="groundlens.providers.BaseLLMProvider.chat" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span></code>
-
-<a href="#groundlens.providers.BaseLLMProvider.chat" class="headerlink" title="Permanent link">&para;</a></h6>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Generate a chat completion from a message history.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>messages</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of message dicts with <code>role</code> and <code>content</code> keys.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>context</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional source document for grounded evaluation.
-When provided, SGI scoring is used; otherwise DGI.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="LLMResponse(text: str, model: str, usage: dict[str, Any] = dict(), groundlens_score: GroundlensScore | None = None)
-
-  
-      dataclass
-   (groundlens.providers._base.LLMResponse)" href="#groundlens.providers.LLMResponse">LLMResponse</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>LLMResponse with generated text and groundlens score.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/groundlens/providers/_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span>
-<span class="normal"><a href="#__codelineno-0-73">73</a></span>
-<span class="normal"><a href="#__codelineno-0-74">74</a></span>
-<span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span>
-<span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span>
-<span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span>
-</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="bp">self</span><span class="p">,</span>
-</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span><span class="p">:</span>
-</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a chat completion from a message history.</span>
-</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a>
-</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Args:</span>
-</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        messages: List of message dicts with ``role`` and ``content`` keys.</span>
-</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        context: Optional source document for grounded evaluation.</span>
-</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">            When provided, SGI scoring is used; otherwise DGI.</span>
-</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>
-</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        LLMResponse with generated text and groundlens score.</span>
-</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="o">...</span>
-</span></code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h4 id="groundlens.providers.LLMResponse" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">LLMResponse</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">usage</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span> <span class="n">groundlens_score</span><span class="p">:</span> <span class="n">GroundlensScore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
-  </span>
-
-<a href="#groundlens.providers.LLMResponse" class="headerlink" title="Permanent link">&para;</a></h4>
-
-
-    <div class="doc doc-contents ">
-
-
-
-        <p>Unified response container for all LLM provider calls.</p>
-
-
-<p><span class="doc-section-title">Attributes:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td><code><span title="groundlens.providers.LLMResponse.text">text</span></code></td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The generated text content from the LLM.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="groundlens.providers.LLMResponse.model">model</span></code></td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The model identifier used for generation.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="groundlens.providers.LLMResponse.usage">usage</span></code></td>
-            <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Provider-specific usage metadata (tokens, cost, etc.).</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="groundlens.providers.LLMResponse.groundlens_score">groundlens_score</span></code></td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="groundlens.score.GroundlensScore(value: float, normalized: float, flagged: bool, method: str, explanation: str, detail: SGIResult | DGIResult)
-
-  
-      dataclass
-   (groundlens.score.GroundlensScore)" href="../../#groundlens.score.GroundlensScore">GroundlensScore</a> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional groundlens evaluation result attached
-after hallucination scoring.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<details class="example" open>
-  <summary>Example</summary>
-  <blockquote>
-<blockquote>
-<blockquote>
-<p>resp = LLMResponse(text="Hello!", model="gpt-4o", usage={})
-resp.groundlens_score is None
-True</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</details>
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../concepts/calibration/">Calibration</a> — <code>fit_thresholds</code> and
+  re-calibrating <code>mu_hat</code> for your encoder.</li>
+<li><a href="../domain-calibration/">Domain Calibration Guide</a> — end-to-end walkthrough.</li>
+</ul>
 
 
 
@@ -2720,12 +2417,12 @@ True</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../javascripts/mathjax.js"></script>
+        <script src="../../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
