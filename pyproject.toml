@@ -152,7 +152,7 @@ known-first-party = ["groundlens"]
 # ── mypy (strict) ───────────────────────────────────────────────────────────
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

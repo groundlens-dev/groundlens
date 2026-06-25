@@ -51,6 +51,8 @@ from groundlens._internal.thresholds import (
 from groundlens.score import SGIResult
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from groundlens._internal.embeddings import EmbeddingFn
 
 logger = logging.getLogger(__name__)
@@ -58,7 +60,7 @@ logger = logging.getLogger(__name__)
 _EPS = 1e-8
 
 
-def _angular_distance(a: np.ndarray, b: np.ndarray) -> float:
+def _angular_distance(a: NDArray[np.float32], b: NDArray[np.float32]) -> float:
     """Geodesic distance on the unit hypersphere.
 
     Assumes a and b are L2-normalized vectors. Returns arccos(a . b),
@@ -69,7 +71,7 @@ def _angular_distance(a: np.ndarray, b: np.ndarray) -> float:
     return math.acos(dot)
 
 
-def _l2_normalize(v: np.ndarray) -> np.ndarray:
+def _l2_normalize(v: NDArray[np.float32]) -> NDArray[np.float32]:
     """Project vector onto the unit hypersphere. Returns v if ||v|| < eps."""
     norm = float(np.linalg.norm(v))
     if norm < _EPS:
