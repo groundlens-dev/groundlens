@@ -35,7 +35,11 @@ from groundlens._internal.embeddings import DEFAULT_MODEL
 from groundlens.dgi import _compute_reference_direction
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from numpy.typing import NDArray
+
+    from groundlens._internal.embeddings import EmbeddingFn
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +108,7 @@ def calibrate(
     csv_path: str | None = None,
     *,
     model: str = DEFAULT_MODEL,
+    encoder: EmbeddingFn | None = None,
     metadata: dict[str, str] | None = None,
 ) -> CalibrationResult:
     """Compute a DGI reference direction from calibration data.
@@ -115,6 +120,8 @@ def calibrate(
         pairs: List of (question, response) tuples.
         csv_path: Path to a CSV file with ``question`` and ``response`` columns.
         model: Sentence transformer model to use for embedding.
+        encoder: Optional bring-your-own-embeddings callable. When set,
+            sentence-transformers is bypassed (no torch required).
         metadata: Optional metadata to attach (domain name, date, notes).
 
     Returns:
@@ -146,7 +153,7 @@ def calibrate(
 
     logger.info("Calibrating DGI with %d pairs using model %s.", len(pairs), model)
 
-    mu_hat = _compute_reference_direction(pairs, model)
+    mu_hat = _compute_reference_direction(pairs, model, encoder=encoder)
 
     # Estimate concentration parameter (kappa) from resultant length.
     # This is a rough estimate — the true MLE for von Mises-Fisher is
@@ -158,7 +165,7 @@ def calibrate(
     texts: list[str] = []
     for q, r in pairs:
         texts.extend([q, r])
-    embeddings = encode_texts(texts, model_name=model)
+    embeddings = encode_texts(texts, model_name=model, encoder=encoder)
 
     unit_displacements = []
     for i in range(len(pairs)):
@@ -183,4 +190,167 @@ def calibrate(
         mu_hat=mu_hat,
         concentration=round(kappa, 2),
         metadata=metadata or {},
+    )
+
+
+@dataclass
+class ThresholdFit:
+    """Fitted decision thresholds for SGI and DGI on a labeled set.
+
+    Thresholds are chosen by maximizing Youden's J for the rule
+    "value >= threshold implies grounded" over the supplied examples.
+
+    Attributes:
+        sgi_review: Fitted SGI review threshold, or ``None`` if no contexts
+            were supplied (SGI requires context).
+        dgi_pass: Fitted DGI pass threshold, or ``None`` if it could not be
+            estimated.
+        n: Number of examples used for fitting.
+        model: Sentence transformer model the scores were computed with.
+        metric: Name of the criterion used to pick thresholds.
+    """
+
+    sgi_review: float | None
+    dgi_pass: float | None
+    n: int
+    model: str
+    metric: str = "youden_j"
+
+
+def _youden_threshold(
+    grounded_vals: list[float],
+    hallucinated_vals: list[float],
+) -> float:
+    """Pick the cutoff ``t`` maximizing Youden's J for "value >= t is grounded".
+
+    J(t) = mean(grounded >= t) + mean(hallucinated < t) - 1, but the constant
+    ``-1`` does not affect the argmax, so we maximize the sum of the two
+    means. Candidate cutoffs are the sorted unique observed values (plus a
+    cutoff just above the maximum). No sklearn required.
+
+    Args:
+        grounded_vals: Scores for the grounded (label 0) class.
+        hallucinated_vals: Scores for the ungrounded (label 1) class.
+
+    Returns:
+        The threshold maximizing Youden's J. Ties resolve to the lowest
+        candidate cutoff.
+    """
+    g = np.asarray(grounded_vals, dtype=np.float64)
+    h = np.asarray(hallucinated_vals, dtype=np.float64)
+    candidates = np.unique(np.concatenate([g, h]))
+    # Also consider a cutoff strictly above the maximum so "flag everything"
+    # is reachable when that separates best.
+    upper = float(candidates[-1]) + 1.0 if candidates.size else 1.0
+    best_t = float(candidates[0]) if candidates.size else 0.0
+    best_j = -np.inf
+    for t in (*candidates.tolist(), upper):
+        tpr = float(np.mean(g >= t)) if g.size else 0.0
+        tnr = float(np.mean(h < t)) if h.size else 0.0
+        j = tpr + tnr
+        if j > best_j:
+            best_j = j
+            best_t = float(t)
+    return best_t
+
+
+def fit_thresholds(
+    examples: list[Mapping[str, object]],
+    *,
+    model: str = DEFAULT_MODEL,
+    encoder: EmbeddingFn | None = None,
+    reference_csv: str | None = None,
+) -> ThresholdFit:
+    """Fit SGI/DGI decision thresholds on a labeled set via Youden's J.
+
+    For each example this computes DGI (and SGI when a ``context`` is
+    present), then picks each threshold by maximizing Youden's J for the
+    rule "value >= threshold implies grounded".
+
+    Args:
+        examples: A list of mappings, each with keys ``question`` (str),
+            ``response`` (str), ``label`` (int: ``1`` = ungrounded /
+            hallucinated, ``0`` = grounded), and optional ``context`` (str).
+        model: Sentence transformer model name.
+        encoder: Optional bring-your-own-embeddings callable. Passed through
+            to ``compute_dgi`` / ``compute_sgi`` so fitting works without
+            torch.
+        reference_csv: Optional DGI calibration CSV passed to ``compute_dgi``.
+
+    Returns:
+        A :class:`ThresholdFit` with the fitted ``dgi_pass`` and (when any
+        contexts were supplied) ``sgi_review`` thresholds.
+
+    Raises:
+        ValueError: If ``examples`` is empty, or if both classes (grounded
+            and ungrounded) are not present.
+
+    Example:
+        >>> fit = fit_thresholds(
+        ...     [
+        ...         {"question": "Q1?", "response": "A1.", "label": 0},
+        ...         {"question": "Q2?", "response": "off-topic", "label": 1},
+        ...     ]
+        ... )
+        >>> fit.metric
+        'youden_j'
+    """
+    from groundlens.dgi import compute_dgi
+    from groundlens.sgi import compute_sgi
+
+    if not examples:
+        msg = "examples must contain at least one item."
+        raise ValueError(msg)
+
+    labels = [int(ex["label"]) for ex in examples]  # type: ignore[call-overload]
+    if 0 not in labels or 1 not in labels:
+        msg = (
+            "fit_thresholds requires both classes present: at least one "
+            "grounded (label=0) and one ungrounded (label=1) example."
+        )
+        raise ValueError(msg)
+
+    dgi_grounded: list[float] = []
+    dgi_hallucinated: list[float] = []
+    sgi_grounded: list[float] = []
+    sgi_hallucinated: list[float] = []
+
+    for ex in examples:
+        question = str(ex["question"])
+        response = str(ex["response"])
+        label = int(ex["label"])  # type: ignore[call-overload]
+
+        dgi = compute_dgi(
+            question,
+            response,
+            model=model,
+            reference_csv=reference_csv,
+            encoder=encoder,
+        )
+        (dgi_hallucinated if label == 1 else dgi_grounded).append(dgi.value)
+
+        context = ex.get("context")
+        if context:
+            sgi = compute_sgi(
+                question,
+                str(context),
+                response,
+                model=model,
+                encoder=encoder,
+            )
+            (sgi_hallucinated if label == 1 else sgi_grounded).append(sgi.value)
+
+    dgi_pass: float | None = None
+    if dgi_grounded and dgi_hallucinated:
+        dgi_pass = _youden_threshold(dgi_grounded, dgi_hallucinated)
+
+    sgi_review: float | None = None
+    if sgi_grounded and sgi_hallucinated:
+        sgi_review = _youden_threshold(sgi_grounded, sgi_hallucinated)
+
+    return ThresholdFit(
+        sgi_review=sgi_review,
+        dgi_pass=dgi_pass,
+        n=len(examples),
+        model=model,
     )

@@ -38,12 +38,20 @@ from __future__ import annotations
 
 import logging
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
-from groundlens._internal.thresholds import SGI_REVIEW, normalize_sgi
+from groundlens._internal.thresholds import (
+    SGI_REVIEW,
+    _warn_default_thresholds_with_custom_encoder,
+    normalize_sgi,
+)
 from groundlens.score import SGIResult
+
+if TYPE_CHECKING:
+    from groundlens._internal.embeddings import EmbeddingFn
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +83,7 @@ def compute_sgi(
     response: str,
     *,
     model: str = DEFAULT_MODEL,
+    encoder: EmbeddingFn | None = None,
 ) -> SGIResult:
     """Compute the Semantic Grounding Index for a response.
 
@@ -83,6 +92,9 @@ def compute_sgi(
         context: Source document, retrieved chunks, or reference text.
         response: The LLM output to evaluate.
         model: Sentence transformer model name. Default ``all-MiniLM-L6-v2``.
+        encoder: Optional bring-your-own-embeddings callable taking
+            ``list[str]`` and returning an ``(n, d)`` array. Bypasses
+            sentence-transformers (no torch required) when provided.
 
     Returns:
         SGIResult with raw score, normalized score, and flag status.
@@ -110,7 +122,10 @@ def compute_sgi(
         msg = "response must be a non-empty string."
         raise ValueError(msg)
 
-    embeddings = encode_texts([question, context, response], model_name=model)
+    if encoder is not None or model != DEFAULT_MODEL:
+        _warn_default_thresholds_with_custom_encoder("compute_sgi", model, encoder is not None)
+
+    embeddings = encode_texts([question, context, response], model_name=model, encoder=encoder)
     q_emb, ctx_emb, resp_emb = embeddings[0], embeddings[1], embeddings[2]
 
     # L2-normalize to project onto the unit hypersphere (paper Algorithm 1).
@@ -171,13 +186,20 @@ class SGI:
         False
     """
 
-    def __init__(self, model: str = DEFAULT_MODEL) -> None:
+    def __init__(
+        self,
+        model: str = DEFAULT_MODEL,
+        encoder: EmbeddingFn | None = None,
+    ) -> None:
         """Initialize SGI scorer.
 
         Args:
             model: Sentence transformer model name or path.
+            encoder: Optional bring-your-own-embeddings callable. When set,
+                scoring bypasses sentence-transformers (no torch required).
         """
         self.model = model
+        self.encoder = encoder
 
     def score(
         self,
@@ -200,4 +222,5 @@ class SGI:
             context=context,
             response=response,
             model=self.model,
+            encoder=self.encoder,
         )

@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.18-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.6.25-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://docs.groundlens.dev) · [Research](#research) · [Examples](examples/) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
@@ -27,6 +27,7 @@ Groundlens verifies agent outputs with two deterministic layers stitched into on
 
 - **Geometric scoring** (SGI, DGI) — continuous, calibrated, sub-second. Captures semantic drift that rules miss, and produces a ranking signal usable for prioritized review queues at production scale.
 - **Rule-based audit** — per-rule pass/fail with a citation to the academic, industrial, or regulatory source that motivated the check. Byte-identical reproducibility across years and runs.
+- **Bring your own embeddings** — inject any encoder via `encoder=` (or `set_default_encoder(...)` once). Score with a hosted embedding API, an in-house model, or precomputed vectors — and run SGI/DGI **without torch**.
 
 The combination is what a Model Risk Committee, an internal audit, or an external supervisor accepts. Neither layer alone is enough.
 
@@ -102,6 +103,30 @@ flagged = dgi_score.flagged or rules.flagged
 ```
 
 The flag combiner is a deployer decision: `OR` for recall (more flags to human review), `AND` for precision, or a weighted geometric mean.
+
+## Custom encoders / no-torch
+
+By default groundlens loads a `sentence-transformers` model on first use. You can supply your own embedding function instead — to reuse a hosted embedding API, an in-house model, or precomputed vectors, and to run SGI/DGI **without installing torch** (the custom-encoder path never imports `sentence-transformers`).
+
+An encoder is *a callable taking `list[str]` and returning an `(n, d)` array*. Pass it per call, or register it once:
+
+```python
+import groundlens
+
+# Per-call: e.g. a SentenceTransformer's bound .encode, or any function.
+from sentence_transformers import SentenceTransformer
+encoder = SentenceTransformer("all-MiniLM-L6-v2").encode
+
+groundlens.compute_sgi(question="...", context="...", response="...", encoder=encoder)
+groundlens.compute_dgi(question="...", response="...", encoder=encoder)
+
+# Process-global: applies to every call, no monkeypatching.
+groundlens.set_default_encoder(encoder)
+groundlens.compute_dgi(question="...", response="...")
+groundlens.set_default_encoder(None)  # restore the default path
+```
+
+The bundled SGI/DGI thresholds and DGI `mu_hat` are calibrated for the default encoder. When you switch encoders, re-fit with `groundlens.fit_thresholds(...)` (cutoffs) and `groundlens.calibrate(...)` (reference direction) — both accept the same `encoder=`. See the [Custom Encoders guide](https://docs.groundlens.dev/guides/custom-encoders/).
 
 ## Built-in rule sets
 

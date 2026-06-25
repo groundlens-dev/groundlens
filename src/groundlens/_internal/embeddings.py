@@ -26,14 +26,23 @@ Thread safety:
 from __future__ import annotations
 
 import logging
+import os
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+
 if TYPE_CHECKING:
-    import numpy as np
     from numpy.typing import NDArray
     from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
+
+# Public type alias for a bring-your-own-embeddings callable. An encoder is
+# "a callable taking list[str] and returning an (n, d) array". Examples:
+# ``SentenceTransformer(...).encode`` or any user function returning a 2D
+# array-like of float embeddings. Kept runtime-safe (no torch import).
+EmbeddingFn = Callable[[list[str]], "NDArray[np.float32]"]
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
@@ -93,8 +102,72 @@ to match the encoder's training recipe; see model card on HuggingFace."""
 _encoder: SentenceTransformer | None = None
 _encoder_model_name: str | None = None
 
+# Models that ship custom modeling code and therefore require
+# ``trust_remote_code=True`` to load via sentence-transformers.
+_TRUST_REMOTE_CODE_MODELS: set[str] = {DEFAULT_MODEL}
 
-def get_encoder(model_name: str = DEFAULT_MODEL) -> Any:
+# Process-global bring-your-own-embeddings hook. When set, ``encode_texts``
+# routes through it instead of sentence-transformers. ``encode_texts`` is the
+# single function object imported (by name) into sgi.py and dgi.py, so having
+# it consult this global means ``set_default_encoder`` takes effect for ALL
+# callers regardless of their import binding (no monkeypatching required).
+_custom_encoder: EmbeddingFn | None = None
+
+
+def set_default_encoder(encoder: EmbeddingFn | None) -> None:
+    """Set (or clear) the process-global embedding callable.
+
+    When a default encoder is set, every ``encode_texts`` call that does not
+    receive an explicit ``encoder=`` argument routes through it, bypassing
+    sentence-transformers entirely (so no torch import is triggered). Pass
+    ``None`` to clear and restore the sentence-transformers path.
+
+    Args:
+        encoder: A callable taking ``list[str]`` and returning an ``(n, d)``
+            array-like of float embeddings, or ``None`` to clear.
+    """
+    global _custom_encoder
+    _custom_encoder = encoder
+
+
+def get_default_encoder() -> EmbeddingFn | None:
+    """Return the process-global embedding callable, or ``None`` if unset.
+
+    Returns:
+        The encoder previously set via :func:`set_default_encoder`, or ``None``.
+    """
+    return _custom_encoder
+
+
+def _resolve_trust_remote_code(model_name: str, override: bool | None) -> bool:
+    """Decide whether to load ``model_name`` with ``trust_remote_code=True``.
+
+    Resolution order:
+        1. Explicit ``override`` (when not ``None``) wins.
+        2. Models in :data:`_TRUST_REMOTE_CODE_MODELS` default to ``True``.
+        3. The ``GROUNDLENS_TRUST_REMOTE_CODE`` env var (truthy → ``True``).
+        4. Otherwise ``False``.
+
+    Args:
+        model_name: HuggingFace model name or local path.
+        override: Caller-supplied value, or ``None`` to auto-resolve.
+
+    Returns:
+        ``True`` if the model should be loaded with ``trust_remote_code=True``.
+    """
+    if override is not None:
+        return override
+    if model_name in _TRUST_REMOTE_CODE_MODELS:
+        return True
+    env = os.environ.get("GROUNDLENS_TRUST_REMOTE_CODE", "")
+    return env.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def get_encoder(
+    model_name: str = DEFAULT_MODEL,
+    *,
+    trust_remote_code: bool | None = None,
+) -> Any:
     """Load a sentence transformer model, caching for process lifetime.
 
     The model is downloaded on first use (cached to ``~/.cache/torch/``
@@ -105,6 +178,10 @@ def get_encoder(model_name: str = DEFAULT_MODEL) -> Any:
     Args:
         model_name: HuggingFace model name or local path. Must be
             compatible with the sentence-transformers library.
+        trust_remote_code: Whether to pass ``trust_remote_code=True`` when
+            loading. ``None`` (default) auto-resolves via
+            :func:`_resolve_trust_remote_code` — the bundled default model
+            ships custom pooling code and requires it.
 
     Returns:
         A ``SentenceTransformer`` instance ready for ``.encode()``.
@@ -126,8 +203,21 @@ def get_encoder(model_name: str = DEFAULT_MODEL) -> Any:
         )
         raise ImportError(msg) from exc
 
-    logger.info("Loading embedding model: %s", model_name)
-    _encoder = SentenceTransformer(model_name)
+    trust = _resolve_trust_remote_code(model_name, trust_remote_code)
+    logger.info("Loading embedding model: %s (trust_remote_code=%s)", model_name, trust)
+    if trust:
+        try:
+            _encoder = SentenceTransformer(model_name, trust_remote_code=True)
+        except TypeError:
+            # Older sentence-transformers releases lack the kwarg.
+            logger.warning(
+                "Installed sentence-transformers does not support "
+                "trust_remote_code; loading %s without it.",
+                model_name,
+            )
+            _encoder = SentenceTransformer(model_name)
+    else:
+        _encoder = SentenceTransformer(model_name)
     _encoder_model_name = model_name
     logger.info("Embedding model loaded: %s", model_name)
 
@@ -137,19 +227,35 @@ def get_encoder(model_name: str = DEFAULT_MODEL) -> Any:
 def encode_texts(
     texts: list[str],
     model_name: str = DEFAULT_MODEL,
+    *,
+    encoder: EmbeddingFn | None = None,
 ) -> NDArray[np.float32]:
     """Encode a list of texts into embedding vectors.
 
+    Resolution: an explicit ``encoder`` argument wins; otherwise the
+    process-global encoder set via :func:`set_default_encoder` is used;
+    otherwise sentence-transformers is loaded lazily. When a custom encoder
+    is used, sentence-transformers is NOT imported — this is what makes the
+    custom-encoder path torch-free.
+
     Args:
         texts: Strings to encode. Empty strings produce zero vectors.
-        model_name: Sentence transformer model to use.
+        model_name: Sentence transformer model to use (default path only).
+        encoder: Optional callable taking ``list[str]`` and returning an
+            ``(n, d)`` array-like of float embeddings. Overrides both the
+            default encoder and sentence-transformers.
 
     Returns:
         Array of shape ``(len(texts), embedding_dim)`` with float32 values.
         Embeddings are NOT L2-normalized (raw encoder output).
     """
-    encoder = get_encoder(model_name)
-    embeddings: NDArray[np.float32] = encoder.encode(
+    fn = encoder if encoder is not None else _custom_encoder
+    if fn is not None:
+        # Custom-encoder path: never touch sentence-transformers (torch-free).
+        return np.asarray(fn(list(texts)), dtype=np.float32)
+
+    st_encoder = get_encoder(model_name)
+    embeddings: NDArray[np.float32] = st_encoder.encode(
         texts,
         convert_to_numpy=True,
         normalize_embeddings=False,

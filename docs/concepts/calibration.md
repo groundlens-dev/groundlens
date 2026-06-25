@@ -137,6 +137,49 @@ The saved JSON contains all fields needed to reconstruct the reference direction
 !!! warning "Model consistency"
     The calibration must use the same embedding model as the scoring. If you calibrate with `all-MiniLM-L6-v2`, you must score with `all-MiniLM-L6-v2`. Mixing models produces undefined behavior because the embedding spaces are geometrically different.
 
+## Fitting decision thresholds (`fit_thresholds`)
+
+Calibrating `mu_hat` sets the *reference direction*. Choosing the **cutoff**
+at which a score flags for review is a separate decision. `fit_thresholds`
+fits both the SGI review threshold and the DGI pass threshold from a small
+labeled set by maximizing [Youden's
+J](https://en.wikipedia.org/wiki/Youden%27s_J_statistic) for the rule
+"`value >= threshold` implies grounded".
+
+Each example is a mapping with `question`, `response`, and `label`
+(`1` = ungrounded / hallucinated, `0` = grounded). Add `context` to also fit
+an SGI threshold:
+
+```python
+from groundlens import fit_thresholds
+
+examples = [
+    {"question": "Q?", "context": "C.", "response": "grounded A.", "label": 0},
+    {"question": "Q?", "context": "C.", "response": "off-topic A.", "label": 1},
+    # ... ideally 20+ examples spanning both classes
+]
+
+fit = fit_thresholds(examples)
+fit.dgi_pass     # fitted DGI cutoff
+fit.sgi_review   # fitted SGI cutoff (None if no contexts were supplied)
+fit.n            # number of examples used
+fit.metric       # "youden_j"
+```
+
+`fit_thresholds` accepts the same `model=`, `reference_csv=`, and `encoder=`
+arguments as the scoring functions, so you can fit thresholds with the exact
+encoder and reference direction you score with. It raises `ValueError` if
+both classes are not present.
+
+!!! warning "Thresholds and `mu_hat` are encoder-specific"
+    The bundled SGI/DGI thresholds and the bundled DGI `mu_hat` are
+    calibrated for the **default** encoder. If you change the encoder or
+    model, you **must** re-fit: pass your encoder to both `calibrate(...)`
+    (for `mu_hat`) and `fit_thresholds(...)` (for the cutoffs). groundlens
+    emits a one-time `UserWarning` when you score with a non-default
+    encoder/model against the bundled constants. See the
+    [Custom Encoders guide](../guides/custom-encoders.md).
+
 ## Next Steps
 
 - [Domain Calibration Guide](../guides/domain-calibration.md) --- step-by-step walkthrough with evaluation

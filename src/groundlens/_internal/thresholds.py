@@ -11,6 +11,7 @@ default behavior is to flag for human review rather than silently pass.
 from __future__ import annotations
 
 import math
+import warnings
 
 # ── SGI thresholds (arXiv:2512.13771) ───────────────────────────────────────
 #
@@ -38,6 +39,43 @@ SGI_REVIEW: float = 0.95
 
 DGI_PASS: float = 0.30
 """DGI score indicating alignment with grounded reference direction. Green zone."""
+
+
+# ── Encoder / threshold mismatch warning ─────────────────────────────────────
+
+# The bundled SGI/DGI thresholds and the bundled DGI ``mu_hat`` are calibrated
+# for the default encoder/model. Scoring with a custom encoder or a non-default
+# model while relying on the bundled constants is a silent footgun, so warn —
+# but only ONCE per unique (func, model, encoder_provided) to avoid log spam.
+_mismatch_warned: set[tuple[str, str, bool]] = set()
+
+
+def _warn_default_thresholds_with_custom_encoder(
+    func: str,
+    model: str,
+    encoder_provided: bool,
+) -> None:
+    """Warn once that bundled thresholds/mu_hat assume the default encoder.
+
+    Args:
+        func: Name of the calling scorer (e.g. ``"compute_sgi"``).
+        model: The model name being used for scoring.
+        encoder_provided: Whether a custom ``encoder`` callable was supplied.
+    """
+    key = (func, model, encoder_provided)
+    if key in _mismatch_warned:
+        return
+    _mismatch_warned.add(key)
+    warnings.warn(
+        f"{func}() is using a non-default encoder/model "
+        f"(model={model!r}, custom_encoder={encoder_provided}) but the "
+        "bundled SGI/DGI thresholds and DGI mu_hat are calibrated for the "
+        "default encoder. Calibrate your own with "
+        "groundlens.fit_thresholds(...) / groundlens.calibrate(...) to get "
+        "meaningful flags.",
+        UserWarning,
+        stacklevel=3,
+    )
 
 
 # ── Normalization ───────────────────────────────────────────────────────────

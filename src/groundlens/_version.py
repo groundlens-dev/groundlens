@@ -1,3 +1,3 @@
 """Groundlens version — CalVer format YYYY.M.D."""
 
-__version__ = "2026.6.18"
+__version__ = "2026.6.25"

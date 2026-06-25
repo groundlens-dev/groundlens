@@ -5,6 +5,42 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.6.25 -- Pluggable encoders, threshold fitting, default-model load fix
+
+### Added
+
+- **Pluggable encoder / bring-your-own-embeddings.** Every scoring entry
+  point now accepts an `encoder=` keyword — a callable taking `list[str]`
+  and returning an `(n, d)` array (e.g. `SentenceTransformer(...).encode`
+  or a custom function). Provided on `compute_sgi`, `compute_dgi`,
+  `calibrate`, `fit_thresholds`, and the `SGI` / `DGI` scorer classes. The
+  custom-encoder path never imports sentence-transformers, so groundlens
+  can score **without torch** when you bring your own embeddings or
+  precomputed vectors.
+- **`set_default_encoder` / `get_default_encoder`.** Register a
+  process-global encoder once; all scoring routes through it regardless of
+  how `encode_texts` was imported (no monkeypatching). Pass `None` to clear.
+- **`fit_thresholds(...)` and `ThresholdFit`.** Fit SGI/DGI decision
+  thresholds on a labeled set by maximizing Youden's J (`value >= threshold`
+  implies grounded). No new dependencies — pure numpy.
+- **Encoder/threshold mismatch warning.** Scoring with a non-default
+  encoder or model while relying on the bundled thresholds / DGI `mu_hat`
+  now emits a one-time `UserWarning` pointing you at
+  `groundlens.fit_thresholds(...)` / `groundlens.calibrate(...)`. Default
+  usage is unaffected.
+
+### Fixed
+
+- **`get_encoder` now passes `trust_remote_code=True` for the default
+  Snowflake model** (`Snowflake/snowflake-arctic-embed-l-v2.0`), which ships
+  custom pooling code and previously failed to load on a clean install. The
+  behavior is resolved by `_resolve_trust_remote_code` (explicit override >
+  known-model set > `GROUNDLENS_TRUST_REMOTE_CODE` env var > `False`), and
+  the load gracefully falls back for older sentence-transformers releases
+  that lack the kwarg.
+- **Version sync.** `pyproject.toml` and `src/groundlens/_version.py` were
+  out of step (2026.6.17 vs 2026.6.18); both are now `2026.6.25`.
+
 ## 2026.6.18 -- SGI bug fix + Snowflake default + paper alignment
 
 ### Fixed
