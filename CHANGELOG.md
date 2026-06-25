@@ -40,6 +40,13 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   that lack the kwarg.
 - **Version sync.** `pyproject.toml` and `src/groundlens/_version.py` were
   out of step (2026.6.17 vs 2026.6.18); both are now `2026.6.25`.
+- **CI / mypy compatibility with numpy >= 2.3.** numpy now ships type stubs
+  using PEP 695 `type` statements, which mypy rejects under
+  `python_version = "3.10"` ("Type statement is only supported in Python 3.12
+  and greater"), aborting the type-check before reaching project code. Bumped
+  the mypy target to `python_version = "3.12"`, and gave the two SGI geometry
+  helpers (`_angular_distance`, `_l2_normalize`) explicit `NDArray[np.float32]`
+  annotations so strict `disallow_any_generics` passes once checking proceeds.
 
 ## 2026.6.18 -- SGI bug fix + Snowflake default + paper alignment
 
