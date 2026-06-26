@@ -116,7 +116,8 @@ def _compute_reference_direction(
         msg = "No valid displacement vectors computed from reference pairs."
         raise ValueError(msg)
 
-    mu: NDArray[np.float32] = np.mean(np.stack(displacements), axis=0)
+    # np.mean promotes to float64; cast back to the float32 embedding dtype.
+    mu: NDArray[np.float32] = np.mean(np.stack(displacements), axis=0).astype(np.float32)
     return unit_normalize(mu)
 
 

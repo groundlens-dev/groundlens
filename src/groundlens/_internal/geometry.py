@@ -121,5 +121,6 @@ def mean_direction(vectors: list[EmbeddingVector]) -> EmbeddingVector:
         msg = "Cannot compute mean direction of empty vector list."
         raise ValueError(msg)
 
-    mu: EmbeddingVector = np.mean(np.stack(vectors), axis=0)
+    # np.mean promotes to float64; cast back to the float32 embedding dtype.
+    mu: EmbeddingVector = np.mean(np.stack(vectors), axis=0).astype(np.float32)
     return unit_normalize(mu)

@@ -47,6 +47,10 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   the mypy target to `python_version = "3.12"`, and gave the two SGI geometry
   helpers (`_angular_distance`, `_l2_normalize`) explicit `NDArray[np.float32]`
   annotations so strict `disallow_any_generics` passes once checking proceeds.
+- **numpy >= 2.3 float-dtype precision.** `mean_direction` and the DGI
+  reference-direction now cast the `np.mean` result back to `float32`
+  (numpy 2.3 stubs type the reduction as `float64`, tripping strict
+  assignment checks against the `float32` embedding dtype).
 
 ## 2026.6.18 -- SGI bug fix + Snowflake default + paper alignment
 
