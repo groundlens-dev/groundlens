@@ -15,6 +15,7 @@
 [![Version](https://img.shields.io/badge/version-2026.6.25-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
 
 [Documentation](https://docs.groundlens.dev) · [Research](#research) · [Examples](examples/) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
 
