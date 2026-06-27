@@ -5,6 +5,17 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## Unreleased
+
+### Security
+
+- **Pinned the example deploy manifest (`deploy/api/requirements.txt`) to current
+  patched releases.** Its floor specifiers (`>=`) were being resolved by OSV /
+  OpenSSF Scorecard to their *minimum*, surfacing known advisories in
+  long-superseded `transformers` and `torch` versions. The library's own runtime
+  dependencies (`pyproject.toml`: numpy + sentence-transformers) were unaffected —
+  installing `groundlens` never pulled the flagged versions.
+
 ## 2026.6.25 -- Pluggable encoders, threshold fitting, default-model load fix
 
 ### Added
