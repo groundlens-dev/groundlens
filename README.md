@@ -14,12 +14,15 @@
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
 [![Version](https://img.shields.io/badge/version-2026.6.25-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 
 [Documentation](https://docs.groundlens.dev) · [Research](#research) · [Examples](examples/) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
+
+> **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
 Modern AI deployments run **agent pipelines**, not single models. Routing decides intent. RAG retrieves and answers. Specialized agents capture entities and execute operations. Each layer can fail differently, and the standard verification approach — a second LLM as judge — does not survive a model risk review.
 
@@ -45,7 +48,7 @@ Rules give you the **citation-backed audit trail** an auditor needs to reproduce
 
 ## What groundlens detects (and what it doesn't)
 
-The geometric layer rests on three peer-reviewed papers that explicitly characterize which kinds of hallucinations angular geometry of contrastive sentence encoders can and cannot separate. Honest scope is the most important thing this README can give a Head of Model Risk reading it for the first time:
+The geometric layer rests on three peer-reviewed papers that explicitly characterize which kinds of hallucinations angular geometry of contrastive sentence encoders can and cannot separate. A precise statement of scope is the most important thing this README can give a Head of Model Risk reading it for the first time:
 
 | Hallucination type | What it looks like | Detectable by groundlens? |
 |---|---|---|
@@ -55,7 +58,7 @@ The geometric layer rests on three peer-reviewed papers that explicitly characte
 
 References for the taxonomy: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771), Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224), Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
 
-**For regulated-industry deployments**: Type III is precisely the most dangerous class of errors in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The honest combination — SGI/DGI for Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
+**For regulated-industry deployments**: Type III is precisely the most dangerous class of errors in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The right combination — SGI/DGI for Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
 
 ## Quick start
 
@@ -343,7 +346,7 @@ with open_log("triage.db") as log:
 
 The audit log is hash-chained: a supervisor can replay any decision byte-for-byte two years from now and verify the chain has not been altered. That is what SR 26-2, EU AI Act Art. 13, and NIST AI RMF reproducibility requirements look like in practice.
 
-For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom), the integration is identical: call `compute_sgi` / `DGI.score` / `ruleset.evaluate` after every generation and persist via `groundlens.audit`. See [docs/integrations](https://docs.groundlens.dev/integrations/) for framework-specific snippets.
+For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom), the integration is identical: call `compute_sgi` / `DGI.score` / `ruleset.evaluate` after every generation and persist via `groundlens.audit`. See [docs/integrations](https://docs.groundlens.dev/integrations/) for framework-specific snippets. For editor and IDE workflows, the [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp) exposes the same checks to Claude, Cursor, and VS Code.
 
 ## Architecture
 
