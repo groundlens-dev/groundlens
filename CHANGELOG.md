@@ -7,6 +7,28 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
 
 ## Unreleased
 
+## 2026.7.5 -- Verdict layer, DGI magnitude, pinned build deps
+
+### Added
+
+- **`DGIResult.magnitude`** — the Euclidean norm of the question→response
+  displacement (`||phi(response) - phi(question)||`) is now returned alongside
+  the DGI alignment score. DGI's `value` is the *direction* of that displacement
+  (cosine to the grounded reference); `magnitude` is *how far* the response moved
+  from the question. Exposing both makes DGI's two signals available to
+  consumers. The value was already computed internally; it is now surfaced.
+  Backward compatible (defaults to `0.0`).
+- **Canonical verdict layer (`groundlens.verdict`).** New `Verdict` type and
+  `verdict()` function turn an `SGIResult` / `DGIResult` / `GroundlensScore` into
+  a single plain-language reading — headline `VERIFICATION`, a jargon-free label
+  (`Supported by the document` / `Partly supported` / `Not supported by the
+  document` for SGI; `Looks grounded` / `Partly grounded` / `Not grounded` for
+  DGI), a one-line message, and an optional technical `detail` line with the raw
+  components. This is the **single source of truth** for how results are worded,
+  so the README, docs, and MCP servers can all render identically. The verdict
+  *level* comes from the calibrated thresholds; the raw components are shown as
+  detail, not used to invent uncalibrated cut-points.
+
 ### Security
 
 - **Pinned the example deploy manifest (`deploy/api/requirements.txt`) to current

@@ -128,6 +128,14 @@ class TestDGIResult:
         r = DGIResult(value=0.5, normalized=0.75, flagged=False)
         assert r.method == "dgi"
 
+    def test_magnitude_default_is_zero(self) -> None:
+        r = DGIResult(value=0.50, normalized=0.75, flagged=False)
+        assert r.magnitude == 0.0
+
+    def test_magnitude_stored(self) -> None:
+        r = DGIResult(value=0.50, normalized=0.75, flagged=False, magnitude=0.83)
+        assert r.magnitude == 0.83
+
 
 # ---------------------------------------------------------------------------
 # GroundlensScore

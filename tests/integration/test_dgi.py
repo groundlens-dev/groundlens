@@ -96,6 +96,21 @@ class TestComputeDgiValidation:
             compute_dgi(question="Some question?", response="   \t\n  ")
 
 
+class TestComputeDgiMagnitude:
+    """Test that the question->response displacement magnitude is exposed."""
+
+    def test_magnitude_exposed_and_positive(self, factual_pair: dict[str, str]) -> None:
+        result = compute_dgi(**factual_pair)
+        assert result.magnitude > 0.0
+
+    def test_magnitude_positive_for_distinct_texts(self) -> None:
+        result = compute_dgi(
+            question="What is gravity?",
+            response="Gravity is a fundamental force of attraction between masses.",
+        )
+        assert result.magnitude > 0.0
+
+
 class TestComputeDgiExplanation:
     """Test that explanations are generated."""
 
