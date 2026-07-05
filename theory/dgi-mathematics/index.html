@@ -2692,7 +2692,7 @@
 <li><strong>Direction</strong> <span class="arithmatex">\(\hat{\boldsymbol{\delta}} = \boldsymbol{\delta} / \|\boldsymbol{\delta}\|\)</span>: <em>How</em> the semantics changed (toward factual elaboration, toward tangential topics, toward contradictions, etc.)</li>
 <li><strong>Magnitude</strong> <span class="arithmatex">\(\|\boldsymbol{\delta}\|\)</span>: <em>How much</em> the semantics changed (small for paraphrases, large for substantial elaboration)</li>
 </ul>
-<p>DGI uses only the <strong>direction</strong> component, discarding magnitude. This is a deliberate design choice: the magnitude of semantic displacement varies widely across different question types and response lengths, but the <em>direction</em> of grounded displacement is consistent.</p>
+<p>The DGI <strong>score</strong> uses only the <strong>direction</strong> component. This is a deliberate design choice: the magnitude of semantic displacement varies widely across different question types and response lengths, but the <em>direction</em> of grounded displacement is consistent. The magnitude is not discarded — it is returned on <code>DGIResult.magnitude</code> as a second, complementary signal (how far the response moved from the question) — it simply does not enter the score.</p>
 <h2 id="the-unit-displacement">The Unit Displacement<a class="headerlink" href="#the-unit-displacement" title="Permanent link">&para;</a></h2>
 <p>The unit-normalized displacement vector is:</p>
 <div class="arithmatex">\[

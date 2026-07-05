@@ -2444,7 +2444,7 @@
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Displacement magnitude</p>
-<p>DGI only considers the <em>direction</em> of displacement, not its <em>magnitude</em>. A response that is very similar to the question (small displacement) might score well on DGI purely by chance of direction alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged.</p>
+<p>The DGI <em>score</em> considers only the <em>direction</em> of displacement, not its <em>magnitude</em>. A response very similar to the question (small displacement) might score well on DGI purely by chance of direction alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged. The magnitude itself is still returned on <code>DGIResult.magnitude</code> (see below) — it does not enter the score, but it is available as a second signal (how far the response moved from the question).</p>
 </div>
 <h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">DGI</span>
@@ -2482,7 +2482,12 @@
 <tr>
 <td><code>value</code></td>
 <td><code>float</code></td>
-<td>Raw DGI score (cosine similarity to reference direction)</td>
+<td>Raw DGI score = <em>direction</em> (cosine similarity to reference direction)</td>
+</tr>
+<tr>
+<td><code>magnitude</code></td>
+<td><code>float</code></td>
+<td><code>\|\|phi(response) - phi(question)\|\|</code> — how far the response moved from the question. Not used by the score; a second signal.</td>
 </tr>
 <tr>
 <td><code>normalized</code></td>
