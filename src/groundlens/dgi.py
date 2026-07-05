@@ -10,7 +10,10 @@ Mathematical formulation:
     DGI = dot(delta / ||delta||, mu_hat)
 
 where mu_hat is the mean direction of displacement vectors computed from
-verified grounded (question, response) pairs.
+verified grounded (question, response) pairs. The DGI value captures the
+*direction* of the displacement; its *magnitude* ``||delta||`` (how far the
+response moved from the question) is returned separately on
+``DGIResult.magnitude``.
 
 Geometric interpretation:
 
@@ -228,14 +231,14 @@ def compute_dgi(
 
     # Degenerate case: response identical to question.
     if magnitude < 1e-8:
-        return DGIResult(value=0.0, normalized=0.0, flagged=True)
+        return DGIResult(value=0.0, normalized=0.0, flagged=True, magnitude=round(magnitude, 4))
 
     delta_hat = delta / magnitude
     gamma = float(np.dot(delta_hat, mu_hat))
 
     if math.isnan(gamma):
         logger.warning("DGI produced NaN — check embedding dimensions.")
-        return DGIResult(value=0.0, normalized=0.0, flagged=True)
+        return DGIResult(value=0.0, normalized=0.0, flagged=True, magnitude=round(magnitude, 4))
 
     normalized = round(normalize_dgi(gamma), 4)
 
@@ -243,6 +246,7 @@ def compute_dgi(
         value=round(gamma, 4),
         normalized=normalized,
         flagged=gamma < DGI_PASS,
+        magnitude=round(magnitude, 4),
     )
 
 

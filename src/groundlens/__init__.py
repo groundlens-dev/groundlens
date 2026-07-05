@@ -94,6 +94,7 @@ from groundlens.rules import (
 )
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
+from groundlens.verdict import Verdict, verdict
 
 __all__ = [
     "DEFAULT_MODEL",
@@ -117,6 +118,7 @@ __all__ = [
     "SGIResult",
     "SeedExample",
     "ThresholdFit",
+    "Verdict",
     # Meta
     "__version__",
     # Submodules
@@ -141,4 +143,5 @@ __all__ = [
     "rules",
     "set_default_encoder",
     "specialized_agent_rules",
+    "verdict",
 ]
