@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.png" alt="groundlens" width="250">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.png" alt="groundlens" width="150">
 
 # Groundlens
 *Verifiable agent triage*
