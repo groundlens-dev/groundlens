@@ -445,7 +445,7 @@ Requirements: Python 3.10+, numpy, sentence-transformers.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).
 
 ## Contributing
 
