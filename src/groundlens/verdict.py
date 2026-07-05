@@ -107,10 +107,7 @@ def verdict_for_sgi(result: SGIResult) -> Verdict:
             "The answer stays closer to the question than to the source, so it may "
             "not come from the document. Check it before trusting it."
         )
-    detail = (
-        f"distance to source {result.ctx_dist:.2f}, "
-        f"distance to question {result.q_dist:.2f}"
-    )
+    detail = f"distance to source {result.ctx_dist:.2f}, distance to question {result.q_dist:.2f}"
     return Verdict(
         headline=HEADLINE,
         label=label,

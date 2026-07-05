@@ -104,8 +104,7 @@ class TestVerdictRender:
         r = SGIResult(value=2.44, normalized=0.9, flagged=False, q_dist=1.1, ctx_dist=0.45)
         line = verdict_for_sgi(r).line()
         assert line == (
-            "VERIFICATION: Supported by the document "
-            "(Semantic Grounding Index - SGI=2.44)"
+            "VERIFICATION: Supported by the document (Semantic Grounding Index - SGI=2.44)"
         )
 
     def test_two_decimals(self) -> None:
