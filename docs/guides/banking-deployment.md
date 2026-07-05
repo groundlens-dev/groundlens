@@ -273,7 +273,7 @@ the following should be exportable in minutes:
 - [x] **Compliance report** — `ComplianceReport.to_markdown()`
       generates an examiner-ready report combining summary statistics
       with explicit clause references.
-- [x] **Source code** — groundlens is MIT licensed and the full
+- [x] **Source code** — groundlens is Apache-2.0 licensed and the full
       source is available at the published version of the deployment.
 - [x] **Calibration corpus** — the reference_csv used for DGI is
       stored alongside the deployment and version-controlled.
