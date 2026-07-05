@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.6.25-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.7.5-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
@@ -107,6 +107,39 @@ flagged = dgi_score.flagged or rules.flagged
 ```
 
 The flag combiner is a deployer decision: `OR` for recall (more flags to human review), `AND` for precision, or a weighted geometric mean.
+
+## Plain-language verdicts (`verdict`)
+
+A raw score and a boolean flag are the right output for a pipeline and the wrong output for a person. `verdict()` turns any SGI, DGI, or `evaluate()` result into one plain-language reading under the headline **VERIFICATION**. It is the single source of truth for wording — the docs and the [MCP servers](https://github.com/groundlens-dev/groundlens-mcp) render from it, so the phrasing is identical everywhere.
+
+```python
+from groundlens import compute_sgi, verdict
+
+sgi = compute_sgi(question=question, context=context, response=response)
+print(verdict(sgi).render())
+# VERIFICATION: Not supported by the document (Semantic Grounding Index - SGI=0.83)
+# The answer stays closer to the question than to the source, so it may not
+# come from the document. Check it before trusting it.
+```
+
+Context-free DGI reads the same way, and states plainly that it had no source to check against:
+
+```python
+from groundlens import compute_dgi, verdict
+
+dgi = compute_dgi(question=question, response=response)
+print(verdict(dgi).render())
+# VERIFICATION: Looks grounded (Directional Grounding Index - DGI=0.41)
+# The answer moves the way well-grounded answers usually do.
+# No source given — judged by the shape of the answer.
+```
+
+The verdict **level** (`ok` / `review` / `risk`, on `verdict(...).level`) comes only from the calibrated thresholds. The label and message are jargon-free — "grounding" and "hallucination" never appear in what the user reads. The raw components — `q_dist` / `ctx_dist` for SGI, the displacement `magnitude` for DGI — are surfaced on `verdict(...).detail` for anyone who wants them, not used to invent uncalibrated cut-points.
+
+| Metric | `verdict` labels | Level from |
+|---|---|---|
+| **SGI** | Supported by the document · Partly supported · Not supported by the document | SGI ≥ 1.20 / ≥ 0.95 / below |
+| **DGI** | Looks grounded · Partly grounded · Not grounded | DGI ≥ 0.30 / ≥ 0.0 / below |
 
 ## Custom encoders / no-torch
 
@@ -359,7 +392,7 @@ Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deter
 
 | Layer | Module | Inputs | Output | Calibrable? | Bundled defaults | Custom extension |
 |---|---|---|---|---|---|---|
-| **Score — geometry** | `groundlens.sgi`, `groundlens.dgi` | `(question, response[, context])` + sentence-transformer embedding | continuous `normalized` ∈ ℝ, `flagged` ∈ {True, False} | **DGI yes** (via `mu_hat`). SGI no — geometric ratio with no parameter. | bundled `reference_pairs.csv` (212 cross-domain pairs from `grounding-benchmark`) | `DGI.calibrate(pairs=…)` or `reference_csv=…` |
+| **Score — geometry** | `groundlens.sgi`, `groundlens.dgi` | `(question, response[, context])` + sentence-transformer embedding | continuous `normalized` ∈ ℝ, `flagged` ∈ {True, False}, raw components (`q_dist`/`ctx_dist`; DGI `magnitude`), and a plain-language `verdict()` | **DGI yes** (via `mu_hat`). SGI no — geometric ratio with no parameter. | bundled `reference_pairs.csv` (212 cross-domain pairs from `grounding-benchmark`) | `DGI.calibrate(pairs=…)` or `reference_csv=…` |
 | **Score — encoder** | `groundlens._internal.embeddings` | text | unit-norm vector | n/a | `Snowflake/snowflake-arctic-embed-l-v2.0` (default since 2026.6.18, multilingual, 1024 dims), or `LIGHTWEIGHT_MINILM` / `MULTILINGUAL_MINI` / `MULTILINGUAL_E5` | any sentence-transformers model |
 | **Rules** | `groundlens.rules`, `groundlens.agents.*` | `(question, response, context, metadata)` | per-rule pass/fail with citation + sub-scores + `audit_explanation` | n/a (deterministic) | `routing_rules`, `customer_support_rules(rag=…)`, `specialized_agent_rules`, `decision_rationale_rules(domain=…, regulations=…)` | `RuleSet(rules=(ChecklistRule(...), ...))` |
 | **Audit** | `groundlens.audit` | every triage output | SHA-256 hash-chained sqlite log | n/a | `open_log("triage.db")` | append-only, replay-verifiable |
