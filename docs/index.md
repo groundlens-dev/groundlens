@@ -54,6 +54,11 @@ score = evaluate(
 print(score.flagged)   # False
 print(score.method)    # 'sgi'
 print(score.value)     # 1.23 (example)
+
+# ...or a plain-language reading for a person:
+from groundlens import verdict
+print(verdict(score).line())
+# VERIFICATION: Supported by the document (Semantic Grounding Index - SGI=1.23)
 ```
 
 ## Setup in 30 Seconds

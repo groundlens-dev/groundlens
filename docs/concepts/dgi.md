@@ -95,7 +95,7 @@ DGI is the right choice when you **do not have source context**:
     The generic reference direction provides weak discrimination (AUROC ~0.76). Always calibrate for production use.
 
 !!! warning "Displacement magnitude"
-    DGI only considers the *direction* of displacement, not its *magnitude*. A response that is very similar to the question (small displacement) might score well on DGI purely by chance of direction alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged.
+    The DGI *score* considers only the *direction* of displacement, not its *magnitude*. A response very similar to the question (small displacement) might score well on DGI purely by chance of direction alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged. The magnitude itself is still returned on `DGIResult.magnitude` (see below) — it does not enter the score, but it is available as a second signal (how far the response moved from the question).
 
 ## API Reference
 
@@ -127,7 +127,8 @@ The `DGIResult` contains:
 
 | Field | Type | Description |
 |---|---|---|
-| `value` | `float` | Raw DGI score (cosine similarity to reference direction) |
+| `value` | `float` | Raw DGI score = *direction* (cosine similarity to reference direction) |
+| `magnitude` | `float` | `\|\|phi(response) - phi(question)\|\|` — how far the response moved from the question. Not used by the score; a second signal. |
 | `normalized` | `float` | Score in [0, 1] |
 | `flagged` | `bool` | True if below pass threshold |
 | `method` | `str` | Always `"dgi"` |

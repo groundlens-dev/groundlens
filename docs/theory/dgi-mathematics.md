@@ -15,7 +15,7 @@ This vector encodes the semantic transformation from question to response. Its t
 - **Direction** $\hat{\boldsymbol{\delta}} = \boldsymbol{\delta} / \|\boldsymbol{\delta}\|$: *How* the semantics changed (toward factual elaboration, toward tangential topics, toward contradictions, etc.)
 - **Magnitude** $\|\boldsymbol{\delta}\|$: *How much* the semantics changed (small for paraphrases, large for substantial elaboration)
 
-DGI uses only the **direction** component, discarding magnitude. This is a deliberate design choice: the magnitude of semantic displacement varies widely across different question types and response lengths, but the *direction* of grounded displacement is consistent.
+The DGI **score** uses only the **direction** component. This is a deliberate design choice: the magnitude of semantic displacement varies widely across different question types and response lengths, but the *direction* of grounded displacement is consistent. The magnitude is not discarded — it is returned on `DGIResult.magnitude` as a second, complementary signal (how far the response moved from the question) — it simply does not enter the score.
 
 ## The Unit Displacement
 

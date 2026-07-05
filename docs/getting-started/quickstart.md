@@ -40,7 +40,8 @@ result = compute_dgi(
     response="Seasons are caused by Earth's 23.5-degree axial tilt.",
 )
 
-print(f"DGI Score:    {result.value:.4f}")
+print(f"DGI Score:    {result.value:.4f}")   # direction: alignment with grounded reference
+print(f"Magnitude:    {result.magnitude:.4f}") # how far the response moved from the question
 print(f"Normalized:   {result.normalized:.4f}")
 print(f"Flagged:      {result.flagged}")
 print(f"Explanation:  {result.explanation}")
@@ -50,6 +51,36 @@ print(f"Explanation:  {result.explanation}")
     - **DGI > 0.30**: Displacement aligns with grounded response patterns. Pass.
     - **0.00 < DGI < 0.30**: Weak alignment --- the response diverges from typical grounded patterns. Flagged.
     - **DGI < 0.00**: Displacement opposes the grounded direction. High risk.
+
+## Plain-language verdicts
+
+The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to `verdict()`. It is the single source of truth for wording — the README and the [MCP servers](https://github.com/groundlens-dev/groundlens-mcp) render from the same function.
+
+```python
+from groundlens import compute_sgi, compute_dgi, verdict
+
+sgi = compute_sgi(
+    question="What is the Bizum daily limit?",
+    context="The daily Bizum transfer limit is 1,000 EUR per transaction.",
+    response="The Bizum daily limit is 500 EUR. Premium clients have 10,000 EUR.",
+)
+print(verdict(sgi).render())
+# VERIFICATION: Not supported by the document (Semantic Grounding Index - SGI=0.83)
+# The answer stays closer to the question than to the source, so it may not
+# come from the document. Check it before trusting it.
+
+dgi = compute_dgi(
+    question="What causes seasons on Earth?",
+    response="Seasons are caused by Earth's 23.5-degree axial tilt.",
+)
+print(verdict(dgi).render())
+# VERIFICATION: Looks grounded (Directional Grounding Index - DGI=0.41)
+# The answer moves the way well-grounded answers usually do.
+# No source given — judged by the shape of the answer.
+```
+
+!!! note "What the verdict is (and isn't)"
+    The verdict **level** (`ok` / `review` / `risk`, on `verdict(...).level`) comes only from the calibrated thresholds. The **label** and **message** are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (`q_dist` / `ctx_dist` for SGI, the displacement `magnitude` for DGI) are on `verdict(...).detail`. A verdict is a statement about whether the answer is *drawn from the source*, not about whether it is *factually correct*.
 
 ## Auto-Select with evaluate()
 
@@ -83,6 +114,15 @@ score.flagged      # Boolean: needs human review?
 score.method       # 'sgi' or 'dgi'
 score.explanation  # Human-readable interpretation
 score.detail       # Full SGIResult or DGIResult
+```
+
+`verdict()` accepts a `GroundlensScore` directly, so the same plain-language reading works after `evaluate()`:
+
+```python
+from groundlens import evaluate, verdict
+
+score = evaluate(question="...", response="...", context="...")
+print(verdict(score).render())
 ```
 
 ## Reusable Scorer Objects
