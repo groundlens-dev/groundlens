@@ -2504,7 +2504,7 @@
 </tr>
 <tr>
 <td><code>check</code> function calls an LLM or HTTP</td>
-<td>Non-deterministic verdicts</td>
+<td>Non-deterministic results</td>
 <td>Move the LLM out of the check; use rules for pattern verification only</td>
 </tr>
 <tr>
@@ -2524,7 +2524,7 @@
 <ul>
 <li>5-10 known-good responses (should pass)</li>
 <li>5-10 known-bad responses (should fail with specific rules)</li>
-<li>5-10 known-ambiguous responses (any verdict OK, but the audit trail should be human-readable)</li>
+<li>5-10 known-ambiguous responses (any outcome OK, but the audit trail should be human-readable)</li>
 </ul>
 <p>Inspect the <code>audit_explanation</code> for each case. Read the rules that did not match — are they the right reasons? Read the rules that matched — are they the right reasons?</p>
 <p>A rule set you can read out loud and defend is a rule set you can put in front of an auditor.</p>

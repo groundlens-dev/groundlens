@@ -697,10 +697,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#plain-language-verdicts" class="md-nav__link">
+  <a href="#plain-language-checks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Plain-language verdicts
+        Plain-language checks
       
     </span>
   </a>
@@ -2182,10 +2182,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#plain-language-verdicts" class="md-nav__link">
+  <a href="#plain-language-checks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Plain-language verdicts
+        Plain-language checks
       
     </span>
   </a>
@@ -2306,17 +2306,17 @@
 <li><strong>DGI &lt; 0.00</strong>: Displacement opposes the grounded direction. High risk.</li>
 </ul>
 </div>
-<h2 id="plain-language-verdicts">Plain-language verdicts<a class="headerlink" href="#plain-language-verdicts" title="Permanent link">&para;</a></h2>
-<p>The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to <code>verdict()</code>. It is the single source of truth for wording — the README and the <a href="https://github.com/groundlens-dev/groundlens-mcp">MCP servers</a> render from the same function.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">verdict</span>
+<h2 id="plain-language-checks">Plain-language checks<a class="headerlink" href="#plain-language-checks" title="Permanent link">&para;</a></h2>
+<p>The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to <code>check()</code>. It is the single source of truth for wording — the README and the <a href="https://github.com/groundlens-dev/groundlens-mcp">MCP servers</a> render from the same function.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">check</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the Bizum daily limit?&quot;</span><span class="p">,</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;The daily Bizum transfer limit is 1,000 EUR per transaction.&quot;</span><span class="p">,</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The Bizum daily limit is 500 EUR. Premium clients have 10,000 EUR.&quot;</span><span class="p">,</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">)</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">verdict</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># VERIFICATION: Not supported by the document (Semantic Grounding Index - SGI=0.83)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># CHECK: Not supported by the document (Semantic Grounding Index - SGI=0.83)</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># The answer stays closer to the question than to the source, so it may not</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># come from the document. Check it before trusting it.</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
@@ -2324,14 +2324,14 @@
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
 </span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
 </span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">)</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="nb">print</span><span class="p">(</span><span class="n">verdict</span><span class="p">(</span><span class="n">dgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="c1"># VERIFICATION: Looks grounded (Directional Grounding Index - DGI=0.41)</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">dgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="c1"># CHECK: Looks grounded (Directional Grounding Index - DGI=0.41)</span>
 </span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="c1"># The answer moves the way well-grounded answers usually do.</span>
 </span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="c1"># No source given — judged by the shape of the answer.</span>
 </span></code></pre></div>
 <div class="admonition note">
-<p class="admonition-title">What the verdict is (and isn't)</p>
-<p>The verdict <strong>level</strong> (<code>ok</code> / <code>review</code> / <code>risk</code>, on <code>verdict(...).level</code>) comes only from the calibrated thresholds. The <strong>label</strong> and <strong>message</strong> are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (<code>q_dist</code> / <code>ctx_dist</code> for SGI, the displacement <code>magnitude</code> for DGI) are on <code>verdict(...).detail</code>. A verdict is a statement about whether the answer is <em>drawn from the source</em>, not about whether it is <em>factually correct</em>.</p>
+<p class="admonition-title">What the check is (and isn't)</p>
+<p>The check <strong>level</strong> (<code>ok</code> / <code>review</code> / <code>risk</code>, on <code>check(...).level</code>) comes only from the calibrated thresholds. The <strong>label</strong> and <strong>message</strong> are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (<code>q_dist</code> / <code>ctx_dist</code> for SGI, the displacement <code>magnitude</code> for DGI) are on <code>check(...).detail</code>. A check is a statement about whether the answer is <em>drawn from the source</em>, not about whether it is <em>factually correct</em>.</p>
 </div>
 <h2 id="auto-select-with-evaluate">Auto-Select with evaluate()<a class="headerlink" href="#auto-select-with-evaluate" title="Permanent link">&para;</a></h2>
 <p>The <code>evaluate()</code> function automatically selects SGI or DGI based on whether context is provided:</p>
@@ -2360,11 +2360,11 @@
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">score</span><span class="o">.</span><span class="n">explanation</span>  <span class="c1"># Human-readable interpretation</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">score</span><span class="o">.</span><span class="n">detail</span>       <span class="c1"># Full SGIResult or DGIResult</span>
 </span></code></pre></div>
-<p><code>verdict()</code> accepts a <code>GroundlensScore</code> directly, so the same plain-language reading works after <code>evaluate()</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">verdict</span>
+<p><code>check()</code> accepts a <code>GroundlensScore</code> directly, so the same plain-language reading works after <code>evaluate()</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">check</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">verdict</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
 </span></code></pre></div>
 <h2 id="reusable-scorer-objects">Reusable Scorer Objects<a class="headerlink" href="#reusable-scorer-objects" title="Permanent link">&para;</a></h2>
 <p>For repeated evaluations, use the class-based API to avoid passing <code>model</code> every time:</p>
