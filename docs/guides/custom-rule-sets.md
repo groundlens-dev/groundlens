@@ -215,7 +215,7 @@ If a sub-score has three rules with weights 0.5 + 0.3 + 0.2 = 1.0, all three mus
 | Rule fires on irrelevant cases | False positives on grounded responses | Add a precondition check and abstain (`matched=True`) when the precondition is missing |
 | Weights don't sum to ~1.0 in a sub-score | Sub-scores never reach high values | Audit the weight distribution within each sub-score |
 | Flag predicate uses geometric mean | Safety failures masked by UX scores | Make the predicate non-compensatory: per-sub-score thresholds with `OR` |
-| `check` function calls an LLM or HTTP | Non-deterministic verdicts | Move the LLM out of the check; use rules for pattern verification only |
+| `check` function calls an LLM or HTTP | Non-deterministic results | Move the LLM out of the check; use rules for pattern verification only |
 | Empty citations on safety rules | Rule fails audit | Cite the source: academic paper, regulation, industry whitepaper |
 | Rule set used outside its calibrated domain | Over-flags or under-flags badly | Build a domain-fit rule set; don't reuse the wrong one |
 
@@ -225,7 +225,7 @@ Before deploying, run it on a labelled reference set. At minimum:
 
 - 5-10 known-good responses (should pass)
 - 5-10 known-bad responses (should fail with specific rules)
-- 5-10 known-ambiguous responses (any verdict OK, but the audit trail should be human-readable)
+- 5-10 known-ambiguous responses (any outcome OK, but the audit trail should be human-readable)
 
 Inspect the `audit_explanation` for each case. Read the rules that did not match — are they the right reasons? Read the rules that matched — are they the right reasons?
 

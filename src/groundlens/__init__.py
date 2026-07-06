@@ -79,6 +79,7 @@ from groundlens.calibrate import (
     calibrate,
     fit_thresholds,
 )
+from groundlens.check import Check, check
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
 from groundlens.propose import ProposedLabel, PropositionBatch, SeedExample
@@ -94,7 +95,6 @@ from groundlens.rules import (
 )
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
-from groundlens.verdict import Verdict, verdict
 
 __all__ = [
     "DEFAULT_MODEL",
@@ -105,6 +105,7 @@ __all__ = [
     # Classes
     "SGI",
     "CalibrationResult",
+    "Check",
     "ChecklistRule",
     "DGIResult",
     "EmbeddingFn",
@@ -118,7 +119,6 @@ __all__ = [
     "SGIResult",
     "SeedExample",
     "ThresholdFit",
-    "Verdict",
     # Meta
     "__version__",
     # Submodules
@@ -126,6 +126,7 @@ __all__ = [
     # Rule sets (legacy + canonical)
     "banking_rules",
     "calibrate",
+    "check",
     "compute_dgi",
     # Functions
     "compute_sgi",
@@ -143,5 +144,4 @@ __all__ = [
     "rules",
     "set_default_encoder",
     "specialized_agent_rules",
-    "verdict",
 ]

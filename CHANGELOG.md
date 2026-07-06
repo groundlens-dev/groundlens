@@ -7,7 +7,7 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
 
 ## Unreleased
 
-## 2026.7.5 -- Verdict layer, DGI magnitude, pinned build deps
+## 2026.7.6 -- Check layer, DGI magnitude, pinned build deps
 
 ### Added
 
@@ -18,14 +18,14 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   from the question. Exposing both makes DGI's two signals available to
   consumers. The value was already computed internally; it is now surfaced.
   Backward compatible (defaults to `0.0`).
-- **Canonical verdict layer (`groundlens.verdict`).** New `Verdict` type and
-  `verdict()` function turn an `SGIResult` / `DGIResult` / `GroundlensScore` into
-  a single plain-language reading — headline `VERIFICATION`, a jargon-free label
+- **Canonical check layer (`groundlens.check`).** New `Check` type and
+  `check()` function turn an `SGIResult` / `DGIResult` / `GroundlensScore` into
+  a single plain-language reading — headline `CHECK`, a jargon-free label
   (`Supported by the document` / `Partly supported` / `Not supported by the
   document` for SGI; `Looks grounded` / `Partly grounded` / `Not grounded` for
   DGI), a one-line message, and an optional technical `detail` line with the raw
   components. This is the **single source of truth** for how results are worded,
-  so the README, docs, and MCP servers can all render identically. The verdict
+  so the README, docs, and MCP servers can all render identically. The check
   *level* comes from the calibrated thresholds; the raw components are shown as
   detail, not used to invent uncalibrated cut-points.
 
