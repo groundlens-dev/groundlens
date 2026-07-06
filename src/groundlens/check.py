@@ -1,4 +1,4 @@
-"""Canonical human-readable verdicts for groundlens scores.
+"""Canonical human-readable checks for groundlens scores.
 
 Single source of truth for how SGI / DGI results are presented to people.
 Everything downstream renders from here — the README, the docs, the stdio MCP
@@ -6,18 +6,21 @@ server, and the remote (HTTP) MCP — so the wording is identical everywhere.
 
 Design principles:
 
-- **The verdict LEVEL is the only calibrated part.** It comes from the
+- **The check LEVEL is the only calibrated part.** It comes from the
   empirically derived thresholds (SGI 1.20 / 0.95; DGI 0.30 / 0.0 — see
   :mod:`groundlens._internal.thresholds`). Nothing else claims calibration.
 - **The LABEL and MESSAGE are plain language.** No jargon in the user-facing
   text: "grounding" and "hallucination" do not appear in a label. The headline
-  word is ``VERIFICATION``; the metric's full name ("Semantic Grounding Index")
+  word is ``CHECK``; the metric's full name ("Semantic Grounding Index")
   carries meaning for non-experts, the bare acronym does not, so both are shown.
 - **Raw components are surfaced as an optional technical ``detail`` line**
   (``q_dist`` / ``ctx_dist`` for SGI, displacement ``magnitude`` for DGI). They
   are shown, not used to invent uncalibrated 2-D cut-points. Finer message
   splitting (e.g. "restates the question" vs "not in the source") needs
   calibrated cut-points on those components and is deferred until we have them.
+
+A check does not rule on whether an answer is *true* — only on whether it is
+*drawn from the source* (SGI) or *shaped like a grounded answer* (DGI).
 
 Vocabulary (locked):
 
@@ -34,7 +37,7 @@ from dataclasses import dataclass
 from groundlens._internal.thresholds import DGI_PASS, SGI_REVIEW, SGI_STRONG_PASS
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 
-HEADLINE = "VERIFICATION"
+HEADLINE = "CHECK"
 
 # Programmatic severity levels (not shown to end users).
 LEVEL_OK = "ok"
@@ -43,13 +46,13 @@ LEVEL_RISK = "risk"
 
 
 @dataclass(frozen=True, slots=True)
-class Verdict:
+class Check:
     """A plain-language reading of an SGI or DGI result.
 
     Attributes:
-        headline: Always ``"VERIFICATION"``.
-        label: Short plain verdict shown to the user (no jargon).
-        message: One-line plain explanation of what the verdict means.
+        headline: Always ``"CHECK"``.
+        label: Short plain reading shown to the user (no jargon).
+        message: One-line plain explanation of what the reading means.
         level: Programmatic severity — ``"ok"`` / ``"review"`` / ``"risk"``.
         method: ``"sgi"`` or ``"dgi"``.
         metric_name: Full metric name, e.g. ``"Semantic Grounding Index"``.
@@ -71,7 +74,7 @@ class Verdict:
     note: str = ""
 
     def line(self) -> str:
-        """The single headline line: ``VERIFICATION: <label> (<name> - <ABBR>=x.xx)``."""
+        """The single headline line: ``CHECK: <label> (<name> - <ABBR>=x.xx)``."""
         return (
             f"{self.headline}: {self.label} "
             f"({self.metric_name} - {self.metric_abbr}={self.score:.2f})"
@@ -89,8 +92,8 @@ class Verdict:
         return self.render()
 
 
-def verdict_for_sgi(result: SGIResult) -> Verdict:
-    """Build the canonical :class:`Verdict` for an SGI result."""
+def check_for_sgi(result: SGIResult) -> Check:
+    """Build the canonical :class:`Check` for an SGI result."""
     v = result.value
     if v >= SGI_STRONG_PASS:
         level = LEVEL_OK
@@ -99,7 +102,7 @@ def verdict_for_sgi(result: SGIResult) -> Verdict:
     elif v >= SGI_REVIEW:
         level = LEVEL_REVIEW
         label = "Partly supported"
-        message = "The answer is only partly drawn from the source — worth a check."
+        message = "The answer is only partly drawn from the source — worth a look."
     else:
         level = LEVEL_RISK
         label = "Not supported by the document"
@@ -108,7 +111,7 @@ def verdict_for_sgi(result: SGIResult) -> Verdict:
             "not come from the document. Check it before trusting it."
         )
     detail = f"distance to source {result.ctx_dist:.2f}, distance to question {result.q_dist:.2f}"
-    return Verdict(
+    return Check(
         headline=HEADLINE,
         label=label,
         message=message,
@@ -121,8 +124,8 @@ def verdict_for_sgi(result: SGIResult) -> Verdict:
     )
 
 
-def verdict_for_dgi(result: DGIResult) -> Verdict:
-    """Build the canonical :class:`Verdict` for a DGI result."""
+def check_for_dgi(result: DGIResult) -> Check:
+    """Build the canonical :class:`Check` for a DGI result."""
     v = result.value
     if v >= DGI_PASS:
         level = LEVEL_OK
@@ -131,7 +134,7 @@ def verdict_for_dgi(result: DGIResult) -> Verdict:
     elif v >= 0.0:
         level = LEVEL_REVIEW
         label = "Partly grounded"
-        message = "The answer only weakly follows a grounded pattern — worth a check."
+        message = "The answer only weakly follows a grounded pattern — worth a look."
     else:
         level = LEVEL_RISK
         label = "Not grounded"
@@ -139,7 +142,7 @@ def verdict_for_dgi(result: DGIResult) -> Verdict:
             "The answer moves opposite to the way grounded answers do. "
             "Check it before trusting it."
         )
-    return Verdict(
+    return Check(
         headline=HEADLINE,
         label=label,
         message=message,
@@ -153,8 +156,8 @@ def verdict_for_dgi(result: DGIResult) -> Verdict:
     )
 
 
-def verdict(result: SGIResult | DGIResult | GroundlensScore) -> Verdict:
-    """Return the canonical :class:`Verdict` for any groundlens score.
+def check(result: SGIResult | DGIResult | GroundlensScore) -> Check:
+    """Return the canonical :class:`Check` for any groundlens score.
 
     Accepts an :class:`~groundlens.score.SGIResult`, a
     :class:`~groundlens.score.DGIResult`, or a
@@ -167,11 +170,11 @@ def verdict(result: SGIResult | DGIResult | GroundlensScore) -> Verdict:
     if isinstance(result, GroundlensScore):
         result = result.detail
     if isinstance(result, SGIResult):
-        return verdict_for_sgi(result)
+        return check_for_sgi(result)
     if isinstance(result, DGIResult):
-        return verdict_for_dgi(result)
+        return check_for_dgi(result)
     msg = (
-        "verdict() expects an SGIResult, DGIResult, or GroundlensScore, "
+        "check() expects an SGIResult, DGIResult, or GroundlensScore, "
         f"got {type(result).__name__}."
     )
     raise TypeError(msg)

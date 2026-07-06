@@ -109,10 +109,10 @@ class TestAuditExplanation:
         result = rs.evaluate(question="Q", response="risk score 0.456 mentioned here.")
         assert "Ruleset: banking_v1" in result.audit_explanation
 
-    def test_audit_explanation_lists_verdict(self):
+    def test_audit_explanation_lists_result(self):
         rs = banking_rules()
         result = rs.evaluate(question="Q", response="risk score 0.456.")
-        assert "Verdict:" in result.audit_explanation
+        assert "Result:" in result.audit_explanation
 
     def test_audit_explanation_includes_matched_evidence(self):
         rs = banking_rules()

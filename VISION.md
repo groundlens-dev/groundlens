@@ -14,7 +14,7 @@ groundlens is built by someone who has been on the other side of every tool that
 
 LLM hallucination detection is stuck in a paradox: the dominant approach uses a second LLM to judge the first. This creates three fundamental issues:
 
-1. **Non-determinism.** Ask the judge LLM the same question twice and you may get different verdicts. You cannot reproduce results, you cannot audit decisions, and you cannot explain to a regulator why a specific output was flagged or passed.
+1. **Non-determinism.** Ask the judge LLM the same question twice and you may get different rulings. You cannot reproduce results, you cannot audit decisions, and you cannot explain to a regulator why a specific output was flagged or passed.
 
 2. **Circular trust.** If you do not trust LLM A's output, why would you trust LLM B's judgment of that output? Both models share the same failure modes -- they confabulate, they are sensitive to phrasing, and their confidence is poorly calibrated.
 

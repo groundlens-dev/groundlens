@@ -145,7 +145,7 @@ class DGIDetail(BaseModel):
 class GroundingResult(BaseModel):
     """Structured response from a grounding check."""
 
-    verdict: str = Field(description="GROUNDED or HALLUCINATION RISK")
+    status: str = Field(description="GROUNDED or HALLUCINATION RISK")
     flagged: bool = Field(description="True if hallucination risk detected")
     method: str = Field(description="SGI or DGI")
     score: float = Field(description="Grounding score")
@@ -177,7 +177,7 @@ def _run_sgi(question: str, context: str, response: str) -> GroundingResult:
     latency = int((time.monotonic() - t0) * 1000)
 
     return GroundingResult(
-        verdict="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
+        status="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
         flagged=result.flagged,
         method="SGI (Semantic Grounding Index)",
         score=round(result.value, 4),
@@ -204,7 +204,7 @@ def _run_dgi(question: str, response: str) -> GroundingResult:
     latency = int((time.monotonic() - t0) * 1000)
 
     return GroundingResult(
-        verdict="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
+        status="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
         flagged=result.flagged,
         method="DGI (Directional Grounding Index)",
         score=round(result.value, 4),
