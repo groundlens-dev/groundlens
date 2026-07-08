@@ -83,11 +83,15 @@ The point is not that geometry replaces the judge. It is that one half of ground
 *Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Reproduce it in the repo notebook: [`notebooks/groundlens_x_facts_grounding.ipynb`](notebooks/groundlens_x_facts_grounding.ipynb).*
 
 <div align="center">
-
-<video src="https://github.com/groundlens-dev/groundlens/raw/main/examples/anim_histogram.mp4" controls muted loop width="100%"></video>
-
+<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<br>
 <em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
+</div>
 
+<div align="center">
+<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<br>
+<em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
 </div>
 
 ### Published results
