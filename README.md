@@ -1,8 +1,8 @@
 <div align="center">
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.png" alt="groundlens" width="150">
 
-# Groundlens
-*Verifiable agent triage*
+# Groundlens Library — The Deterministic Check For RAG And Agent Loops. No LLM Judge.
+
 </div>
 
 
@@ -22,10 +22,11 @@
 </div>
 
 ---
+## Verification Tool for Regulated Industries
 
 > **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
-Modern AI deployments run **agent pipelines**, not single models. Routing decides intent. RAG retrieves and answers. Specialized agents capture entities and execute operations. Each layer can fail differently, and the standard verification approach — a second LLM as judge — does not survive a model risk review.
+Current AI deployments run RAG systems and agent loops. Routing decides intent. RAG retrieves and answers. Specialized agents capture entities and execute operations. Each layer can fail differently, and the standard verification approach — a second LLM as judge — does not survive a model risk review.
 
 Groundlens verifies agent outputs with two deterministic layers stitched into one audit packet:
 
@@ -35,7 +36,7 @@ Groundlens verifies agent outputs with two deterministic layers stitched into on
 
 The combination is what a Model Risk Committee, an internal audit, or an external supervisor accepts. Neither layer alone is enough.
 
-## Why geometry **and** rules
+## Geometry **and** rules
 
 Each layer answers a different question. Both questions get asked in a real audit.
 
@@ -47,9 +48,9 @@ Each layer answers a different question. Both questions get asked in a real audi
 
 Rules give you the **citation-backed audit trail** an auditor needs to reproduce a decision two years from now. Geometry gives you the **continuous score** an operations team needs to triage the bottom 5% of a million daily outputs. Without rules, you can't defend the decision. Without geometry, you can't scale the review. Groundlens ships both, and a hash-chained audit log that ties them together.
 
-## What groundlens detects (and what it doesn't)
+## What groundlens detects
 
-The geometric layer rests on three peer-reviewed papers that explicitly characterize which kinds of hallucinations angular geometry of contrastive sentence encoders can and cannot separate. A precise statement of scope is the most important thing this README can give a Head of Model Risk reading it for the first time:
+The geometric layer rests on three published papers that explicitly characterize which kinds of hallucinations angular geometry of contrastive sentence encoders can and cannot separate. A precise statement of scope is the most important thing this README can give a Head of Model Risk reading it for the first time:
 
 | Hallucination type | What it looks like | Detectable by groundlens? |
 |---|---|---|
@@ -59,7 +60,7 @@ The geometric layer rests on three peer-reviewed papers that explicitly characte
 
 References for the taxonomy: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771), Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224), Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
 
-**For regulated-industry deployments**: Type III is precisely the most dangerous class of errors in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The right combination — SGI/DGI for Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
+**For regulated-industry deployments**: Type III is the most critical class of errors in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The right combination — SGI/DGI for Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
 
 ## Quick start
 
