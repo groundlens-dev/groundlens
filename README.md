@@ -59,6 +59,7 @@ The geometric layer rests on three published papers that state exactly which hal
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI** with domain calibration. Validated on a 212-pair human-confabulated dataset (87.8% on declarative-knowledge domains); NLI on the same pairs reaches only 57.5% |
 | **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by angular geometry. Documented as a *negative result* on TruthfulQA, AUROC = 0.478 — *below chance*. For Type III, combine Groundlens with domain NLI and/or KG verification |
 
+
 References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224) · Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
 
 **For regulated-industry deployments:** Type III is the most critical class in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The right combination — SGI/DGI for the Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
@@ -100,11 +101,11 @@ From the SGI and DGI papers. Every row is reproducible from the linked paper's r
 
 | Benchmark | Task | Metric | Baseline | Note |
 |---|---|---|---|---|
-| **HaluEval QA** (n = 10,000) | Type I, context available | **SGI AUROC 0.805** (mean over 5 encoders, range 0.78–0.82) | NLI 0.748 · cosine 0.941 | On LLM-generated hallucinations, correct and wrong answers sit far apart, so even cosine separates. SGI's value is decomposition and the harder cases below, not this number. |
+| **HaluEval QA** (n = 10,000) | Type I, context available | **SGI AUROC 0.805** (mean over 5 encoders, range 0.78–0.82) | NLI 0.748 · cosine similarity 0.941 | On LLM-generated hallucinations, correct and wrong answers sit far apart, so even cosine separates. SGI's value is decomposition and the harder cases below, not this number. |
 | **Human-confabulated** (212 pairs, 9 domains) | Type II, realistic errors | **DGI 87.8%** detection on declarative-knowledge domains; 56.9% on template domains | NLI 57.5% (AUROC 0.536, ≈ chance) | The realistic case. Human confabulations sit *close* to the grounded answer (cosine 0.72–0.92), where surface methods collapse and directional geometry still separates. |
 | **TruthfulQA** (n = 800) | Type III, same-frame factual error | **AUROC 0.478 — below chance** | — | Published *negative result*. Angular geometry measures topical engagement, not factual truth. Use rules / KG verification for Type III. |
 
-Two honest readings a reviewer should take from this table. First, geometry is not magic: on same-topic factual errors it is below chance, and it says so. Second, geometry earns its place exactly where the cheap surface baselines fail — the human-confabulated case that resembles real deployments, where NLI drops to chance and directional grounding does not.
+Two findings. First, geometry is not magic: on same-topic factual errors it is below chance, and it says so. Second, geometry earns its place exactly where the cheap surface baselines fail — the human-confabulated case that resembles real deployments, where NLI drops to chance and directional grounding does not. Cosine similarity win (0.941) when the error sits far from the truth — the HaluEval dataset case — and collapse when it sits close, the human-confabulation case that resembles real deployments (NLI drops to 0.536, chance). A production detector has to work in the second regime. That is what directional and ratio geometry are for.
 
 Domain calibration moves the operating point: generic thresholds sit near AUROC 0.76; with 20–50 verified-grounded pairs from your own domain the reported range rises toward 0.90–0.99 on labelled corpora. Calibration, not the default threshold, is the deployment configuration — see [Calibrating SGI and DGI](#calibrating-sgi-and-dgi).
 
