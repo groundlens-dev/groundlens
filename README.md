@@ -84,17 +84,12 @@ We ran Groundlens against FACTS' own public examples to ask how much of that jud
 
 The point is not that geometry replaces the judge. It is that one half of grounding — where an answer came from — is nearly free, and can clear the clearly-grounded answers and catch most of the ungrounded ones before a single LLM call.
 
-*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Reproduce it in the repo notebook: [`notebooks/groundlens_x_facts_grounding.ipynb`](notebooks/groundlens_x_facts_grounding.ipynb).*
-
-<div align="center">
-<img src="examples/anim_benchmark.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
-<br>
-<em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
-</div>
+*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Reproduce it in the repo notebook]*:[`notebooks/groundlens_x_facts_grounding.ipynb`](notebooks/groundlens_x_facts_grounding.ipynb).
 
 <div align="center">
 <img src="examples/anim_scatter.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
+<em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
 </div>
 
 ### Published results
