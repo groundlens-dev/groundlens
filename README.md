@@ -93,7 +93,7 @@ The point is not that geometry replaces the judge. It is that one half of ground
 </div>
 
 <div align="center">
-<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<img src="examples/anim_scatter.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
 </div>
 
