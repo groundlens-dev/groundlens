@@ -26,10 +26,13 @@ The standard way to check an LLM's output is a second LLM as judge. It does not 
 
 ## See it run
 
-<!-- Drag your MCP demo .mp4 into GitHub's web editor here; it becomes a user-attachments URL that plays inline.
-     One clip only: the CHECK line appearing under an answer. -->
+<div align="center">
+<img src="examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="100%">
+<br>
+<em>The Groundlens MCP inside Claude: a deterministic CHECK under every answer. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
+</div>
 
-*[MCP demo — the CHECK line appearing live under each answer.]*
+**Live demo:** [groundlens-demo.hf.space](https://groundlens-demo.hf.space)
 
 ## Two deterministic layers, one audit packet
 
@@ -84,7 +87,7 @@ The point is not that geometry replaces the judge. It is that one half of ground
 *Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Reproduce it in the repo notebook: [`notebooks/groundlens_x_facts_grounding.ipynb`](notebooks/groundlens_x_facts_grounding.ipynb).*
 
 <div align="center">
-<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<img src="examples/anim_benchmark.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
 <em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
 </div>
@@ -92,7 +95,6 @@ The point is not that geometry replaces the judge. It is that one half of ground
 <div align="center">
 <img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
-<em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
 </div>
 
 ### Published results
