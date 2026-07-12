@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.">
+        <meta name="description" content="Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.">
       
       
         <meta name="author" content="Javier Marin">
@@ -553,10 +553,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geometric-llm-hallucination-detection-no-second-llm-deterministic-auditable" class="md-nav__link">
+  <a href="#deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+        Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
       
     </span>
   </a>
@@ -2155,10 +2155,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geometric-llm-hallucination-detection-no-second-llm-deterministic-auditable" class="md-nav__link">
+  <a href="#deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+        Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
       
     </span>
   </a>
@@ -2256,14 +2256,18 @@
   <img src="assets/Logo_groundlens_new-05.png" alt="groundlens" width="200">
 </div>
 
-<h2 id="geometric-llm-hallucination-detection-no-second-llm-deterministic-auditable">Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.<a class="headerlink" href="#geometric-llm-hallucination-detection-no-second-llm-deterministic-auditable" title="Permanent link">&para;</a></h2>
+<h2 id="deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable">Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.<a class="headerlink" href="#deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable" title="Permanent link">&para;</a></h2>
 <hr />
-<p>Groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry rather than a second language model. It provides two complementary scoring methods:</p>
+<p>Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human) runs only on the outputs that actually need it. It provides two complementary scoring methods:</p>
 <ul>
 <li><strong>SGI (Semantic Grounding Index)</strong> --- measures whether a response engaged with provided source context, using distance ratios in embedding space.</li>
 <li><strong>DGI (Directional Grounding Index)</strong> --- evaluates response grounding without any context, using directional statistics on displacement vectors.</li>
 </ul>
-<p>Both methods are deterministic, sub-second, and produce auditable numeric scores --- no black-box LLM-as-judge.</p>
+<p>Both methods are deterministic, sub-second, and produce auditable numeric scores. Groundlens runs <em>before</em> any LLM-as-judge, not instead of one: it is the deterministic filter that decides what the expensive check even has to look at.</p>
+<div class="admonition info">
+<p class="admonition-title">What Groundlens is (and is not)</p>
+<p>Groundlens is <strong>Stage 1</strong>: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to <strong>Stage 2</strong>, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.</p>
+</div>
 <h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2367,7 +2371,7 @@
 </tbody>
 </table>
 <h2 id="author">Author<a class="headerlink" href="#author" title="Permanent link">&para;</a></h2>
-<p><strong>Javier Marin</strong> --- <a href="mailto:javier@jgroundlens.dev">javier@groundlens.dev</a> and <a href="mailto:javier@jmarin.info">javier@jmarin.info</a></p>
+<p><strong>Javier Marin</strong> --- <a href="mailto:javier@groundlens.dev">javier@groundlens.dev</a> and <a href="mailto:javier@jmarin.info">javier@jmarin.info</a></p>
 <hr />
 <p><em>Groundlens is part of the <a href="https://github.com/groundlens-dev/groundlens">CERT Framework</a> for verification triage --- helping teams prioritize which LLM outputs need human review.</em></p>
 

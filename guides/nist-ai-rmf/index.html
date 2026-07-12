@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.">
+        <meta name="description" content="Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.">
       
       
         <meta name="author" content="Javier Marin">
@@ -2537,7 +2537,7 @@ harmful bias. groundlens supports several:</p>
 </tr>
 <tr>
 <td>Secure and resilient</td>
-<td>No second LLM in the verification loop removes a class of failure modes (judge model compromised or drifted)</td>
+<td>The deterministic first stage removes a class of failure modes from the triage step (no judge-model drift or compromise in scoring); the second-stage judge runs only on escalations</td>
 </tr>
 </tbody>
 </table>

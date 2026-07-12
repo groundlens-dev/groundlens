@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.">
+        <meta name="description" content="Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.">
       
       
         <meta name="author" content="Javier Marin">
@@ -2279,7 +2279,7 @@
 
 
 <h1 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h1>
-<p>groundlens detects hallucinations by analyzing the <strong>geometry</strong> of text embeddings. Instead of asking a second LLM "is this answer correct?" (which is itself susceptible to hallucination), groundlens computes deterministic geometric scores in embedding space.</p>
+<p>groundlens triages LLM outputs by analyzing the <strong>geometry</strong> of text embeddings. Before spending a second LLM (or a human) on "is this answer correct?", groundlens computes a deterministic geometric score that filters out the responses not even engaging their source, so the expensive second-stage check runs on far fewer outputs.</p>
 <h2 id="the-core-idea">The Core Idea<a class="headerlink" href="#the-core-idea" title="Permanent link">&para;</a></h2>
 <p>Every piece of text --- a question, a context document, an LLM response --- can be mapped to a point in a high-dimensional vector space using a sentence transformer. In this space, texts with similar meaning are close together; texts with different meaning are far apart.</p>
 <p>groundlens exploits two geometric properties of this space:</p>

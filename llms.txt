@@ -1,8 +1,8 @@
 # groundlens
 
-> Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+> Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 
-groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), not a second LLM.
+groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), with no LLM in the scoring path. Groundlens is the deterministic first stage of a two-stage pipeline: it filters cheaply and escalates the factual-verification cases it cannot settle (in-register substitution, Type III) to a second-stage LLM judge or human.
 
 ## Core Concepts
 
