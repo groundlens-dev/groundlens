@@ -13,7 +13,7 @@ The EU AI Act requires that high-risk AI systems be:
 
 groundlens supports all four requirements by design.
 
-## No Black-Box Second LLM
+## A Deterministic First Stage
 
 The most common alternative to groundlens --- "LLM-as-judge" --- uses a second LLM to evaluate the first. This creates serious compliance problems:
 

@@ -4,7 +4,7 @@ This file helps AI coding agents (Claude Code, Codex, Copilot Workspace, etc.) n
 
 ## What groundlens does
 
-groundlens detects LLM hallucinations using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`). No second LLM is needed.
+groundlens triages LLM outputs using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`), with no LLM in the scoring path. It is the first stage of a two-stage pipeline; the second-stage judge or human runs only on what it escalates.
 
 Two scoring methods:
 - **SGI (Semantic Grounding Index):** ratio-based, requires context. `SGI = dist(response, question) / dist(response, context)`.

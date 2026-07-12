@@ -21,7 +21,7 @@ harmful bias. groundlens supports several:
 | Valid and reliable | Deterministic scoring with documented mathematical properties; reproducible results across runs and machines |
 | Accountable and transparent | Hash-chain audit log; per-evaluation traceability of inputs, outputs, configuration |
 | Explainable and interpretable | Rule-based sub-scores with evidence spans; geometric scores decomposable into distances and angles |
-| Secure and resilient | No second LLM in the verification loop removes a class of failure modes (judge model compromised or drifted) |
+| Secure and resilient | The deterministic first stage removes a class of failure modes from the triage step (no judge-model drift or compromise in scoring); the second-stage judge runs only on escalations |
 
 ## GOVERN function
 
