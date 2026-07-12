@@ -1,5 +1,5 @@
 site_name: groundlens
-site_description: Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+site_description: Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 site_author: Javier Marin
 site_url: https://docs.groundlens.dev/
 repo_url: https://github.com/groundlens-dev/groundlens

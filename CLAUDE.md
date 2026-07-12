@@ -4,7 +4,7 @@ This file provides context for AI coding agents (Claude Code, Copilot, Codex) wo
 
 ## What is groundlens
 
-A Python library that detects LLM hallucinations using embedding geometry — no second LLM. It computes deterministic, auditable scores from spatial relationships in sentence-transformer embedding spaces.
+A Python library that triages LLM outputs using embedding geometry, with no LLM in the scoring path. It is the deterministic **first stage** of a two-stage pipeline: it computes auditable scores from spatial relationships in sentence-transformer embedding spaces, and the second stage (an LLM judge or a human) runs only on what it escalates.
 
 Two methods:
 - **SGI** (Semantic Grounding Index): distance ratio, requires context. `dist(r, q) / dist(r, ctx)`.
@@ -16,7 +16,7 @@ The library is used in regulated environments (legal, healthcare, finance). Dete
 
 1. **Determinism is sacred.** Same inputs → same outputs, always. No randomness in scoring paths. No sampling. No stochastic operations. If you're tempted to add `random.seed()` anywhere, you're solving the wrong problem.
 
-2. **No second LLM.** The entire point of groundlens is that it does not use a second LLM for verification. Never add LLM-based scoring, LLM-as-judge patterns, or inference calls in the scoring path.
+2. **No LLM in the scoring path.** groundlens is the deterministic first stage; it never uses an LLM to score. The second-stage judge or human is downstream, on escalations only. Never add LLM-based scoring, LLM-as-judge patterns, or inference calls in the scoring path.
 
 3. **Frozen result types.** `SGIResult`, `DGIResult`, and `GroundlensScore` are frozen dataclasses (`frozen=True, slots=True`). Do not unfreeze them. Immutability is a design decision, not a convenience.
 

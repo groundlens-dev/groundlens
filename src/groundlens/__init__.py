@@ -1,6 +1,6 @@
 """Groundlens — Verifiable agent triage.
 
-Deterministic. Auditable. No second LLM in the loop.
+Deterministic. Auditable. The first-stage filter that runs before your judge, with no LLM in the scoring path.
 
 Groundlens triages outputs from individual LLMs and from multi-agent
 pipelines (routing, RAG, specialized / tool-using agents). Two layers:

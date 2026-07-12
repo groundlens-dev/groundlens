@@ -1,6 +1,6 @@
 # How It Works
 
-groundlens detects hallucinations by analyzing the **geometry** of text embeddings. Instead of asking a second LLM "is this answer correct?" (which is itself susceptible to hallucination), groundlens computes deterministic geometric scores in embedding space.
+groundlens triages LLM outputs by analyzing the **geometry** of text embeddings. Before spending a second LLM (or a human) on "is this answer correct?", groundlens computes a deterministic geometric score that filters out the responses not even engaging their source, so the expensive second-stage check runs on far fewer outputs.
 
 ## The Core Idea
 

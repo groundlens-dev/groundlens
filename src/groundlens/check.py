@@ -44,6 +44,17 @@ LEVEL_OK = "ok"
 LEVEL_REVIEW = "review"
 LEVEL_RISK = "risk"
 
+# Second-stage handoff lines. Groundlens is stage 1; these tell the reader what
+# the deterministic filter cannot settle and must be escalated.
+HANDOFF_ESCALATE = (
+    "Escalate to your second stage, an LLM judge or a human. "
+    "Geometry cannot settle this one."
+)
+HANDOFF_OK = (
+    "Grounding, not facts: a plausible wrong fact in the right frame would pass "
+    "this check. Verify facts in a second stage."
+)
+
 
 @dataclass(frozen=True, slots=True)
 class Check:
@@ -60,6 +71,8 @@ class Check:
         score: The raw metric value (``result.value``).
         detail: Optional technical line with the raw components.
         note: Optional standing caveat (DGI: no source was provided).
+        escalate: True when this case must go to the second stage.
+        handoff: Plain line naming the second-stage handoff.
     """
 
     headline: str
@@ -72,6 +85,8 @@ class Check:
     score: float
     detail: str = ""
     note: str = ""
+    escalate: bool = False
+    handoff: str = ""
 
     def line(self) -> str:
         """The single headline line: ``CHECK: <label> (<name> - <ABBR>=x.xx)``."""
@@ -81,10 +96,12 @@ class Check:
         )
 
     def render(self) -> str:
-        """Full multi-line rendering: headline, message, optional note."""
+        """Full multi-line rendering: headline, message, note, handoff."""
         parts = [self.line(), self.message]
         if self.note:
             parts.append(self.note)
+        if self.handoff:
+            parts.append(self.handoff)
         return "\n".join(parts)
 
     def __str__(self) -> str:
@@ -99,10 +116,12 @@ def check_for_sgi(result: SGIResult) -> Check:
         level = LEVEL_OK
         label = "Supported by the document"
         message = "The answer draws on the source and adds detail beyond the question."
+        escalate, handoff = False, HANDOFF_OK
     elif v >= SGI_REVIEW:
         level = LEVEL_REVIEW
         label = "Partly supported"
         message = "The answer is only partly drawn from the source — worth a look."
+        escalate, handoff = True, HANDOFF_ESCALATE
     else:
         level = LEVEL_RISK
         label = "Not supported by the document"
@@ -110,6 +129,7 @@ def check_for_sgi(result: SGIResult) -> Check:
             "The answer stays closer to the question than to the source, so it may "
             "not come from the document. Check it before trusting it."
         )
+        escalate, handoff = True, HANDOFF_ESCALATE
     detail = f"distance to source {result.ctx_dist:.2f}, distance to question {result.q_dist:.2f}"
     return Check(
         headline=HEADLINE,
@@ -121,6 +141,8 @@ def check_for_sgi(result: SGIResult) -> Check:
         metric_abbr="SGI",
         score=v,
         detail=detail,
+        escalate=escalate,
+        handoff=handoff,
     )
 
 
@@ -131,10 +153,12 @@ def check_for_dgi(result: DGIResult) -> Check:
         level = LEVEL_OK
         label = "Looks grounded"
         message = "The answer moves the way well-grounded answers usually do."
+        escalate, handoff = False, HANDOFF_OK
     elif v >= 0.0:
         level = LEVEL_REVIEW
         label = "Partly grounded"
         message = "The answer only weakly follows a grounded pattern — worth a look."
+        escalate, handoff = True, HANDOFF_ESCALATE
     else:
         level = LEVEL_RISK
         label = "Not grounded"
@@ -142,6 +166,7 @@ def check_for_dgi(result: DGIResult) -> Check:
             "The answer moves opposite to the way grounded answers do. "
             "Check it before trusting it."
         )
+        escalate, handoff = True, HANDOFF_ESCALATE
     return Check(
         headline=HEADLINE,
         label=label,
@@ -153,6 +178,8 @@ def check_for_dgi(result: DGIResult) -> Check:
         score=v,
         detail=f"commitment (how far the answer moved from the question) {result.magnitude:.2f}",
         note="No source given — judged by the shape of the answer.",
+        escalate=escalate,
+        handoff=handoff,
     )
 
 
