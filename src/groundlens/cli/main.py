@@ -396,7 +396,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         prog="groundlens",
-        description="Deterministic first-stage grounding triage. No LLM in the scoring path. Escalates what it cannot settle.",
+        description=(
+            "Deterministic first-stage grounding triage. No LLM in the scoring "
+            "path. Escalates what it cannot settle."
+        ),
     )
     parser.add_argument(
         "--version",
