@@ -29,7 +29,7 @@ The standard way to check an LLM's output is a second LLM as judge, paid on ever
 <div align="center">
 <img src="examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="100%">
 <br>
-<em>The Groundlens MCP inside Claude: a deterministic CHECK under every answer. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
+<em>The Groundlens MCP inside Claude: SGI as a single-pass, no-judge triage filter that catch semantic disengagement. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
 </div>
 
 **Live demo:** [groundlens-demo.hf.space](https://groundlens-demo.hf.space)
