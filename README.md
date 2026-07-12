@@ -1,7 +1,7 @@
 <div align="center">
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.png" alt="groundlens" width="150">
 
-# Groundlens — the deterministic check for RAG and agent loops. No LLM judge.
+# Groundlens: the deterministic first stage for RAG and agent loops. It decides what your LLM judge has to look at.
 </div>
 
 <div align="center">
@@ -20,7 +20,7 @@
 
 ---
 
-The standard way to check an LLM's output is a second LLM as judge. It does not survive a model risk review: non-deterministic at temperature 0, a free-text opinion with no citation, and priced per call. Groundlens replaces that vote with two **deterministic** layers — geometric scoring and citation-backed rules — that return the same verdict every time, sub-second, with no second model in the loop. Built for RAG systems and agent loops in regulated industries.
+The standard way to check an LLM's output is a second LLM as judge, paid on every output: non-deterministic at temperature 0, a free-text opinion with no citation, priced per call. Groundlens is the deterministic **first stage** that runs in front of that judge. Two deterministic layers, geometric scoring and citation-backed rules, clear the clearly grounded answers and catch the clearly ungrounded ones, sub-second, with no LLM in the scoring path, so the expensive judge runs only on what Groundlens escalates. It settles whether an answer engaged its source. A plausible wrong fact stated in the right frame is provably invisible to geometry, and Groundlens escalates it to your second stage. Built for RAG systems and agent loops in regulated industries.
 
 > **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
@@ -42,15 +42,15 @@ Groundlens verifies agent outputs with two layers stitched into one audit packet
 - **Rule-based audit** — per-rule pass/fail with a citation to the academic, industrial, or regulatory source that motivated the check. Byte-identical reproducibility across years and runs.
 - **Bring your own embeddings** — inject any encoder via `encoder=` (or `set_default_encoder(...)` once). Score with a hosted embedding API, an in-house model, or precomputed vectors — and run SGI/DGI **without torch**.
 
-Each layer answers a different question. Both questions get asked in a real audit.
+Groundlens is **Stage 1**: it runs first, deterministically, on every output. The expensive LLM-as-judge (or a human) is **Stage 2**, and it runs only on what Stage 1 escalates.
 
-| Layer | What it answers | Limit when used alone |
-|---|---|---|
-| LLM-as-judge | "Does this response look right semantically?" | Non-deterministic at T=0; free-text reasons, no citations; ~$300/M outputs at gpt-4o-mini scale |
-| Geometric scoring | "How far is this response from the grounded reference distribution, on a continuous scale?" | No human-readable trail per response; can't say *why* it drifted |
-| Rule-based audit | "Which specific fact, citation, or procedural element is missing or fabricated, and on what authority do we say so?" | Binary checks; doesn't capture semantic drift outside the rule patterns |
+| Stage | Component | What it answers | Limit alone |
+|---|---|---|---|
+| **Stage 1** | Geometric scoring (SGI, DGI) | "How far is this response from the grounded reference distribution, on a continuous scale?" | No human-readable trail per response; can't say *why* it drifted |
+| **Stage 1** | Rule-based audit | "Which specific fact, citation, or procedural element is missing or fabricated, and on what authority?" | Binary checks; doesn't capture semantic drift outside the rule patterns |
+| Stage 2 (downstream) | LLM-as-judge or human | "Does this look right, and is the fact true?" | Non-deterministic at T=0; free-text reasons, no citations; ~$300/M outputs. Run it only on what Stage 1 escalates. |
 
-Rules give you the **citation-backed audit trail** an auditor needs to reproduce a decision two years from now. Geometry gives you the **continuous score** an operations team needs to triage the bottom 5% of a million daily outputs. Without rules, you can't defend the decision. Without geometry, you can't scale the review. Groundlens ships both, and a hash-chained audit log that ties them together.
+Stage 1 gives you two things Stage 2 cannot afford at scale: a **continuous score** to triage the bottom 5% of a million daily outputs, and a **citation-backed audit trail** an auditor can reproduce two years from now, tied together by a hash-chained log. What Stage 1 cannot settle, a plausible in-register factual error, it escalates to Stage 2. Without Stage 1 you run the expensive judge on everything; without Stage 2 you cannot settle facts.
 
 ## What Groundlens detects
 
@@ -60,12 +60,12 @@ The geometric layer rests on three published papers that state exactly which hal
 |---|---|---|
 | **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. Validated on HaluEval QA (AUROC ≈ 0.81 averaged across five encoders) |
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI** with domain calibration. Validated on a 212-pair human-confabulated dataset (87.8% on declarative-knowledge domains); NLI on the same pairs reaches only 57.5% |
-| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by angular geometry. Documented as a *negative result* on TruthfulQA, AUROC = 0.478 — *below chance*. For Type III, combine Groundlens with domain NLI and/or KG verification |
+| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by angular geometry. Documented as a *negative result* on TruthfulQA, AUROC = 0.478 — *below chance*. For Type III, escalate to your second stage: an LLM judge, domain NLI, KG verification, or a human. No embedding method separates this class |
 
 
 References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224) · Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
 
-**For regulated-industry deployments:** Type III is the most critical class in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The right combination — SGI/DGI for the Type I/II screen + domain rules for Type III enforcement — is what passes a Model Risk Committee review.
+**For regulated-industry deployments:** Type III is the most critical class in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The rule-based layer catches the Type III cases a policy or citation check can express; the residue, a plausible wrong figure that passes every rule, is escalated to a second-stage judge or human. SGI/DGI for the Type I/II screen, rules plus that escalation for Type III, is what passes a Model Risk Committee review.
 
 ## Benchmarks
 
@@ -100,7 +100,7 @@ From the SGI and DGI papers. Every row is reproducible from the linked paper's r
 |---|---|---|---|---|
 | **HaluEval QA** (n = 10,000) | Type I, context available | **SGI AUROC 0.805** (mean over 5 encoders, range 0.78–0.82) | NLI 0.748 · cosine similarity 0.941 | On LLM-generated hallucinations, correct and wrong answers sit far apart, so even cosine separates. SGI's value is decomposition and the harder cases below, not this number. |
 | **Human-confabulated** (212 pairs, 9 domains) | Type II, realistic errors | **DGI 87.8%** detection on declarative-knowledge domains; 56.9% on template domains | NLI 57.5% (AUROC 0.536, ≈ chance) | The realistic case. Human confabulations sit *close* to the grounded answer (cosine 0.72–0.92), where surface methods collapse and directional geometry still separates. |
-| **TruthfulQA** (n = 800) | Type III, same-frame factual error | **AUROC 0.478 — below chance** | — | Published *negative result*. Angular geometry measures topical engagement, not factual truth. Use rules / KG verification for Type III. |
+| **TruthfulQA** (n = 800) | Type III, same-frame factual error | **AUROC 0.478 — below chance** | — | Published *negative result*. Angular geometry measures topical engagement, not factual truth. Escalate Type III to your second stage: a judge, KG verification, or a human. |
 
 Two findings. First, geometry is not magic: on same-topic factual errors it is below chance, and it says so. Second, geometry earns its place exactly where the cheap surface baselines fail — the human-confabulated case that resembles real deployments, where NLI drops to chance and directional grounding does not. Cosine similarity win (0.941) when the error sits far from the truth — the HaluEval dataset case — and collapse when it sits close, the human-confabulation case that resembles real deployments (NLI drops to 0.536, chance). A production detector has to work in the second regime. That is what directional and ratio geometry are for.
 
@@ -418,7 +418,7 @@ Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deter
 
 ![Topology of groundlens (Score + Rules + propose_labels)](docs/assets/groundlens_topology.png)
 
-Full component and lifecycle tables (modules, inputs, outputs, calibration, compliance mapping) live in the docs to keep this README readable: **[docs.groundlens.dev/architecture](https://docs.groundlens.dev/architecture/)**. The one-line summary: continuous geometric score for ranking, per-rule audit trail with citations, hash-chained log for reproducibility, compliance mapping for the model-risk packet — and no second LLM in any of them.
+Full component and lifecycle tables (modules, inputs, outputs, calibration, compliance mapping) live in the docs to keep this README readable: **[docs.groundlens.dev/architecture](https://docs.groundlens.dev/architecture/)**. The one-line summary: continuous geometric score for ranking, per-rule audit trail with citations, hash-chained log for reproducibility, compliance mapping for the model-risk packet, with no LLM in the scoring path. Your second-stage judge or human runs only on what Groundlens escalates.
 
 ## Research
 

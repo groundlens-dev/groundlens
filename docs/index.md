@@ -4,16 +4,19 @@
   <img src="assets/Logo_groundlens_new-05.png" alt="groundlens" width="200">
 </div>
 
-## Geometric LLM hallucination detection. No second LLM. Deterministic. Auditable.
+## Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 
 ---
 
-Groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry rather than a second language model. It provides two complementary scoring methods:
+Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human) runs only on the outputs that actually need it. It provides two complementary scoring methods:
 
 - **SGI (Semantic Grounding Index)** --- measures whether a response engaged with provided source context, using distance ratios in embedding space.
 - **DGI (Directional Grounding Index)** --- evaluates response grounding without any context, using directional statistics on displacement vectors.
 
-Both methods are deterministic, sub-second, and produce auditable numeric scores --- no black-box LLM-as-judge.
+Both methods are deterministic, sub-second, and produce auditable numeric scores. Groundlens runs *before* any LLM-as-judge, not instead of one: it is the deterministic filter that decides what the expensive check even has to look at.
+
+!!! info "What Groundlens is (and is not)"
+    Groundlens is **Stage 1**: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to **Stage 2**, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.
 
 ## Key Features
 
@@ -81,7 +84,7 @@ No token generation. No prompt engineering. No stochastic sampling. Pure geometr
 
 ## Author
 
-**Javier Marin** --- [javier@groundlens.dev](mailto:javier@jgroundlens.dev) and [javier@jmarin.info](mailto:javier@jmarin.info)
+**Javier Marin** --- [javier@groundlens.dev](mailto:javier@groundlens.dev) and [javier@jmarin.info](mailto:javier@jmarin.info)
 
 ---
 

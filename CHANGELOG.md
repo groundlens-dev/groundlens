@@ -7,6 +7,24 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
 
 ## Unreleased
 
+### Changed
+
+- **Positioning: Groundlens is the deterministic first stage of a two-stage
+  verification pipeline**, not a replacement for the LLM judge. README, docs,
+  package docstring, CLI banner, and the agent guides now say the same thing:
+  the cheap deterministic filter clears the clearly grounded, catches the
+  clearly ungrounded, and escalates what it cannot settle to a second stage
+  (an LLM judge or a human).
+
+### Added
+
+- **`Check.escalate` and `Check.handoff`** — every check now carries a
+  second-stage signal. `escalate` is `True` on the review and risk bands;
+  `handoff` is a plain line naming the handoff. On a passing check it states
+  that grounding is not fact-checking, so an in-register factual substitution
+  (Type III) must still be verified in a second stage. This stops the library
+  from silently green-lighting the one class geometry provably cannot separate.
+
 ## 2026.7.6 -- Check layer, DGI magnitude, pinned build deps
 
 ### Added
