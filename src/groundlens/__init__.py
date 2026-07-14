@@ -1,6 +1,7 @@
 """Groundlens — Verifiable agent triage.
 
-Deterministic. Auditable. No second LLM in the loop.
+Deterministic. Auditable. The first-stage filter that runs before your
+judge, with no LLM in the scoring path.
 
 Groundlens triages outputs from individual LLMs and from multi-agent
 pipelines (routing, RAG, specialized / tool-using agents). Two layers:
@@ -79,6 +80,7 @@ from groundlens.calibrate import (
     calibrate,
     fit_thresholds,
 )
+from groundlens.check import Check, check
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
 from groundlens.propose import ProposedLabel, PropositionBatch, SeedExample
@@ -104,6 +106,7 @@ __all__ = [
     # Classes
     "SGI",
     "CalibrationResult",
+    "Check",
     "ChecklistRule",
     "DGIResult",
     "EmbeddingFn",
@@ -124,6 +127,7 @@ __all__ = [
     # Rule sets (legacy + canonical)
     "banking_rules",
     "calibrate",
+    "check",
     "compute_dgi",
     # Functions
     "compute_sgi",

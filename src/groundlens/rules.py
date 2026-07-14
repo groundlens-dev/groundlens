@@ -349,8 +349,8 @@ def _format_audit_explanation(
     lines.append(f"Ruleset: {ruleset_name}")
     sub_score_str = ", ".join(f"{name}={value:.3f}" for name, value in sub_scores.items())
     lines.append(f"Sub-scores: {sub_score_str} (quality={quality:.3f})")
-    verdict = "FLAGGED" if flagged else "PASS"
-    lines.append(f"Verdict: {verdict} (flag threshold={quality_floor})")
+    result_label = "FLAGGED" if flagged else "PASS"
+    lines.append(f"Result: {result_label} (flag threshold={quality_floor})")
 
     matched = [r for r in results if r.matched]
     missed = [r for r in results if not r.matched]

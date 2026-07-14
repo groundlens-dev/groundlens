@@ -70,9 +70,15 @@ class DGIResult:
 
     Attributes:
         value: Raw DGI score = cosine similarity to reference direction.
+            This is the *direction* of the question->response displacement.
             Range: [-1, 1].
         normalized: Score mapped to [0, 1] via linear normalization.
         flagged: ``True`` if the score is below the pass threshold.
+        magnitude: Euclidean norm of the question->response displacement
+            vector, ``||phi(response) - phi(question)||``. This is *how far*
+            the response moved from the question (commitment), independent of
+            direction. Together with ``value`` (direction) it gives the two
+            signals behind DGI. Defaults to ``0.0`` for backward compatibility.
         method: Always ``"dgi"``.
         explanation: Human-readable interpretation of the score.
     """
@@ -80,6 +86,7 @@ class DGIResult:
     value: float
     normalized: float
     flagged: bool
+    magnitude: float = 0.0
     method: str = "dgi"
     explanation: str = ""
 

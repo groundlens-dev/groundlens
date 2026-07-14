@@ -69,7 +69,7 @@ r = requests.post(
         "response": "The capital of France is Paris.",
     },
 )
-print(r.json()["verdict"])  # GROUNDED
+print(r.json()["status"])  # GROUNDED
 ```
 
 ### JavaScript
@@ -84,14 +84,14 @@ const res = await fetch("https://groundlens-groundlens-api.hf.space/v1/check", {
   }),
 });
 const data = await res.json();
-console.log(data.verdict); // GROUNDED
+console.log(data.status); // GROUNDED
 ```
 
 ## Response format
 
 ```json
 {
-  "verdict": "GROUNDED",
+  "status": "GROUNDED",
   "flagged": false,
   "method": "DGI (Directional Grounding Index)",
   "score": 0.4521,

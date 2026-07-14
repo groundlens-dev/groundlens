@@ -5,6 +5,97 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.7.13 -- The register wall: retraction, and the controls
+
+### Removed (retraction)
+
+- **Withdrawn: the 0.90-0.99 domain-calibration AUROC range, DGI 0.958, the
+  87.8% confabulation detection rate, and the NLI-at-chance baseline.** All
+  four rested on evaluations in which the grounded and the confabulated text
+  had different authors. Authorship was correlated with the label, so the
+  detectors were scored on a shortcut. With authorship held constant a logistic
+  probe falls from 0.932 to 0.660, an MLP from 0.935 to 0.675, and the
+  directional score (DGI) to 0.606. The ceiling of the whole
+  embedding-similarity class is in the high 0.6s.
+- **Withdrawn: every claim that geometry outperforms NLI.** An NLI
+  cross-encoder does *not* decline as a confabulation stays in register: it
+  holds AUROC 0.836, 0.786, 0.837, 0.719, 0.887 across the register bins and is
+  the strongest method at the in-register end. Entailment is now the
+  **recommended second stage**, not a baseline we beat.
+- Deleted `examples/ragtruth_precision_stratified_report.md` and
+  `examples/ragtruth_A3_variant_findings.md`: both reported beats-baselines
+  numbers on RAGTruth, whose apparent skill is a length artifact
+  (length-matched, 0.676 -> 0.634).
+
+### Added
+
+- **The register wall, the ceiling, and the evaluation checklist** in the
+  README, replacing the withdrawn benchmark tables. Domain calibration is
+  restated correctly: overall 0.684 -> 0.736, with the gain at the easy
+  out-of-register end (0.717 -> 0.815) and the in-register bin moving only
+  0.626 -> 0.689.
+- **Authorship-confound warnings** printed by `benchmarks/compare_methods.py`
+  and documented in `benchmarks/confabulation_benchmark.py`.
+- **House rule in `CLAUDE.md` and `AGENTS.md`:** no benchmark number ships
+  without the authorship and length controls.
+
+### Changed
+
+- Every surviving benchmark figure (SGI on HaluEval QA, the FACTS provenance
+  figure) is now flagged **pending the authorship and length controls**.
+- Package, CLI and compliance docstrings no longer describe groundlens as
+  "hallucination detection". It is a grounding check: semantic disengagement
+  and provenance, not factual truth.
+
+### Changed
+
+- **Positioning: Groundlens is the deterministic first stage of a two-stage
+  verification pipeline**, not a replacement for the LLM judge. README, docs,
+  package docstring, CLI banner, and the agent guides now say the same thing:
+  the cheap deterministic filter clears the clearly grounded, catches the
+  clearly ungrounded, and escalates what it cannot settle to a second stage
+  (an LLM judge or a human).
+
+### Added
+
+- **`Check.escalate` and `Check.handoff`** — every check now carries a
+  second-stage signal. `escalate` is `True` on the review and risk bands;
+  `handoff` is a plain line naming the handoff. On a passing check it states
+  that grounding is not fact-checking, so an in-register factual substitution
+  (Type III) must still be verified in a second stage. This stops the library
+  from silently green-lighting the one class geometry provably cannot separate.
+
+## 2026.7.6 -- Check layer, DGI magnitude, pinned build deps
+
+### Added
+
+- **`DGIResult.magnitude`** — the Euclidean norm of the question→response
+  displacement (`||phi(response) - phi(question)||`) is now returned alongside
+  the DGI alignment score. DGI's `value` is the *direction* of that displacement
+  (cosine to the grounded reference); `magnitude` is *how far* the response moved
+  from the question. Exposing both makes DGI's two signals available to
+  consumers. The value was already computed internally; it is now surfaced.
+  Backward compatible (defaults to `0.0`).
+- **Canonical check layer (`groundlens.check`).** New `Check` type and
+  `check()` function turn an `SGIResult` / `DGIResult` / `GroundlensScore` into
+  a single plain-language reading — headline `CHECK`, a jargon-free label
+  (`Supported by the document` / `Partly supported` / `Not supported by the
+  document` for SGI; `Looks grounded` / `Partly grounded` / `Not grounded` for
+  DGI), a one-line message, and an optional technical `detail` line with the raw
+  components. This is the **single source of truth** for how results are worded,
+  so the README, docs, and MCP servers can all render identically. The check
+  *level* comes from the calibrated thresholds; the raw components are shown as
+  detail, not used to invent uncalibrated cut-points.
+
+### Security
+
+- **Pinned the example deploy manifest (`deploy/api/requirements.txt`) to current
+  patched releases.** Its floor specifiers (`>=`) were being resolved by OSV /
+  OpenSSF Scorecard to their *minimum*, surfacing known advisories in
+  long-superseded `transformers` and `torch` versions. The library's own runtime
+  dependencies (`pyproject.toml`: numpy + sentence-transformers) were unaffected —
+  installing `groundlens` never pulled the flagged versions.
+
 ## 2026.6.25 -- Pluggable encoders, threshold fitting, default-model load fix
 
 ### Added

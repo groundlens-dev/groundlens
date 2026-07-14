@@ -10,7 +10,10 @@ Mathematical formulation:
     DGI = dot(delta / ||delta||, mu_hat)
 
 where mu_hat is the mean direction of displacement vectors computed from
-verified grounded (question, response) pairs.
+verified grounded (question, response) pairs. The DGI value captures the
+*direction* of the displacement; its *magnitude* ``||delta||`` (how far the
+response moved from the question) is returned separately on
+``DGIResult.magnitude``.
 
 Geometric interpretation:
 
@@ -18,12 +21,19 @@ Geometric interpretation:
     - DGI < 0.3: displacement diverges from grounded patterns.
     - DGI < 0.0: displacement is opposite to grounded direction (high risk).
 
-Calibration:
+Calibration and ceiling:
 
-    DGI accuracy depends heavily on the reference direction mu_hat.
-    Generic calibration (bundled dataset) achieves AUROC ~0.76.
-    Domain-specific calibration typically reaches AUROC 0.90-0.99.
-    The confabulation benchmark reports DGI AUROC 0.958 with domain calibration.
+    DGI's reference direction mu_hat is fit on verified grounded pairs.
+    Calibration sets the operating point. It does not remove the blind spot.
+
+    DGI's skill declines toward chance as a confabulation stays in the
+    register of a correct answer. With authorship held constant it reaches
+    AUROC 0.606, and the ceiling of the whole embedding-similarity class is
+    about 0.68. That is a ceiling, not a shortfall: no decoder over these
+    embeddings does materially better without reading authorship.
+
+    Escalate in-register cases to a second stage: an entailment check (NLI),
+    a source lookup, or a judge. Entailment does not decline in register.
 
 Use cases:
 
@@ -228,14 +238,14 @@ def compute_dgi(
 
     # Degenerate case: response identical to question.
     if magnitude < 1e-8:
-        return DGIResult(value=0.0, normalized=0.0, flagged=True)
+        return DGIResult(value=0.0, normalized=0.0, flagged=True, magnitude=round(magnitude, 4))
 
     delta_hat = delta / magnitude
     gamma = float(np.dot(delta_hat, mu_hat))
 
     if math.isnan(gamma):
         logger.warning("DGI produced NaN — check embedding dimensions.")
-        return DGIResult(value=0.0, normalized=0.0, flagged=True)
+        return DGIResult(value=0.0, normalized=0.0, flagged=True, magnitude=round(magnitude, 4))
 
     normalized = round(normalize_dgi(gamma), 4)
 
@@ -243,6 +253,7 @@ def compute_dgi(
         value=round(gamma, 4),
         normalized=normalized,
         flagged=gamma < DGI_PASS,
+        magnitude=round(magnitude, 4),
     )
 
 

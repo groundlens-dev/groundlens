@@ -24,10 +24,13 @@ Use cases:
     - Document Q&A: verify answers cite the source material.
     - Summarization: confirm the summary reflects the input document.
 
-Validated on HaluEval QA (n=5,000), AUC 0.806 averaged across five
-embedding architectures. Documented negative result on TruthfulQA
-(AUC=0.478): angular geometry measures topical engagement, not factual
-accuracy.
+HaluEval QA (n=5,000), AUC 0.806 averaged across five embedding
+architectures. This figure predates the authorship and length controls and
+has not been re-run under them: treat it as provisional.
+
+At chance on TruthfulQA. Angular geometry measures topical engagement and
+provenance, not factual truth, and its skill declines toward chance as an
+error stays in the register of a correct answer.
 
 References:
     Marin (2025). *Semantic Grounding Index: Geometric Bounds on Context

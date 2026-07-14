@@ -218,9 +218,10 @@ _SGI_MAPPING = ComplianceMapping(
 _DGI_MAPPING = ComplianceMapping(
     fn_name="compute_dgi",
     description=(
-        "Context-free directional grounding score using calibrated reference "
-        "direction. Domain-specific calibration converts generic detection "
-        "into domain-expert detection without retraining a model."
+        "Context-free directional grounding score against a calibrated "
+        "reference direction. Measures semantic disengagement and provenance, "
+        "not factual truth. Declared blind spot: in-register factual "
+        "substitution, which the deployment must escalate to a second stage."
     ),
     references=(
         StandardReference(
