@@ -4,15 +4,15 @@
 # ///
 """Compare groundlens SGI/DGI vs cosine similarity on the benchmark.
 
-Demonstrates that standard cosine similarity fails on human
-confabulations (fluent, plausible-sounding fabrications), while
-geometric methods (SGI ratio, DGI directional alignment) succeed.
+WARNING: this benchmark has an authorship confound. The grounded responses
+come from a source; the confabulations were written by a person from memory.
+Authorship is therefore correlated with the label, and any separation reported
+here is confounded with it. With authorship held constant, the directional
+score falls to AUROC 0.606 and the ceiling of the whole embedding-similarity
+class is about 0.68.
 
-Key insight: cosine similarity measures semantic relatedness, not
-factual grounding. A confabulated answer about Paris is still
-semantically close to a question about Paris. Geometric methods
-detect the structural displacement patterns that distinguish
-grounded responses from fabrications.
+Do not quote a number from this script. Run it to see the confound, not to
+measure grounding. See *The Register Wall* for the controlled evaluation.
 """
 
 from __future__ import annotations
@@ -138,11 +138,11 @@ def run_comparison(model: str = "all-MiniLM-L6-v2") -> None:
 
     print("=" * 60)
     print()
-    print("  Key finding: cosine similarity cannot distinguish human")
-    print("  confabulations from grounded responses because both are")
-    print("  semantically similar to the question. Geometric methods")
-    print("  detect the structural displacement patterns unique to")
-    print("  grounded text.")
+    print("  CONFOUND: grounded responses come from a source; confabulations")
+    print("  were written by a person from memory. Authorship is correlated")
+    print("  with the label, so any separation above is confounded with it.")
+    print("  Hold authorship constant and the directional score falls to 0.606.")
+    print("  Do not quote these numbers. See The Register Wall.")
 
 
 if __name__ == "__main__":
