@@ -15,7 +15,7 @@ groundlens supports all four requirements by design.
 
 ## A Deterministic First Stage
 
-The most common alternative to groundlens --- "LLM-as-judge" --- uses a second LLM to evaluate the first. This creates serious compliance problems:
+The usual pattern, "LLM-as-judge", uses a second LLM to evaluate the first. It is not the alternative to groundlens; it is the **second stage**. But run on everything, on its own, it creates compliance problems:
 
 | Issue | LLM-as-Judge | groundlens |
 |---|---|---|
@@ -26,7 +26,14 @@ The most common alternative to groundlens --- "LLM-as-judge" --- uses a second L
 | Circular risk | The judge LLM can itself hallucinate | No generative model in the evaluation loop |
 
 !!! abstract "Key compliance advantage"
-    groundlens removes the generative model from the evaluation loop entirely. The score is computed via deterministic mathematical operations on embeddings --- no sampling, no temperature, no prompt sensitivity.
+    groundlens removes the generative model from the **triage** step. The score is computed via deterministic mathematical operations on embeddings: no sampling, no temperature, no prompt sensitivity.
+
+    It does not remove the second stage, and it should not. What it gives an examiner is a deterministic, reproducible account of **which** outputs were escalated to the judge and **why**.
+
+!!! danger "What determinism does not buy you (Article 15)"
+    Coverage. A confabulation that stays in register, right topic, right terminology, one wrong figure, is close to invisible to any embedding-similarity method: the whole class tops out in the high 0.6s AUROC once authorship is controlled.
+
+    Do not present a geometric score to an examiner as Article 15 accuracy evidence on its own. Under **Article 9**, however, a method that publishes its own failure region as a number rather than a caveat is worth more than one reporting a figure it cannot defend. Write the blind spot into the risk file.
 
 ## Article 9: Risk Management
 

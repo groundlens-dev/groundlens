@@ -4,7 +4,7 @@ This step-by-step guide walks through the complete process of calibrating DGI fo
 
 ## Overview
 
-Domain calibration replaces the generic reference direction $\hat{\boldsymbol{\mu}}$ with one computed from verified (question, response) pairs from your specific domain. This typically improves AUROC from ~0.76 to 0.90--0.99.
+Domain calibration replaces the generic reference direction $\hat{\boldsymbol{\mu}}$ with one computed from verified (question, response) pairs from your specific domain. Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689.
 
 ## Step 1: Collect Calibration Pairs
 

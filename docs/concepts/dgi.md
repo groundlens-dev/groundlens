@@ -46,8 +46,8 @@ DGI accuracy depends heavily on the quality of $\hat{\mu}$:
 
 | Calibration | Typical AUROC | When to use |
 |---|---|---|
-| Generic (bundled dataset) | ~0.76 | Quick evaluation, prototyping |
-| Domain-specific (20--100 pairs) | 0.90--0.99 | Production systems |
+| Generic (bundled dataset) | 0.684 overall / 0.626 in-register | Quick evaluation, prototyping |
+| Domain-specific (20--100 pairs) | 0.736 overall / 0.689 in-register | Production triage |
 
 The bundled dataset provides a general-purpose reference direction trained on diverse question-answer pairs. Domain-specific calibration produces a $\hat{\mu}$ that captures the particular displacement patterns of your domain (e.g., legal, medical, financial), dramatically improving discrimination.
 
@@ -92,7 +92,7 @@ DGI is the right choice when you **do not have source context**:
     DGI operates on the distributional hypothesis: words (and sentences) that appear in similar contexts have similar meanings. This means DGI cannot distinguish between a factually correct statement and a **human-crafted confabulation** that mimics the distributional properties of a grounded response. See [Confabulation Boundary](../theory/confabulation-boundary.md) for the full analysis.
 
 !!! warning "Calibration sensitivity"
-    The generic reference direction provides weak discrimination (AUROC ~0.76). Always calibrate for production use.
+    Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689. Calibrate for production, but do not expect it to close the blind spot. With authorship held constant DGI reaches 0.606, and ≈ 0.68 is the ceiling of the entire embedding-similarity class, not a target to beat.
 
 !!! warning "Displacement magnitude"
     The DGI *score* considers only the *direction* of displacement, not its *magnitude*. A response very similar to the question (small displacement) might score well on DGI purely by chance of direction alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged. The magnitude itself is still returned on `DGIResult.magnitude` (see below) — it does not enter the score, but it is available as a second signal (how far the response moved from the question).

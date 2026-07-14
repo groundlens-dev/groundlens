@@ -25,7 +25,7 @@ Both methods are deterministic, sub-second, and produce auditable numeric scores
 | **Two scoring modes** | SGI (with context) and DGI (context-free) cover all verification scenarios |
 | **Deterministic** | Same inputs always produce the same score --- no sampling variance |
 | **Sub-second** | Sentence-transformer inference, not LLM generation |
-| **Domain calibration** | Generic AUROC ~0.8; domain-specific calibration reaches 0.90--0.99 |
+| **Domain calibration** | Sharpens the easy end (0.717 → 0.815). Does not move the blind spot (in-register 0.626 → 0.689) |
 | **EU AI Act ready** | No opaque second LLM --- fully auditable decision pipeline |
 | **Provider wrappers** | OpenAI, Anthropic, Google Gemini with automatic scoring |
 | **Framework integrations** | LangChain, CrewAI, Semantic Kernel, AutoGen |

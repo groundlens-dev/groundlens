@@ -177,5 +177,5 @@ for i, score in enumerate(results):
 
 - [CLI Reference](cli.md) --- run groundlens from the command line
 - [How It Works](../concepts/how-it-works.md) --- understand the geometry behind the scores
-- [Domain Calibration](../guides/domain-calibration.md) --- boost DGI accuracy from 0.76 to 0.90+ AUROC
+- [Domain Calibration](../guides/domain-calibration.md) --- what calibration does, and what it does not fix
 - [RAG Verification](../guides/rag-verification.md) --- integrate SGI into your RAG pipeline

@@ -145,7 +145,7 @@ Running benchmark on 200 items...
 
 --- Benchmark Results ---
 SGI AUROC: 0.8234 (n=150)
-DGI AUROC: 0.9580 (n=200)
+DGI AUROC: 0.6810 (n=200)   # uncontrolled benchmarks inflate this — see docs/benchmarks
 ```
 
 !!! note "Dependencies"
