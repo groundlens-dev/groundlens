@@ -2,7 +2,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["groundlens[crewai]"]
 # ///
-"""CrewAI tool integration — give agents hallucination detection.
+"""CrewAI tool integration — give agents a deterministic grounding check.
 
 Requires: ``pip install groundlens[crewai]``
 

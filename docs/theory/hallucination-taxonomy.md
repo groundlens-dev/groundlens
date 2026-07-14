@@ -50,7 +50,7 @@ $$
 \Gamma(q, r) = \hat{\delta}(q, r)^\top \hat{\mu} \ll \mathbb{E}[\hat{\delta}_i^\top \hat{\mu}]
 $$
 
-**Detection:** DGI measures this. With domain-specific calibration, DGI achieves AUROC **0.90–0.99** depending on the domain.
+**Detection:** DGI separates this **while the confabulation stays out of register**. As it moves into register, DGI declines toward chance like every embedding-similarity method: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the ceiling of the whole class. Escalate the in-register cases.
 
 #### Three confabulation mechanisms
 

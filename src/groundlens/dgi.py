@@ -1,4 +1,4 @@
-"""Directional Grounding Index (DGI) — context-free hallucination detection.
+"""Directional Grounding Index (DGI) — context-free grounding score.
 
 DGI evaluates whether an LLM response follows the characteristic semantic
 displacement pattern of grounded responses — without requiring source context.
