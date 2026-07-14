@@ -2598,7 +2598,7 @@
 <div class="arithmatex">\[
 \Gamma(q, r) = \hat{\delta}(q, r)^\top \hat{\mu} \ll \mathbb{E}[\hat{\delta}_i^\top \hat{\mu}]
 \]</div>
-<p><strong>Detection:</strong> DGI measures this. With domain-specific calibration, DGI achieves AUROC <strong>0.90–0.99</strong> depending on the domain.</p>
+<p><strong>Detection:</strong> DGI separates this <strong>while the confabulation stays out of register</strong>. As it moves into register, DGI declines toward chance like every embedding-similarity method: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the ceiling of the whole class. Escalate the in-register cases.</p>
 <h4 id="three-confabulation-mechanisms">Three confabulation mechanisms<a class="headerlink" href="#three-confabulation-mechanisms" title="Permanent link">&para;</a></h4>
 <p>The taxonomy identifies three mechanisms of confabulation, each with a different geometric consequence. These map directly to patterns observed in clinical neuropsychology, where confabulation from incomplete memory produces different failures depending on what kind of knowledge is being recalled (Dalla Barba, 1993).</p>
 <p><strong>Register preservation</strong> (regulatory/procedural domains): The confabulation inverts factual claims while keeping the domain register intact. Example: asked about Roth IRA contribution rules, a confabulation fabricates a flat 15% withdrawal tax and invents mandatory distributions at 65 — but every term (<em>contributions, distributions, adjusted gross income</em>) stays in the financial-regulatory register. Because the wrong answer shares the same lexical distribution as the right one, the embedding displacement is small. Detection difficulty: <strong>high</strong>.</p>
