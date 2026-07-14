@@ -6,6 +6,8 @@ This file helps AI coding agents (Claude Code, Codex, Copilot Workspace, etc.) n
 
 groundlens triages LLM outputs using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`), with no LLM in the scoring path. It is the first stage of a two-stage pipeline; the second-stage judge or human runs only on what it escalates.
 
+**House rule, non-negotiable: no benchmark number ships without the authorship and length controls.** Detectors that appear to beat the register wall are usually reading *who wrote the text*, not whether it is grounded. Before any AUROC, accuracy or detection rate enters a docstring, the README, the docs or a slide: hold authorship constant, match length, and report the per-register-bin curve rather than a pooled figure. A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality. If a number has not been through the controls, label it "pending controls" or do not ship it.
+
 Two scoring methods:
 - **SGI (Semantic Grounding Index):** ratio-based, requires context. `SGI = dist(response, question) / dist(response, context)`.
 - **DGI (Directional Grounding Index):** direction-based, context-free. `DGI = dot(normalize(delta), mu_hat)` where `delta = phi(response) - phi(question)`.

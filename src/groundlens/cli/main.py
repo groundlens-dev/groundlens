@@ -1,4 +1,4 @@
-"""Groundlens CLI — hallucination detection from the command line.
+"""Groundlens CLI — deterministic grounding checks from the command line.
 
 Provides subcommands for single-response checking, batch CSV evaluation,
 DGI calibration, and benchmark execution. All imports of scoring functions

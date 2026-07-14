@@ -58,9 +58,9 @@ The geometric layer rests on three published papers that state exactly which hal
 
 | Hallucination type | What it looks like | Detectable by Groundlens? |
 |---|---|---|
-| **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. Validated on HaluEval QA (AUROC ≈ 0.81 averaged across five encoders) |
-| **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI** with domain calibration. Validated on a 212-pair human-confabulated dataset (87.8% on declarative-knowledge domains); NLI on the same pairs reaches only 57.5% |
-| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by angular geometry. Documented as a *negative result* on TruthfulQA, AUROC = 0.478 — *below chance*. For Type III, escalate to your second stage: an LLM judge, domain NLI, KG verification, or a human. No embedding method separates this class |
+| **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. HaluEval QA AUROC ≈ 0.81 (mean over five encoders). *Pending the authorship and length controls: this figure predates them and has not been re-run.* |
+| **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI**, declared-limited. DGI separates a confabulation that leaves the register of a correct answer. Its skill declines toward chance as the confabulation stays *in* register, which is the case that matters in production. With authorship held constant, DGI reaches AUROC 0.606 and the ceiling of the whole embedding-similarity class is ~0.68. Escalate in-register cases to Stage 2. |
+| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall) |
 
 
 References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224) · Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
@@ -79,32 +79,68 @@ We ran Groundlens against FACTS' own public examples to ask how much of that jud
 
 | Question | Geometry alone |
 |---|---|
-| **Attribution** — did this answer come from *this* document, and not another? | AUROC ≈ 0.95. Deterministic, sub-second, no LLM. |
-| **Faithfulness** — is every individual claim supported? | A filter, not a verdict: as a first pass it catches ≈ 85% of the answers the judge would flag, leaving a smaller set for expensive review. |
+| **Provenance** — did this answer come from *this* document, and not another? | AUROC ≈ 0.95, *pending the authorship and length controls*. The grounded and closed-book arms of FACTS differ in generation condition, which is exactly the shortcut the controls exist to expose. Treat as provisional. |
+| **Faithfulness** — is every individual claim supported? | Not settled by geometry. A first-pass filter only, and its recall on this axis is *pending the same controls*. Facts go to Stage 2. |
 
 The point is not that geometry replaces the judge. It is that one half of grounding — where an answer came from — is nearly free, and can clear the clearly-grounded answers and catch most of the ungrounded ones before a single LLM call.
 
-*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Reproduce it in the repo notebook]*:[`notebooks/groundlens_x_facts_grounding.ipynb`](notebooks/groundlens_x_facts_grounding.ipynb).
+*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Labels are LLM-judge derived and the two arms differ in generation condition, so these numbers have not passed the controls. Reproduce it in the repo notebook: [`examples/groundlens_x_facts_grounding.ipynb`](examples/groundlens_x_facts_grounding.ipynb).*
 
 <div align="center">
 <img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
-<em>Every FACTS example placed by its grounding geometry; grounded and ungrounded separate before any judge is asked. Labels decided by Claude Sonnet 5.</em>
+<em>Every FACTS example placed by its grounding geometry, grounded arm against closed-book arm. Labels decided by an LLM judge, and the two arms differ in generation condition: the separation shown here is provenance under a generation-condition contrast, pending the authorship and length controls.</em>
 </div>
 
-### Published results
+### The register wall
 
-From the SGI and DGI papers. Every row is reproducible from the linked paper's released code.
+The central result, and the reason the numbers in this section are not the ones we published before. Full write-up: *The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure* (under review).
 
-| Benchmark | Task | Metric | Baseline | Note |
-|---|---|---|---|---|
-| **HaluEval QA** (n = 10,000) | Type I, context available | **SGI AUROC 0.805** (mean over 5 encoders, range 0.78–0.82) | NLI 0.748 · cosine similarity 0.941 | On LLM-generated hallucinations, correct and wrong answers sit far apart, so even cosine separates. SGI's value is decomposition and the harder cases below, not this number. |
-| **Human-confabulated** (212 pairs, 9 domains) | Type II, realistic errors | **DGI 87.8%** detection on declarative-knowledge domains; 56.9% on template domains | NLI 57.5% (AUROC 0.536, ≈ chance) | The realistic case. Human confabulations sit *close* to the grounded answer (cosine 0.72–0.92), where surface methods collapse and directional geometry still separates. |
-| **TruthfulQA** (n = 800) | Type III, same-frame factual error | **AUROC 0.478 — below chance** | — | Published *negative result*. Angular geometry measures topical engagement, not factual truth. Escalate Type III to your second stage: a judge, KG verification, or a human. |
+Bin confabulations by how far they sit from the register of a correct answer, and every distributional and embedding-similarity detector, ours included, declines toward chance as the confabulation moves *in* register: same vocabulary, same phrasing, same structure. Entailment does not.
 
-Two findings. First, geometry is not magic: on same-topic factual errors it is below chance, and it says so. Second, geometry earns its place exactly where the cheap surface baselines fail — the human-confabulated case that resembles real deployments, where NLI drops to chance and directional grounding does not. Cosine similarity win (0.941) when the error sits far from the truth — the HaluEval dataset case — and collapse when it sits close, the human-confabulation case that resembles real deployments (NLI drops to 0.536, chance). A production detector has to work in the second regime. That is what directional and ratio geometry are for.
+| Detector | Out of register | In register |
+|---|---|---|
+| NLI cross-encoder (supervised) | 0.836 | **0.887** |
+| Classic encoders (MiniLM, mpnet, bge, gte) | 0.70 – 0.74 | **0.62 – 0.68** |
+| Raw cosine | 0.726 | **0.595** |
 
-Domain calibration moves the operating point: generic thresholds sit near AUROC 0.76; with 20–50 verified-grounded pairs from your own domain the reported range rises toward 0.90–0.99 on labelled corpora. Calibration, not the default threshold, is the deployment configuration — see [Calibrating SGI and DGI](#calibrating-sgi-and-dgi).
+NLI is strongest exactly where geometry is weakest. **It is the recommended second stage.** We do not compete with it; we run before it.
+
+### The ceiling, and the authorship shortcut
+
+A detector that appears to beat the wall is usually reading *who wrote the text*, not whether it is grounded. In the human-confabulated set the grounded answers come from a source and the confabulations were written by a person from memory: authorship is perfectly correlated with the label. Hold authorship constant and the skill collapses.
+
+| Detector | Uncontrolled | Authorship matched |
+|---|---|---|
+| Large instruction-tuned embedder | ≈ 0.99 | shortcut |
+| Logistic probe | 0.932 | 0.660 |
+| MLP | 0.935 | 0.675 |
+| Directional score (DGI) | high | **0.606** |
+
+With authorship matched, even the best supervised decoder over these embeddings sits in the high 0.6s. **DGI's ≈ 0.68 is not a weak estimator. It is the ceiling of the entire class.**
+
+### Calibration, corrected
+
+Domain calibration moves the operating point, not the wall. Overall AUROC rises from 0.684 to 0.736, and almost all of that gain lands at the easy out-of-register end (0.717 → 0.815). The in-register bin moves only 0.626 → 0.689. Calibrate to set your escalation rate. Do not expect it to close the blind spot. See [Calibrating SGI and DGI](#calibrating-sgi-and-dgi).
+
+### External benchmarks, length-matched
+
+RAGTruth-QA's apparent 0.705 is a length artifact: length-matched, it falls from 0.676 to 0.634. FaithBench declines from 0.620 to 0.500. TruthfulQA is at chance. Report length-matched numbers or report nothing.
+
+### Evaluation checklist (the house rule)
+
+**No benchmark number ships without the authorship and length controls.** Before any AUROC, accuracy or detection rate enters this README, a docstring, a slide or a paper:
+
+1. **Hold authorship constant.** Grounded and confabulated text from the same writer. A detector that loses its score here was reading authorship.
+2. **Match length.** Report the length-matched figure next to the raw one.
+3. **Bin by register.** Report the per-bin curve, not a pooled AUROC. Pooling hides the wall.
+4. **Publish the blind spot as a number**, not as a caveat.
+
+A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality.
+
+### Retracted
+
+The 0.90–0.99 domain-calibration range, DGI 0.958, the 87.8% confabulation detection rate and the NLI-at-chance baseline are **withdrawn**. All four rested on evaluations where the grounded and the confabulated text had different authors. NLI does not collapse: it is the strongest method at the in-register end, and it is now the recommended second stage. Every surviving figure above is flagged pending the controls.
 
 ## Quick start
 
@@ -231,7 +267,7 @@ For legal, insurance, healthcare, or any in-house governance framework, extend a
 
 ## Calibrating SGI and DGI
 
-Both geometric scores need domain calibration. Generic thresholds and the bundled `mu_hat` are starting points, not deployment configuration. The published SGI and DGI papers report AUROC ~0.76 generic vs **0.90–0.99** with domain calibration on labelled banking corpora.
+Both geometric scores need domain calibration. Generic thresholds and the bundled `mu_hat` are starting points, not deployment configuration. Calibration sets *where you escalate*, not *what you can see*: overall AUROC moves 0.684 → 0.736, and the gain lands at the easy out-of-register end (0.717 → 0.815) while the in-register bin moves only 0.626 → 0.689. Calibrate to tune your escalation rate. The blind spot stays.
 
 **SGI** — threshold over the normalized score:
 

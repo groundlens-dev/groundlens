@@ -24,7 +24,9 @@ The library is used in regulated environments (legal, healthcare, finance). Dete
 
 5. **Lazy imports for optional deps.** Providers and integrations import their third-party dependencies inside function bodies, not at module level. `import groundlens` must never fail because `openai` isn't installed.
 
-6. **Unit tests must not load the embedding model.** Tests in `tests/unit/` must run without downloading or loading `all-MiniLM-L6-v2`. Mock the encoder in unit tests. Integration tests in `tests/integration/` may load the model.
+6. **No benchmark number ships without the authorship and length controls.** Detectors that appear to beat the register wall are usually reading *who wrote the text*, not whether it is grounded. Before any AUROC, accuracy or detection rate enters a docstring, the README, the docs or a slide: hold authorship constant, match length, and report the per-register-bin curve rather than a pooled figure. A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality. If a number has not been through the controls, label it "pending controls" or do not ship it.
+
+7. **Unit tests must not load the embedding model.** Tests in `tests/unit/` must run without downloading or loading `all-MiniLM-L6-v2`. Mock the encoder in unit tests. Integration tests in `tests/integration/` may load the model.
 
 ## Architecture
 
