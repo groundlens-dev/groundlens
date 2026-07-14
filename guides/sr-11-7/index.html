@@ -1415,10 +1415,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#replacing-llm-as-judge-under-sr-11-7" class="md-nav__link">
+  <a href="#making-llm-as-judge-defensible-under-sr-11-7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Replacing LLM-as-judge under SR 11-7
+        Making LLM-as-judge defensible under SR 11-7
       
     </span>
   </a>
@@ -2232,10 +2232,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#replacing-llm-as-judge-under-sr-11-7" class="md-nav__link">
+  <a href="#making-llm-as-judge-defensible-under-sr-11-7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Replacing LLM-as-judge under SR 11-7
+        Making LLM-as-judge defensible under SR 11-7
       
     </span>
   </a>
@@ -2429,10 +2429,17 @@ and ongoing monitoring. groundlens contributes to all four:</p>
 </tr>
 </tbody>
 </table>
-<h2 id="replacing-llm-as-judge-under-sr-11-7">Replacing LLM-as-judge under SR 11-7<a class="headerlink" href="#replacing-llm-as-judge-under-sr-11-7" title="Permanent link">&para;</a></h2>
-<p>The most common pattern for hallucination detection — a second LLM
-acting as judge — is hard to defend under SR 11-7. groundlens removes
-the second LLM entirely.</p>
+<h2 id="making-llm-as-judge-defensible-under-sr-11-7">Making LLM-as-judge defensible under SR 11-7<a class="headerlink" href="#making-llm-as-judge-defensible-under-sr-11-7" title="Permanent link">&para;</a></h2>
+<p>A second LLM acting as judge is hard to defend under SR 11-7 on its own:
+non-deterministic, unreproducible, and unable to explain itself. But you
+cannot remove it either, because a plausible wrong figure stated in the
+right frame is invisible to geometry and it is exactly the error a model
+risk function cares about.</p>
+<p>groundlens makes the judge defensible by moving it downstream. Stage 1 is
+deterministic, reproducible and cheap, and it runs on everything. Stage 2,
+the judge or the human, runs only on what Stage 1 escalates, and the audit
+log records <strong>which</strong> cases were escalated and <strong>why</strong>. That log, not the
+score, is the SR 11-7 artifact.</p>
 <table>
 <thead>
 <tr>

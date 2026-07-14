@@ -2437,6 +2437,11 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition danger">
+<p class="admonition-title">Read this scale against the ceiling of the method</p>
+<p>For embedding-similarity detectors, an <strong>authorship-controlled</strong> AUROC in the high 0.6s is at the ceiling of what the whole class can do. Nothing in this family lands in the 0.9 band on a controlled evaluation.</p>
+<p>So a reported 0.9+ here is not a signal of quality. It is a signal to go looking for a shortcut: authorship, length, or a generation-condition artifact. We know, because we published one. See <a href="../results/">Results</a>.</p>
+</div>
 <h3 id="why-auroc">Why AUROC?<a class="headerlink" href="#why-auroc" title="Permanent link">&para;</a></h3>
 <p>AUROC is <strong>threshold-independent</strong>: it evaluates the scoring function's ability to rank grounded responses above hallucinated ones, regardless of where you set the decision threshold. This is important because different deployments may use different thresholds based on their risk tolerance.</p>
 <h2 id="benchmark-datasets">Benchmark Datasets<a class="headerlink" href="#benchmark-datasets" title="Permanent link">&para;</a></h2>
@@ -2545,6 +2550,17 @@
 <li><strong>Separate calibration and test sets</strong>: For DGI, calibration pairs are never in the test set.</li>
 <li><strong>Stratified evaluation</strong>: AUROC is computed separately for each hallucination type (divergent, tangential, confabulation).</li>
 </ol>
+<p>The first four are table stakes. The next four are the ones that decide whether a number means anything, and most published detectors, including our own earlier work, fail them.</p>
+<ol>
+<li><strong>Authorship control.</strong> The grounded and the confabulated text must come from the same author. If the true answers are machine-written and the false ones human-written (or the reverse), the label is correlated with authorship and a detector can score highly by recognising <strong>who wrote the text</strong> rather than whether it is grounded. A detector that loses its score under this control was reading authorship. Ours did: a logistic probe falls 0.932 → 0.660, an MLP 0.935 → 0.675, the directional score to 0.606.</li>
+<li><strong>Length matching.</strong> Report the length-matched AUROC next to the raw one. RAGTruth-QA is the cautionary case: an apparent 0.705 falls to 0.634 once lengths are matched.</li>
+<li><strong>Register binning.</strong> Report the per-bin curve from out-of-register to in-register, not a single pooled AUROC. Pooling hides the wall, which is the entire phenomenon.</li>
+<li><strong>Publish the blind spot as a number</strong>, not as a caveat at the bottom of the page.</li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">House rule</p>
+<p><strong>No benchmark number ships without the authorship and length controls.</strong> If a figure has not been through them, label it <em>pending controls</em> or do not publish it. This applies to this documentation, the README, the papers and the slides.</p>
+</div>
 <h2 id="reproducing-results">Reproducing Results<a class="headerlink" href="#reproducing-results" title="Permanent link">&para;</a></h2>
 <p>All reported results can be reproduced exactly because:</p>
 <ul>
@@ -2552,9 +2568,13 @@
 <li>Benchmark datasets are <strong>versioned</strong> and publicly available</li>
 <li>The embedding model is <strong>fixed</strong> and downloadable</li>
 </ul>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Reproduce the headline DGI AUROC 0.958 result</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--dataset<span class="w"> </span>cert-framework/human-confabulation-benchmark
+<div class="admonition warning">
+<p class="admonition-title">Determinism is not validity</p>
+<p>Reproducing a number guarantees you get the same number twice. It does not guarantee the number measures grounding. An authorship artifact reproduces perfectly. That is what the controls above are for.</p>
+</div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--dataset<span class="w"> </span>cert-framework/human-confabulation-benchmark
 </span></code></pre></div>
+<p>This dataset has a known authorship confound (grounded answers written by a model, confabulations written by a person). The benchmark prints a warning above its AUROC. Read it before quoting anything.</p>
 <p>See <a href="../results/">Results</a> for the full numbers.</p>
 
 

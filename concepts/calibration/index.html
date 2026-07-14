@@ -2349,14 +2349,14 @@
 <h1 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Permanent link">&para;</a></h1>
 <p>DGI accuracy depends on the quality of the reference direction <span class="arithmatex">\(\hat{\mu}\)</span>. <strong>Domain-specific calibration</strong> is the single most impactful step you can take to improve groundlens accuracy in production.</p>
 <h2 id="why-calibrate">Why Calibrate?<a class="headerlink" href="#why-calibrate" title="Permanent link">&para;</a></h2>
-<p>The bundled generic reference direction is trained on diverse question-answer pairs across many domains. It captures a "universal" grounded displacement direction that achieves AUROC ~0.76 --- useful for prototyping but insufficient for production.</p>
+<p>The bundled generic reference direction is trained on diverse question-answer pairs across many domains. It captures a "universal" grounded displacement direction: overall AUROC 0.684, and 0.626 on in-register confabulations.</p>
 <p>Different domains have different displacement patterns:</p>
 <ul>
 <li><strong>Legal</strong>: Questions about statutes produce responses with specific citation patterns</li>
 <li><strong>Medical</strong>: Clinical questions produce responses with diagnostic terminology shifts</li>
 <li><strong>Financial</strong>: Regulatory questions produce responses with compliance-specific elaboration</li>
 </ul>
-<p>Domain-specific calibration captures these patterns, typically improving AUROC to 0.90--0.99.</p>
+<p>Domain-specific calibration captures these patterns. Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689.</p>
 <table>
 <thead>
 <tr>
@@ -2369,33 +2369,27 @@
 <tbody>
 <tr>
 <td>Generic</td>
-<td>0.76</td>
+<td>0.684</td>
 <td>---</td>
 <td>Baseline</td>
 </tr>
 <tr>
-<td>Legal</td>
-<td>0.76</td>
-<td>0.94</td>
-<td>+0.18</td>
+<td>Domain-calibrated (overall)</td>
+<td>0.684</td>
+<td>0.736</td>
+<td>+0.052</td>
 </tr>
 <tr>
-<td>Medical</td>
-<td>0.76</td>
-<td>0.97</td>
-<td>+0.21</td>
+<td>Domain-calibrated (out-of-register bin)</td>
+<td>0.717</td>
+<td>0.815</td>
+<td>+0.098</td>
 </tr>
 <tr>
-<td>Financial</td>
-<td>0.76</td>
-<td>0.92</td>
-<td>+0.16</td>
-</tr>
-<tr>
-<td>Technical docs</td>
-<td>0.76</td>
-<td>0.95</td>
-<td>+0.19</td>
+<td>Domain-calibrated (<strong>in-register bin</strong>)</td>
+<td>0.626</td>
+<td><strong>0.689</strong></td>
+<td><strong>+0.063</strong></td>
 </tr>
 </tbody>
 </table>

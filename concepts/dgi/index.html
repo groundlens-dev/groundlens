@@ -2348,13 +2348,13 @@
 <tbody>
 <tr>
 <td>Generic (bundled dataset)</td>
-<td>~0.76</td>
+<td>0.684 overall / 0.626 in-register</td>
 <td>Quick evaluation, prototyping</td>
 </tr>
 <tr>
 <td>Domain-specific (20--100 pairs)</td>
-<td>0.90--0.99</td>
-<td>Production systems</td>
+<td>0.736 overall / 0.689 in-register</td>
+<td>Production triage</td>
 </tr>
 </tbody>
 </table>
@@ -2440,7 +2440,7 @@
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Calibration sensitivity</p>
-<p>The generic reference direction provides weak discrimination (AUROC ~0.76). Always calibrate for production use.</p>
+<p>Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689. Calibrate for production, but do not expect it to close the blind spot. With authorship held constant DGI reaches 0.606, and ≈ 0.68 is the ceiling of the entire embedding-similarity class, not a target to beat.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Displacement magnitude</p>

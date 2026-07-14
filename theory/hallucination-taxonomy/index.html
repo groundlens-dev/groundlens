@@ -2603,7 +2603,7 @@
 <p>The taxonomy identifies three mechanisms of confabulation, each with a different geometric consequence. These map directly to patterns observed in clinical neuropsychology, where confabulation from incomplete memory produces different failures depending on what kind of knowledge is being recalled (Dalla Barba, 1993).</p>
 <p><strong>Register preservation</strong> (regulatory/procedural domains): The confabulation inverts factual claims while keeping the domain register intact. Example: asked about Roth IRA contribution rules, a confabulation fabricates a flat 15% withdrawal tax and invents mandatory distributions at 65 — but every term (<em>contributions, distributions, adjusted gross income</em>) stays in the financial-regulatory register. Because the wrong answer shares the same lexical distribution as the right one, the embedding displacement is small. Detection difficulty: <strong>high</strong>.</p>
 <p><strong>Template-filling</strong> (technical specification domains): The confabulation preserves the syntactic template (entity → classification → mechanism → interaction) while swapping content in the slots. Example: asked about SQL <code>GROUP BY</code>, a confabulation describes parallel query partitioning rather than row aggregation — but the clause-mechanism-usage template is identical. The template dominates the embedding; the slot content where truth resides contributes little variance. Detection difficulty: <strong>high</strong> — template-structured domains (Python, TypeScript) reach only 56.9% detection, not significantly above chance (<span class="arithmatex">\(p = .161\)</span>).</p>
-<p><strong>Mechanism inversion</strong> (declarative-knowledge domains): The confabulation preserves the broad subject register but invents a mechanism drawn from an adjacent domain, importing vocabulary from that neighboring register. Example: asked how CRISPR-Cas9 edits genes, a confabulation describes protein-folding correction rather than DNA cleavage, importing <em>chaperones, mRNA, refolding</em> from a neighboring molecular-biology register. The imported vocabulary creates distributional divergence that DGI can detect. Detection difficulty: <strong>low</strong> — declarative domains reach 87.8% detection (<span class="arithmatex">\(p &lt; 10^{-15}\)</span>).</p>
+<p><strong>Mechanism inversion</strong> (declarative-knowledge domains): The confabulation preserves the broad subject register but invents a mechanism drawn from an adjacent domain, importing vocabulary from that neighboring register. Example: asked how CRISPR-Cas9 edits genes, a confabulation describes protein-folding correction rather than DNA cleavage, importing <em>chaperones, mRNA, refolding</em> from a neighboring molecular-biology register. The imported vocabulary creates distributional divergence that DGI can detect <strong>while the import stays out of register</strong>. Detection difficulty rises steeply as the confabulation stays inside the domain's own register, and the previously reported 87.8% detection figure is withdrawn: it came from a benchmark where the grounded and confabulated text had different authors.</p>
 <div class="admonition info">
 <p class="admonition-title">The template vs. declarative split</p>
 <p>Fisher's exact test confirms the split between template-structured and declarative domains at <span class="arithmatex">\(p = 1.5 \times 10^{-6}\)</span>, replicating across all four embedding architectures tested. This split is itself a prediction of the taxonomy: confabulations that stay within their domain register approach the Type III boundary in detection difficulty.</p>
@@ -2642,16 +2642,18 @@
 <td>Slight leakage from <span class="arithmatex">\(\hat{\mu}\)</span> estimation</td>
 </tr>
 <tr>
-<td>NLI (DeBERTa-v3-small)</td>
+<td>NLI (DeBERTa-v3-small), on this dataset</td>
 <td>0.311</td>
-<td><strong>Inverted</strong> — actively favors false answers</td>
+<td>Below chance <strong>on TruthfulQA specifically</strong></td>
 </tr>
 </tbody>
 </table>
-<p>The NLI result is the strongest evidence: a learned textual-entailment classifier trained on large-scale human annotations does not merely fail — it <em>inverts</em>, assigning higher entailment scores to false answers than to truthful ones. This confirms that the Type III boundary is not an artifact of the geometric framework but a property of the task itself.</p>
-<div class="admonition danger">
-<p class="admonition-title">Why NLI inverts on TruthfulQA</p>
-<p>TruthfulQA's false answers are common misconceptions stated with high confidence and simple syntax. Its truthful answers are longer and hedged (<em>"the standard view in the literature is..."</em>). The NLI model rewards confidence over truth, producing AUROC 0.311 — worse than random. Any method that relies on distributional features of the (question, response) pair is susceptible to this inversion.</p>
+<p>The geometric scores sit at chance here, and that is the Type III boundary: on a same-frame factual error, angular geometry has nothing to measure.</p>
+<div class="admonition warning">
+<p class="admonition-title">Do not generalize the NLI number on this dataset</p>
+<p>An earlier version of this page read the 0.311 as evidence that entailment classifiers "invert" and that <em>any</em> method using distributional features of the (question, response) pair inherits the problem. <strong>That generalization is wrong, and it was the most damaging claim in these docs</strong>, because it argued the reader out of the one method that works.</p>
+<p>TruthfulQA is an adversarial misconception benchmark with a length and hedging artifact: false answers are short, confident misconceptions; true answers are long and hedged. It punishes a classifier reading surface confidence. It says nothing about entailment in general.</p>
+<p>Measured properly, binned by how far a confabulation sits from the register of a correct answer, an NLI cross-encoder holds AUROC 0.836, 0.786, 0.837, 0.719, <strong>0.887</strong>, and it <strong>does not decline</strong>. It is the strongest method precisely where geometry dies. Entailment is the recommended second stage. See <a href="../../benchmarks/results/">Results</a>.</p>
 </div>
 <hr />
 <h2 id="the-alignment-objective-why-the-taxonomy-works">The alignment objective: why the taxonomy works<a class="headerlink" href="#the-alignment-objective-why-the-taxonomy-works" title="Permanent link">&para;</a></h2>
@@ -2690,11 +2692,6 @@
 <td>69–78%</td>
 <td>0.72–0.92</td>
 </tr>
-<tr>
-<td>NLI on human confabulations</td>
-<td>57.5%</td>
-<td>—</td>
-</tr>
 </tbody>
 </table>
 <p>The cause is visible in the paired similarity column: HaluEval's correct and hallucinated responses sit far apart in embedding space, while human confabulations remain close to their grounded counterparts. A method scoring 95% on HaluEval is detecting the <em>distributional trace of LLM-prompted fabrication</em> — the instruction to "generate a wrong answer" leaves a geometric fingerprint that is not present in production hallucinations.</p>
@@ -2702,7 +2699,7 @@
 <hr />
 <h2 id="external-validation">External validation<a class="headerlink" href="#external-validation" title="Permanent link">&para;</a></h2>
 <p>The taxonomy's predictions hold on independently collected, human-annotated benchmarks:</p>
-<p><strong>ExpertQA</strong> (900 expert-annotated claims, 32 specialist fields): <span class="arithmatex">\(\Gamma\)</span> outperforms NLI by <span class="arithmatex">\(\Delta = +0.243\)</span> (<span class="arithmatex">\(p &lt; .001\)</span>). Expert errors are entailment-compatible but occupy a different region of embedding space — exactly the Type II signature <span class="arithmatex">\(\Gamma\)</span> is designed for. NLI operates at chance (0.452).</p>
+<p><strong>ExpertQA</strong> (900 expert-annotated claims, 32 specialist fields): an earlier version of this page reported that <span class="arithmatex">\(\Gamma\)</span> outperformed NLI by <span class="arithmatex">\(\Delta = +0.243\)</span>. That comparison ran without an authorship or length control and is <strong>withdrawn</strong>. Detectors that appear to beat entailment on this class are, on inspection, reading who wrote the text: hold authorship constant and a supervised probe over the same embeddings falls from 0.932 to 0.660.</p>
 <p><strong>WikiBio GPT-3</strong> (102 sentence-level annotations): NLI outperforms <span class="arithmatex">\(\Gamma\)</span> by <span class="arithmatex">\(\Delta = +0.131\)</span>. The annotation criterion marks any incorrect detail as "major inaccurate" regardless of semantic distance, conflating Type II (large displacement) and Type III (near-zero displacement). When a dataset mixes the two types, <span class="arithmatex">\(\Gamma\)</span> detects only the Type II subset.</p>
 <p><strong>FELM</strong> (81 segment-level labels): Both methods perform similarly.</p>
 <p>The pattern is itself a prediction: <span class="arithmatex">\(\Gamma\)</span> wins when errors are predominantly Type II; it loses when datasets mix Types II and III.</p>
@@ -2757,7 +2754,7 @@
 <p><strong>Complement with domain knowledge.</strong> For high-stakes applications where within-frame factual errors matter (medical, legal, financial), combine groundlens triage with domain-specific fact-checking on the outputs that pass geometric verification. See <a href="../confabulation-boundary/#complementary-tools-for-type-iii-detection">Complementary Tools for Type III Detection</a> for concrete tool recommendations.</p>
 </li>
 <li>
-<p><strong>Calibrate per domain.</strong> Generic DGI achieves AUROC ~0.76. Domain-specific calibration with 20–100 verified pairs reaches 0.90–0.99. The improvement is largest in declarative-knowledge domains where <span class="arithmatex">\(\hat{\mu}\)</span> is well-defined.</p>
+<p><strong>Calibrate per domain, to set your escalation rate.</strong> Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689. Calibration decides how much you send to the second stage. It does not decide what you can see.</p>
 </li>
 <li>
 <p><strong>Be honest about benchmark results.</strong> Performance on LLM-generated benchmarks (HaluEval, HaluBench) overstates what any method — geometric, NLI, or otherwise — achieves on the hallucinations deployed systems actually produce.</p>

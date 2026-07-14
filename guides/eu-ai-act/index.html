@@ -2290,7 +2290,7 @@
 </ol>
 <p>groundlens supports all four requirements by design.</p>
 <h2 id="a-deterministic-first-stage">A Deterministic First Stage<a class="headerlink" href="#a-deterministic-first-stage" title="Permanent link">&para;</a></h2>
-<p>The most common alternative to groundlens --- "LLM-as-judge" --- uses a second LLM to evaluate the first. This creates serious compliance problems:</p>
+<p>The usual pattern, "LLM-as-judge", uses a second LLM to evaluate the first. It is not the alternative to groundlens; it is the <strong>second stage</strong>. But run on everything, on its own, it creates compliance problems:</p>
 <table>
 <thead>
 <tr>
@@ -2329,7 +2329,13 @@
 </table>
 <div class="admonition abstract">
 <p class="admonition-title">Key compliance advantage</p>
-<p>groundlens removes the generative model from the evaluation loop entirely. The score is computed via deterministic mathematical operations on embeddings --- no sampling, no temperature, no prompt sensitivity.</p>
+<p>groundlens removes the generative model from the <strong>triage</strong> step. The score is computed via deterministic mathematical operations on embeddings: no sampling, no temperature, no prompt sensitivity.</p>
+<p>It does not remove the second stage, and it should not. What it gives an examiner is a deterministic, reproducible account of <strong>which</strong> outputs were escalated to the judge and <strong>why</strong>.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">What determinism does not buy you (Article 15)</p>
+<p>Coverage. A confabulation that stays in register, right topic, right terminology, one wrong figure, is close to invisible to any embedding-similarity method: the whole class tops out in the high 0.6s AUROC once authorship is controlled.</p>
+<p>Do not present a geometric score to an examiner as Article 15 accuracy evidence on its own. Under <strong>Article 9</strong>, however, a method that publishes its own failure region as a number rather than a caveat is worth more than one reporting a figure it cannot defend. Write the blind spot into the risk file.</p>
 </div>
 <h2 id="article-9-risk-management">Article 9: Risk Management<a class="headerlink" href="#article-9-risk-management" title="Permanent link">&para;</a></h2>
 <p>The EU AI Act requires a risk management system that identifies and mitigates risks throughout the AI system's lifecycle.</p>
