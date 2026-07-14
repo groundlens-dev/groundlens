@@ -18,16 +18,18 @@
 
 </div>
 
----
 
-The standard way to check an LLM's output is a second LLM as judge, paid on every output: non-deterministic at temperature 0, a free-text opinion with no citation, priced per call. Groundlens is the deterministic **first stage** that runs in front of that judge. Two deterministic layers, geometric scoring and citation-backed rules, clear the clearly grounded answers and catch the clearly ungrounded ones, sub-second, with no LLM in the scoring path, so the expensive judge runs only on what Groundlens escalates. It settles whether an answer engaged its source. A plausible wrong fact stated in the right frame is provably invisible to geometry, and Groundlens escalates it to your second stage. Built for RAG systems and agent loops in regulated industries.
+
+The standard way to check an LLM's output is a second LLM as judge, paid on every output: non-deterministic at temperature 0, a free-text opinion with no citation, priced per call. Groundlens is the deterministic **first stage** that runs in front of that judge. Two deterministic layers, geometric scoring and citation-backed rules, clear the clearly grounded answers and catch the clearly ungrounded ones, sub-second, with no LLM in the scoring path, so the expensive judge runs only on what Groundlens escalates. It settles whether an answer engaged its source. A plausible wrong fact stated in the right frame is invisible to geometry, and Groundlens escalates it to your second stage. Built for RAG systems and agent loops in regulated industries.
+
+Groundlens ships two geometric scores: **SGI**, a context-grounded score that compares a response against its retrieved source, and **DGI**, a context-free score that works from the question and answer alone. Where each one holds, and where it does not, is stated precisely below.
 
 > **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
 ## See it run
 
 <div align="center">
-<img src="examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="100%">
+<img src="examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="65%">
 <br>
 <em>The Groundlens MCP inside Claude: a deterministic CHECK under every answer. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
 </div>
@@ -54,7 +56,9 @@ Stage 1 gives you two things Stage 2 cannot afford at scale: a **continuous scor
 
 ## What Groundlens detects
 
-The geometric layer rests on three published papers that state exactly which hallucinations angular geometry can and cannot separate. A precise statement of scope is the most important thing this README can give a Head of Model Risk reading it for the first time.
+The geometric layer rests on published work that states exactly which hallucinations angular geometry can and cannot separate. A precise statement of scope is the most important thing this README can give a Head of Model Risk reading it for the first time.
+
+A note on the numbers below: figures from the register-wall study (the ceiling, the in-register bins, the length-matched external results) have passed authorship and length controls and are reported as measured. Figures marked *pending controls* predate those controls and have not been re-run; treat them as provisional.
 
 | Hallucination type | What it looks like | Detectable by Groundlens? |
 |---|---|---|
@@ -62,35 +66,13 @@ The geometric layer rests on three published papers that state exactly which hal
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI**, declared-limited. DGI separates a confabulation that leaves the register of a correct answer. Its skill declines toward chance as the confabulation stays *in* register, which is the case that matters in production. With authorship held constant, DGI reaches AUROC 0.606 and the ceiling of the whole embedding-similarity class is ~0.68. Escalate in-register cases to Stage 2. |
 | **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall) |
 
-
-References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224) · Marin (2026) [Rotational Dynamics, arXiv:2603.13259](https://arxiv.org/abs/2603.13259).
+References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224).
 
 **For regulated-industry deployments:** Type III is the most critical class in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The rule-based layer catches the Type III cases a policy or citation check can express; the residue, a plausible wrong figure that passes every rule, is escalated to a second-stage judge or human. SGI/DGI for the Type I/II screen, rules plus that escalation for Type III, is what passes a Model Risk Committee review.
 
 ## Benchmarks
 
-Groundlens is measured against published benchmarks and against an independent one. The point of this section is not a single headline number — it is to show, precisely, where geometry wins and where it does not.
-
-### Validated against Google DeepMind's FACTS
-
-FACTS Grounding (Google DeepMind) measures whether an answer stays faithful to the document it was given — scored by an ensemble of frontier LLM judges. A precise instrument, and an expensive one: fit to rank models on a leaderboard, not to check every response in production.
-
-We ran Groundlens against FACTS' own public examples to ask how much of that judgment is recoverable from geometry alone — no LLM in the loop. The single grounding verdict splits in two:
-
-| Question | Geometry alone |
-|---|---|
-| **Provenance** — did this answer come from *this* document, and not another? | AUROC ≈ 0.95, *pending the authorship and length controls*. The grounded and closed-book arms of FACTS differ in generation condition, which is exactly the shortcut the controls exist to expose. Treat as provisional. |
-| **Faithfulness** — is every individual claim supported? | Not settled by geometry. A first-pass filter only, and its recall on this axis is *pending the same controls*. Facts go to Stage 2. |
-
-The point is not that geometry replaces the judge. It is that one half of grounding — where an answer came from — is nearly free, and can clear the clearly-grounded answers and catch most of the ungrounded ones before a single LLM call.
-
-*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Labels are LLM-judge derived and the two arms differ in generation condition, so these numbers have not passed the controls. Reproduce it in the repo notebook: [`examples/groundlens_x_facts_grounding.ipynb`](examples/groundlens_x_facts_grounding.ipynb).*
-
-<div align="center">
-<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
-<br>
-<em>Every FACTS example placed by its grounding geometry, grounded arm against closed-book arm. Labels decided by an LLM judge, and the two arms differ in generation condition: the separation shown here is provenance under a generation-condition contrast, pending the authorship and length controls.</em>
-</div>
+Groundlens is measured against published benchmarks and against an independent one. The point of this section is not a single headline number — it is to show, precisely, where geometry wins and where it does not. We lead with the controlled result, because it is the one that has passed authorship and length controls; the provisional numbers follow, clearly marked.
 
 ### The register wall
 
@@ -119,7 +101,7 @@ A detector that appears to beat the wall is usually reading *who wrote the text*
 
 With authorship matched, even the best supervised decoder over these embeddings sits in the high 0.6s. **DGI's ≈ 0.68 is not a weak estimator. It is the ceiling of the entire class.**
 
-### Calibration, corrected
+### Calibration
 
 Domain calibration moves the operating point, not the wall. Overall AUROC rises from 0.684 to 0.736, and almost all of that gain lands at the easy out-of-register end (0.717 → 0.815). The in-register bin moves only 0.626 → 0.689. Calibrate to set your escalation rate. Do not expect it to close the blind spot. See [Calibrating SGI and DGI](#calibrating-sgi-and-dgi).
 
@@ -127,7 +109,28 @@ Domain calibration moves the operating point, not the wall. Overall AUROC rises 
 
 RAGTruth-QA's apparent 0.705 is a length artifact: length-matched, it falls from 0.676 to 0.634. FaithBench declines from 0.620 to 0.500. TruthfulQA is at chance. Report length-matched numbers or report nothing.
 
-### Evaluation checklist (the house rule)
+### Provisional: provenance on Google DeepMind's FACTS
+
+FACTS Grounding (Google DeepMind) measures whether an answer stays faithful to the document it was given — scored by an ensemble of frontier LLM judges. A precise instrument, and an expensive one: fit to rank models on a leaderboard, not to check every response in production.
+
+We ran Groundlens against FACTS' own public examples to ask how much of that judgment is recoverable from geometry alone — no LLM in the loop. The single grounding verdict splits in two:
+
+| Question | Geometry alone |
+|---|---|
+| **Provenance** — did this answer come from *this* document, and not another? | Partially recoverable from geometry. **We withhold a headline figure:** the separation we observe is measured under a generation-condition contrast (the grounded and closed-book arms of FACTS differ in how they were produced), which is exactly the authorship-style shortcut our controls exist to expose. A number here would very likely be measuring the shortcut, not provenance. Re-run pending controls. |
+| **Faithfulness** — is every individual claim supported? | Not settled by geometry. A first-pass filter only, and its recall on this axis is *pending the same controls*. Facts go to Stage 2. |
+
+The point is not that geometry replaces the judge. It is that one half of grounding — where an answer came from — appears partly recoverable before a single LLM call. We are deliberately not attaching an AUROC to it until it has passed the same authorship and length controls we require of every other number on this page. By our own [evaluation checklist](#evaluation-checklist), a high figure under a generation-condition contrast is a reason to suspect a shortcut, not to publish.
+
+*Method: a single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Labels are LLM-judge derived and the two arms differ in generation condition, so these numbers have not passed the controls. Reproduce it in the repo notebook: [`examples/groundlens_x_facts_grounding.ipynb`](examples/groundlens_x_facts_grounding.ipynb).*
+
+<div align="center">
+<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<br>
+<em>Every FACTS example placed by its grounding geometry, grounded arm against closed-book arm. Labels decided by an LLM judge, and the two arms differ in generation condition: the separation shown here is provenance under a generation-condition contrast, pending the authorship and length controls.</em>
+</div>
+
+### Evaluation checklist
 
 **No benchmark number ships without the authorship and length controls.** Before any AUROC, accuracy or detection rate enters this README, a docstring, a slide or a paper:
 
@@ -138,9 +141,35 @@ RAGTruth-QA's apparent 0.705 is a length artifact: length-matched, it falls from
 
 A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality.
 
-### Retracted
+### Comparison table: crossing the wall
 
-The 0.90–0.99 domain-calibration range, DGI 0.958, the 87.8% confabulation detection rate and the NLI-at-chance baseline are **withdrawn**. All four rested on evaluations where the grounded and the confabulated text had different authors. NLI does not collapse: it is the strongest method at the in-register end, and it is now the recommended second stage. Every surviving figure above is flagged pending the controls.
+Embedding-similarity detectors (raw cosine, and context-free directional
+scores like DGI) share a blind spot: when a false answer keeps the vocabulary,
+phrasing, and structure of a correct one (an **in-register confabulation**),
+it lands next to the grounded response in embedding space, and detection falls
+toward chance. This is a property of the embedding geometry, not of any one
+estimator, so a bigger encoder does not fix it.
+
+Catching in-register errors requires a signal with access to truth **beyond word
+co-occurrence**. The methods below can get past the wall, each by a different
+route, and each with a different cost.
+
+| Method | How it gets past the wall | Advantages | Disadvantages |
+|---|---|---|---|
+| **NLI / cross-encoder entailment** | Trained on entailment labels; judges whether the response *follows from* a source, not whether they share words | Cheap at inference, deterministic, single-pass; robust on in-register errors | Needs a source/premise; supervised model; degrades when no reference is available |
+| **Reference / context-grounded geometric (SGI)** | Compares the response against the *retrieved context*, not the query alone; measures engagement with the provided evidence | Deterministic, cheap, interpretable, no second LLM; strong on RAG grounding | Requires context/retrieval to be available; verifies grounding *in the source*, not world-truth |
+| **LLM-as-judge / model-graded** | Invokes a model with world knowledge; reasons about grounding instead of measuring geometry | Flexible, no reference corpus needed, handles nuance | Expensive (second inference), non-deterministic, prompt-sensitive, hard to audit |
+| **Trained consistency classifiers (e.g. HHEM)** | Learns the grounded/hallucinated boundary directly from labeled data | Fast, packaged, single-pass | Opaque; generalization depends on training data; may still rely on distributional features and inherit part of the wall |
+| **Uncertainty / sampling (SelfCheckGPT, semantic entropy)** | Ignores references entirely; flags low self-consistency across multiple samples | Reference-free; catches a different error class (model genuinely unsure) | Needs 5–20 generations (high latency/cost); **misses confident in-register falsehoods** — the exact case the wall is about |
+| **Supervised internal-state probes (CCS, truth directions)** | Reads a truth direction from the model's activations under supervision | Can recover truth the surface text hides | Needs white-box access to internals plus labels; unavailable behind a third-party API |
+
+> **Where groundlens sits.** DGI is a context-free directional score: it is a cheap
+> first-pass triage filter and is **subject to the wall** on in-register errors, use it
+> to catch out-of-register and divergent hallucinations, not confident in-register ones.
+> SGI crosses the wall **when retrieved context is available**, because it measures the
+> response against that context rather than against the question alone. If you have a
+> source document, prefer SGI; if you have only a question and answer, treat any
+> similarity score as triage and escalate uncertain cases to NLI or an LLM judge.
 
 ## Quick start
 
@@ -458,12 +487,18 @@ Full component and lifecycle tables (modules, inputs, outputs, calibration, comp
 
 ## Research
 
-The methods Groundlens implements are documented in four research papers:
+The methods Groundlens implements are documented in three published papers and one preprint:
 
-1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG.
-2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/abs/2602.13224). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector.
-3. **Rotational Dynamics of Factual Constraint Processing** — Marin (2026). [arXiv:2603.13259](https://arxiv.org/abs/2603.13259). Mechanistic interpretability of how transformers reject wrong answers.
+1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG; introduces SGI.
+2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/abs/2602.13224). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector, with the in-register limit declared.
+3. **The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure** — Marin (2026). *Under review.* The controlled study behind the benchmark numbers on this page: the register-distance wall, the authorship shortcut, and the geometric ceiling.
 4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026). *Preprint, draft available on request.* Underpins `decision_rationale_rules(domain="finance")`: 20 rules triangulated across peer-reviewed NLP literature, banking-regulator whitepapers, tier-1 bank public reports, cross-industry frameworks, and financial-domain NLP benchmarks.
+
+<!-- NOTE (remove before publishing): the previous README listed a third arXiv id 2603.13259
+ ("Rotational Dynamics of Factual Constraint Processing") as backing for DGI/benchmarks.
+ That id was elsewhere attributed to the confabulation-benchmark paper. These are not the
+ same work. Confirm which arXiv id maps to which paper and restore the correct citation
+ before publishing. It has been removed here rather than ship a citation that may be wrong. -->
 
 ## Compliance mapping
 
