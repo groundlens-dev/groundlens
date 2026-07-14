@@ -4,7 +4,7 @@ DGI accuracy depends on the quality of the reference direction $\hat{\mu}$. **Do
 
 ## Why Calibrate?
 
-The bundled generic reference direction is trained on diverse question-answer pairs across many domains. It captures a "universal" grounded displacement direction that achieves AUROC ~0.76 --- useful for prototyping but insufficient for production.
+The bundled generic reference direction is trained on diverse question-answer pairs across many domains. It captures a "universal" grounded displacement direction: overall AUROC 0.684, and 0.626 on in-register confabulations.
 
 Different domains have different displacement patterns:
 
@@ -12,15 +12,14 @@ Different domains have different displacement patterns:
 - **Medical**: Clinical questions produce responses with diagnostic terminology shifts
 - **Financial**: Regulatory questions produce responses with compliance-specific elaboration
 
-Domain-specific calibration captures these patterns, typically improving AUROC to 0.90--0.99.
+Domain-specific calibration captures these patterns. Calibration moves the operating point, not the wall: overall AUROC 0.684 → 0.736, with the gain at the easy out-of-register end (0.717 → 0.815) and the in-register bin moving only 0.626 → 0.689.
 
 | Domain | Generic AUROC | Calibrated AUROC | Improvement |
 |---|---|---|---|
-| Generic | 0.76 | --- | Baseline |
-| Legal | 0.76 | 0.94 | +0.18 |
-| Medical | 0.76 | 0.97 | +0.21 |
-| Financial | 0.76 | 0.92 | +0.16 |
-| Technical docs | 0.76 | 0.95 | +0.19 |
+| Generic | 0.684 | --- | Baseline |
+| Domain-calibrated (overall) | 0.684 | 0.736 | +0.052 |
+| Domain-calibrated (out-of-register bin) | 0.717 | 0.815 | +0.098 |
+| Domain-calibrated (**in-register bin**) | 0.626 | **0.689** | **+0.063** |
 
 ## How to Collect Calibration Pairs
 

@@ -246,6 +246,6 @@ for step in trace.steps:
 
 ## Why This Matters for Agentic AI
 
-Multi-step agents make hallucination detection harder because errors compound across nodes. A hallucinated fact from an early reasoning step can propagate through tool calls and synthesis, producing a final answer that *looks* well-supported but rests on fabricated premises.
+Multi-step agents make grounding harder to trace because errors compound across nodes. A hallucinated fact from an early reasoning step can propagate through tool calls and synthesis, producing a final answer that *looks* well-supported but rests on fabricated premises.
 
 groundlens addresses this by scoring each LLM call independently at the node level. The triage trace shows exactly *where* in the pipeline confidence dropped, enabling targeted human review instead of blanket distrust of the entire output.

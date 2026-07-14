@@ -2,121 +2,82 @@
 
 All results use the default embedding model (`all-MiniLM-L6-v2`, 384 dimensions) unless otherwise noted. AUROC is the primary metric.
 
-## Headline Results
+!!! danger "Retraction, 2026-07"
+    The figures previously published on this page (DGI 0.958, domain-calibrated AUROC 0.90–0.99, 87.8% detection on human confabulations, and an NLI baseline near chance) are **withdrawn**.
 
-| Method | Calibration | AUROC | Dataset |
-|---|---|---|---|
-| DGI | Domain-specific | **0.958** | Confabulation benchmark (LLM-generated) |
-| DGI | Generic (bundled) | 0.76 | Mixed QA |
-| SGI | N/A | 0.88 | RAG verification (context-grounded) |
+    All of them rested on evaluations in which the grounded and the confabulated text had **different authors**. Authorship was correlated with the label, so the detectors were being scored on a shortcut. Hold authorship constant and the skill collapses. NLI does not collapse: it is the strongest method at the in-register end, and it is now the recommended second stage.
 
-## DGI: Generic vs. Domain-Specific Calibration
+    The controlled evaluation is in *The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure* (under review). This page reports it.
 
-The single biggest improvement comes from domain-specific calibration:
+## The wall
 
-| Calibration | AUROC | $\kappa$ | Pairs | Notes |
-|---|---|---|---|---|
-| Generic (bundled) | 0.76 | 3.2 | ~500 | Multi-domain, diverse |
-| Legal | 0.94 | 11.4 | 47 | Contract/regulatory QA |
-| Medical | 0.97 | 14.2 | 63 | Clinical pharmacy QA |
-| Financial | 0.92 | 8.7 | 38 | Compliance/regulatory QA |
-| Technical docs | 0.95 | 12.1 | 55 | Software documentation QA |
-| Customer support | 0.91 | 7.9 | 42 | Product support QA |
+Bin confabulations by how far they sit from the register of a correct answer, and every distributional and embedding-similarity detector, ours included, declines toward chance as the confabulation moves **into** register: same vocabulary, same phrasing, same structure, one wrong fact.
 
-!!! abstract "Key insight"
-    Domain calibration with just 40--60 pairs typically improves AUROC by 0.15--0.21 over the generic baseline. The concentration parameter $\kappa$ predicts calibration quality: $\kappa > 10$ consistently produces AUROC > 0.93.
+| Detector | Out of register | In register |
+|---|--:|--:|
+| NLI cross-encoder (supervised) | 0.836 | **0.887** |
+| Classic encoders (MiniLM, mpnet, bge, gte) | 0.70 – 0.74 | **0.62 – 0.68** |
+| Raw cosine | 0.726 | **0.595** |
 
-## DGI by Hallucination Type
+Entailment does not decline. It is strongest exactly where geometry is weakest. That is not a defeat: it is the division of labour that makes the two-stage design work.
 
-The confabulation benchmark breaks down performance by hallucination type (arXiv:2603.13259):
+## The ceiling, and the authorship shortcut
 
-| Hallucination Type | DGI AUROC (domain) | DGI AUROC (generic) |
-|---|---|---|
-| Divergent (topic drift) | 0.98 | 0.85 |
-| Fabrication (invented facts) | 0.96 | 0.78 |
-| Tangential (partial grounding) | 0.89 | 0.71 |
-| Template confabulation | 0.62 | 0.54 |
-| Expert-crafted confabulation | 0.51 | 0.50 |
+A detector that appears to beat the wall is usually reading **who wrote the text**, not whether it is grounded. In the human-confabulated benchmark the grounded answers come from a source and the confabulations were written by a person from memory, so authorship is perfectly correlated with the label.
 
-The results clearly show the **confabulation boundary**: performance degrades as hallucinations become more distributionally similar to grounded responses. See [Confabulation Boundary](../theory/confabulation-boundary.md) for the theoretical analysis.
+Hold authorship constant and the skill disappears:
 
-## SGI Results
+| Detector | Uncontrolled | Authorship matched |
+|---|--:|--:|
+| Large instruction-tuned embedder | ≈ 0.99 | shortcut, not skill |
+| Logistic probe | 0.932 | **0.660** |
+| MLP | 0.935 | **0.675** |
+| Directional score (DGI) | high | **0.606** |
 
-SGI is evaluated on datasets where context is available:
+With authorship matched, even the best supervised decoder over these embeddings sits in the high 0.6s. **DGI's ≈ 0.68 is not a weak estimator. It is the ceiling of the entire class.** Extra model capacity buys nothing: the MLP, with far more parameters than DGI, reaches 0.675.
 
-| Scenario | AUROC | Notes |
-|---|---|---|
-| RAG verification (context used vs. ignored) | 0.88 | Standard RAG setup |
-| Document QA (answer from doc vs. parametric) | 0.91 | Long-document QA |
-| Summarization (faithful vs. hallucinated) | 0.84 | Summary grounding check |
+## Calibration, corrected
 
-SGI does not require calibration --- it uses the geometric structure of question/context/response directly.
+Domain calibration moves the operating point, not the wall.
 
-## Embedding Model Comparison
+| | Overall | Out-of-register bin | In-register bin |
+|---|--:|--:|--:|
+| Generic | 0.684 | 0.717 | 0.626 |
+| Domain-calibrated | 0.736 | **0.815** | 0.689 |
 
-Different embedding models produce different AUROC values:
+Almost the entire gain lands where the problem was already easy. The in-register bin, the one that matters in production, moves 0.626 → 0.689.
 
-| Model | Dimensions | DGI AUROC (generic) | DGI AUROC (domain) | Inference time |
-|---|---|---|---|---|
-| all-MiniLM-L6-v2 | 384 | 0.76 | 0.958 | ~5 ms |
-| all-mpnet-base-v2 | 768 | 0.79 | 0.964 | ~12 ms |
-| bge-small-en-v1.5 | 384 | 0.74 | 0.951 | ~5 ms |
-| e5-small-v2 | 384 | 0.75 | 0.953 | ~5 ms |
+!!! warning "Calibrate to set your escalation rate"
+    Calibration decides *how much* you send to the second stage. It does not decide *what you can see*. Do not calibrate expecting the blind spot to close.
 
-!!! tip "Model recommendation"
-    `all-MiniLM-L6-v2` provides the best tradeoff between accuracy and speed. The larger `all-mpnet-base-v2` offers marginal improvement (+0.006 AUROC) at 2.4x the inference cost.
+## External benchmarks, length-matched
 
-## Calibration Size Sensitivity
+| Benchmark | Apparent | After control |
+|---|--:|--:|
+| RAGTruth-QA | 0.705 | **0.634** (length-matched) |
+| FaithBench | 0.620 | **0.500** |
+| TruthfulQA | — | chance |
 
-How many calibration pairs are needed for good domain calibration?
+RAGTruth's apparent skill was a length artifact: the grounded and hallucinated responses differ in median length (146 vs 92 words), and the rank correlation between score and length is −0.70. Match the lengths and it falls from 0.676 to 0.634.
 
-| Pairs | DGI AUROC | $\kappa$ |
-|---|---|---|
-| 5 (minimum) | 0.82 | 4.1 |
-| 10 | 0.88 | 6.8 |
-| 20 | 0.93 | 10.2 |
-| 50 | 0.96 | 13.5 |
-| 100 | 0.97 | 14.8 |
-| 200 | 0.97 | 15.1 |
+## SGI: pending
 
-Diminishing returns set in around 50 pairs. The jump from 5 to 20 pairs provides the most value.
+| Benchmark | Reported | Status |
+|---|--:|---|
+| HaluEval QA (n = 10,000) | 0.805 (mean over 5 encoders) | **Pending the authorship and length controls** |
+| FACTS Grounding (provenance) | ≈ 0.95 | **Pending.** The two arms differ in generation condition, which is the shortcut the controls exist to expose. Labels are LLM-judge derived. |
 
-## Latency
+SGI, with context, is the road forward. Its numbers predate the controls and have not been re-run under them. Treat them as provisional, and do not quote them as validated.
 
-Scoring latency on CPU (Intel Xeon, single thread):
+## What "reproducible" does and does not mean
 
-| Operation | Time | Notes |
-|---|---|---|
-| Model loading (first call) | ~1.5 s | One-time cost, cached thereafter |
-| Single SGI score | ~15 ms | 3 embeddings + distance computation |
-| Single DGI score | ~12 ms | 2 embeddings + dot product (mu_hat cached) |
-| Batch of 100 | ~0.8 s | Amortized ~8 ms per item |
-| Batch of 1000 | ~6 s | Amortized ~6 ms per item |
+groundlens scoring is deterministic: the same input gives the same score, forever, on any machine.
 
-## Comparison with LLM-as-Judge
-
-| Method | AUROC | Latency | Deterministic | Cost |
-|---|---|---|---|---|
-| groundlens DGI (domain) | 0.958 | ~12 ms | Yes | $0 (local) |
-| groundlens SGI | 0.88 | ~15 ms | Yes | $0 (local) |
-| GPT-4o as judge | 0.91 | ~2 s | No | ~$0.01/eval |
-| Claude as judge | 0.89 | ~3 s | No | ~$0.01/eval |
-| Llama-3 as judge (local) | 0.82 | ~5 s | Approx. | $0 (GPU required) |
-
-!!! abstract "Key tradeoff"
-    LLM-as-judge achieves comparable AUROC to groundlens DGI with generic calibration, but groundlens with domain calibration outperforms all LLM judges while being 100--200x faster, deterministic, and free of evaluation cost. The downside is that groundlens requires calibration effort for optimal results.
-
-## Reproducing These Results
+Determinism guarantees you get the same number twice. **It does not guarantee the number measures grounding.** That is what the controls in the [evaluation protocol](overview.md) are for, and it is the lesson of the retraction at the top of this page.
 
 ```bash
-# Install benchmark dependencies
 pip install groundlens datasets scikit-learn
-
-# Run the confabulation benchmark
 groundlens benchmark
-
-# With a custom embedding model
-groundlens benchmark --model all-mpnet-base-v2
 ```
 
-All numbers in this page were produced with groundlens version 2026.4.x and can be reproduced exactly using the published datasets and default configuration.
+The bundled benchmark prints a confound warning above its AUROC. Read it.

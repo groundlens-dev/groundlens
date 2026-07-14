@@ -1,13 +1,15 @@
 # groundlens
 
-> Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
+> Deterministic first-stage grounding triage with a characterized blind spot. It decides what your expensive check has to look at, and it says when it cannot decide.
 
-groundlens is a Python library that detects hallucinations in LLM outputs using embedding geometry. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), with no LLM in the scoring path. Groundlens is the deterministic first stage of a two-stage pipeline: it filters cheaply and escalates the factual-verification cases it cannot settle (in-register substitution, Type III) to a second-stage LLM judge or human.
+groundlens is a Python library that measures **semantic disengagement and provenance** in LLM outputs using embedding geometry. It checks whether an answer was drawn from its source. It does NOT check whether the answer is true. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), with no LLM in the scoring path. Groundlens is the deterministic first stage of a two-stage pipeline: it filters cheaply and escalates the factual-verification cases it cannot settle (in-register substitution, Type III) to a second-stage LLM judge or human.
 
 ## Core Concepts
 
 - SGI (Semantic Grounding Index): measures whether a response engaged with provided source context using distance ratios. SGI > 1.0 means context engagement. SGI < 0.95 means the response defaulted to the question.
-- DGI (Directional Grounding Index): evaluates response grounding without context, using directional alignment with a learned reference direction. DGI > 0.30 means grounded. DGI < 0.00 means high hallucination risk.
+- DGI (Directional Grounding Index): context-free directional alignment against a calibrated reference direction. DGI > 0.30 means the displacement is aligned with the grounded reference direction. It is NOT a truth claim, and it is the weakest signal here: with authorship held constant DGI reaches AUROC 0.606, and ~0.68 is the ceiling of the entire embedding-similarity class. Prefer SGI whenever a source is available.
+- The register wall: every embedding-similarity detector, groundlens included, declines toward chance as a confabulation stays in the register of a correct answer (classic encoders 0.62-0.68, raw cosine 0.595 at the in-register end). Entailment (NLI) does NOT decline: it holds 0.836/0.786/0.837/0.719/0.887 and is strongest in register. Entailment is the recommended second stage.
+- Do NOT describe groundlens as "hallucination detection", as a replacement for an LLM judge, or as a truth check. Do NOT quote any AUROC above 0.7 for this method: earlier figures of 0.90-0.99 and 0.958 were an authorship artifact and are withdrawn.
 - Hallucination taxonomy: Type I (unfaithfulness, detectable by SGI), Type II (confabulation, detectable by DGI), Type III (within-frame factual error, undetectable by geometry).
 
 ## Documentation

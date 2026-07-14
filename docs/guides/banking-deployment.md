@@ -160,7 +160,7 @@ finance), which is a generic starting point — not a substitute for a
 banking-specific corpus. Build a deployment-specific calibration
 spanning the sub-domains relevant to your operating context (credit,
 AML, KYC, fraud, sanctions, concentration, model risk). A starting
-target is 100–200 pairs per sub-domain to reach AUROC > 0.95 on a
+target is 100–200 pairs per sub-domain. Do **not** target AUROC > 0.9: with authorship and length held constant, the ceiling for this class of detector is in the high 0.6s. Calibrate to size your second stage, not to hit a number. Held-out evaluation on a
 held-out test set drawn from the same distribution. See the
 [domain calibration guide](domain-calibration.md) for the procedure.
 
