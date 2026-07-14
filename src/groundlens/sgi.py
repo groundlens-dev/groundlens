@@ -1,4 +1,4 @@
-"""Semantic Grounding Index (SGI) — grounded hallucination detection.
+"""Semantic Grounding Index (SGI) — context-grounding score.
 
 SGI evaluates whether an LLM response engaged with provided source
 context or stayed semantically anchored to the question. It requires

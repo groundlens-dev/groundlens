@@ -12,7 +12,7 @@ groundlens is built by someone who has been on the other side of every tool that
 
 ## The problem
 
-LLM hallucination detection is stuck in a paradox: the dominant approach uses a second LLM to judge the first. This creates three fundamental issues:
+Verification is stuck on cost: the dominant approach uses a second LLM to judge the first, on every output. This creates three fundamental issues:
 
 1. **Non-determinism.** Ask the judge LLM the same question twice and you may get different rulings. You cannot reproduce results, you cannot audit decisions, and you cannot explain to a regulator why a specific output was flagged or passed.
 
