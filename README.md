@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.7.6-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
+[![Version](https://img.shields.io/badge/version-2026.7.14-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
 [![License: Apache](https://img.shields.io/badge/license-Apache%202-g?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
@@ -24,13 +24,13 @@ The standard way to check an LLM's output is a second LLM as judge, paid on ever
 
 Groundlens ships two geometric scores: **SGI**, a context-grounded score that compares a response against its retrieved source, and **DGI**, a context-free score that works from the question and answer alone. Where each one holds, and where it does not, is stated precisely below.
 
-> [!TIP]
+> **Tip**
 > **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
 ## See it run
 
 <div align="center">
-<img src="examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="50%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="50%">
 <br>
 <em>The Groundlens MCP inside Claude: a deterministic CHECK under every answer. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
 </div>
@@ -69,7 +69,7 @@ A note on the numbers below: figures from the register-wall study (the ceiling, 
 
 References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224).
 
-> [!IMPORTANT]
+> **Important**
 > **For regulated-industry deployments:** Type III is the most critical class in banking, healthcare, and legal — a wrong figure in a financial summary, a wrong dose in a clinical recommendation. Groundlens does *not* claim to catch those geometrically. The rule-based layer (`groundlens.rules`) is designed exactly for the policy and citation checks that Type III demands. The rule-based layer catches the Type III cases a policy or citation check can express; the residue, a plausible wrong figure that passes every rule, is escalated to a second-stage judge or human. SGI/DGI for the Type I/II screen, rules plus that escalation for Type III, is what passes a Model Risk Committee review.
 
 ## Benchmarks
@@ -88,7 +88,7 @@ Bin confabulations by how far they sit from the register of a correct answer, an
 | Classic encoders (MiniLM, mpnet, bge, gte) | 0.70 – 0.74 | **0.62 – 0.68** |
 | Raw cosine | 0.726 | **0.595** |
 
-> [!IMPORTANT]
+> **Important**
 > NLI is strongest exactly where geometry is weakest. **It is the recommended second stage.** We do not compete with it; we run before it.
 
 ### The ceiling, and the authorship shortcut
@@ -125,11 +125,11 @@ We ran Groundlens against FACTS' own public examples to ask how much of that jud
 
 The point is not that geometry replaces the judge. It is that one half of grounding — where an answer came from — appears partly recoverable before a single LLM call. We are deliberately not attaching an AUROC to it until it has passed the same authorship and length controls we require of every other number on this page. By our own [evaluation checklist](#evaluation-checklist), a high figure under a generation-condition contrast is a reason to suspect a shortcut, not to publish.
 
-> [!NOTE]
+> **Note**
 > A single-judge proxy for FACTS' three-model ensemble, over the public v2 examples; short answers under-scored. Labels are LLM-judge derived and the two arms differ in generation condition, so these numbers have not passed the controls. Reproduce it in the repo notebook: [`examples/groundlens_x_facts_grounding.ipynb`](examples/groundlens_x_facts_grounding.ipynb).*
 
 <div align="center">
-<img src="examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/examples/anim_histogram.gif" alt="Every FACTS example placed by its grounding geometry" width="100%">
 <br>
 <em>Every FACTS example placed by its grounding geometry, grounded arm against closed-book arm. Labels decided by an LLM judge, and the two arms differ in generation condition: the separation shown here is provenance under a generation-condition contrast, pending the authorship and length controls.</em>
 </div>
@@ -167,7 +167,7 @@ route, and each with a different cost.
 | **Uncertainty / sampling (SelfCheckGPT, semantic entropy)** | Ignores references entirely; flags low self-consistency across multiple samples | Reference-free; catches a different error class (model genuinely unsure) | Needs 5–20 generations (high latency/cost); **misses confident in-register falsehoods** — the exact case the wall is about |
 | **Supervised internal-state probes (CCS, truth directions)** | Reads a truth direction from the model's activations under supervision | Can recover truth the surface text hides | Needs white-box access to internals plus labels; unavailable behind a third-party API |
 
-> [!IMPORTANT]
+> **Important**
 > **Where groundlens sits.** DGI is a context-free directional score: it is a cheap
 > first-pass triage filter and is **subject to the wall** on in-register errors, use it
 > to catch out-of-register and divergent hallucinations, not confident in-register ones.
@@ -281,7 +281,7 @@ The bundled SGI/DGI thresholds and DGI `mu_hat` are calibrated for the default e
 
 Every rule carries a citation to its source — academic paper, industry whitepaper, or regulatory clause. Pick the rule set that matches the agent class you are triaging.
 
->[!NOTE]
+> **Note**
 >From release **2026.6.13** the rule-set API follows a single convention: **the archetype is the function name, the deployment dimensions are keyword arguments**. See [ADR 0001](docs/adr/0001-rule-set-architecture.md) for the rationale.
 
 | Rule set | Use it for | Sub-scores | Rules |
@@ -292,7 +292,7 @@ Every rule carries a citation to its source — academic paper, industry whitepa
 | [`specialized_agent_rules(domain="general", tools=())`](src/groundlens/agents/specialized.py) | Tool-using / execution agents (entity capture, transaction execution) | entity_groundedness, entity_completeness, entity_calibration, execution_readiness | 9 |
 | [`banking_rules()`](src/groundlens/rules.py) (legacy) | Mechanical-enforcement skeleton from De La Chica & Martí-González (2026) | spec, expl, bshift | 22 |
 
-> [!WARNING]
+> **Warning**
 > Deprecated, kept as aliases for one or more releases:
 > `customer_support_rag_rules()` → use `customer_support_rules(rag=True)`.
 > `groundlens_banking_rules()` → use `decision_rationale_rules(domain="finance")`.
@@ -381,7 +381,7 @@ The ceiling of the whole embedding-similarity class, measured with authorship he
 
 **The AUROC this loop reports is optimistic.** Your grounded answers come from your own documents; the candidate confabulations are written by an LLM. Authorship therefore correlates with the label, which is exactly the shortcut our [evaluation checklist](#evaluation-checklist) says to control for. Treat the loop's AUROC as a relative signal for *when to stop labelling*, not as an estimate of deployment performance. For a number you can quote, evaluate on pairs where grounded and false responses share an author. **If the loop reports 0.9+, that is a signal to go looking for a shortcut, not a signal of quality.**
 
->[!NOTE]
+> **Note**
 >`SeedExample` bundles `context`, `question` and `grounded` so the confabulation prompt is always coherent — the previous `(faq_corpus, seed_pairs)` shape paired them randomly and produced incoherent candidates. The five built-in strategies (`redefinition`, `mechanism_inversion`, `entity_composition`, `polysemy`, `template_filling`) come from [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark) (CC BY 4.0); custom strategies via `(name, prompt_template)` tuples. `propose_labels` does NOT label and does NOT calibrate — the human assigns the labels, the loop is non-circular by design. SGI has no calibration parameter, so this applies only to DGI. Full step-by-step guide with troubleshooting: [docs/guides/active-learning.md](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/active-learning.md).
 
 ## Build your own rule set
@@ -497,7 +497,7 @@ For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom)
 
 Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deterministic, citable). Triage is the combination. Calibration data is what makes both layers useful — `propose_labels` is the active-learning helper that produces it.
 
-![Topology of groundlens (Score + Rules + propose_labels)](docs/assets/groundlens_topology.png)
+![Topology of groundlens (Score + Rules + propose_labels)](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_topology.png)
 
 Full component and lifecycle tables (modules, inputs, outputs, calibration, compliance mapping) live in the docs to keep this README readable: **[docs.groundlens.dev/architecture](https://docs.groundlens.dev/architecture/)**. The one-line summary: continuous geometric score for ranking, per-rule audit trail with citations, hash-chained log for reproducibility, compliance mapping for the model-risk packet, with no LLM in the scoring path. Your second-stage judge or human runs only on what Groundlens escalates.
 
