@@ -12,27 +12,31 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/api/groundlens/integrations/crewai/tool/">
+        <link rel="canonical" href="https://docs.groundlens.dev/tutorial/02-the-blind-spot/">
       
       
+        <link rel="prev" href="../01-first-check/">
+      
+      
+        <link rel="next" href="../03-a-verification-loop/">
       
       
         
       
       
-      <link rel="icon" href="../../../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Tool - groundlens</title>
+        <title>Part 2: The blind spot - groundlens</title>
       
     
     
-      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#groundlens.integrations.crewai.tool" class="md-skip">
+        <a href="#part-2-the-blind-spot" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +100,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../../.." title="groundlens" class="md-header__button md-logo" aria-label="groundlens" data-md-component="logo">
+    <a href="../.." title="groundlens" class="md-header__button md-logo" aria-label="groundlens" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tool
+              Part 2: The blind spot
             
           </span>
         </div>
@@ -223,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -240,11 +244,35 @@
   
   
   
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorial
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
   
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../getting-started/installation/" class="md-tabs__link">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -266,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../concepts/how-it-works/" class="md-tabs__link">
+        <a href="../../concepts/how-it-works/" class="md-tabs__link">
           
   
   
@@ -288,7 +316,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../theory/hallucination-taxonomy/" class="md-tabs__link">
+        <a href="../../theory/hallucination-taxonomy/" class="md-tabs__link">
           
   
   
@@ -310,7 +338,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../guides/rag-verification/" class="md-tabs__link">
+        <a href="../../guides/rag-verification/" class="md-tabs__link">
           
   
   
@@ -332,7 +360,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../providers/openai/" class="md-tabs__link">
+        <a href="../../providers/openai/" class="md-tabs__link">
           
   
   
@@ -354,7 +382,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../integrations/langgraph/" class="md-tabs__link">
+        <a href="../../integrations/langgraph/" class="md-tabs__link">
           
   
   
@@ -376,7 +404,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../benchmarks/overview/" class="md-tabs__link">
+        <a href="../../benchmarks/overview/" class="md-tabs__link">
           
   
   
@@ -398,7 +426,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../adr/0001-rule-set-architecture/" class="md-tabs__link">
+        <a href="../../adr/0001-rule-set-architecture/" class="md-tabs__link">
           
   
   
@@ -418,7 +446,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../" class="md-tabs__link">
+      <a href="../../api/" class="md-tabs__link">
         
   
   
@@ -459,7 +487,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../../.." title="groundlens" class="md-nav__button md-logo" aria-label="groundlens" data-md-component="logo">
+    <a href="../.." title="groundlens" class="md-nav__button md-logo" aria-label="groundlens" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -489,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -505,6 +533,266 @@
   
 
       </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-first-check/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1: Your first check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2: The blind spot
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2: The blind spot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#make-it-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make it fail
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-happens-briefly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this happens, briefly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-the-handoff-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the handoff exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-do-with-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to do with this
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-a-verification-loop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3: A verification loop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -539,10 +827,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -560,8 +848,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -578,7 +866,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../getting-started/installation/" class="md-nav__link">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -606,7 +894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../getting-started/quickstart/" class="md-nav__link">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -634,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../getting-started/cli/" class="md-nav__link">
+      <a href="../../getting-started/cli/" class="md-nav__link">
         
   
   
@@ -694,10 +982,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -715,8 +1003,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -733,7 +1021,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../concepts/how-it-works/" class="md-nav__link">
+      <a href="../../concepts/how-it-works/" class="md-nav__link">
         
   
   
@@ -761,7 +1049,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../concepts/sgi/" class="md-nav__link">
+      <a href="../../concepts/sgi/" class="md-nav__link">
         
   
   
@@ -789,7 +1077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../concepts/dgi/" class="md-nav__link">
+      <a href="../../concepts/dgi/" class="md-nav__link">
         
   
   
@@ -817,7 +1105,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../concepts/calibration/" class="md-nav__link">
+      <a href="../../concepts/calibration/" class="md-nav__link">
         
   
   
@@ -879,10 +1167,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -900,8 +1188,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -918,7 +1206,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../theory/hallucination-taxonomy/" class="md-nav__link">
+      <a href="../../theory/hallucination-taxonomy/" class="md-nav__link">
         
   
   
@@ -946,7 +1234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../theory/embedding-geometry/" class="md-nav__link">
+      <a href="../../theory/embedding-geometry/" class="md-nav__link">
         
   
   
@@ -974,7 +1262,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../theory/sgi-mathematics/" class="md-nav__link">
+      <a href="../../theory/sgi-mathematics/" class="md-nav__link">
         
   
   
@@ -1002,7 +1290,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../theory/dgi-mathematics/" class="md-nav__link">
+      <a href="../../theory/dgi-mathematics/" class="md-nav__link">
         
   
   
@@ -1030,7 +1318,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../theory/confabulation-boundary/" class="md-nav__link">
+      <a href="../../theory/confabulation-boundary/" class="md-nav__link">
         
   
   
@@ -1100,10 +1388,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -1121,8 +1409,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1139,7 +1427,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/rag-verification/" class="md-nav__link">
+      <a href="../../guides/rag-verification/" class="md-nav__link">
         
   
   
@@ -1167,7 +1455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/custom-encoders/" class="md-nav__link">
+      <a href="../../guides/custom-encoders/" class="md-nav__link">
         
   
   
@@ -1195,7 +1483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/active-learning/" class="md-nav__link">
+      <a href="../../guides/active-learning/" class="md-nav__link">
         
   
   
@@ -1223,7 +1511,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/domain-calibration/" class="md-nav__link">
+      <a href="../../guides/domain-calibration/" class="md-nav__link">
         
   
   
@@ -1251,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/batch-evaluation/" class="md-nav__link">
+      <a href="../../guides/batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1279,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/banking-deployment/" class="md-nav__link">
+      <a href="../../guides/banking-deployment/" class="md-nav__link">
         
   
   
@@ -1307,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/eu-ai-act/" class="md-nav__link">
+      <a href="../../guides/eu-ai-act/" class="md-nav__link">
         
   
   
@@ -1335,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/sr-11-7/" class="md-nav__link">
+      <a href="../../guides/sr-11-7/" class="md-nav__link">
         
   
   
@@ -1363,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../guides/nist-ai-rmf/" class="md-nav__link">
+      <a href="../../guides/nist-ai-rmf/" class="md-nav__link">
         
   
   
@@ -1421,10 +1709,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -1442,8 +1730,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1460,7 +1748,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../providers/openai/" class="md-nav__link">
+      <a href="../../providers/openai/" class="md-nav__link">
         
   
   
@@ -1488,7 +1776,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../providers/anthropic/" class="md-nav__link">
+      <a href="../../providers/anthropic/" class="md-nav__link">
         
   
   
@@ -1516,7 +1804,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../providers/google/" class="md-nav__link">
+      <a href="../../providers/google/" class="md-nav__link">
         
   
   
@@ -1578,10 +1866,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -1599,8 +1887,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1617,7 +1905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../integrations/langgraph/" class="md-nav__link">
+      <a href="../../integrations/langgraph/" class="md-nav__link">
         
   
   
@@ -1645,7 +1933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../integrations/langchain/" class="md-nav__link">
+      <a href="../../integrations/langchain/" class="md-nav__link">
         
   
   
@@ -1673,7 +1961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../integrations/crewai/" class="md-nav__link">
+      <a href="../../integrations/crewai/" class="md-nav__link">
         
   
   
@@ -1701,7 +1989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../integrations/semantic-kernel/" class="md-nav__link">
+      <a href="../../integrations/semantic-kernel/" class="md-nav__link">
         
   
   
@@ -1729,7 +2017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../integrations/autogen/" class="md-nav__link">
+      <a href="../../integrations/autogen/" class="md-nav__link">
         
   
   
@@ -1785,10 +2073,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -1806,8 +2094,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1824,7 +2112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../benchmarks/overview/" class="md-nav__link">
+      <a href="../../benchmarks/overview/" class="md-nav__link">
         
   
   
@@ -1852,7 +2140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../benchmarks/results/" class="md-nav__link">
+      <a href="../../benchmarks/results/" class="md-nav__link">
         
   
   
@@ -1906,10 +2194,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   
@@ -1927,8 +2215,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1945,7 +2233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../../adr/0001-rule-set-architecture/" class="md-nav__link">
+      <a href="../../adr/0001-rule-set-architecture/" class="md-nav__link">
         
   
   
@@ -1980,7 +2268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../" class="md-nav__link">
+      <a href="../../api/" class="md-nav__link">
         
   
   
@@ -2017,6 +2305,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2025,75 +2315,46 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#groundlens.integrations.crewai.tool" class="md-nav__link">
+  <a href="#make-it-fail" class="md-nav__link">
     <span class="md-ellipsis">
       
-        tool
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="tool">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.integrations.crewai.tool-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Classes
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.integrations.crewai.tool.GroundlensTool" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GroundlensTool
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="GroundlensTool">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.integrations.crewai.tool.GroundlensTool--agent-uses-the-tool-to-verify-its-own-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Agent uses the tool to verify its own output
+        Make it fail
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#groundlens.integrations.crewai.tool-functions" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#why-this-happens-briefly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Functions:
+        Why this happens, briefly
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#why-the-handoff-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the handoff exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-do-with-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to do with this
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2117,225 +2378,49 @@
   
 
 
-  <h1>Tool</h1>
-
-<div class="doc doc-object doc-module">
-
-
-
-<h2 id="groundlens.integrations.crewai.tool" class="doc doc-heading">
-            <code>groundlens.integrations.crewai.tool</code>
-
-
-<a href="#groundlens.integrations.crewai.tool" class="headerlink" title="Permanent link">&para;</a></h2>
-
-    <div class="doc doc-contents first">
-
-        <p>CrewAI tool for agent self-verification via groundlens.</p>
-<p>Allows CrewAI agents to verify their own outputs for hallucination
-risk before presenting them to users or other agents.</p>
-
-
-<details class="example" open>
-  <summary>Example</summary>
-  <blockquote>
+<h1 id="part-2-the-blind-spot">Part 2: The blind spot<a class="headerlink" href="#part-2-the-blind-spot" title="Permanent link">&para;</a></h1>
+<p>Most libraries hide their failure cases. This tutorial hands you one on purpose, because using groundlens safely depends on understanding exactly where it stops working. Skip this part and you will misuse the tool.</p>
+<h2 id="make-it-fail">Make it fail<a class="headerlink" href="#make-it-fail" title="Permanent link">&para;</a></h2>
+<p>Go back to the example from <a href="../01-first-check/">Part 1</a>. The source said the deductible is <strong><span class="arithmatex">\(1,500**. Change the answer to say **\)</span>2,500</strong>, and change nothing else. Every other word stays identical to a correct, grounded answer.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">check</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">question</span> <span class="o">=</span> <span class="s2">&quot;What does the water damage policy cover?&quot;</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">source</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s2">&quot;Coverage includes burst pipes and sudden appliance failure up to &quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s2">&quot;$50,000. Flood damage requires a separate NFIP policy. &quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="s2">&quot;Deductible is $1,500 per occurrence.&quot;</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># One wrong number. Everything else copied from a correct answer.</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">answer</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="s2">&quot;The policy covers burst pipes and sudden appliance failure up to &quot;</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="s2">&quot;$50,000 per occurrence, with a $2,500 deductible.&quot;</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span></code></pre></div>
+<p>Run it. The check <strong>passes</strong>. The answer is reported as supported by the document.</p>
+<p>It is not a bug. The answer <em>is</em> drawn from the document. It uses the document's vocabulary, its structure, its framing. Geometrically, a wrong number in the right place sits in almost exactly the same location as the right number. The check measures whether the answer engaged its source. It does not, and cannot, measure whether the facts inside it are true.</p>
+<h2 id="why-this-happens-briefly">Why this happens, briefly<a class="headerlink" href="#why-this-happens-briefly" title="Permanent link">&para;</a></h2>
+<p>groundlens scores a response by where it sits in embedding space relative to the question and the source. A confabulation that stays <em>in register</em>, same topic, same terminology, same shape as a correct answer, lands in the same region. As an error becomes more in-register, every detector of this kind declines toward chance. This is measured, not hypothetical, and it has a name: the register wall. The <a href="../../theory/confabulation-boundary/">Theory</a> section derives it; the <a href="../../benchmarks/results/">Benchmarks</a> quantify it.</p>
+<p>The one-line version: <strong>grounding is not fact-checking.</strong> A plausible wrong fact in the right frame passes this check by design.</p>
+<h2 id="why-the-handoff-exists">Why the handoff exists<a class="headerlink" href="#why-the-handoff-exists" title="Permanent link">&para;</a></h2>
+<p>Look at what <code>render()</code> printed under the verdict. Even on a pass, there is a line like:</p>
 <blockquote>
-<blockquote>
-<p>from groundlens.integrations.crewai import GroundlensTool
-tool = GroundlensTool()
-result = tool._run(
-...     question="What is X?",
-...     response="X is Y.",
-...     context="According to the docs, X is Y.",
-... )
-print(result)</p>
+<p>Grounding, not facts: a plausible wrong fact in the right frame would pass this check. Verify facts in a second stage.</p>
 </blockquote>
-</blockquote>
-</blockquote>
-</details>
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-<h3 id="groundlens.integrations.crewai.tool-classes">Classes<a href="#groundlens.integrations.crewai.tool-classes" class="headerlink" title="Permanent link">&para;</a></h3>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h4 id="groundlens.integrations.crewai.tool.GroundlensTool" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">GroundlensTool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;groundlens_verify&#39;</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">groundlens_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all-MiniLM-L6-v2&#39;</span><span class="p">)</span></code>
-
-<a href="#groundlens.integrations.crewai.tool.GroundlensTool" class="headerlink" title="Permanent link">&para;</a></h4>
-
-
-    <div class="doc doc-contents ">
-
-
-
-        <p>CrewAI tool for verifying LLM outputs using groundlens.</p>
-<p>Extends the CrewAI tool pattern to let agents self-verify their
-outputs. The tool evaluates a question-response pair (with optional
-context) and returns a human-readable verification summary.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>name</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Tool name visible to the agent. Defaults to
-<code>"groundlens_verify"</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;groundlens_verify&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>description</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Tool description for agent tool selection.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>groundlens_model</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Sentence-transformer model for groundlens scoring.
-Defaults to <code>"all-MiniLM-L6-v2"</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;all-MiniLM-L6-v2&#39;</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<details class="example" open>
-  <summary>Example</summary>
-  <blockquote>
-<blockquote>
-<blockquote>
-<p>from groundlens.integrations.crewai import GroundlensTool
-tool = GroundlensTool()</p>
-<h5 id="groundlens.integrations.crewai.tool.GroundlensTool--agent-uses-the-tool-to-verify-its-own-output">Agent uses the tool to verify its own output<a class="headerlink" href="#groundlens.integrations.crewai.tool.GroundlensTool--agent-uses-the-tool-to-verify-its-own-output" title="Permanent link">&para;</a></h5>
-<p>result = tool._run(
-...     question="What causes rain?",
-...     response="Rain is caused by condensation.",
-...     context="Water cycle: evaporation, condensation, precipitation.",
-... )
-"PASS" in result or "FLAGGED" in result
-True</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</details>
-
-
-
-
-
-
-
-                  <details class="mkdocstrings-source">
-                    <summary>Source code in <code>src/groundlens/integrations/crewai/tool.py</code></summary>
-                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>    <span class="bp">self</span><span class="p">,</span>
-</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;groundlens_verify&quot;</span><span class="p">,</span>
-</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="n">groundlens_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>
-</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
-</span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_groundlens_model</span> <span class="o">=</span> <span class="n">groundlens_model</span>
-</span></code></pre></div></td></tr></table></div>
-                  </details>
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
-<h3 id="groundlens.integrations.crewai.tool-functions">Functions:<a href="#groundlens.integrations.crewai.tool-functions" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-
-  </div>
-
-    </div>
-
-</div>
+<p>That is the <code>handoff</code> field, and it is not decoration. It is the library telling you, in the result itself, that a pass is not a guarantee of truth. Never drop it when you show a result to a user, and never report a passing check as "verified" or "not hallucinated".</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">verdict</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;label:   &quot;</span><span class="p">,</span> <span class="n">verdict</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;level:   &quot;</span><span class="p">,</span> <span class="n">verdict</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>      <span class="c1"># &quot;ok&quot; here, even though the fact is wrong</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;escalate:&quot;</span><span class="p">,</span> <span class="n">verdict</span><span class="o">.</span><span class="n">escalate</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;handoff: &quot;</span><span class="p">,</span> <span class="n">verdict</span><span class="o">.</span><span class="n">handoff</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="what-to-do-with-this">What to do with this<a class="headerlink" href="#what-to-do-with-this" title="Permanent link">&para;</a></h2>
+<p>You do not fix the blind spot by tuning a threshold or calibrating harder. It is a property of the whole class of embedding-similarity methods, and it does not move. You handle it by architecture: run this cheap check first on everything, and send the cases it cannot settle to a more expensive stage that <em>reads</em> the answer against the source. Entailment models, a source lookup, or a judge all do that, and they do not decline in register.</p>
+<p>That escalation is what you build in <a href="../03-a-verification-loop/">Part 3</a>.</p>
 
 
 
@@ -2419,12 +2504,12 @@ True</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../../javascripts/mathjax.js"></script>
+        <script src="../../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
