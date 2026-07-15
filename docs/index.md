@@ -1,7 +1,7 @@
 # Groundlens
 
 <div align="center">
-  <img src="assets/Logo_groundlens_new-05.png" alt="groundlens" width="200">
+  <img src="assets/logo.png" alt="groundlens" width="200">
 </div>
 
 ## Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
