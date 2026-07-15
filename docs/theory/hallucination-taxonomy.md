@@ -9,7 +9,7 @@ groundlens is built on a geometric taxonomy that classifies hallucinations by th
 ---
 
 <figure>
-  <img src="../images/taxonomy.png" alt="Geometric taxonomy of LLM hallucinations on the unit hypersphere, showing question $q$, context $c$, plausibility region $P_q$, and the three hallucination types" width="100%">
+  <img src="../../images/taxonomy.png" alt="Geometric taxonomy of LLM hallucinations on the unit hypersphere, showing question $q$, context $c$, plausibility region $P_q$, and the three hallucination types" width="100%">
   <figcaption>The three hallucination types on the unit hypersphere S<sup>d−1</sup>. Grounded responses fall inside the plausibility region 𝒫<sub>q</sub>. Type I (unfaithfulness) stays near the question; Type II (confabulation) deviates from the grounded displacement direction; Type III (within-frame error) lands inside 𝒫<sub>q</sub> and is geometrically indistinguishable from a correct answer.</figcaption>
 </figure>
 

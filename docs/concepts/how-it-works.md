@@ -30,7 +30,7 @@ groundlens uses sentence transformers (default: `all-MiniLM-L6-v2`) to map text 
     Sentence transformers are specifically trained (via contrastive learning) to place semantically similar texts nearby and dissimilar texts far apart. This is exactly the property groundlens needs --- the geometric structure encodes semantic relationships.
 
 <figure>
-  <img src="../images/sgi-dgi-operation.svg" alt="SGI measures distance ratios between response, question, and context embeddings; DGI measures displacement direction alignment with the learned grounded direction" width="100%">
+  <img src="../../images/sgi-dgi-operation.svg" alt="SGI measures distance ratios between response, question, and context embeddings; DGI measures displacement direction alignment with the learned grounded direction" width="100%">
   <figcaption>The two scoring methods: SGI compares how close the response is to the context versus the question; DGI checks whether the displacement from question to response aligns with a learned "grounded direction" μ̂.</figcaption>
 </figure>
 

@@ -2,7 +2,7 @@
 
 This page provides the complete API reference for groundlens. All public classes and functions are documented with their signatures, parameters, return types, and examples.
 
-For auto-generated documentation from source docstrings, ensure `mkdocstrings` is configured in your MkDocs build.
+Signatures, parameters, return types and examples below are generated directly from the source docstrings, so they never drift from the code.
 
 ## Core Functions
 
