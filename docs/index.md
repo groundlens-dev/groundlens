@@ -2,10 +2,11 @@
 
 <div align="center">
   <img src="assets/logo.png" alt="groundlens" width="200">
+</div>
 
 # Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 
-</div>
+
 
 Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human reviewer) runs only on the outputs that actually need it. It provides two complementary scoring methods:
 
