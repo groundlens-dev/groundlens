@@ -233,8 +233,8 @@ A rule set you can read out loud and defend is a rule set you can put in front o
 
 ## See also
 
-- [examples/custom_rules.py](../../examples/custom_rules.py) — runnable end-to-end legal contract review
-- [src/groundlens/agents/customer_support.py](../../src/groundlens/agents/customer_support.py) — production customer-support RAG rule set, 7 rules, 3 sub-scores
-- [src/groundlens/agents/routing.py](../../src/groundlens/agents/routing.py) — production routing agent rule set, 10 rules, 4 sub-scores
-- [src/groundlens/agents/specialized.py](../../src/groundlens/agents/specialized.py) — production specialized agent rule set with strict predicate and external validators
+- [examples/custom_rules.py](https://github.com/groundlens-dev/groundlens/blob/main/examples/custom_rules.py) — runnable end-to-end legal contract review
+- [src/groundlens/agents/customer_support.py](https://github.com/groundlens-dev/groundlens/blob/main/src/groundlens/agents/customer_support.py) — production customer-support RAG rule set, 7 rules, 3 sub-scores
+- [src/groundlens/agents/routing.py](https://github.com/groundlens-dev/groundlens/blob/main/src/groundlens/agents/routing.py) — production routing agent rule set, 10 rules, 4 sub-scores
+- [src/groundlens/agents/specialized.py](https://github.com/groundlens-dev/groundlens/blob/main/src/groundlens/agents/specialized.py) — production specialized agent rule set with strict predicate and external validators
 - [Banking deployment guide](banking-deployment.md) — applying the 4-step recipe under SR 26-2 / EU AI Act constraints

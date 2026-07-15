@@ -1,3 +1,4 @@
+strict: true
 site_name: groundlens
 site_description: Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 site_author: Javier Marin
@@ -60,14 +61,14 @@ plugins:
             docstring_style: google
             merge_init_into_class: true
             show_signature_annotations: true
-  - gen-files:
-      scripts:
-        - docs/gen_ref_pages.py
-  - literate-nav:
-      nav_file: SUMMARY.md
 
 nav:
   - Home: index.md
+  - Tutorial:
+    - Overview: tutorial/index.md
+    - "Part 1: Your first check": tutorial/01-first-check.md
+    - "Part 2: The blind spot": tutorial/02-the-blind-spot.md
+    - "Part 3: A verification loop": tutorial/03-a-verification-loop.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quickstart: getting-started/quickstart.md
