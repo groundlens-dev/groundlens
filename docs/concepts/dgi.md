@@ -133,3 +133,9 @@ The `DGIResult` contains:
 | `flagged` | `bool` | True if below pass threshold |
 | `method` | `str` | Always `"dgi"` |
 | `explanation` | `str` | Human-readable interpretation |
+
+## DGI depends on the encoder more than SGI
+
+DGI works by checking whether the step from question to answer points in the same direction as known grounded answers. That direction is learned from data and lives in one specific embedding space. Change the encoder and the direction has to be relearned, and some encoders simply do not lay grounded and ungrounded answers along a clean direction.
+
+In our reasoning-chains benchmark, DGI ran through seven base language models used as encoders and stayed near chance on all of them, while SGI still showed the expected pattern. The practical takeaway is short: SGI is the safer default when you are unsure about your encoder, and DGI should be calibrated and measured on your own data before you trust it. See [Custom encoders](../guides/custom-encoders.md) and the reasoning-chains benchmark in the project README.

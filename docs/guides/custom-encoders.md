@@ -119,3 +119,15 @@ installed.
 - [Calibration](../concepts/calibration.md) — `fit_thresholds` and
   re-calibrating `mu_hat` for your encoder.
 - [Domain Calibration Guide](domain-calibration.md) — end-to-end walkthrough.
+
+## What changes when you bring your own encoder
+
+Three things are worth knowing before you trust the scores.
+
+**The cut-off values were set for the default encoder.** SGI and DGI turn a raw score into a pass or a flag using thresholds, and DGI also uses a learned reference direction (`mu_hat`). Both were fitted on the default model. When you pass a different `encoder=`, the raw geometry still works, but those cut-offs may sit in the wrong place, so the `flagged` field can mislead you. The library prints a one-time warning to remind you. Re-fit with `fit_thresholds(...)` for the cut-offs and `calibrate(...)` for the DGI direction. Until you do, rank on the raw score (`result.value`) instead of trusting the flag.
+
+**If the encoder is a language model, pool by mean.** A sentence encoder already returns one vector per text. A raw language model returns one vector per token, so you have to reduce them to one. Average them (mean pooling). Do not use the last token's vector: in our reasoning benchmark, last-token vectors from base language models scored at or below chance.
+
+**Bigger is not automatically better.** In the same benchmark, an 8B base model did not beat a 1.5B one at grounding. Choose your encoder by measuring it on a small labelled set from your own use case, not by parameter count.
+
+**DGI is more sensitive to the encoder than SGI.** SGI compares distances and degrades gently. DGI depends on a single learned direction, and on raw base-language-model embeddings it fell to chance in our run. If you rely on DGI with a custom encoder, calibrate it and measure it before you ship.

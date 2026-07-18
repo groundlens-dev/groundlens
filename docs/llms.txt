@@ -2,7 +2,7 @@
 
 > Deterministic first-stage grounding triage with a characterized blind spot. It decides what your expensive check has to look at, and it says when it cannot decide.
 
-groundlens is a Python library that measures **semantic disengagement and provenance** in LLM outputs using embedding geometry. It checks whether an answer was drawn from its source. It does NOT check whether the answer is true. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (all-MiniLM-L6-v2), with no LLM in the scoring path. Groundlens is the deterministic first stage of a two-stage pipeline: it filters cheaply and escalates the factual-verification cases it cannot settle (in-register substitution, Type III) to a second-stage LLM judge or human.
+groundlens is a Python library that measures **semantic disengagement and provenance** in LLM outputs using embedding geometry. It checks whether an answer was drawn from its source. It does NOT check whether the answer is true. It computes deterministic, auditable scores from the spatial relationships between questions, responses, and source context in embedding space. It uses a single sentence-transformer model (Snowflake/snowflake-arctic-embed-l-v2.0 by default, and any encoder can be injected), with no LLM in the scoring path. Groundlens is the deterministic first stage of a two-stage pipeline: it filters cheaply and escalates the factual-verification cases it cannot settle (in-register substitution, Type III) to a second-stage LLM judge or human.
 
 ## Core Concepts
 
