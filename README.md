@@ -16,40 +16,50 @@
 
 
 </div>
+<div align="center">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="50%">
+<br>
+<sub> The Groundlens MCP inside Claude: a deterministic CHECK under every answer. </br> Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</sub>
+</div>
 
-- TABLE OF CONTENTS
-  - [Hallucinations Taxonomy](#hallucinationstaxonomy)
-  - [What is Groundlens](#whatisgroundlens)
-    - [The first stage](#thefirststage)
-    - [The recommended second stage: NLI](#therecommendedsecondstage:NLI)
+</br>
+
+</br>
+
+
+## TABLE OF CONTENTS
+  - [:framed_picture: Hallucinations Taxonomy](#hallucinationstaxonomy)
+  - [:compass: What is Groundlens](#whatisgroundlens)
+    - [Goundlens as the first stage](#goundlensasthefirststage)
+    - [NLI as the complementary stage](#nliasthecomplementarystage)
     - [Do we need an LLM judge as third stage](#doweneedanLLMjudgeasthirdstage)
     - [Human review](#humanreview)
     - [Proposed stack](#proposedstack)
     - [Rules based auditing](#rulesbasedauditing)
-  - [Benchmarks](#benchmarks)
+  - [:white_check_mark: Benchmarks](#benchmarks)
     - [The register wall](#theregisterwall)
     - [Reasoning chains](#reasoningchains)
     - [The ceiling, and the authorship shortcut](#theceiling,andtheauthorshipshortcut)
     - [Google DeepMind's FACTS](#googlefeepMind'sfacts)
     - [Evaluation checklist](#evaluationchecklist)
     - [Comparison table](*comparisontable:crossingthegeometricwall)
- - [Quick setup](#quicksetup)
- - [Readable checks](#readablechecks)
- - [Custom encoders](#customencoders)
- - [Rule sets](#rulesets)
- - [Calibrating SGI and DGI](*calibratingsgianddgi)
-    -[Bootstrap calibration set for DGI](#bootstrapcalibrationsetfordgi)
-    -[Calibration limits](#calibrationlimits)
- - [Builing your own rule set](#builingyourownruleset)
- - [Integrations](#integrations)
- - [Architecture](#architecture)
- - [Research](#research)
- - [Compliance mapping](#compliancemapping)
+ - [:arrow_forward: Quick setup](#quicksetup)
+ - [:bar_chart: Interpretable scores](#interpretablescores)
+ - [:white_square_button: Custom encoders](#customencoders)
+ - [:anchor: Calibrating SGI and DGI](*calibratingsgiandgi)
+    - [Bootstrap calibration set for DGI](#bootstrapcalibrationsetfordgi)
+    - [Calibration limits](#calibrationlimits)
+ - [:books: Rule sets](#rulesets)
+    - [Builing your own rule set](#builingyourownruleset)
+ - [:knot: Integrations](#integrations)
+ - [:ladder: Architecture](#architecture)
+ - [:page_facing_up: Research](#research)
+ - [:round_pushpin: Compliance mapping](#compliancemapping)
    
    
 ---
   
-## Hallucinations taxonomy
+## :framed_picture: Hallucinations taxonomy
 
 A model can go wrong in ways that look alike on the surface but have nothing in common underneath. It can ignore the document you gave it and answer from memory. It can wander off topic and invent something unrelated. It can stay perfectly on topic and get one fact wrong. Calling all three "hallucination" hides the fact that they have different causes and need different tools. The first two leave a trace in the geometry of the text and can be caught cheaply. The third does not, and no similarity score will ever catch it; it needs a source check or a person. Until you separate them, you cannot tell which one you are dealing with, so you cannot choose the right check.
 A taxonomy is what lets you say, precisely, what your tool catches and what it does not. Without it you are stuck with a vague claim, "detects hallucinations," that is either overselling or impossible to test. With it you can state scope plainly: catches these kinds, blind to that kind, escalate that kind elsewhere. That precise statement is exactly what makes the tool trustworthy to someone whose job is to manage the risk, and it is what stops a user from deploying it where it is blind.
@@ -62,11 +72,11 @@ So the taxonomy is not academic tidiness. It is the thing that turns a marketing
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI**, declared-limited. DGI separates a confabulation that leaves the register of a correct answer. Its skill declines toward chance as the confabulation stays *in* register, which is the case that matters in production. With authorship held constant, DGI reaches AUROC 0.606 and the ceiling of the whole embedding-similarity class is ~0.68. Escalate in-register cases to Stage 2. |
 | **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall). The same blind spot has now been measured on multi-step reasoning chains, not only single questions: see the [reasoning-chains benchmark](#reasoning-chains). |
 
-## What is Groundlens
+## :compass: What is Groundlens
 
 Groundlens is a fast, deterministic first-pass filter that uses embedding geometry, not a second language model, to catch the answers that drifted off their source or ignored the question, so you only pay for slower checks like entailment or a human on the cases it cannot settle.
 
-### The first stage
+### Goundlens as the first stage
 
 The standard way to check an LLM's output is a second LLM as judge, paid on every output: non-deterministic at temperature 0, a free-text opinion with no citation, priced per call. 
 
@@ -80,7 +90,7 @@ Two deterministic layers, geometric scoring and citation-backed rules, clear the
 
 Groundlens ships two geometric scores: **SGI**, a context-grounded score that compares a response against its retrieved source, and **DGI**, a context-free score that works from the question and answer alone. Where each one holds, and where it does not, is stated precisely below.
 
-### The recomended second stage: NLI
+### NLI as the complementary stage
 
 NLI is the recommended second stage, and geometry runs before it. So the question is not "SGI versus NLI." It is "what is left for a first stage once you have decided NLI is your second stage."
 
@@ -100,13 +110,8 @@ NLI is the recommended second stage, and geometry runs before it. So the questio
 > **Use Groundlens in your editor:** the [**Groundlens MCP server**](https://github.com/groundlens-dev/groundlens-mcp) adds deterministic hallucination checks to Claude, Cursor, and VS Code — [one-click install ›](https://github.com/groundlens-dev/groundlens-mcp#one-click-install)
 
 
-<div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/examples/groundlens_check.gif" alt="Groundlens MCP: a grounding CHECK printed live under every answer inside Claude" width="50%">
-<br>
-<em>The Groundlens MCP inside Claude: a deterministic CHECK under every answer. Question 4 asks for a figure the report never gives — Claude declines, and the check catches it anyway: provenance, not truth.</em>
-</div>
-
-**Live demo:** [groundlens-demo.hf.space](https://groundlens-demo.hf.space)
+</br>
+:point_right: You can use our live demo in HuggingFace: [groundlens-demo.hf.space](https://groundlens-demo.hf.space)
 
 ### Do we need an LLM judge as third stage
 An LLM judge is warranted only for compositional faithfulness and answer-quality failures, the ones that need reasoning over evidence rather than a single entailment decision, and only as a volume reducer between NLI and a human. It is the tier that is smarter than NLI and cheaper than a person, sitting on a residue that stages one and two have already shrunk enough to afford it. 
@@ -116,14 +121,14 @@ An LLM judge is warranted only for compositional faithfulness and answer-quality
 Human review is mandatory at the intersection of two conditions: the failure is not verifiable by any machine check you have, and the cost of being wrong is irreversible or unbounded. Neither alone forces a human. Together they do, and no detector accuracy number buys you out of it.
 
 Two main reasons: 
-- Epistemic: the machine cannot know
-- Consequential: the machine might know, but you cannot accept its residual error rate given what is at stake
+- [X] Epistemic: the machine cannot know
+- [X] Consequential: the machine might know, but you cannot accept its residual error rate given what is at stake
 
 ### Proposed Stack
 
-| Situation | Aproach|
-|---|
-| Type I and Type II confabulations |Geometry methods |
+| Situation | Aproach |
+|---|---|
+| Type I and Type II confabulations | Geometry methods |
 | Type III factual and checkable against a source | NLI or a knowledge-base lookup resolves, deterministically |
 | Compositional faithfulness, multi-hop, relevance, completeness | LLM judge is justified, and only grounded with the source and ideally a different model |
 | Irreducible | A plausible wrong figure with no available source, or anything high enough stakes that you will not accept a model's word, goes to a human regardless |
@@ -147,7 +152,7 @@ Groundlens is **Stage 1**: it runs first, deterministically, on every output. Th
 Stage 1 gives you two things Stage 2 cannot afford at scale: a **continuous score** to triage the bottom 5% of a million daily outputs, and a **citation-backed audit trail** an auditor can reproduce two years from now, tied together by a hash-chained log. What Stage 1 cannot settle, a plausible in-register factual error, it escalates to Stage 2. Without Stage 1 you run the expensive judge on everything; without Stage 2 you cannot settle facts.
 
 
-## Benchmarks
+## :white_check_mark: Benchmarks
 
 Groundlens is measured against published benchmarks and against an independent one. The point of this section is not a single headline number — it is to show, precisely, where geometry wins and where it does not. We lead with the controlled result, because it is the one that has passed authorship and length controls; the provisional numbers follow, clearly marked.
 
@@ -264,7 +269,7 @@ route, and each with a different cost.
 | **Supervised internal-state probes (CCS, truth directions)** | Reads a truth direction from the model's activations under supervision | Can recover truth the surface text hides | Needs white-box access to internals plus labels; unavailable behind a third-party API |
 
 > **Important**
-> **Where groundlens sits.** DGI is a context-free directional score: it is a cheap
+> DGI is a context-free directional score: it is a cheap
 > first-pass triage filter and is **subject to the wall** on in-register errors, use it
 > to catch out-of-register and divergent hallucinations, not confident in-register ones.
 > SGI crosses the wall **when retrieved context is available**, because it measures the
@@ -273,7 +278,7 @@ route, and each with a different cost.
 > similarity score as triage and escalate uncertain cases to NLI or an LLM judge.
 
 
-## Quick setup
+## :arrow_forward: Quick setup
 
 ```bash
 pip install groundlens
@@ -319,8 +324,7 @@ flagged = dgi_score.flagged or rules.flagged
 
 The flag combiner is a deployer decision: `OR` for recall (more flags to human review), `AND` for precision, or a weighted geometric mean.
 
-## Readable checks
-
+## :bar_chart: Interpretable scores
 A raw score and a boolean flag are the right output for a pipeline and the wrong output for a person. `check()` turns any SGI, DGI, or `evaluate()` result into one plain-language reading under the headline **CHECK**. It is the single source of truth for wording — the docs and the [MCP servers](https://github.com/groundlens-dev/groundlens-mcp) render from it, so the phrasing is identical everywhere.
 
 ```python
@@ -352,7 +356,7 @@ The check **level** (`ok` / `review` / `risk`, on `check(...).level`) comes only
 | **SGI** | Supported by the document · Partly supported · Not supported by the document | SGI ≥ 1.20 / ≥ 0.95 / below |
 | **DGI** | Looks grounded · Partly grounded · Not grounded | DGI ≥ 0.30 / ≥ 0.0 / below |
 
-## Custom encoders 
+## :white_square_button: Custom encoders 
 
 By default Groundlens loads a `sentence-transformers` model on first use. You can supply your own embedding function instead — to reuse a hosted embedding API, an in-house model, or precomputed vectors, and to run SGI/DGI **without installing torch** (the custom-encoder path never imports `sentence-transformers`).
 
@@ -374,9 +378,9 @@ groundlens.set_default_encoder(None)  # restore the default path
 
 The bundled SGI/DGI thresholds and DGI `mu_hat` are calibrated for the default encoder. When you switch encoders, re-fit with `groundlens.fit_thresholds(...)` (cutoffs) and `groundlens.calibrate(...)` (reference direction) — both accept the same `encoder=`. See the [Custom Encoders guide](https://docs.groundlens.dev/guides/custom-encoders/).
 
-**If your encoder is a language model, two things matter.** Turn each text into a single vector by averaging its token vectors (mean pooling), not by taking the last token; in our tests the last-token vector of a base language model was close to useless for grounding. And do not assume a bigger model scores better: check a handful of your own labelled examples and keep the encoder that actually separates them. The library prints a warning the first time you score with a non-default encoder, because the built-in pass or fail cut-offs were set for the default model. Treat that warning as a reminder to run `fit_thresholds` before you trust the flags, and until then rank on the raw score (`result.value`).
+If your encoder is a language model you may turn each text into a single vector by averaging its token vectors (mean pooling), not by taking the last token; in our tests the last-token vector of a base language model was close to useless for grounding. And do not assume a bigger model scores better: check a handful of your own labelled examples and keep the encoder that actually separates them. The library prints a warning the first time you score with a non-default encoder, because the built-in pass or fail cut-offs were set for the default model. Treat that warning as a reminder to run `fit_thresholds` before you trust the flags, and until then rank on the raw score (`result.value`).
 
-## Rule sets
+## :books: Rule sets
 
 Every rule carries a citation to its source — academic paper, industry whitepaper, or regulatory clause. Pick the rule set that matches the agent class you are triaging.
 
@@ -398,7 +402,47 @@ Every rule carries a citation to its source — academic paper, industry whitepa
 > `rag_rules(domain="banking" | "customer_support")` → call the canonical archetype factory directly. The dispatcher emits a `DeprecationWarning`.
 > For legal, insurance, healthcare, or any in-house governance framework, extend an existing factory (`domain="..."` slot) or write your own (see below).
 
-## Calibrating SGI and DGI
+### Building your own rule set
+
+The rule engine is intentionally small. `RuleSet` and `ChecklistRule` are composable primitives — you write pure-Python `check` functions and group them under sub-score categories with a flag predicate. Every rule must carry a `citation`; that field is what survives an audit.
+
+```python
+from groundlens import ChecklistRule, RuleEvidence, RuleSet
+
+def check_cites_clause(question, response, context, metadata):
+    matched = "clause" in response.lower() or "§" in response
+    return RuleEvidence(
+        matched=matched,
+        span="clause/§",
+        explanation="rationale cites a specific contract clause",
+    )
+
+def flag_predicate(sub_scores):
+    # Non-compensatory: safety dimensions don't average with UX dimensions.
+    return sub_scores.get("groundedness", 0.0) < 0.5
+
+legal_ruleset = RuleSet(
+    name="legal_contract_review_v1",
+    rules=(
+        ChecklistRule(
+            id="legal.cites_clause",
+            description="rationale cites a specific contract clause",
+            weight=0.60,
+            sub_score="traceability",
+            check=check_cites_clause,
+            citation="EU AI Act 2024/1689 Art. 13(3)(b)(iv) — explain output capability",
+        ),
+        # ... more rules
+    ),
+    sub_scores=("groundedness", "traceability"),
+    flag_predicate=flag_predicate,
+)
+```
+
+Full 4-step recipe with anatomy, patterns, and common pitfalls: **[docs/guides/custom-rule-sets.md](docs/guides/custom-rule-sets.md)**.
+Runnable end-to-end legal example: **[examples/custom_rules.py](examples/custom_rules.py)**.
+
+## :anchor: Calibrating SGI and DGI
 
 Both geometric scores need domain calibration. Generic thresholds and the bundled `mu_hat` are starting points, not deployment configuration. Calibration sets *where you escalate*, not *what you can see*: overall AUROC moves 0.684 → 0.736, and the gain lands at the easy out-of-register end (0.717 → 0.815) while the in-register bin moves only 0.626 → 0.689. Calibrate to tune your escalation rate. The blind spot stays.
 
@@ -483,47 +527,8 @@ The ceiling of the whole embedding-similarity class, measured with authorship he
 > **Note**
 >`SeedExample` bundles `context`, `question` and `grounded` so the confabulation prompt is always coherent — the previous `(faq_corpus, seed_pairs)` shape paired them randomly and produced incoherent candidates. The five built-in strategies (`redefinition`, `mechanism_inversion`, `entity_composition`, `polysemy`, `template_filling`) come from [`groundlens-dev/grounding-benchmark`](https://github.com/groundlens-dev/grounding-benchmark) (CC BY 4.0); custom strategies via `(name, prompt_template)` tuples. `propose_labels` does NOT label and does NOT calibrate — the human assigns the labels, the loop is non-circular by design. SGI has no calibration parameter, so this applies only to DGI. Full step-by-step guide with troubleshooting: [docs/guides/active-learning.md](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/active-learning.md).
 
-## Building your own rule set
 
-The rule engine is intentionally small. `RuleSet` and `ChecklistRule` are composable primitives — you write pure-Python `check` functions and group them under sub-score categories with a flag predicate. Every rule must carry a `citation`; that field is what survives an audit.
-
-```python
-from groundlens import ChecklistRule, RuleEvidence, RuleSet
-
-def check_cites_clause(question, response, context, metadata):
-    matched = "clause" in response.lower() or "§" in response
-    return RuleEvidence(
-        matched=matched,
-        span="clause/§",
-        explanation="rationale cites a specific contract clause",
-    )
-
-def flag_predicate(sub_scores):
-    # Non-compensatory: safety dimensions don't average with UX dimensions.
-    return sub_scores.get("groundedness", 0.0) < 0.5
-
-legal_ruleset = RuleSet(
-    name="legal_contract_review_v1",
-    rules=(
-        ChecklistRule(
-            id="legal.cites_clause",
-            description="rationale cites a specific contract clause",
-            weight=0.60,
-            sub_score="traceability",
-            check=check_cites_clause,
-            citation="EU AI Act 2024/1689 Art. 13(3)(b)(iv) — explain output capability",
-        ),
-        # ... more rules
-    ),
-    sub_scores=("groundedness", "traceability"),
-    flag_predicate=flag_predicate,
-)
-```
-
-Full 4-step recipe with anatomy, patterns, and common pitfalls: **[docs/guides/custom-rule-sets.md](docs/guides/custom-rule-sets.md)**.
-Runnable end-to-end legal example: **[examples/custom_rules.py](examples/custom_rules.py)**.
-
-## Integrations
+## :knot: Integrations
 
 A realistic production pattern. LangChain handles retrieval and generation; Groundlens triages every output with SGI + rules, persists a hash-chained audit log, and routes flagged responses to human review before they reach the customer.
 
@@ -604,28 +609,20 @@ The audit log is hash-chained: a supervisor can replay any decision byte-for-byt
 
 For other agent frameworks (LangGraph, CrewAI, Semantic Kernel, AutoGen, custom), the integration is identical: call `compute_sgi` / `DGI.score` / `ruleset.evaluate` after every generation and persist via `groundlens.audit`. See [docs/integrations](https://docs.groundlens.dev/integrations/) for framework-specific snippets. For editor and IDE workflows, the [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp) exposes the same checks to Claude, Cursor, and VS Code.
 
-## Architecture
+## :ladder: Architecture
 
 Groundlens is two layers: **Score** (continuous, geometric) and **Rules** (deterministic, citable). Triage is the combination. Calibration data is what makes both layers useful — `propose_labels` is the active-learning helper that produces it.
 
 Full component and lifecycle tables (modules, inputs, outputs, calibration, compliance mapping) live in the docs to keep this README readable: **[docs.groundlens.dev/architecture](https://docs.groundlens.dev/architecture/)**. The one-line summary: continuous geometric score for ranking, per-rule audit trail with citations, hash-chained log for reproducibility, compliance mapping for the model-risk packet, with no LLM in the scoring path. Your second-stage judge or human runs only on what Groundlens escalates.
 
-## Research
+## :page_facing_up: Research
 
 The methods Groundlens implements are documented in three preprints and two pending papers:
 
 1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG; introduces SGI.
 2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/abs/2602.13224). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector, with the in-register limit declared.
-3. **The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure** — Marin (2026). *Under review.* The controlled study behind the benchmark numbers on this page: the register-distance wall, the authorship shortcut, and the geometric ceiling.
-4. **Defendable Rules for LLM Rationale Evaluation in Banking Governance: A Multi-Source Provenance Framework** — Marin (2026). *Preprint, draft available on request.* Underpins `decision_rationale_rules(domain="finance")`: 20 rules triangulated across peer-reviewed NLP literature, banking-regulator whitepapers, tier-1 bank public reports, cross-industry frameworks, and financial-domain NLP benchmarks.
 
-<!-- NOTE (remove before publishing): the previous README listed a third arXiv id 2603.13259
- ("Rotational Dynamics of Factual Constraint Processing") as backing for DGI/benchmarks.
- That id was elsewhere attributed to the confabulation-benchmark paper. These are not the
- same work. Confirm which arXiv id maps to which paper and restore the correct citation
- before publishing. It has been removed here rather than ship a citation that may be wrong. -->
-
-## Compliance mapping
+## 	:round_pushpin: Compliance mapping
 
 Built-in mapping from Groundlens components to specific regulatory clauses:
 
@@ -641,4 +638,4 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
+We enthusiastically welcome contributions and feedback. See [CONTRIBUTING.md](CONTRIBUTING.md).
