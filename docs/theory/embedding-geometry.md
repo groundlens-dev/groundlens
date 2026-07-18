@@ -4,7 +4,7 @@ This page provides the mathematical foundations underlying groundlens. We cover 
 
 ## Embedding Spaces and $\mathbb{R}^n$
 
-A sentence-transformer model $\phi$ maps variable-length text strings to fixed-dimensional vectors in $\mathbb{R}^n$. For the default model `all-MiniLM-L6-v2`, $n = 384$. For `all-mpnet-base-v2`, $n = 768$.
+A sentence-transformer model $\phi$ maps variable-length text strings to fixed-dimensional vectors in $\mathbb{R}^n$. For the default model `Snowflake/snowflake-arctic-embed-l-v2.0`, $n = 1024$. For the lightweight `all-MiniLM-L6-v2`, $n = 384$; for `all-mpnet-base-v2`, $n = 768$.
 
 $$
 \phi: \mathcal{T} \to \mathbb{R}^n

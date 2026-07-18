@@ -65,7 +65,7 @@ A note on the numbers below: figures from the register-wall study (the ceiling, 
 |---|---|---|
 | **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. HaluEval QA AUROC ≈ 0.81 (mean over five encoders). *Pending the authorship and length controls: this figure predates them and has not been re-run.* |
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI**, declared-limited. DGI separates a confabulation that leaves the register of a correct answer. Its skill declines toward chance as the confabulation stays *in* register, which is the case that matters in production. With authorship held constant, DGI reaches AUROC 0.606 and the ceiling of the whole embedding-similarity class is ~0.68. Escalate in-register cases to Stage 2. |
-| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall) |
+| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall). The same blind spot has now been measured on multi-step reasoning chains, not only single questions: see the [reasoning-chains benchmark](#reasoning-chains). |
 
 References: Marin (2025) [SGI, arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · Marin (2026) [Geometric Taxonomy + DGI, arXiv:2602.13224](https://arxiv.org/abs/2602.13224).
 
@@ -90,6 +90,31 @@ Bin confabulations by how far they sit from the register of a correct answer, an
 
 > **Important**
 > NLI is strongest exactly where geometry is weakest. **It is the recommended second stage.** We do not compete with it; we run before it.
+
+### Reasoning chains
+
+The wall was first measured on single questions and answers. We then asked a narrower question: does the same blind spot show up when the text is a multi-step reasoning chain rather than one short answer? It does.
+
+Two datasets were used. The first is a set of OpenBookQA reasoning chains, where people marked whether the two supplied facts actually support the answer. The second is a set of fact-composition edits: a correct two-fact statement is changed by swapping one fact while keeping the length and wording almost the same. The edited statement is the in-register case, meaning same words and one wrong fact.
+
+Every item was scored with the Groundlens library itself, `compute_sgi` and `compute_dgi`. To stay consistent with our interpretability work, the encoder was not a stock sentence model but each of the base language models from that work (Qwen2-1.5B, StableLM-2, Mistral-7B, Qwen2-7B, Qwen3-4B, Qwen3-8B, SmolLM3-3B), wrapped as a custom encoder. The pattern repeats on all of them: SGI catches the corrupted step when the edit also changes the words, and its skill falls to chance as the edit stays in register. The decline is monotonic for every encoder (rank correlation minus one with mean pooling).
+
+<div align="center">
+<img src="docs/assets/register-wall-reasoning.gif" alt="Detection collapses as a reasoning edit stays in register" width="72%">
+<br>
+<em>The register wall on reasoning. Detection AUROC for a corrupted reasoning step, from an out-of-register edit (different words) down to an in-register edit (same words, one wrong fact). The signal falls to chance exactly where it matters. The Groundlens SGI run reproduces this same shape across all seven encoders.</em>
+</div>
+
+| Groundlens signal, mean pooling, 7 base-LLM encoders | Out of register | In register |
+|---|---|---|
+| SGI | 0.61 to 0.73 | 0.51 to 0.52 |
+| DGI | at chance (0.43 to 0.55 overall) | at chance |
+
+Two practical lessons came out of the run. Pool a language model's hidden states by mean, not by the last token; last-token pooling was degenerate here and scored below chance. And a bigger base model did not give a better grounding signal, so pick the encoder by measuring it, not by its size. DGI in particular carried no signal on these raw base-model embeddings, a reminder that DGI depends on the encoder more than SGI does; see [Custom encoders](https://docs.groundlens.dev/guides/custom-encoders/) and the [DGI concept page](https://docs.groundlens.dev/concepts/dgi/).
+
+Reproduce it end to end in [`benchmarks/reasoning_groundlens_encoders.ipynb`](benchmarks/reasoning_groundlens_encoders.ipynb). It runs both experiments across all seven encoders, saves after each one, and resumes if it is interrupted.
+
+*Method: register distance is cos(original, edited) in each encoder's own space; AUROC is reported per register-distance quintile, not pooled; length is matched by construction in the fact-composition set; the original and edited statements share an author, so the authorship shortcut does not apply. On the fact-composition set, which has no question of its own, SGI uses one fixed neutral question, held constant across the original and edited pair.*
 
 ### The ceiling, and the authorship shortcut
 
@@ -276,6 +301,8 @@ groundlens.set_default_encoder(None)  # restore the default path
 ```
 
 The bundled SGI/DGI thresholds and DGI `mu_hat` are calibrated for the default encoder. When you switch encoders, re-fit with `groundlens.fit_thresholds(...)` (cutoffs) and `groundlens.calibrate(...)` (reference direction) — both accept the same `encoder=`. See the [Custom Encoders guide](https://docs.groundlens.dev/guides/custom-encoders/).
+
+**If your encoder is a language model, two things matter.** Turn each text into a single vector by averaging its token vectors (mean pooling), not by taking the last token; in our tests the last-token vector of a base language model was close to useless for grounding. And do not assume a bigger model scores better: check a handful of your own labelled examples and keep the encoder that actually separates them. The library prints a warning the first time you score with a non-default encoder, because the built-in pass or fail cut-offs were set for the default model. Treat that warning as a reminder to run `fit_thresholds` before you trust the flags, and until then rank on the raw score (`result.value`).
 
 ## Built-in rule sets
 
