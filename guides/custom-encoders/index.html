@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1487,6 +1487,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#what-changes-when-you-bring-your-own-encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changes when you bring your own encoder
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2400,6 +2411,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#what-changes-when-you-bring-your-own-encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changes when you bring your own encoder
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2520,6 +2542,12 @@ DGI reference direction with <code>calibrate</code>, both of which accept the sa
   re-calibrating <code>mu_hat</code> for your encoder.</li>
 <li><a href="../domain-calibration/">Domain Calibration Guide</a> — end-to-end walkthrough.</li>
 </ul>
+<h2 id="what-changes-when-you-bring-your-own-encoder">What changes when you bring your own encoder<a class="headerlink" href="#what-changes-when-you-bring-your-own-encoder" title="Permanent link">&para;</a></h2>
+<p>Three things are worth knowing before you trust the scores.</p>
+<p><strong>The cut-off values were set for the default encoder.</strong> SGI and DGI turn a raw score into a pass or a flag using thresholds, and DGI also uses a learned reference direction (<code>mu_hat</code>). Both were fitted on the default model. When you pass a different <code>encoder=</code>, the raw geometry still works, but those cut-offs may sit in the wrong place, so the <code>flagged</code> field can mislead you. The library prints a one-time warning to remind you. Re-fit with <code>fit_thresholds(...)</code> for the cut-offs and <code>calibrate(...)</code> for the DGI direction. Until you do, rank on the raw score (<code>result.value</code>) instead of trusting the flag.</p>
+<p><strong>If the encoder is a language model, pool by mean.</strong> A sentence encoder already returns one vector per text. A raw language model returns one vector per token, so you have to reduce them to one. Average them (mean pooling). Do not use the last token's vector: in our reasoning benchmark, last-token vectors from base language models scored at or below chance.</p>
+<p><strong>Bigger is not automatically better.</strong> In the same benchmark, an 8B base model did not beat a 1.5B one at grounding. Choose your encoder by measuring it on a small labelled set from your own use case, not by parameter count.</p>
+<p><strong>DGI is more sensitive to the encoder than SGI.</strong> SGI compares distances and degrades gently. DGI depends on a single learned direction, and on raw base-language-model embeddings it fell to chance in our run. If you rely on DGI with a custom encoder, calibrate it and measure it before you ship.</p>
 
 
 
@@ -2606,7 +2634,7 @@ DGI reference direction with <code>calibrate</code>, both of which accept the sa
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       

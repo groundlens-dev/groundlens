@@ -2,158 +2,158 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.groundlens.dev/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/adr/0001-rule-set-architecture/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/api/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/benchmarks/overview/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/benchmarks/results/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/concepts/calibration/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/concepts/dgi/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/concepts/how-it-works/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/concepts/sgi/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/getting-started/cli/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/getting-started/installation/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/getting-started/quickstart/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/active-learning/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/banking-deployment/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/batch-evaluation/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/custom-encoders/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/custom-rule-sets/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/domain-calibration/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/eu-ai-act/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/nist-ai-rmf/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/rag-verification/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/guides/sr-11-7/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/integrations/autogen/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/integrations/crewai/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/integrations/langchain/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/integrations/langgraph/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/integrations/semantic-kernel/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/providers/anthropic/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/providers/google/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/providers/openai/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/theory/confabulation-boundary/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/theory/dgi-mathematics/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/theory/embedding-geometry/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/theory/hallucination-taxonomy/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/theory/sgi-mathematics/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/tutorial/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/tutorial/01-first-check/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/tutorial/02-the-blind-spot/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
          <loc>https://docs.groundlens.dev/tutorial/03-a-verification-loop/</loc>
-         <lastmod>2026-07-15</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
 </urlset>
