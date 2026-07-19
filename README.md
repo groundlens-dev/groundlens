@@ -65,7 +65,7 @@
 A model can go wrong in ways that look alike on the surface but have nothing in common underneath. It can ignore the document you gave it and answer from memory. It can wander off topic and invent something unrelated. It can stay perfectly on topic and get one fact wrong. Calling all three "hallucination" hides the fact that they have different causes and need different tools. The first two leave a trace in the geometry of the text and can be caught cheaply. The third does not, and no similarity score will ever catch it; it needs a source check or a person. Until you separate them, you cannot tell which one you are dealing with, so you cannot choose the right check.
 A taxonomy is what lets you say, precisely, what your tool catches and what it does not. Without it you are stuck with a vague claim, "detects hallucinations," that is either overselling or impossible to test. With it you can state scope plainly: catches these kinds, blind to that kind, escalate that kind elsewhere. That precise statement is exactly what makes the tool trustworthy to someone whose job is to manage the risk, and it is what stops a user from deploying it where it is blind.
 It also keeps you accountable in measurement. If you pool every failure into one accuracy number, you hide the place where your method collapses. Reporting by type forces the number to tell the truth, including the uncomfortable part.
-So the taxonomy is not academic tidiness. It is the thing that turns a marketing word into an engineering specification: named failures, matched to the checks that catch them, with the blind spot declared as a category rather than discovered in production.
+
 
 </br>
 
@@ -73,7 +73,7 @@ So the taxonomy is not academic tidiness. It is the thing that turns a marketing
 |---|---|---|
 | **Type I — Query-proximate unfaithfulness** | Response ignores the retrieved context and defaults to the question's topic | **SGI**, when context is available. HaluEval QA AUROC ≈ 0.81 (mean over five encoders). *Pending the authorship and length controls: this figure predates them and has not been re-run.* |
 | **Type II — Confabulation outside plausibility region** | Response imports vocabulary from an adjacent register (e.g., describing CRISPR using protein-folding terms) | **DGI**, declared-limited. DGI separates a confabulation that leaves the register of a correct answer. Its skill declines toward chance as the confabulation stays *in* register, which is the case that matters in production. With authorship held constant, DGI reaches AUROC 0.606 and the ceiling of the whole embedding-similarity class is ~0.68. Escalate in-register cases to Stage 2. |
-| **Type III — Factual error within the same frame** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall). The same blind spot has now been measured on multi-step reasoning chains, not only single questions: see the [reasoning-chains benchmark](#reasoning-chains). |
+| **Type III — Factual error within the same frame :construction:** | Wrong number, wrong name, wrong date — same vocabulary, same topic, same syntax as the correct answer | **NOT** detectable by any embedding-similarity score, ours included. At chance on TruthfulQA. This is a declared blind spot, not a tuning problem. Escalate to Stage 2: an entailment check (NLI), a source lookup, a KG check, or a human. Entailment is the method that *does* hold up here — see [The register wall](#the-register-wall). The same blind spot has now been measured on multi-step reasoning chains, not only single questions: see the [reasoning-chains benchmark](#reasoning-chains). |
 
 ## :compass: What is Groundlens
 
@@ -177,9 +177,7 @@ Stage 1 gives you two things Stage 2 cannot afford at scale: a **continuous scor
 
 Groundlens is measured against published benchmarks and against an independent one. The point of this section is not a single headline number — it is to show, precisely, where geometry wins and where it does not. We lead with the controlled result, because it is the one that has passed authorship and length controls; the provisional numbers follow, clearly marked.
 
-### The register wall
-
-The central result, and the reason the numbers in this section are not the ones we published before. Full write-up: *The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure* (under review).
+### The register wall :construction:
 
 Bin confabulations by how far they sit from the register of a correct answer, and every distributional and embedding-similarity detector, ours included, declines toward chance as the confabulation moves *in* register: same vocabulary, same phrasing, same structure. Entailment does not.
 
@@ -203,7 +201,7 @@ Every item was scored with the Groundlens library itself, `compute_sgi` and `com
 <div align="center">
 <img src="docs/assets/register-wall-reasoning.gif" alt="Detection collapses as a reasoning edit stays in register" width="72%">
 <br>
-<sub>The register wall on reasoning. Detection AUROC for a corrupted reasoning step, from an out-of-register edit (different words) down to an in-register edit (same words, one wrong fact). The signal falls to chance in-register edit. The Groundlens SGI run reproduces this same shape across different kind of encoders.</sub>
+<sub>The register wall on reasoning :construction:. Detection AUROC for a corrupted reasoning step, from an out-of-register edit (different words) down to an in-register edit (same words, one wrong fact). The signal falls to chance in-register edit. The Groundlens SGI run reproduces this same shape across different kind of encoders.</sub>
 </div>
 
 <br>
@@ -258,25 +256,15 @@ The point is not that geometry replaces the judge. It is that one half of ground
 <sub>Every FACTS example placed by its grounding geometry, grounded arm against closed-book arm. Labels decided by an LLM judge, and the two arms differ in generation condition: the separation shown here is provenance under a generation-condition contrast, pending the authorship and length controls.</sub>
 </div>
 
-### Evaluation checklist
-
-**No benchmark number ships without the authorship and length controls.** Before any AUROC, accuracy or detection rate enters this README, a docstring, a slide or a paper:
-
-1. **Hold authorship constant.** Grounded and confabulated text from the same writer. A detector that loses its score here was reading authorship.
-2. **Match length.** Report the length-matched figure next to the raw one.
-3. **Bin by register.** Report the per-bin curve, not a pooled AUROC. Pooling hides the wall.
-4. **Publish the blind spot as a number**, not as a caveat.
-
-A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality.
-
-### Comparison table: crossing the geometric wall
+### Comparison table: crossing the geometric wall :construction:
 
 Embedding-similarity detectors (raw cosine, and context-free directional
 scores like DGI) share a blind spot: when a false answer keeps the vocabulary,
 phrasing, and structure of a correct one (an **in-register confabulation**),
-it lands next to the grounded response in embedding space, and detection falls
-toward chance. This is a property of the embedding geometry, not of any one
-estimator, so a bigger encoder does not fix it.
+it lands next to the grounded response in embedding space. That is the distributional hypothesis, Harris 1954. 
+Same words, same syntax, same topical neighborhood, same co-occurrence statistics. Their distributional signatures are nearly identical, so they genuinely occupy nearly the same point in the space. The thing that differs, which one is true, is not a function of the string's internal statistics at all. It is a function of the string plus the world. 
+
+:construction: No metric computed inside the space can separate two points that the space was built to place together. That is the wall, stated at its root. 
 
 Catching in-register errors requires a signal with access to truth **beyond word
 co-occurrence**. The methods below can get past the wall, each by a different
@@ -648,8 +636,11 @@ Full component and lifecycle tables (modules, inputs, outputs, calibration, comp
 
 The methods Groundlens implements are documented in three preprints and two pending papers:
 
-1. **Semantic Grounding Index** — Marin (2025). [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). Ratio-based geometric grounding for RAG; introduces SGI.
-2. **A Geometric Taxonomy of Hallucinations** — Marin (2026). [arXiv:2602.13224](https://arxiv.org/abs/2602.13224). Type I (off-context) vs Type II (in-context fabrication); DGI as the Type II detector, with the in-register limit declared.
+|APA citation|Link|
+|---|---|
+|Marín, J. (2025). Semantic grounding index: Geometric bounds on context engagement in RAG systems. arXiv preprint arXiv:2512.13771.|[arXiv:2512.13771](https://arxiv.org/abs/2512.13771)|
+|Marín, J. (2026). A Geometric Taxonomy of Hallucinations in LLMs. arXiv preprint arXiv:2602.13224.|[arXiv:2512.13224](https://arxiv.org/abs/2512.13224)|
+|Marín, J. (2026). How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing. arXiv preprint arXiv:2603.13259.|[arXiv:2512.13259](https://arxiv.org/abs/2512.13259)|
 
 ## 	:round_pushpin: Compliance mapping
 
