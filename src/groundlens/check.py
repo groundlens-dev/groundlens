@@ -54,6 +54,27 @@ HANDOFF_OK = (
     "this check. Verify facts in a second stage."
 )
 
+# Second-stage (model-based) handoff. The model-based check IS the second stage,
+# so when it cannot settle a case the only place left is a person.
+HANDOFF_HUMAN = (
+    "The model does not answer consistently here. Send it to a human reviewer."
+)
+HANDOFF_SECOND_STAGE_OK = (
+    "Consistency, not facts: the model agreeing with itself is not proof it is right. "
+    "For high-stakes claims, still verify against a source."
+)
+
+# ── Second-stage vocabulary: Sample Consistency (model-based) ────────────────
+#
+# PROVISIONAL cut-points. Unlike the SGI/DGI thresholds these are NOT calibrated
+# against a labeled benchmark. Calibrate on your own data (``groundlens.fit_thresholds``)
+# before relying on the level in production.
+SC_CONSISTENT: float = 0.80
+"""Provisional: consistency at or above this reads as a consistent answer."""
+
+SC_MIXED: float = 0.55
+"""Provisional: consistency at or above this reads as mixed; below reads as inconsistent."""
+
 
 @dataclass(frozen=True, slots=True)
 class Check:
@@ -177,6 +198,70 @@ def check_for_dgi(result: DGIResult) -> Check:
         score=v,
         detail=f"commitment (how far the answer moved from the question) {result.magnitude:.2f}",
         note="No source given — judged by the shape of the answer.",
+        escalate=escalate,
+        handoff=handoff,
+    )
+
+
+def check_for_verification(
+    consistency: float,
+    *,
+    method: str = "selfcheck_nli",
+    metric_name: str = "Sample Consistency",
+    n_samples: int = 0,
+    detail: str = "",
+) -> Check:
+    """Build the canonical :class:`Check` for a model-based second-stage score.
+
+    Args:
+        consistency: Agreement across samples in ``[0.0, 1.0]``. Higher means the
+            model answered the same way across resamples or rewordings.
+        method: Which second-stage method produced the score (e.g.
+            ``"selfcheck_nli"``, ``"paraphrase_nli"``).
+        metric_name: Human-readable metric name.
+        n_samples: Number of samples averaged over (for the detail line).
+        detail: Optional technical detail line; a default is used when empty.
+
+    Note:
+        The cut-points (:data:`SC_CONSISTENT`, :data:`SC_MIXED`) are PROVISIONAL and
+        not calibrated against a labeled benchmark. See :func:`groundlens.fit_thresholds`.
+    """
+    v = float(consistency)
+    if v >= SC_CONSISTENT:
+        level = LEVEL_OK
+        label = "Consistent answer"
+        message = "The model gives the same answer across samples."
+        escalate, handoff = False, HANDOFF_SECOND_STAGE_OK
+    elif v >= SC_MIXED:
+        level = LEVEL_REVIEW
+        label = "Partly consistent"
+        message = "The model only partly agrees with itself across samples, worth a look."
+        escalate, handoff = True, HANDOFF_HUMAN
+    else:
+        level = LEVEL_RISK
+        label = "Inconsistent answer"
+        message = (
+            "The model gives different answers across samples, a common sign of a "
+            "made-up answer. Check it before trusting it."
+        )
+        escalate, handoff = True, HANDOFF_HUMAN
+    if not detail:
+        detail = (
+            f"consistency across {n_samples} samples"
+            if n_samples
+            else "consistency across samples"
+        )
+    return Check(
+        headline=HEADLINE,
+        label=label,
+        message=message,
+        level=level,
+        method=method,
+        metric_name=metric_name,
+        metric_abbr="SC",
+        score=v,
+        detail=detail,
+        note="Provisional cut-points; calibrate with fit_thresholds on your data.",
         escalate=escalate,
         handoff=handoff,
     )

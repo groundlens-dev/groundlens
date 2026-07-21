@@ -58,10 +58,21 @@ crewai = ["crewai>=0.80.0"]
 semantic-kernel = ["semantic-kernel>=1.0.0"]
 autogen = ["autogen-agentchat>=0.4.0"]
 
+# Model-based second stage (groundlens.verify). Optional and heavy; the
+# deterministic core does not depend on any of this. bitsandbytes (4-bit) is
+# Linux-only, so it is gated by a marker to keep `pip install groundlens[verify]`
+# working on macOS (there, load models with load_in_4bit=False).
+verify = [
+    "transformers>=4.40.0",
+    "torch>=2.1.0",
+    "accelerate>=0.30.0",
+    "bitsandbytes>=0.43.0; platform_system == 'Linux'",
+]
+
 # Bundles
 providers = ["groundlens[openai,anthropic,google]"]
 integrations = ["groundlens[langchain,langgraph,crewai,semantic-kernel,autogen]"]
-all = ["groundlens[providers,integrations]"]
+all = ["groundlens[providers,integrations,verify]"]
 
 # Development
 dev = [
