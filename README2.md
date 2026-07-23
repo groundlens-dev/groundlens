@@ -22,9 +22,9 @@ Groundlens MCP inside Claude
 
 - [🧭 What is Groundlens](#-what-is-groundlens)
 - [🚀 The basics](#-the-basics)
-- [🔌 Integrate it](#-integrate-it)
-- [🎓 Tutorials](#-tutorials)
-- [📍 Compliance](#-compliance)
+- [:jigsaw: Integrate it](#-integrate-it)
+- [:notebook_with_decorative_cover: Tutorials](#-tutorials)
+- [📍 Compliance mapping](#-compliance-mapping)
 - [📄 Research](#-research)
 - [🤝 Contributing](#-contributing)
 
@@ -82,9 +82,9 @@ Read the **level**, not the decimal. `check(sgi).level` is `"ok"`, `"review"`, o
 
 | Reading | SGI (default encoder) |
 |---|---|
-| ✅ came from the source | higher 1.20 |
-| ⚠️ partly | between 0.95 and 1.2 |
-| ❌ not from the source | below 0.95|
+| :green_circle: came from the source | higher 1.20 |
+| :orange_circle: partly | between 0.95 and 1.2 |
+| :stop_sign: not from the source | below 0.95|
 
 ### DGI: check an answer when there is no source
 
@@ -108,9 +108,9 @@ Read the **level**, not the decimal, the same as SGI. DGI leans on the embedding
 
 | Reading | DGI (default encoder) |
 |---|---|
-| ✅ looks grounded | higher than 0.30 |
-| ⚠️ partly | between 0 and 0.3 |
-| ❌ not grounded | negative values |
+| :green_circle: looks grounded | higher than 0.30 |
+| :orange_circle: partly | between 0 and 0.3 |
+| :red_circle: not grounded | negative values |
 
 **DGI** can be calibrated per domain (finance, healthcare, legal, coding): a domain-specific reference sharpens which answers it flags. Calibration tunes where it escalates, not the blind spot — see [Calibration](#-calibration).
 
@@ -194,7 +194,7 @@ The log is hash-chained, so any decision can be replayed and verified byte-for-b
 
 ---
 
-## 🔌 Integrate it
+## :jigsaw:	 Integrate it
 
 To wire groundlens into an agent pipeline it ships adapters that score every model response for you and collect the readings.
 
@@ -246,7 +246,7 @@ Full setup: [groundlens-dev/groundlens-mcp](https://github.com/groundlens-dev/gr
 
 ---
 
-## 🎓 Tutorials
+## :notebook_with_decorative_cover: Tutorials
 
 Several tutorials are available at [`examples/tutorials/`](https://github.com/groundlens-dev/groundlens/tree/main/examples/tutorials).
 
@@ -274,12 +274,12 @@ from groundlens import compute_sgi, check
 from groundlens.agents import customer_support_rules
 
 question = "What is the daily transfer limit?"
-context  = "The daily transfer limit is 1,000 EUR per transaction and 2,000 EUR per day."
+context  = "The daily transfer limit is 1,000 $ per transaction and 2,000 $ per day."
 
-grounded = "The daily limit is 1,000 EUR per transaction and 2,000 EUR per day."
-invented = "The daily limit is 500 EUR per transaction, and 10,000 EUR for premium clients."
+grounded = "The daily limit is 1,000 $ per transaction and 2,000 $ per day."
+invented = "The daily limit is 500 $ per transaction, and 10,000 $ for premium clients."
 
-rules = customer_support_rules()
+rules = customer_support_rules()   #this is a ptr-frgin
 ```
 
 **Step 3 — score both answers.**
@@ -305,7 +305,7 @@ print(audit.audit_explanation)
 
 ---
 
-## 📍 Compliance
+## 📍 Compliance mapping
 
 Groundlens ships mappings from its components to specific regulatory clauses, and a hash-chained audit log that makes any decision reproducible byte-for-byte, which is what these frameworks ask for in practice:
 
