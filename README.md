@@ -95,6 +95,15 @@ Read the **level**, not the decimal. `check(sgi).level` is `"ok"`, `"review"`, o
 | :orange_circle: partly | 0.95 to 1.20 |
 | :stop_sign: not from the source | below 0.95 |
 
+Four real answers, scored with the default encoder:
+
+| The answer | SGI | Reading |
+|---|---|---|
+| Faithful, straight from the source | 4.39 | Supported by the document |
+| Faithful paraphrase of the source | 1.25 | Supported by the document |
+| Restates the question without answering | 0.78 | Not supported by the document |
+| Same wording, one wrong figure (the blind spot) | 1.11 | Partly supported |
+
 ### DGI: check an answer when there is no source
 
 When there is no retrieved document (one-shot prompting, tool use, an agent talking to itself), SGI has nothing to compare against. DGI works from the question and the answer alone: it measures the *direction* the answer takes and compares it to how well-grounded answers usually move.
@@ -122,6 +131,17 @@ print(reading_local.level, reading_local.label)   # act on the level, not the ra
 DGI is a directional triage signal, not a truth test, and it leans on the embedding model and the domain far more than SGI does. Its cut-points are not universal: they depend on your encoder and the style of your data, so read DGI as a relative ranking and set the operating point by calibrating on your own grounded set (see [Calibration](#-calibration)). It will not catch a confident wrong fact phrased like a right one; that is what the [consistency checks](#consistency-checks-does-the-model-agree-with-itself) and rules are for.
 
 The local variant `k=...` shown above builds a query-specific reference from the calibration questions nearest to yours, which sharpens DGI when your reference set spans several domains.
+
+DGI is measured on the shipped 212-pair reference set (real questions with a grounded and a fabricated answer each). At the calibrated cut of **0.525**, grounded answers land above it and fabricated ones below. Four of the nine domains:
+
+| Domain | DGI, grounded answer | DGI, fabricated answer |
+|---|---|---|
+| Finance | 0.66 (ok) | 0.51 (not grounded) |
+| Medical | 0.65 (ok) | 0.52 (not grounded) |
+| Science | 0.55 (ok) | 0.47 (not grounded) |
+| Law | 0.57 (ok) | 0.43 (not grounded) |
+
+Across the full set: AUROC 0.78 with the global direction, 0.81 with the local variant `k=`.
 
 ### Consistency checks: does the model agree with itself?
 

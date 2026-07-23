@@ -17,8 +17,9 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   every deployment relying on the default. Snowflake remains available via
   `model="Snowflake/snowflake-arctic-embed-l-v2.0"` (still loads with
   `trust_remote_code=True`); recalibrate thresholds and `mu_hat` if you use it.
-- **DGI is a single binary cut at `DGI_PASS = 0.3`** for the default encoder (ok at
-  or above 0.3, not grounded below). It is a domain- and encoder-specific operating
+- **DGI is a single binary cut at `DGI_PASS = 0.525`** for the default encoder,
+  calibrated (Youden's J) on the bundled 212-pair reference set (AUROC 0.78 global,
+  0.81 with the local variant `k=`). It is a domain- and encoder-specific operating
   point; recalibrate on your own grounded set.
 
 ### Added
