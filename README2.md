@@ -108,9 +108,9 @@ Read the **level**, not the decimal, the same as SGI. DGI leans on the embedding
 
 | Reading | DGI (default encoder) |
 |---|---|
-| :green_circle: looks grounded | higher than 0.30 |
-| :orange_circle: partly | between 0 and 0.3 |
-| :red_circle: not grounded | negative values |
+| :green_circle: looks grounded | 0.594 or higher |
+| :orange_circle: partly | 0.55 to 0.594 |
+| :red_circle: not grounded | below 0.55 |
 
 **DGI** can be calibrated per domain (finance, healthcare, legal, coding): a domain-specific reference sharpens which answers it flags. Calibration tunes where it escalates, not the blind spot — see [Calibration](#-calibration).
 
