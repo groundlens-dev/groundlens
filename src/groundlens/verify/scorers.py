@@ -56,7 +56,7 @@ class NLIScorer:
         self._model: Any = None
         self._torch: Any = None
 
-    def _ensure_loaded(self) -> None:
+    def _ensure_loaded(self) -> None:  # pragma: no cover - loads a real model; not run in CI
         if self._model is not None:
             return
         try:
@@ -72,7 +72,9 @@ class NLIScorer:
         self._torch = torch
         self.device = device
 
-    def _contradiction(self, premises: list[str], hypotheses: list[str]) -> list[float]:
+    def _contradiction(  # pragma: no cover - runs a real NLI model; not run in CI
+        self, premises: list[str], hypotheses: list[str]
+    ) -> list[float]:
         self._ensure_loaded()
         torch = self._torch
         out: list[float] = []

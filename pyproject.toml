@@ -221,5 +221,6 @@ exclude_lines = [
     "if __name__ == .__main__.",
     "@overload",
     "raise NotImplementedError",
+    "^\\s*\\.\\.\\.\\s*$",  # Protocol / stub bodies
 ]
 # fail_under = 85  # Enforced locally with slow tests; CI runs non-slow only

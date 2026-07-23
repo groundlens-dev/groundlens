@@ -75,7 +75,7 @@ class HFTextGenerator:
         self._torch: Any = None
 
     # -- lazy loading -------------------------------------------------------
-    def _ensure_loaded(self) -> None:
+    def _ensure_loaded(self) -> None:  # pragma: no cover - loads a real model; not run in CI
         if self._model is not None:
             return
         try:
@@ -121,7 +121,9 @@ class HFTextGenerator:
                 self._tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             )
 
-    def _decode_batch(self, prompts: list[str], num_return_sequences: int) -> list[list[str]]:
+    def _decode_batch(  # pragma: no cover - runs real generation; not run in CI
+        self, prompts: list[str], num_return_sequences: int
+    ) -> list[list[str]]:
         self._ensure_loaded()
         torch = self._torch
         if self.seed is not None:
