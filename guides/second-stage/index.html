@@ -12,13 +12,13 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/benchmarks/overview/">
+        <link rel="canonical" href="https://docs.groundlens.dev/guides/second-stage/">
       
       
-        <link rel="prev" href="../../integrations/autogen/">
+        <link rel="prev" href="../rag-verification/">
       
       
-        <link rel="next" href="../results/">
+        <link rel="next" href="../custom-encoders/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Overview - groundlens</title>
+        <title>Second Stage (model-based) - groundlens</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#benchmarks-overview" class="md-skip">
+        <a href="#second-stage-model-based" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Second Stage (model-based)
             
           </span>
         </div>
@@ -331,11 +331,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/rag-verification/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../rag-verification/" class="md-tabs__link">
           
   
   
@@ -397,13 +399,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../benchmarks/overview/" class="md-tabs__link">
           
   
   
@@ -1254,8 +1254,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1283,21 +1285,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1315,7 +1318,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1333,7 +1336,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/rag-verification/" class="md-nav__link">
+      <a href="../rag-verification/" class="md-nav__link">
         
   
   
@@ -1358,10 +1361,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/second-stage/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Second Stage (model-based)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1377,6 +1407,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The methods
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#any-model-not-just-hugging-face" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any model, not just Hugging Face
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calibration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1389,7 +1505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/custom-encoders/" class="md-nav__link">
+      <a href="../custom-encoders/" class="md-nav__link">
         
   
   
@@ -1417,7 +1533,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/active-learning/" class="md-nav__link">
+      <a href="../active-learning/" class="md-nav__link">
         
   
   
@@ -1445,7 +1561,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/domain-calibration/" class="md-nav__link">
+      <a href="../domain-calibration/" class="md-nav__link">
         
   
   
@@ -1473,7 +1589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/batch-evaluation/" class="md-nav__link">
+      <a href="../batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1501,7 +1617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/banking-deployment/" class="md-nav__link">
+      <a href="../banking-deployment/" class="md-nav__link">
         
   
   
@@ -1529,7 +1645,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/eu-ai-act/" class="md-nav__link">
+      <a href="../eu-ai-act/" class="md-nav__link">
         
   
   
@@ -1557,7 +1673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/sr-11-7/" class="md-nav__link">
+      <a href="../sr-11-7/" class="md-nav__link">
         
   
   
@@ -1585,7 +1701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/nist-ai-rmf/" class="md-nav__link">
+      <a href="../nist-ai-rmf/" class="md-nav__link">
         
   
   
@@ -1983,10 +2099,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -1998,22 +2112,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -2031,7 +2144,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2046,37 +2159,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../benchmarks/overview/" class="md-nav__link">
         
   
   
@@ -2092,176 +2178,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-we-measure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What We Measure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What We Measure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#auroc-area-under-roc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        AUROC (Area Under ROC)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-auroc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why AUROC?
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#benchmark-datasets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Benchmark Datasets
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Benchmark Datasets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#confabulation-benchmark" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Confabulation Benchmark
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#domain-specific-benchmarks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Domain-Specific Benchmarks
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-run-benchmarks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Run Benchmarks
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How to Run Benchmarks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#evaluation-protocol" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Evaluation Protocol
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reproducing-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reproducing Results
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2274,7 +2190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../results/" class="md-nav__link">
+      <a href="../../benchmarks/results/" class="md-nav__link">
         
   
   
@@ -2449,138 +2365,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-we-measure" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What We Measure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What We Measure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#auroc-area-under-roc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        AUROC (Area Under ROC)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-auroc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why AUROC?
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#benchmark-datasets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Benchmark Datasets
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Benchmark Datasets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#confabulation-benchmark" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Confabulation Benchmark
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#domain-specific-benchmarks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Domain-Specific Benchmarks
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-run-benchmarks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Run Benchmarks
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How to Run Benchmarks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#evaluation-protocol" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Evaluation Protocol
+        Install
       
     </span>
   </a>
@@ -2588,10 +2376,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reproducing-results" class="md-nav__link">
+  <a href="#the-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reproducing Results
+        The pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The methods
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#any-model-not-just-hugging-face" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any model, not just Hugging Face
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calibration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
       
     </span>
   </a>
@@ -2618,180 +2450,48 @@
   
 
 
-<h1 id="benchmarks-overview">Benchmarks Overview<a class="headerlink" href="#benchmarks-overview" title="Permanent link">&para;</a></h1>
-<p>groundlens benchmarks measure how well SGI and DGI discriminate between grounded and hallucinated responses. The primary metric is <strong>AUROC</strong> (Area Under the Receiver Operating Characteristic curve), which measures the probability that a randomly chosen grounded response scores higher than a randomly chosen hallucinated response.</p>
-<h2 id="what-we-measure">What We Measure<a class="headerlink" href="#what-we-measure" title="Permanent link">&para;</a></h2>
-<h3 id="auroc-area-under-roc">AUROC (Area Under ROC)<a class="headerlink" href="#auroc-area-under-roc" title="Permanent link">&para;</a></h3>
-<p>AUROC ranges from 0.0 to 1.0:</p>
-<table>
-<thead>
-<tr>
-<th>AUROC</th>
-<th>Interpretation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1.00</td>
-<td>Perfect discrimination</td>
-</tr>
-<tr>
-<td>0.90--0.99</td>
-<td>Excellent --- suitable for production</td>
-</tr>
-<tr>
-<td>0.80--0.90</td>
-<td>Good --- useful for triage with some noise</td>
-</tr>
-<tr>
-<td>0.70--0.80</td>
-<td>Fair --- informative but not reliable alone</td>
-</tr>
-<tr>
-<td>0.50</td>
-<td>Random chance --- no discrimination</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition danger">
-<p class="admonition-title">Read this scale against the ceiling of the method</p>
-<p>For embedding-similarity detectors, an <strong>authorship-controlled</strong> AUROC in the high 0.6s is at the ceiling of what the whole class can do. Nothing in this family lands in the 0.9 band on a controlled evaluation.</p>
-<p>So a reported 0.9+ here is not a signal of quality. It is a signal to go looking for a shortcut: authorship, length, or a generation-condition artifact. We know, because we published one. See <a href="../results/">Results</a>.</p>
-</div>
-<h3 id="why-auroc">Why AUROC?<a class="headerlink" href="#why-auroc" title="Permanent link">&para;</a></h3>
-<p>AUROC is <strong>threshold-independent</strong>: it evaluates the scoring function's ability to rank grounded responses above hallucinated ones, regardless of where you set the decision threshold. This is important because different deployments may use different thresholds based on their risk tolerance.</p>
-<h2 id="benchmark-datasets">Benchmark Datasets<a class="headerlink" href="#benchmark-datasets" title="Permanent link">&para;</a></h2>
-<h3 id="confabulation-benchmark">Confabulation Benchmark<a class="headerlink" href="#confabulation-benchmark" title="Permanent link">&para;</a></h3>
-<p>The primary benchmark dataset, published alongside arXiv:2603.13259. It contains:</p>
+<h1 id="second-stage-model-based">Second stage (model-based)<a class="headerlink" href="#second-stage-model-based" title="Permanent link">&para;</a></h1>
+<p>Groundlens is the deterministic first stage. It clears the clearly grounded, catches the clearly ungrounded, and escalates what geometry cannot settle. <code>groundlens.verify</code> is the stage you escalate to: a model-based consistency check that ships in the same library and returns the same <a href="../../concepts/how-it-works/"><code>Check</code></a>.</p>
+<p>It is optional and kept out of the core import path. <code>import groundlens</code> never loads a model, and even <code>import groundlens.verify</code> loads nothing heavy until a detector actually runs.</p>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;groundlens[verify]&quot;</span>
+</span></code></pre></div>
+<p>This pulls in <code>transformers</code>, <code>torch</code> and <code>accelerate</code>. On Linux it also installs <code>bitsandbytes</code> for 4-bit loading; on macOS load models with <code>load_in_4bit=False</code>.</p>
+<h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">&para;</a></h2>
+<p>Run the deterministic stage first and only spend model calls on escalated cases:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">two_stage</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">two_stage</span><span class="p">(</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of Spain?&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">answer</span><span class="o">=</span><span class="s2">&quot;Madrid&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;Spain is a country in Europe. Its capital is Madrid.&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-7B-Instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">result</span><span class="o">.</span><span class="n">escalated</span>   <span class="c1"># False: SGI settled it, no model call</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">result</span><span class="o">.</span><span class="n">stage1</span>      <span class="c1"># the deterministic Check</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">result</span><span class="o">.</span><span class="n">stage2</span>      <span class="c1"># None here (only set when stage 2 runs)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">result</span><span class="o">.</span><span class="n">final</span>       <span class="c1"># the Check to act on</span>
+</span></code></pre></div>
+<p>When stage one escalates (its <code>Check.escalate</code> is set), <code>two_stage</code> runs the model-based detector and <code>result.final</code> becomes the stage-two reading.</p>
+<h2 id="the-methods">The methods<a class="headerlink" href="#the-methods" title="Permanent link">&para;</a></h2>
+<p>Two presets, both returning a <code>Check</code>:</p>
 <ul>
-<li>Verified grounded (question, response) pairs</li>
-<li>LLM-generated hallucinations (produced by instructing models to answer without access to correct information)</li>
-<li>Template-based confabulations (factual substitutions in correct response templates)</li>
-<li>Context-annotated examples (for SGI evaluation)</li>
+<li><strong><code>SelfCheckNLI</code></strong> resamples the model and scores contradiction with NLI. This reproduces SelfCheckGPT-NLI, the validated method (92.50 AUC-PR on WikiBio-GPT3, Manakul et al., EMNLP 2023).</li>
+<li><strong><code>ParaphraseCheck</code></strong> rewords the question and answers each rewording. It front-loads the signal, reaching good detection at a low sample budget, but saturates, since a question has only so many genuinely different phrasings.</li>
 </ul>
-<p><strong>Dataset</strong>: <code>cert-framework/human-confabulation-benchmark</code> on HuggingFace.</p>
-<h3 id="domain-specific-benchmarks">Domain-Specific Benchmarks<a class="headerlink" href="#domain-specific-benchmarks" title="Permanent link">&para;</a></h3>
-<p>Additional benchmark datasets for specific verticals:</p>
-<table>
-<thead>
-<tr>
-<th>Domain</th>
-<th>Pairs</th>
-<th>Grounded</th>
-<th>Hallucinated</th>
-<th>Available</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>General</td>
-<td>200</td>
-<td>100</td>
-<td>100</td>
-<td>Bundled</td>
-</tr>
-<tr>
-<td>Legal</td>
-<td>150</td>
-<td>75</td>
-<td>75</td>
-<td>On request</td>
-</tr>
-<tr>
-<td>Medical</td>
-<td>180</td>
-<td>90</td>
-<td>90</td>
-<td>On request</td>
-</tr>
-<tr>
-<td>Financial</td>
-<td>120</td>
-<td>60</td>
-<td>60</td>
-<td>On request</td>
-</tr>
-</tbody>
-</table>
-<h2 id="how-to-run-benchmarks">How to Run Benchmarks<a class="headerlink" href="#how-to-run-benchmarks" title="Permanent link">&para;</a></h2>
-<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Default benchmark (confabulation benchmark)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>groundlens<span class="w"> </span>benchmark
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Custom dataset</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--dataset<span class="w"> </span>cert-framework/human-confabulation-benchmark
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Custom model</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--model<span class="w"> </span>all-mpnet-base-v2
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelfCheckNLI</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">checker</span> <span class="o">=</span> <span class="n">SelfCheckNLI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-7B-Instruct&quot;</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">reading</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;What is the capital of Spain?&quot;</span><span class="p">,</span> <span class="s2">&quot;Madrid&quot;</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">reading</span><span class="o">.</span><span class="n">level</span>        <span class="c1"># &quot;ok&quot; / &quot;review&quot; / &quot;risk&quot;</span>
 </span></code></pre></div>
-<h3 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Load your benchmark dataset</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_benchmark</span><span class="p">()</span>  <span class="c1"># Your loading logic</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">sgi_scores</span><span class="p">,</span> <span class="n">sgi_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">dgi_scores</span><span class="p">,</span> <span class="n">dgi_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">question</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;question&quot;</span><span class="p">]</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;response&quot;</span><span class="p">]</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">context</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;context&quot;</span><span class="p">)</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">label</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>  <span class="c1"># 1 = grounded, 0 = hallucinated</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="c1"># SGI (when context is available)</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="k">if</span> <span class="n">context</span><span class="p">:</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">sgi_result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="n">sgi_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sgi_result</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="n">sgi_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="c1"># DGI (always)</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">dgi_result</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">dgi_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dgi_result</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="n">dgi_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="c1"># Compute AUROC</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SGI AUROC: </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">sgi_labels</span><span class="p">,</span><span class="w"> </span><span class="n">sgi_scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DGI AUROC: </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">dgi_labels</span><span class="p">,</span><span class="w"> </span><span class="n">dgi_scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>datasets<span class="w"> </span>scikit-learn<span class="w">  </span><span class="c1"># Required for benchmark command</span>
-</span></code></pre></div>
-<h2 id="evaluation-protocol">Evaluation Protocol<a class="headerlink" href="#evaluation-protocol" title="Permanent link">&para;</a></h2>
-<p>To ensure fair comparison, all benchmarks follow the same protocol:</p>
-<ol>
-<li><strong>Fixed embedding model</strong>: Default <code>all-MiniLM-L6-v2</code> unless stated otherwise.</li>
-<li><strong>No threshold tuning on test data</strong>: Thresholds are fixed before evaluation.</li>
-<li><strong>Separate calibration and test sets</strong>: For DGI, calibration pairs are never in the test set.</li>
-<li><strong>Stratified evaluation</strong>: AUROC is computed separately for each hallucination type (divergent, tangential, confabulation).</li>
-</ol>
-<p>The first four are table stakes. The next four are the ones that decide whether a number means anything, and most published detectors, including our own earlier work, fail them.</p>
-<ol>
-<li><strong>Authorship control.</strong> The grounded and the confabulated text must come from the same author. If the true answers are machine-written and the false ones human-written (or the reverse), the label is correlated with authorship and a detector can score highly by recognising <strong>who wrote the text</strong> rather than whether it is grounded. A detector that loses its score under this control was reading authorship. Ours did: a logistic probe falls 0.932 → 0.660, an MLP 0.935 → 0.675, the directional score to 0.606.</li>
-<li><strong>Length matching.</strong> Report the length-matched AUROC next to the raw one. RAGTruth-QA is the cautionary case: an apparent 0.705 falls to 0.634 once lengths are matched.</li>
-<li><strong>Register binning.</strong> Report the per-bin curve from out-of-register to in-register, not a single pooled AUROC. Pooling hides the wall, which is the entire phenomenon.</li>
-<li><strong>Publish the blind spot as a number</strong>, not as a caveat at the bottom of the page.</li>
-</ol>
-<div class="admonition danger">
-<p class="admonition-title">House rule</p>
-<p><strong>No benchmark number ships without the authorship and length controls.</strong> If a figure has not been through them, label it <em>pending controls</em> or do not publish it. This applies to this documentation, the README, the papers and the slides.</p>
-</div>
-<h2 id="reproducing-results">Reproducing Results<a class="headerlink" href="#reproducing-results" title="Permanent link">&para;</a></h2>
-<p>All reported results can be reproduced exactly because:</p>
-<ul>
-<li>groundlens scoring is <strong>deterministic</strong> (no sampling)</li>
-<li>Benchmark datasets are <strong>versioned</strong> and publicly available</li>
-<li>The embedding model is <strong>fixed</strong> and downloadable</li>
-</ul>
-<div class="admonition warning">
-<p class="admonition-title">Determinism is not validity</p>
-<p>Reproducing a number guarantees you get the same number twice. It does not guarantee the number measures grounding. An authorship artifact reproduces perfectly. That is what the controls above are for.</p>
-</div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>groundlens<span class="w"> </span>benchmark<span class="w"> </span>--dataset<span class="w"> </span>cert-framework/human-confabulation-benchmark
-</span></code></pre></div>
-<p>This dataset has a known authorship confound (grounded answers written by a model, confabulations written by a person). The benchmark prints a warning above its AUROC. Read it before quoting anything.</p>
-<p>See <a href="../results/">Results</a> for the full numbers.</p>
+<p>Use <code>checker.verify(...)</code> instead of <code>checker.check(...)</code> to get the full <code>Verification</code>: the <code>Check</code> plus the samples, the consistency score, the seed, and the wall-clock time. A stochastic stage inside an auditable library should leave that trail.</p>
+<h2 id="any-model-not-just-hugging-face">Any model, not just Hugging Face<a class="headerlink" href="#any-model-not-just-hugging-face" title="Permanent link">&para;</a></h2>
+<p>The detector depends only on a small <code>TextGenerator</code> protocol (<code>generate(prompt, n)</code> and <code>generate_many(prompts)</code>). The bundled <code>HFTextGenerator</code> is the local, batched default; to use an API model, wrap your client in an object with those two methods and pass it as <code>generator=...</code>. Pick the scorer with <code>scorer="nli"</code> (validated, needs the extra) or <code>scorer="embedding"</code> (reuses the core sentence encoder, no extra needed).</p>
+<h2 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Permanent link">&para;</a></h2>
+<p>The second-stage cut-points (<code>SC_CONSISTENT</code>, <code>SC_MIXED</code>) are provisional. Unlike the SGI and DGI thresholds they are not calibrated against a labeled benchmark. Calibrate them on your own data with <a href="../../concepts/calibration/"><code>fit_thresholds</code></a> before relying on the level in production.</p>
+<h2 id="what-it-does-not-do">What it does not do<a class="headerlink" href="#what-it-does-not-do" title="Permanent link">&para;</a></h2>
+<p>Consistency is not truth. A model can be confidently and consistently wrong, and the second stage will read that as consistent. For high-stakes factual claims, a consistent reading still warrants a source check or a human. The model-based stage narrows the residue the first stage escalates; it does not eliminate it.</p>
 
 
 
