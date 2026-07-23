@@ -119,3 +119,15 @@ class TestEvaluateBatch:
     def test_empty_batch_returns_empty(self, mock_dgi) -> None:
         results = evaluate_batch([])
         assert results == []
+
+    def test_blank_question_raises(self) -> None:
+        with pytest.raises(ValueError, match="question must be a non-empty string"):
+            evaluate_batch([{"question": "  ", "response": "A."}])
+
+    def test_blank_response_reports_item_index(self) -> None:
+        items = [
+            {"question": "Q1?", "response": "A1."},
+            {"question": "Q2?", "response": ""},
+        ]
+        with pytest.raises(ValueError, match="Item 1"):
+            evaluate_batch(items)
