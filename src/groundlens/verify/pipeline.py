@@ -66,6 +66,6 @@ def two_stage(
     if not (stage1.escalate or always):
         return TwoStageResult(stage1=stage1, stage2=None, final=stage1, escalated=False)
 
-    det = detector if detector is not None else SelfCheckNLI(model=model, **detector_kwargs)  # type: ignore[arg-type]
+    det = detector if detector is not None else SelfCheckNLI(model=model, **detector_kwargs)
     stage2 = det.verify(question, answer)
     return TwoStageResult(stage1=stage1, stage2=stage2, final=stage2.check, escalated=True)

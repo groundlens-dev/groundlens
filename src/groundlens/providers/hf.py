@@ -111,12 +111,14 @@ class HFTextGenerator:
     def _template(self, prompt: str) -> str:
         messages = [{"role": "user", "content": prompt}]
         try:
-            return self._tok.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+            return str(
+                self._tok.apply_chat_template(
+                    messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+                )
             )
         except TypeError:
-            return self._tok.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
+            return str(
+                self._tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             )
 
     def _decode_batch(self, prompts: list[str], num_return_sequences: int) -> list[list[str]]:
