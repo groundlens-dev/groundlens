@@ -61,20 +61,20 @@ class TestSGICheck:
 
 
 # ---------------------------------------------------------------------------
-# DGI checks — levels come from calibrated thresholds (0.30 / 0.0)
+# DGI checks — levels come from calibrated thresholds (0.594 / 0.55)
 # ---------------------------------------------------------------------------
 
 
 class TestDGICheck:
     def test_looks_grounded(self) -> None:
-        r = DGIResult(value=0.41, normalized=0.7, flagged=False, magnitude=1.02)
+        r = DGIResult(value=0.62, normalized=0.81, flagged=False, magnitude=1.02)
         v = check_for_dgi(r)
         assert v.level == "ok"
         assert v.label == "Looks grounded"
         assert v.metric_abbr == "DGI"
 
     def test_partly_grounded(self) -> None:
-        r = DGIResult(value=0.18, normalized=0.59, flagged=True, magnitude=0.7)
+        r = DGIResult(value=0.57, normalized=0.785, flagged=True, magnitude=0.7)
         v = check_for_dgi(r)
         assert v.level == "review"
         assert v.label == "Partly grounded"
@@ -86,7 +86,7 @@ class TestDGICheck:
         assert v.label == "Not grounded"
 
     def test_note_mentions_no_source(self) -> None:
-        r = DGIResult(value=0.41, normalized=0.7, flagged=False, magnitude=1.0)
+        r = DGIResult(value=0.62, normalized=0.81, flagged=False, magnitude=1.0)
         assert "No source" in check_for_dgi(r).note
 
     def test_detail_uses_magnitude(self) -> None:

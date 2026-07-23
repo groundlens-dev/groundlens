@@ -108,9 +108,9 @@ Read the **level**, not the decimal, the same as SGI. DGI leans on the embedding
 
 | Reading | DGI (default encoder) |
 |---|---|
-| :green_circle: looks grounded | higher than 0.30 |
-| :orange_circle: partly | between 0 and 0.3 |
-| :red_circle: not grounded | negative values |
+| :green_circle: looks grounded | 0.594 or higher |
+| :orange_circle: partly | 0.55 to 0.594 |
+| :red_circle: not grounded | below 0.55 |
 
 **DGI** can be calibrated per domain (finance, healthcare, legal, coding): a domain-specific reference sharpens which answers it flags. Calibration tunes where it escalates, not the blind spot — see [Calibration](#-calibration).
 
@@ -142,6 +142,27 @@ print(result.final.render())   # the CHECK to act on, in the same plain language
 ```
 
 The cut-points here are provisional; calibrate them on your own data with `fit_thresholds`. [Tutorial 3](https://github.com/groundlens-dev/groundlens/blob/main/examples/tutorials/03-consistency-checks.md) walks through both methods end to end.
+
+**Use a hosted API instead of a local model.** The consistency checks accept any generator that exposes `generate` / `generate_many`. Groundlens ships ready-made adapters for Claude, GPT, Gemini, and any OpenAI-compatible endpoint, so you do not need a local GPU:
+
+```python
+from groundlens.verify import SampleConsistency, AnthropicGenerator, OpenAIGenerator, GeminiGenerator
+
+q = "What is the capital of Australia?"
+a = "Sydney"   # confident, and wrong
+
+# Claude, scored with the embedding scorer (reuses the SGI/DGI encoder, no torch)
+checker = SampleConsistency(generator=AnthropicGenerator(model="claude-3-5-haiku-latest"), scorer="embedding")
+print(checker.verify(question=q, answer=a).check.render())
+
+# Swap the generator for GPT (or any OpenAI-compatible endpoint via base_url) or Gemini:
+OpenAIGenerator(model="gpt-4o-mini")     # base_url=... for DeepSeek, vLLM, a local gateway
+GeminiGenerator(model="gemini-1.5-flash")
+```
+
+Install the matching extra: `pip install "groundlens[anthropic]"`, `[openai]`, or `[google]`. The API key is read from the provider's usual environment variable, or pass `api_key=...`. The `embedding` scorer keeps this torch-free; the NLI scorer (`scorer="nli"`, more accurate) needs `pip install "groundlens[verify]"`.
+
+> **Privacy.** With a hosted API, your prompts and answers go to that provider, using your key, under their terms. Groundlens holds no key and has no server in the path: it never sees or stores your data, and it cannot, there is nothing of ours in between. For a no-egress option, use the local model. Full detail, and how to verify it yourself, in [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
 
 ### Rules: did the answer break a policy?
 
@@ -306,6 +327,9 @@ print(audit.audit_explanation)
 ---
 
 ## 📍 Compliance mapping
+
+Data handling, privacy, and how to verify Groundlens sends nothing out: [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
+
 
 Groundlens ships mappings from its components to specific regulatory clauses, and a hash-chained audit log that makes any decision reproducible byte-for-byte, which is what these frameworks ask for in practice:
 

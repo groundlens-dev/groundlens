@@ -34,7 +34,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from groundlens._internal.thresholds import DGI_PASS, SGI_REVIEW, SGI_STRONG_PASS
+from groundlens._internal.thresholds import (
+    DGI_PASS,
+    DGI_REVIEW,
+    SGI_REVIEW,
+    SGI_STRONG_PASS,
+)
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 
 HEADLINE = "CHECK"
@@ -172,7 +177,7 @@ def check_for_dgi(result: DGIResult) -> Check:
         label = "Looks grounded"
         message = "The answer moves the way well-grounded answers usually do."
         escalate, handoff = False, HANDOFF_OK
-    elif v >= 0.0:
+    elif v >= DGI_REVIEW:
         level = LEVEL_REVIEW
         label = "Partly grounded"
         message = "The answer only weakly follows a grounded pattern — worth a look."

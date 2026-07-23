@@ -17,9 +17,10 @@ response moved from the question) is returned separately on
 
 Geometric interpretation:
 
-    - DGI > 0.3: displacement aligns with grounded reference direction.
-    - DGI < 0.3: displacement diverges from grounded patterns.
-    - DGI < 0.0: displacement is opposite to grounded direction (high risk).
+    - DGI >= 0.594: aligns with the grounded reference direction (ok).
+    - 0.55 <= DGI < 0.594: weak alignment, worth a look (review).
+    - DGI < 0.55: diverges from grounded patterns (risk).
+    (Cut-points for the default sentence-t5-large encoder.)
 
 Calibration and ceiling:
 
@@ -55,8 +56,13 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from groundlens._internal.csv_loader import load_reference_pairs
-from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
+from groundlens._internal.embeddings import (
+    DEFAULT_MODEL,
+    encode_texts,
+    get_default_encoder,
+)
 from groundlens._internal.geometry import displacement_vector, unit_normalize
+from groundlens._internal.reference import load_certified_reference
 from groundlens._internal.thresholds import (
     DGI_PASS,
     _warn_default_thresholds_with_custom_encoder,
@@ -152,10 +158,14 @@ def _get_mu_hat(
     Returns:
         Unit-normalized reference direction, shape ``(d,)``.
     """
+    # A process-global encoder (set_default_encoder) is a hidden second input
+    # to encode_texts; fold it in so the certified vector is never dotted against
+    # a foreign embedding space and the cache never returns a stale direction.
+    active_encoder = encoder if encoder is not None else get_default_encoder()
     cache_key = (
         model_name,
         reference_csv or "__bundled__",
-        id(encoder) if encoder is not None else None,
+        id(active_encoder) if active_encoder is not None else None,
     )
 
     if cache_key not in _mu_hat_cache:
@@ -168,18 +178,34 @@ def _get_mu_hat(
                 "DGI.calibrate(pairs=...) on a DGI instance before scoring."
             )
             raise RuntimeError(msg)
-        logger.info(
-            "Computing DGI reference direction (model=%s, data=%s)...",
-            model_name,
-            reference_csv or "bundled",
-        )
-        pairs = load_reference_pairs(reference_csv)
-        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name, encoder=encoder)
-        logger.info(
-            "DGI reference direction ready (dims=%d, pairs=%d).",
-            _mu_hat_cache[cache_key].shape[0],
-            len(pairs),
-        )
+        # Default path: use the precomputed, certified reference direction.
+        # It is only valid for the exact encoder it was calibrated on, so we
+        # use it ONLY when there is no bring-your-own encoder and no custom CSV
+        # and the model matches. Any other encoder lives in a different space;
+        # dotting against a foreign mu_hat is silently wrong, so we recompute.
+        ref = load_certified_reference()
+        if reference_csv is None and active_encoder is None and model_name == ref.embedding_model:
+            logger.info(
+                "Loaded certified DGI reference (model=%s, dims=%d).",
+                ref.embedding_model,
+                ref.mu_hat.shape[0],
+            )
+            _mu_hat_cache[cache_key] = ref.mu_hat
+        else:
+            logger.info(
+                "Computing DGI reference direction (model=%s, data=%s)...",
+                model_name,
+                reference_csv or "bundled",
+            )
+            pairs = load_reference_pairs(reference_csv)
+            _mu_hat_cache[cache_key] = _compute_reference_direction(
+                pairs, model_name, encoder=encoder
+            )
+            logger.info(
+                "DGI reference direction ready (dims=%d, pairs=%d).",
+                _mu_hat_cache[cache_key].shape[0],
+                len(pairs),
+            )
 
     return _mu_hat_cache[cache_key]
 
@@ -226,7 +252,9 @@ def compute_dgi(
         msg = "response must be a non-empty string."
         raise ValueError(msg)
 
-    if (encoder is not None or model != DEFAULT_MODEL) and reference_csv is None:
+    if reference_csv is None and (
+        encoder is not None or model != DEFAULT_MODEL or get_default_encoder() is not None
+    ):
         _warn_default_thresholds_with_custom_encoder("compute_dgi", model, encoder is not None)
 
     mu_hat = _get_mu_hat(model, reference_csv, encoder=encoder)

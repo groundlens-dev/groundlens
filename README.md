@@ -365,7 +365,7 @@ The check **level** (`ok` / `review` / `risk`, on `check(...).level`) comes only
 | Metric | `check` labels | Level from |
 |---|---|---|
 | **SGI** | Supported by the document · Partly supported · Not supported by the document | SGI ≥ 1.20 / ≥ 0.95 / below |
-| **DGI** | Looks grounded · Partly grounded · Not grounded | DGI ≥ 0.30 / ≥ 0.0 / below |
+| **DGI** | Looks grounded · Partly grounded · Not grounded | DGI ≥ 0.594 / ≥ 0.55 / below |
 
 ## Second stage (`groundlens.verify`)
 

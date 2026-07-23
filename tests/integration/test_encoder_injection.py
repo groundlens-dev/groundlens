@@ -113,7 +113,10 @@ def test_set_default_encoder_applies_to_both() -> None:
 
 
 def test_resolve_trust_remote_code_default_model() -> None:
-    assert _resolve_trust_remote_code(DEFAULT_MODEL, None) is True
+    # The default encoder (sentence-t5-large) ships no custom code.
+    assert _resolve_trust_remote_code(DEFAULT_MODEL, None) is False
+    # Snowflake stays available as an override and still needs it.
+    assert _resolve_trust_remote_code("Snowflake/snowflake-arctic-embed-l-v2.0", None) is True
 
 
 def test_resolve_trust_remote_code_other_model() -> None:

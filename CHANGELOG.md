@@ -5,6 +5,37 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.7.23 -- Default encoder to sentence-t5-large; certified DGI reference
+
+### Changed (BREAKING)
+
+- **Default encoder is now `sentence-transformers/sentence-t5-large`** (768 dims),
+  the encoder the bundled SGI thresholds and the DGI reference direction were
+  calibrated on. The previous default (`Snowflake/snowflake-arctic-embed-l-v2.0`)
+  was faster to demo but its embedding space did not match the shipped
+  calibration, so out-of-the-box DGI flags were not meaningful. Scores change for
+  every deployment relying on the default. Snowflake remains available via
+  `model="Snowflake/snowflake-arctic-embed-l-v2.0"` (still loads with
+  `trust_remote_code=True`); recalibrate thresholds and `mu_hat` if you use it.
+- **DGI pass threshold is now 0.594** (was 0.30), the certified operating point
+  (Youden's J) for the default encoder, with a review floor at 0.55: `ok` >= 0.594,
+  `review` in [0.55, 0.594), `risk` below 0.55.
+
+### Added
+
+- **Bundled certified DGI reference** (`groundlens/data/generic_reference.json`):
+  the precomputed reference direction (`mu_hat`) and threshold for sentence-t5-large,
+  from 212 human-crafted confabulations across 9 domains (AUROC 0.786). DGI loads
+  this directly instead of re-embedding the calibration corpus on first use, so the
+  default path obtains `mu_hat` with no model load and is instant and deterministic.
+
+### Fixed
+
+- **DGI no longer combines vectors from mismatched embedding spaces.** The certified
+  reference is used only for its own encoder; a bring-your-own encoder or a
+  process-global `set_default_encoder` now always triggers a recomputation in that
+  space instead of being silently dotted against the bundled direction.
+
 ## 2026.7.13 -- The register wall: retraction, and the controls
 
 ### Removed (retraction)

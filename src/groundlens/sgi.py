@@ -45,7 +45,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
+from groundlens._internal.embeddings import (
+    DEFAULT_MODEL,
+    encode_texts,
+    get_default_encoder,
+)
 from groundlens._internal.thresholds import (
     SGI_REVIEW,
     _warn_default_thresholds_with_custom_encoder,
@@ -127,7 +131,7 @@ def compute_sgi(
         msg = "response must be a non-empty string."
         raise ValueError(msg)
 
-    if encoder is not None or model != DEFAULT_MODEL:
+    if encoder is not None or model != DEFAULT_MODEL or get_default_encoder() is not None:
         _warn_default_thresholds_with_custom_encoder("compute_sgi", model, encoder is not None)
 
     embeddings = encode_texts([question, context, response], model_name=model, encoder=encoder)

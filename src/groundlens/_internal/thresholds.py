@@ -33,12 +33,19 @@ SGI_REVIEW: float = 0.95
 # DGI = dot(normalize(phi(r) - phi(q)), mu_hat)
 #
 # Interpretation:
-#   DGI > 0.3  → displacement aligns with verified grounded patterns
-#   DGI < 0.3  → displacement diverges from grounded patterns (risk)
-#   DGI < 0.0  → displacement is opposite to grounded direction (high risk)
+#   DGI >= 0.594  → aligns with verified grounded patterns (ok)
+#   0.55 to 0.594 → weak alignment (review)
+#   DGI < 0.55    → diverges from grounded patterns (risk)
+# (certified operating point for the default sentence-t5-large encoder)
 
-DGI_PASS: float = 0.30
-"""DGI score indicating alignment with grounded reference direction. Green zone."""
+DGI_PASS: float = 0.594
+"""DGI at or above this reads as grounded (ok). Certified operating point
+(Youden's J) for the default sentence-t5-large encoder; see
+``groundlens/data/generic_reference.json``. Only meaningful with that encoder."""
+
+DGI_REVIEW: float = 0.55
+"""DGI in ``[DGI_REVIEW, DGI_PASS)`` reads as partly grounded (review); below
+``DGI_REVIEW`` reads as not grounded (risk)."""
 
 
 # ── Encoder / threshold mismatch warning ─────────────────────────────────────
@@ -112,10 +119,11 @@ def normalize_dgi(raw_dgi: float) -> float:
     Simple linear mapping: normalized = (raw + 1) / 2.
 
     Mapping reference points:
-        DGI -1.0 → 0.000 (opposite to grounded direction)
-        DGI  0.0 → 0.500 (orthogonal)
-        DGI  0.3 → 0.650 (pass threshold)
-        DGI  1.0 → 1.000 (perfectly aligned)
+        DGI -1.0  → 0.000 (opposite to grounded direction)
+        DGI  0.0  → 0.500 (orthogonal)
+        DGI  0.55 → 0.775 (review floor)
+        DGI  0.59 → 0.797 (pass threshold)
+        DGI  1.0  → 1.000 (perfectly aligned)
 
     Args:
         raw_dgi: The raw DGI cosine similarity to reference direction.
