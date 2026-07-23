@@ -146,22 +146,21 @@ The cut-points here are provisional; calibrate them on your own data with `fit_t
 **Use a hosted API instead of a local model.** The consistency checks accept any generator that exposes `generate` / `generate_many`. Groundlens ships ready-made adapters for Claude, GPT, Gemini, and any OpenAI-compatible endpoint, so you do not need a local GPU:
 
 ```python
-from groundlens.verify import two_stage, AnthropicGenerator, OpenAIGenerator, GeminiGenerator
+from groundlens.verify import SampleConsistency, AnthropicGenerator, OpenAIGenerator, GeminiGenerator
 
 q = "What is the capital of Australia?"
 a = "Sydney"   # confident, and wrong
 
-# Claude
-two_stage(question=q, answer=a, generator=AnthropicGenerator(model="claude-3-5-haiku-latest"))
+# Claude, scored with the embedding scorer (reuses the SGI/DGI encoder, no torch)
+checker = SampleConsistency(generator=AnthropicGenerator(model="claude-3-5-haiku-latest"), scorer="embedding")
+print(checker.verify(question=q, answer=a).check.render())
 
-# GPT, or any OpenAI-compatible endpoint via base_url (DeepSeek, vLLM, a local gateway)
-two_stage(question=q, answer=a, generator=OpenAIGenerator(model="gpt-4o-mini"))
-
-# Gemini
-two_stage(question=q, answer=a, generator=GeminiGenerator(model="gemini-1.5-flash"))
+# Swap the generator for GPT (or any OpenAI-compatible endpoint via base_url) or Gemini:
+OpenAIGenerator(model="gpt-4o-mini")     # base_url=... for DeepSeek, vLLM, a local gateway
+GeminiGenerator(model="gemini-1.5-flash")
 ```
 
-Install the matching extra: `pip install "groundlens[anthropic]"`, `[openai]`, or `[google]`. The API key is read from the provider's usual environment variable, or pass `api_key=...`.
+Install the matching extra: `pip install "groundlens[anthropic]"`, `[openai]`, or `[google]`. The API key is read from the provider's usual environment variable, or pass `api_key=...`. The `embedding` scorer keeps this torch-free; the NLI scorer (`scorer="nli"`, more accurate) needs `pip install "groundlens[verify]"`.
 
 > **Privacy.** With a hosted API, your prompts and answers go to that provider, using your key, under their terms. Groundlens holds no key and has no server in the path: it never sees or stores your data, and it cannot, there is nothing of ours in between. For a no-egress option, use the local model. Full detail, and how to verify it yourself, in [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
 

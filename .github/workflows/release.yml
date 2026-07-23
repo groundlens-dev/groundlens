@@ -54,7 +54,8 @@ jobs:
   # Supply-chain: SBOM + Sigstore signatures + a GitHub Release with assets.
   # NOTE: this job is intentionally non-blocking (continue-on-error) so it can
   # never break the PyPI publish. The pip installs below are unpinned pending a
-  # hashed requirements file; pin exact versions and verify on the first tag.
+  # hashed requirements file; the installs below are range-bounded, not
+  # hash-pinned. Pin exact versions with hashes and verify on the first tag.
   supply-chain:
     name: SBOM + signed release assets
     runs-on: ubuntu-latest
@@ -75,12 +76,12 @@ jobs:
           path: dist/
       - name: Generate CycloneDX SBOM
         run: |
-          pip install cyclonedx-bom
+          pip install "cyclonedx-bom>=4,<6"
           pip install dist/*.whl
           cyclonedx-py environment -o groundlens.cdx.json
       - name: Sign distributions with Sigstore
         run: |
-          pip install sigstore
+          pip install "sigstore>=3,<4"
           python -m sigstore sign dist/*.whl dist/*.tar.gz
       - name: Create GitHub Release with assets
         env:

@@ -53,8 +53,9 @@ This is structural, not a promise:
   no-egress container. During local scoring (after the one-time model download)
   there are zero outbound connections. With an API generator, the only traffic is
   to the endpoint you configured.
-- **Read the source:** `grep -rniE "requests|urllib|httpx|socket|telemetry|analytics" src/groundlens/`
-  returns nothing in the core scoring path.
+- **Read the source:** the core scoring path imports no HTTP client or socket.
+  Confirm with an import-anchored search (returns nothing):
+  `grep -rnE "^[[:space:]]*(import|from) .*(requests|httpx|urllib|socket|http\.client)" src/groundlens/`
 
 ## Fully offline / air-gapped operation
 

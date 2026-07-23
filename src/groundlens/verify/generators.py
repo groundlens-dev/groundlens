@@ -167,7 +167,13 @@ class GeminiGenerator:
                 "max_output_tokens": self.max_output_tokens,
             },
         )
-        return (getattr(resp, "text", "") or "").strip()
+        # resp.text is a property that raises ValueError when the candidate is
+        # blocked or has no text part; treat that as an empty sample.
+        try:
+            text = resp.text
+        except (ValueError, AttributeError):
+            text = ""
+        return (text or "").strip()
 
     def generate(self, prompt: str, n: int = 1) -> list[str]:
         """Return ``n`` sampled completions of a single prompt."""
