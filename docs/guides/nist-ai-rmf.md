@@ -76,7 +76,7 @@ environment.
 ### MAP 2.3 — Context characterization
 
 The DGI calibration corpus characterizes the operating context for
-hallucination detection:
+grounding verification:
 
 ```python
 from groundlens import compute_dgi

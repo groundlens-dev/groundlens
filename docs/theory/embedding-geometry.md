@@ -4,7 +4,7 @@ This page provides the mathematical foundations underlying groundlens. We cover 
 
 ## Embedding Spaces and $\mathbb{R}^n$
 
-A sentence-transformer model $\phi$ maps variable-length text strings to fixed-dimensional vectors in $\mathbb{R}^n$. For the default model `all-MiniLM-L6-v2`, $n = 384$. For `all-mpnet-base-v2`, $n = 768$.
+A sentence-transformer model $\phi$ maps variable-length text strings to fixed-dimensional vectors in $\mathbb{R}^n$. For the default model `Snowflake/snowflake-arctic-embed-l-v2.0`, $n = 1024$. For the lightweight `all-MiniLM-L6-v2`, $n = 384$; for `all-mpnet-base-v2`, $n = 768$.
 
 $$
 \phi: \mathcal{T} \to \mathbb{R}^n
@@ -78,7 +78,7 @@ The theoretical foundation for why embedding geometry encodes semantic meaning i
 Modern sentence transformers extend this principle from words to sentences. Texts that appear in similar contexts --- that are used in similar ways, answer similar questions, or describe similar concepts --- receive similar embedding vectors. This is not a coincidence but a direct consequence of the contrastive training objective: the model is trained to minimize the distance between semantically similar text pairs and maximize the distance between dissimilar pairs.
 
 !!! abstract "Why this matters for groundlens"
-    The distributional hypothesis is both the **strength** and the **limitation** of geometric hallucination detection. It is the reason embeddings encode semantic similarity (enabling SGI and DGI), and it is also the reason DGI cannot detect human-crafted confabulations that mimic the distributional properties of grounded text (see [Confabulation Boundary](confabulation-boundary.md)).
+    The distributional hypothesis is both the **strength** and the **limitation** of geometric grounding checks. It is the reason embeddings encode semantic similarity (enabling SGI and DGI), and it is also the reason DGI cannot detect human-crafted confabulations that mimic the distributional properties of grounded text (see [Confabulation Boundary](confabulation-boundary.md)).
 
 ## Sentence Transformer Training
 
@@ -95,7 +95,7 @@ where $\text{sim}$ is cosine similarity and $\tau$ is a temperature parameter. T
 - Contradictions are distant
 - Unrelated texts are scattered
 
-The resulting geometry is not arbitrary --- it reflects genuine semantic structure that groundlens leverages for hallucination detection.
+The resulting geometry is not arbitrary: it reflects genuine semantic structure, and that structure is what groundlens reads to check provenance. It is also the reason for the ceiling: what the geometry does not encode, no decoder over it can recover.
 
 ## The Unit Hypersphere $S^{n-1}$
 

@@ -59,8 +59,9 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="groundlens API",
     description=(
-        "LLM hallucination detection using embedding geometry. "
-        "No second LLM. Deterministic. Same inputs → same scores."
+        "Deterministic grounding check using embedding geometry. First-stage triage: "
+        "it tells you whether a response was drawn from its source, not whether the "
+        "source supports it. Known blind spot: in-register factual substitution."
     ),
     version="2026.5.12",
     docs_url="/docs",
@@ -145,8 +146,11 @@ class DGIDetail(BaseModel):
 class GroundingResult(BaseModel):
     """Structured response from a grounding check."""
 
-    status: str = Field(description="GROUNDED or HALLUCINATION RISK")
-    flagged: bool = Field(description="True if hallucination risk detected")
+    check: str = Field(description="Plain-language CHECK from groundlens.check")
+    level: str = Field(description="ok | review | risk")
+    escalate: bool = Field(default=False, description="True when geometry cannot settle this case")
+    handoff: str = Field(default="", description="What the second stage has to do. Never drop it.")
+    flagged: bool = Field(description="True when the response did not engage its source")
     method: str = Field(description="SGI or DGI")
     score: float = Field(description="Grounding score")
     threshold: float = Field(description="Score threshold for flagging")
@@ -176,17 +180,19 @@ def _run_sgi(question: str, context: str, response: str) -> GroundingResult:
     result = compute_sgi(question=question, context=context, response=response)
     latency = int((time.monotonic() - t0) * 1000)
 
+    from groundlens import check as _check
+
+    v = _check(result)
     return GroundingResult(
-        status="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
+        check=v.label,
+        level=v.level,
+        escalate=v.escalate,
+        handoff=v.handoff,
         flagged=result.flagged,
         method="SGI (Semantic Grounding Index)",
         score=round(result.value, 4),
         threshold=0.95,
-        explanation=(
-            "The response appears grounded in the source material."
-            if not result.flagged
-            else "The response may not be based on the source material provided."
-        ),
+        explanation=v.message,
         detail=SGIDetail(
             q_dist=round(result.q_dist, 4),
             ctx_dist=round(result.ctx_dist, 4),
@@ -203,17 +209,19 @@ def _run_dgi(question: str, response: str) -> GroundingResult:
     result = compute_dgi(question=question, response=response)
     latency = int((time.monotonic() - t0) * 1000)
 
+    from groundlens import check as _check
+
+    v = _check(result)
     return GroundingResult(
-        status="GROUNDED" if not result.flagged else "HALLUCINATION RISK",
+        check=v.label,
+        level=v.level,
+        escalate=v.escalate,
+        handoff=v.handoff,
         flagged=result.flagged,
         method="DGI (Directional Grounding Index)",
         score=round(result.value, 4),
         threshold=0.30,
-        explanation=(
-            "The response follows patterns typical of grounded answers."
-            if not result.flagged
-            else "The response shows geometric patterns associated with hallucination."
-        ),
+        explanation=v.message,
         detail=DGIDetail(
             interpretation=result.explanation,
         ),

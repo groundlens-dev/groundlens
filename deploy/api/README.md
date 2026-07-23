@@ -13,14 +13,14 @@ tags:
 - grounding
 - groundlens
 - api
-short_description: REST API for geometric LLM hallucination detection
+short_description: REST API for deterministic grounding checks (SGI/DGI)
 ---
 
 # groundlens API
 
-REST API for [groundlens](https://groundlens.dev) — LLM hallucination detection using embedding geometry.
+REST API for [groundlens](https://groundlens.dev) — a deterministic first-stage grounding check using embedding geometry. It checks whether a response was drawn from its source, not whether the source supports it.
 
-No second LLM. Deterministic. Same inputs → same scores.
+No model in the scoring path. Deterministic. Same inputs → same scores. Every response carries `escalate` and `handoff`: a passing check means the answer came from the source, not that its facts are right.
 
 ## Endpoints
 
@@ -69,7 +69,8 @@ r = requests.post(
         "response": "The capital of France is Paris.",
     },
 )
-print(r.json()["status"])  # GROUNDED
+print(r.json()["check"])     # e.g. "Looks grounded"
+print(r.json()["handoff"])   # what geometry cannot settle
 ```
 
 ### JavaScript
@@ -84,25 +85,31 @@ const res = await fetch("https://groundlens-groundlens-api.hf.space/v1/check", {
   }),
 });
 const data = await res.json();
-console.log(data.status); // GROUNDED
+console.log(data.check);   // e.g. "Looks grounded"
+console.log(data.handoff); // what geometry cannot settle
 ```
 
 ## Response format
 
 ```json
 {
-  "status": "GROUNDED",
+  "check": "Looks grounded",
+  "level": "ok",
+  "escalate": false,
+  "handoff": "Grounding, not facts: a plausible wrong fact in the right frame would pass this check. Verify facts in a second stage.",
   "flagged": false,
   "method": "DGI (Directional Grounding Index)",
   "score": 0.4521,
   "threshold": 0.30,
-  "explanation": "The response follows patterns typical of grounded answers.",
+  "explanation": "The answer moves the way well-grounded answers usually do.",
   "detail": {
     "interpretation": "Positive directional alignment with grounded response patterns."
   },
   "latency_ms": 45
 }
 ```
+
+**`check` is not a verdict, and `handoff` is not optional.** A pass means the response was drawn from its source. It does not mean the facts are right: an in-register factual substitution (right frame, wrong number) passes this check by design. Render the handoff, and route `escalate: true` to an entailment check, a source lookup, or a judge.
 
 ## Self-hosting
 

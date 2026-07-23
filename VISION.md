@@ -6,13 +6,13 @@ I built groundlens because I kept asking the same question and nobody had a good
 
 My background is not a straight line. Chemical engineering, an MBA, social psychology, a reinvention into data analytics, and then AI -- each pivot driven by curiosity and the reality that the Spanish job market is not kind to a 53-year-old who refuses to stop learning. That winding path turned out to be the point. The math came from engineering. The skepticism about overconfident systems came from psychology. The insistence on auditability came from working in regulated industries where "the model said so" is not an acceptable answer.
 
-The first paper (SGI) started from a geometric observation so simple it felt like it couldn't be new: if a response actually engaged with its source material, it should be *closer* to that material than to the question that prompted it. Measure the distance ratio. That's the whole idea. It was new. It worked. Three peer-reviewed papers later, the geometric framework detects the hallucination types that matter most in production -- and is honest about the ones it cannot catch.
+The first paper (SGI) started from a geometric observation so simple it felt like it couldn't be new: if a response actually engaged with its source material, it should be *closer* to that material than to the question that prompted it. Measure the distance ratio. That's the whole idea. It was new. It worked. Three papers later, a fourth one falsified part of it: the same geometry that separates a disengaged answer cannot separate a wrong fact stated in the right frame, and most of the field's reported skill on that class turns out to be an authorship artifact. So the framework measures semantic disengagement and provenance, it publishes the class of error it cannot catch as a number, and it escalates that class instead of guessing at it.
 
-groundlens is built by someone who has been on the other side of every tool that promises more than it delivers. It will never claim to detect what it mathematically cannot detect. That is the commitment.
+groundlens is built by someone who has been on the other side of every tool that promises more than it delivers. It will never claim to detect what it mathematically cannot detect, and when a published number turns out to have measured the wrong thing, it gets withdrawn in public. That is the commitment.
 
 ## The problem
 
-LLM hallucination detection is stuck in a paradox: the dominant approach uses a second LLM to judge the first. This creates three fundamental issues:
+Verification is stuck on cost: the dominant approach uses a second LLM to judge the first, on every output. This creates three fundamental issues:
 
 1. **Non-determinism.** Ask the judge LLM the same question twice and you may get different rulings. You cannot reproduce results, you cannot audit decisions, and you cannot explain to a regulator why a specific output was flagged or passed.
 
@@ -51,14 +51,14 @@ DGI = dot(normalize(delta), mu_hat)
 
 The reference direction `mu_hat` is computed from calibration data -- verified correct question-response pairs. DGI checks whether new responses follow the same geometric pattern.
 
-Generic calibration achieves AUROC ~0.76. Domain-specific calibration (20-100 verified pairs from your domain) reaches 0.90-0.99.
+Calibration moves the operating point, not the wall. Overall AUROC moves 0.684 -> 0.736, and the gain lands at the easy out-of-register end (0.717 -> 0.815). The in-register bin moves only 0.626 -> 0.689. With authorship held constant, DGI reaches 0.606 and the ceiling of the whole embedding-similarity class is about 0.68.
 
 ### What makes this work
 
 - **Single embedding model.** `all-MiniLM-L6-v2` is 80MB. No GPU required. Sub-second inference.
 - **Deterministic.** Same inputs always produce the same score. Reproducible across runs, machines, and time.
 - **Auditable.** Every score decomposes into distances and angles that can be inspected, logged, and explained.
-- **Domain-adaptable.** Calibration with a small set of verified pairs from your domain transforms generic detection into domain-expert detection.
+- **Bounded, and it says so.** The blind spot is published as a number, not a footnote: in-register factual substitution is invisible to any embedding-similarity score and is escalated, not guessed.
 
 ## What groundlens is not
 
@@ -73,7 +73,7 @@ The value proposition is verification triage: prioritize what to review, flag wh
 - SGI for grounded hallucination detection in RAG pipelines (arXiv:2512.13771)
 - DGI for context-free hallucination detection via directional analysis (arXiv:2602.13224v3)
 - Confabulation boundary characterization via rotational dynamics (arXiv:2603.13259)
-- Domain calibration framework achieving AUROC 0.90-0.99
+- Characterization of the register wall, the authorship control, and the ceiling of the embedding-similarity class (*The Register Wall*, under review)
 
 ### Active research
 

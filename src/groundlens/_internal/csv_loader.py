@@ -6,9 +6,9 @@ Two sources of reference pairs:
    Contains verified grounded (question, response) pairs across finance,
    medical, science, and history domains. Used when no user CSV is provided.
 
-2. **User-provided CSV**: Domain-specific pairs that improve DGI accuracy.
-   Generic calibration (bundled) achieves AUROC ~0.76.
-   Domain-specific calibration typically reaches AUROC 0.90-0.99.
+2. **User-provided CSV**: Domain-specific pairs that sharpen the reference
+   direction. Calibration sets the operating point; it does not remove the
+   blind spot. See ``groundlens.dgi`` for the ceiling.
 
 User CSV format:
     - Comma or semicolon delimited (auto-detected from first 1024 bytes).

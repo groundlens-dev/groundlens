@@ -4,6 +4,17 @@
 # ///
 """Human confabulation benchmark — AUROC evaluation for SGI and DGI.
 
+WARNING: this dataset has an authorship confound. Every grounded response
+was written by a model from a source; every confabulation was written by a
+person from memory. Authorship is perfectly correlated with the label, so a
+detector can score highly here by recognising who wrote the text rather than
+whether it is grounded. Hold authorship constant and a logistic probe falls
+from 0.932 to 0.660, an MLP from 0.935 to 0.675, and the directional score
+to 0.606.
+
+The AUROC this script prints is an upper bound contaminated by authorship.
+Do not publish it. See *The Register Wall* for the controlled evaluation.
+
 Loads the cert-framework/human-confabulation-benchmark dataset from
 HuggingFace (212 pairs), runs both SGI and DGI scoring on all items,
 and reports AUROC using scikit-learn.

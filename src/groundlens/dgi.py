@@ -1,4 +1,4 @@
-"""Directional Grounding Index (DGI) — context-free hallucination detection.
+"""Directional Grounding Index (DGI) — context-free grounding score.
 
 DGI evaluates whether an LLM response follows the characteristic semantic
 displacement pattern of grounded responses — without requiring source context.
@@ -21,12 +21,19 @@ Geometric interpretation:
     - DGI < 0.3: displacement diverges from grounded patterns.
     - DGI < 0.0: displacement is opposite to grounded direction (high risk).
 
-Calibration:
+Calibration and ceiling:
 
-    DGI accuracy depends heavily on the reference direction mu_hat.
-    Generic calibration (bundled dataset) achieves AUROC ~0.76.
-    Domain-specific calibration typically reaches AUROC 0.90-0.99.
-    The confabulation benchmark reports DGI AUROC 0.958 with domain calibration.
+    DGI's reference direction mu_hat is fit on verified grounded pairs.
+    Calibration sets the operating point. It does not remove the blind spot.
+
+    DGI's skill declines toward chance as a confabulation stays in the
+    register of a correct answer. With authorship held constant it reaches
+    AUROC 0.606, and the ceiling of the whole embedding-similarity class is
+    about 0.68. That is a ceiling, not a shortfall: no decoder over these
+    embeddings does materially better without reading authorship.
+
+    Escalate in-register cases to a second stage: an entailment check (NLI),
+    a source lookup, or a judge. Entailment does not decline in register.
 
 Use cases:
 

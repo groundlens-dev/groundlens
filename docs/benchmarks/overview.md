@@ -16,6 +16,11 @@ AUROC ranges from 0.0 to 1.0:
 | 0.70--0.80 | Fair --- informative but not reliable alone |
 | 0.50 | Random chance --- no discrimination |
 
+!!! danger "Read this scale against the ceiling of the method"
+    For embedding-similarity detectors, an **authorship-controlled** AUROC in the high 0.6s is at the ceiling of what the whole class can do. Nothing in this family lands in the 0.9 band on a controlled evaluation.
+
+    So a reported 0.9+ here is not a signal of quality. It is a signal to go looking for a shortcut: authorship, length, or a generation-condition artifact. We know, because we published one. See [Results](results.md).
+
 ### Why AUROC?
 
 AUROC is **threshold-independent**: it evaluates the scoring function's ability to rank grounded responses above hallucinated ones, regardless of where you set the decision threshold. This is important because different deployments may use different thresholds based on their risk tolerance.
@@ -108,6 +113,16 @@ To ensure fair comparison, all benchmarks follow the same protocol:
 3. **Separate calibration and test sets**: For DGI, calibration pairs are never in the test set.
 4. **Stratified evaluation**: AUROC is computed separately for each hallucination type (divergent, tangential, confabulation).
 
+The first four are table stakes. The next four are the ones that decide whether a number means anything, and most published detectors, including our own earlier work, fail them.
+
+5. **Authorship control.** The grounded and the confabulated text must come from the same author. If the true answers are machine-written and the false ones human-written (or the reverse), the label is correlated with authorship and a detector can score highly by recognising **who wrote the text** rather than whether it is grounded. A detector that loses its score under this control was reading authorship. Ours did: a logistic probe falls 0.932 → 0.660, an MLP 0.935 → 0.675, the directional score to 0.606.
+6. **Length matching.** Report the length-matched AUROC next to the raw one. RAGTruth-QA is the cautionary case: an apparent 0.705 falls to 0.634 once lengths are matched.
+7. **Register binning.** Report the per-bin curve from out-of-register to in-register, not a single pooled AUROC. Pooling hides the wall, which is the entire phenomenon.
+8. **Publish the blind spot as a number**, not as a caveat at the bottom of the page.
+
+!!! danger "House rule"
+    **No benchmark number ships without the authorship and length controls.** If a figure has not been through them, label it *pending controls* or do not publish it. This applies to this documentation, the README, the papers and the slides.
+
 ## Reproducing Results
 
 All reported results can be reproduced exactly because:
@@ -116,9 +131,13 @@ All reported results can be reproduced exactly because:
 - Benchmark datasets are **versioned** and publicly available
 - The embedding model is **fixed** and downloadable
 
+!!! warning "Determinism is not validity"
+    Reproducing a number guarantees you get the same number twice. It does not guarantee the number measures grounding. An authorship artifact reproduces perfectly. That is what the controls above are for.
+
 ```bash
-# Reproduce the headline DGI AUROC 0.958 result
 groundlens benchmark --dataset cert-framework/human-confabulation-benchmark
 ```
+
+This dataset has a known authorship confound (grounded answers written by a model, confabulations written by a person). The benchmark prints a warning above its AUROC. Read it before quoting anything.
 
 See [Results](results.md) for the full numbers.

@@ -220,7 +220,7 @@ DGI can be framed as a one-sided hypothesis test:
 
 The DGI score is the test statistic. The threshold DGI = 0.30 defines the rejection region. Under $H_0$, the probability of DGI > 0.30 is vanishingly small (since $0.30 / 0.051 \approx 5.9\sigma$), giving the test high specificity.
 
-Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.30, giving the test high sensitivity. This explains the observed AUROC values of 0.90--0.99 with domain calibration.
+Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.30. Note what the null is here: a **uniformly random direction**, not a competent confabulation. Against an in-register confabulation the separation is far smaller, and no threshold choice recovers it: with authorship held constant the empirical AUROC is ≈ 0.68. The vMF argument gives the *form* of the statistic. It does not license the uncontrolled numbers this section used to quote.
 
 ## Geometric Visualization
 

@@ -1,31 +1,32 @@
 # Groundlens
 
 <div align="center">
-  <img src="assets/Logo_groundlens_new-05.png" alt="groundlens" width="200">
+  <img src="assets/logo.png" alt="groundlens" width="200">
 </div>
 
-## Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
+# Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
 
----
 
-Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human) runs only on the outputs that actually need it. It provides two complementary scoring methods:
+
+Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human reviewer) runs only on the outputs that actually need it. It provides two complementary scoring methods:
 
 - **SGI (Semantic Grounding Index)** --- measures whether a response engaged with provided source context, using distance ratios in embedding space.
 - **DGI (Directional Grounding Index)** --- evaluates response grounding without any context, using directional statistics on displacement vectors.
 
 Both methods are deterministic, sub-second, and produce auditable numeric scores. Groundlens runs *before* any LLM-as-judge, not instead of one: it is the deterministic filter that decides what the expensive check even has to look at.
 
-!!! info "What Groundlens is (and is not)"
-    Groundlens is **Stage 1**: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to **Stage 2**, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.
+## Why Groundlens
+Groundlens is **Stage 1**: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to **Stage 2**, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.
 
 ## Key Features
 
 | Feature | Description |
 |---|---|
+| **MCP available** | [Groundlens MCP](https://github.com/groundlens-dev/groundlens-mcp) |
 | **Two scoring modes** | SGI (with context) and DGI (context-free) cover all verification scenarios |
 | **Deterministic** | Same inputs always produce the same score --- no sampling variance |
 | **Sub-second** | Sentence-transformer inference, not LLM generation |
-| **Domain calibration** | Generic AUROC ~0.8; domain-specific calibration reaches 0.90--0.99 |
+| **Domain calibration** | SGI accepts domain calibration to reach AUROC > 0.8 | 
 | **EU AI Act ready** | No opaque second LLM --- fully auditable decision pipeline |
 | **Provider wrappers** | OpenAI, Anthropic, Google Gemini with automatic scoring |
 | **Framework integrations** | LangChain, CrewAI, Semantic Kernel, AutoGen |
@@ -44,7 +45,7 @@ pip install "groundlens[langchain]"    # LangChain integration
 pip install "groundlens[all]"          # Everything
 ```
 
-## 3-Line Example
+## Basic example
 
 ```python
 from groundlens import evaluate
@@ -64,7 +65,7 @@ print(check(score).line())
 # CHECK: Supported by the document (Semantic Grounding Index - SGI=1.23)
 ```
 
-## Setup in 30 Seconds
+## Quick Setup
 
 1. **Embed** the question, response, and (optionally) context into $\mathbb{R}^n$ using a sentence transformer.
 2. **Compute a geometric score**:
@@ -76,16 +77,19 @@ No token generation. No prompt engineering. No stochastic sampling. Pure geometr
 
 ## Research Papers
 
-| Paper | Index | arXiv |
+| Paper | Index | Preprint |
 |---|---|---|
 | Semantic Grounding Index for LLM Hallucination Detection | SGI | [2512.13771](https://arxiv.org/abs/2512.13771) |
 | A Geometric Taxonomy of Hallucinations in LLMs | DGI | [2602.13224](https://arxiv.org/pdf/2602.13224v3) |
-| Rotational Dynamics of Factual Constraint Processing | Confabulation benchmark | [2603.13259](https://arxiv.org/abs/2603.13259) |
+| How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing | Mechanistic Interpretability | [2603.13259](https://arxiv.org/abs/2603.13259) |
 
-## Author
+## Contributing to Groundlens
 
-**Javier Marin** --- [javier@groundlens.dev](mailto:javier@groundlens.dev) and [javier@jmarin.info](mailto:javier@jmarin.info)
+All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. A detailed overview on how to contribute can be found in the contributing guide.
 
----
+If you are simply looking to start working with the pandas codebase, navigate to the GitHub "issues" tab and start looking through interesting issues. There are a number of issues listed under Docs and good first issue where you could start out.
 
-*Groundlens is part of the [CERT Framework](https://github.com/groundlens-dev/groundlens) for verification triage --- helping teams prioritize which LLM outputs need human review.*
+Feel free to ask questions: [javier@groundlens.dev](mailto:javier@groundlens.dev) / [javier@jmarin.info](mailto:javier@jmarin.info)
+
+
+*As contributors and maintainers to this project, you are expected to abide by groundlens' code of conduct. More information can be found at: Contributor Code of Conduct*

@@ -1,8 +1,9 @@
 """Domain-specific calibration for DGI reference direction.
 
-DGI accuracy improves dramatically with domain-specific calibration.
-Generic calibration (bundled dataset) achieves AUROC ~0.76.
-Domain-specific calibration typically reaches AUROC 0.90-0.99.
+Calibration moves the operating point, not the blind spot. Overall AUROC
+moves 0.684 -> 0.736, and almost all of that gain lands on confabulations
+that are already out of register (0.717 -> 0.815). The in-register bin moves
+only 0.626 -> 0.689. Calibrate to set your escalation rate.
 
 This module provides a standalone calibration API for creating,
 saving, and loading domain-specific reference directions.
@@ -17,7 +18,7 @@ Example:
     >>> from groundlens import calibrate
     >>> result = calibrate(pairs=[("Q1?", "A1."), ("Q2?", "A2.")])
     >>> result.auroc_estimate
-    0.92
+    0.69
     >>> result.save("my_domain_calibration.json")
 """
 

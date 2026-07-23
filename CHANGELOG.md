@@ -5,7 +5,47 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
-## Unreleased
+## 2026.7.13 -- The register wall: retraction, and the controls
+
+### Removed (retraction)
+
+- **Withdrawn: the 0.90-0.99 domain-calibration AUROC range, DGI 0.958, the
+  87.8% confabulation detection rate, and the NLI-at-chance baseline.** All
+  four rested on evaluations in which the grounded and the confabulated text
+  had different authors. Authorship was correlated with the label, so the
+  detectors were scored on a shortcut. With authorship held constant a logistic
+  probe falls from 0.932 to 0.660, an MLP from 0.935 to 0.675, and the
+  directional score (DGI) to 0.606. The ceiling of the whole
+  embedding-similarity class is in the high 0.6s.
+- **Withdrawn: every claim that geometry outperforms NLI.** An NLI
+  cross-encoder does *not* decline as a confabulation stays in register: it
+  holds AUROC 0.836, 0.786, 0.837, 0.719, 0.887 across the register bins and is
+  the strongest method at the in-register end. Entailment is now the
+  **recommended second stage**, not a baseline we beat.
+- Deleted `examples/ragtruth_precision_stratified_report.md` and
+  `examples/ragtruth_A3_variant_findings.md`: both reported beats-baselines
+  numbers on RAGTruth, whose apparent skill is a length artifact
+  (length-matched, 0.676 -> 0.634).
+
+### Added
+
+- **The register wall, the ceiling, and the evaluation checklist** in the
+  README, replacing the withdrawn benchmark tables. Domain calibration is
+  restated correctly: overall 0.684 -> 0.736, with the gain at the easy
+  out-of-register end (0.717 -> 0.815) and the in-register bin moving only
+  0.626 -> 0.689.
+- **Authorship-confound warnings** printed by `benchmarks/compare_methods.py`
+  and documented in `benchmarks/confabulation_benchmark.py`.
+- **House rule in `CLAUDE.md` and `AGENTS.md`:** no benchmark number ships
+  without the authorship and length controls.
+
+### Changed
+
+- Every surviving benchmark figure (SGI on HaluEval QA, the FACTS provenance
+  figure) is now flagged **pending the authorship and length controls**.
+- Package, CLI and compliance docstrings no longer describe groundlens as
+  "hallucination detection". It is a grounding check: semantic disengagement
+  and provenance, not factual truth.
 
 ### Changed
 

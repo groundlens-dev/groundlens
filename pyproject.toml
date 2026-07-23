@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "groundlens"
-version = "2026.7.6"
-description = "Verifiable agent triage. Geometry + rules. No second LLM in the loop."
+version = "2026.7.14"
+description = "Deterministic first-stage grounding triage. It decides what your expensive check has to look at."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
