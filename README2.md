@@ -143,6 +143,28 @@ print(result.final.render())   # the CHECK to act on, in the same plain language
 
 The cut-points here are provisional; calibrate them on your own data with `fit_thresholds`. [Tutorial 3](https://github.com/groundlens-dev/groundlens/blob/main/examples/tutorials/03-consistency-checks.md) walks through both methods end to end.
 
+**Use a hosted API instead of a local model.** The consistency checks accept any generator that exposes `generate` / `generate_many`. Groundlens ships ready-made adapters for Claude, GPT, Gemini, and any OpenAI-compatible endpoint, so you do not need a local GPU:
+
+```python
+from groundlens.verify import two_stage, AnthropicGenerator, OpenAIGenerator, GeminiGenerator
+
+q = "What is the capital of Australia?"
+a = "Sydney"   # confident, and wrong
+
+# Claude
+two_stage(question=q, answer=a, generator=AnthropicGenerator(model="claude-3-5-haiku-latest"))
+
+# GPT, or any OpenAI-compatible endpoint via base_url (DeepSeek, vLLM, a local gateway)
+two_stage(question=q, answer=a, generator=OpenAIGenerator(model="gpt-4o-mini"))
+
+# Gemini
+two_stage(question=q, answer=a, generator=GeminiGenerator(model="gemini-1.5-flash"))
+```
+
+Install the matching extra: `pip install "groundlens[anthropic]"`, `[openai]`, or `[google]`. The API key is read from the provider's usual environment variable, or pass `api_key=...`.
+
+> **Privacy.** With a hosted API, your prompts and answers go to that provider, using your key, under their terms. Groundlens holds no key and has no server in the path: it never sees or stores your data, and it cannot, there is nothing of ours in between. For a no-egress option, use the local model. Full detail, and how to verify it yourself, in [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
+
 ### Rules: did the answer break a policy?
 
 A **rule** is a small, named check that reads the answer and returns pass or fail with the evidence, and carries a citation to why it exists (a paper, a standard, a regulation or an internal rule). It catches the specific, mechanical failures geometry does not: an invented figure, a missing disclosure, a claim outside the agent's remit.
@@ -306,6 +328,9 @@ print(audit.audit_explanation)
 ---
 
 ## 📍 Compliance mapping
+
+Data handling, privacy, and how to verify Groundlens sends nothing out: [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
+
 
 Groundlens ships mappings from its components to specific regulatory clauses, and a hash-chained audit log that makes any decision reproducible byte-for-byte, which is what these frameworks ask for in practice:
 
