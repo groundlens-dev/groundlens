@@ -20,9 +20,7 @@ def _top_level_modules(import_line: str) -> set[str]:
         f"{import_line}\n"
         "print(','.join(sorted({m.split('.')[0] for m in sys.modules})))\n"
     )
-    out = subprocess.run(
-        [sys.executable, "-c", code], capture_output=True, text=True, check=True
-    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
     return set(out.stdout.strip().split(","))
 
 

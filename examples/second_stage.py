@@ -38,14 +38,25 @@ def main() -> None:
     print("unsourced case -> escalated:", unsourced.escalated)
     print(unsourced.final)
     if unsourced.stage2 is not None:
-        print("consistency:", round(unsourced.stage2.consistency, 3),
-              "| samples:", list(unsourced.stage2.samples))
+        print(
+            "consistency:",
+            round(unsourced.stage2.consistency, 3),
+            "| samples:",
+            list(unsourced.stage2.samples),
+        )
 
     # 3) Call the second stage directly (no first stage) when you want it.
     reading = checker.verify("What is the boiling point of water at sea level?", "100 C")
     print()
-    print("direct check   ->", reading.check.level, "|", reading.method,
-          "|", round(reading.seconds, 2), "s")
+    print(
+        "direct check   ->",
+        reading.check.level,
+        "|",
+        reading.method,
+        "|",
+        round(reading.seconds, 2),
+        "s",
+    )
 
 
 if __name__ == "__main__":

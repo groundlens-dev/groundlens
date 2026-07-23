@@ -124,9 +124,7 @@ class SampleConsistency:
         samples = self._sampler(gen, question, self.n_samples)
         inconsistency = float(self._scorer.inconsistency(question, primary, samples))
         consistency = max(0.0, min(1.0, 1.0 - inconsistency))
-        reading = check_for_verification(
-            consistency, method=self._method, n_samples=len(samples)
-        )
+        reading = check_for_verification(consistency, method=self._method, n_samples=len(samples))
         return Verification(
             check=reading,
             answer=primary,

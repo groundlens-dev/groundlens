@@ -56,9 +56,7 @@ HANDOFF_OK = (
 
 # Second-stage (model-based) handoff. The model-based check IS the second stage,
 # so when it cannot settle a case the only place left is a person.
-HANDOFF_HUMAN = (
-    "The model does not answer consistently here. Send it to a human reviewer."
-)
+HANDOFF_HUMAN = "The model does not answer consistently here. Send it to a human reviewer."
 HANDOFF_SECOND_STAGE_OK = (
     "Consistency, not facts: the model agreeing with itself is not proof it is right. "
     "For high-stakes claims, still verify against a source."
