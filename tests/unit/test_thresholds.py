@@ -27,7 +27,7 @@ class TestThresholdConstants:
         assert SGI_REVIEW == 0.95
 
     def test_dgi_pass_value(self) -> None:
-        assert DGI_PASS == 0.3
+        assert DGI_PASS == 0.525
 
     def test_sgi_ordering(self) -> None:
         assert SGI_STRONG_PASS > SGI_REVIEW

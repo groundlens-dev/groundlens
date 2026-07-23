@@ -118,7 +118,7 @@ include = ["src/groundlens", "tests", "LICENSE", "README.md"]
 line-length = 99
 target-version = "py310"
 src = ["src", "tests"]
-extend-exclude = ["*.ipynb"]
+extend-exclude = ["*.ipynb", "*.md"]
 
 [tool.ruff.lint]
 select = [
