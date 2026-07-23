@@ -62,7 +62,6 @@ from groundlens._internal.embeddings import (
     get_default_encoder,
 )
 from groundlens._internal.geometry import displacement_vector, unit_normalize
-from groundlens._internal.reference import load_certified_reference
 from groundlens._internal.thresholds import (
     DGI_PASS,
     _warn_default_thresholds_with_custom_encoder,
@@ -83,6 +82,11 @@ logger = logging.getLogger(__name__)
 # ── Module-level reference direction cache ───────────────────────────────────
 
 _mu_hat_cache: dict[tuple[str, str, int | None], NDArray[np.float32]] = {}
+# Reference bank (unit query embeddings + unit grounded displacements) for the
+# local variant Gamma_k. Keyed like the global cache.
+_bank_cache: dict[
+    tuple[str, str, int | None], tuple[NDArray[np.float32], NDArray[np.float32]]
+] = {}
 
 
 def _compute_reference_direction(
@@ -137,6 +141,70 @@ def _compute_reference_direction(
     return unit_normalize(mu)
 
 
+def _get_reference_bank(
+    model_name: str = DEFAULT_MODEL,
+    reference_csv: str | None = None,
+    *,
+    encoder: EmbeddingFn | None = None,
+) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+    """Embed and cache the reference set for the local variant Gamma_k.
+
+    Returns ``(Q, D)``: ``Q`` are unit-normalized reference query embeddings
+    (for nearest-neighbour selection) and ``D`` the matching unit-normalized
+    grounded displacements. Cached like the global direction.
+    """
+    active_encoder = encoder if encoder is not None else get_default_encoder()
+    key = (
+        model_name,
+        reference_csv or "__bundled__",
+        id(active_encoder) if active_encoder is not None else None,
+    )
+    if key not in _bank_cache:
+        if reference_csv == "__inline__":
+            msg = (
+                "The local DGI variant (k=...) needs a reference set. Pass "
+                "reference_csv=... or use the bundled default; it is not "
+                "available from DGI.calibrate(pairs=...)."
+            )
+            raise RuntimeError(msg)
+        pairs = load_reference_pairs(reference_csv)
+        texts: list[str] = []
+        for q, r in pairs:
+            texts.extend([q, r])
+        emb = encode_texts(texts, model_name=model_name, encoder=encoder)
+        q_list: list[NDArray[np.float32]] = []
+        d_list: list[NDArray[np.float32]] = []
+        for i in range(len(pairs)):
+            q_emb, r_emb = emb[i * 2], emb[i * 2 + 1]
+            delta = displacement_vector(q_emb, r_emb)
+            if float(np.linalg.norm(delta)) > 1e-8:
+                q_list.append(unit_normalize(q_emb))
+                d_list.append(unit_normalize(delta))
+        if not d_list:
+            msg = "No valid reference displacements for the local DGI variant."
+            raise ValueError(msg)
+        _bank_cache[key] = (
+            np.stack(q_list).astype(np.float32),
+            np.stack(d_list).astype(np.float32),
+        )
+    return _bank_cache[key]
+
+
+def _local_mu_hat(
+    query_emb: NDArray[np.float32],
+    bank: tuple[NDArray[np.float32], NDArray[np.float32]],
+    k: int,
+) -> NDArray[np.float32]:
+    """Query-specific grounding direction from the k nearest reference queries."""
+    q_ref, d_ref = bank
+    k = max(1, min(int(k), q_ref.shape[0]))
+    q_unit = unit_normalize(query_emb)
+    sims = q_ref @ q_unit
+    top = np.argpartition(-sims, k - 1)[:k]
+    mu = d_ref[top].mean(axis=0).astype(np.float32)
+    return unit_normalize(mu)
+
+
 def _get_mu_hat(
     model_name: str = DEFAULT_MODEL,
     reference_csv: str | None = None,
@@ -178,34 +246,21 @@ def _get_mu_hat(
                 "DGI.calibrate(pairs=...) on a DGI instance before scoring."
             )
             raise RuntimeError(msg)
-        # Default path: use the precomputed, certified reference direction.
-        # It is only valid for the exact encoder it was calibrated on, so we
-        # use it ONLY when there is no bring-your-own encoder and no custom CSV
-        # and the model matches. Any other encoder lives in a different space;
-        # dotting against a foreign mu_hat is silently wrong, so we recompute.
-        ref = load_certified_reference()
-        if reference_csv is None and active_encoder is None and model_name == ref.embedding_model:
-            logger.info(
-                "Loaded certified DGI reference (model=%s, dims=%d).",
-                ref.embedding_model,
-                ref.mu_hat.shape[0],
-            )
-            _mu_hat_cache[cache_key] = ref.mu_hat
-        else:
-            logger.info(
-                "Computing DGI reference direction (model=%s, data=%s)...",
-                model_name,
-                reference_csv or "bundled",
-            )
-            pairs = load_reference_pairs(reference_csv)
-            _mu_hat_cache[cache_key] = _compute_reference_direction(
-                pairs, model_name, encoder=encoder
-            )
-            logger.info(
-                "DGI reference direction ready (dims=%d, pairs=%d).",
-                _mu_hat_cache[cache_key].shape[0],
-                len(pairs),
-            )
+        # Compute the reference direction from the bundled reference set (or a
+        # user CSV) in the active encoder's own space, so it always reproduces
+        # from the shipped data. First use embeds the set, then caches.
+        logger.info(
+            "Computing DGI reference direction (model=%s, data=%s)...",
+            model_name,
+            reference_csv or "bundled",
+        )
+        pairs = load_reference_pairs(reference_csv)
+        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name, encoder=encoder)
+        logger.info(
+            "DGI reference direction ready (dims=%d, pairs=%d).",
+            _mu_hat_cache[cache_key].shape[0],
+            len(pairs),
+        )
 
     return _mu_hat_cache[cache_key]
 
@@ -217,6 +272,7 @@ def compute_dgi(
     model: str = DEFAULT_MODEL,
     reference_csv: str | None = None,
     encoder: EmbeddingFn | None = None,
+    k: int | None = None,
 ) -> DGIResult:
     """Compute the Directional Grounding Index for a response.
 
@@ -229,6 +285,10 @@ def compute_dgi(
         encoder: Optional bring-your-own-embeddings callable taking
             ``list[str]`` and returning an ``(n, d)`` array. Bypasses
             sentence-transformers (no torch required) when provided.
+        k: If set, use the local variant Gamma_k: build the reference
+            direction from the ``k`` reference queries nearest to ``question``,
+            instead of one global mean direction. Needs the reference set (the
+            bundled data or ``reference_csv``); the first local call embeds it.
 
     Returns:
         DGIResult with raw score, normalized score, and flag status.
@@ -257,9 +317,17 @@ def compute_dgi(
     ):
         _warn_default_thresholds_with_custom_encoder("compute_dgi", model, encoder is not None)
 
-    mu_hat = _get_mu_hat(model, reference_csv, encoder=encoder)
     embeddings = encode_texts([question, response], model_name=model, encoder=encoder)
     q_emb, r_emb = embeddings[0], embeddings[1]
+
+    # Global Gamma uses one mean direction; local Gamma_k uses a query-specific
+    # direction from the k nearest reference queries (paper Eq. 4).
+    if k is not None:
+        mu_hat = _local_mu_hat(
+            q_emb, _get_reference_bank(model, reference_csv, encoder=encoder), k
+        )
+    else:
+        mu_hat = _get_mu_hat(model, reference_csv, encoder=encoder)
 
     delta = displacement_vector(q_emb, r_emb)
     magnitude = float(np.linalg.norm(delta))
@@ -286,8 +354,9 @@ def compute_dgi(
 
 
 def reset_calibration_cache() -> None:
-    """Clear all cached reference directions. Useful for testing."""
+    """Clear all cached reference directions and banks. Useful for testing."""
     _mu_hat_cache.clear()
+    _bank_cache.clear()
 
 
 class DGI:
@@ -314,6 +383,7 @@ class DGI:
         model: str = DEFAULT_MODEL,
         reference_csv: str | None = None,
         encoder: EmbeddingFn | None = None,
+        k: int | None = None,
     ) -> None:
         """Initialize DGI scorer.
 
@@ -323,10 +393,13 @@ class DGI:
             encoder: Optional bring-your-own-embeddings callable. When set,
                 both calibration and scoring bypass sentence-transformers
                 (no torch required).
+            k: If set, score with the local variant Gamma_k (query-specific
+                reference direction from the k nearest reference queries).
         """
         self.model = model
         self.reference_csv = reference_csv
         self.encoder = encoder
+        self.k = k
 
     def calibrate(
         self,
@@ -399,6 +472,7 @@ class DGI:
             model=self.model,
             reference_csv=self.reference_csv,
             encoder=self.encoder,
+            k=self.k,
         )
 
     def propose_labels(

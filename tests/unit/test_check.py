@@ -61,7 +61,7 @@ class TestSGICheck:
 
 
 # ---------------------------------------------------------------------------
-# DGI checks — levels come from calibrated thresholds (0.594 / 0.55)
+# DGI checks — single binary cut at 0.30 (grounded / not grounded)
 # ---------------------------------------------------------------------------
 
 
@@ -73,11 +73,11 @@ class TestDGICheck:
         assert v.label == "Looks grounded"
         assert v.metric_abbr == "DGI"
 
-    def test_partly_grounded(self) -> None:
-        r = DGIResult(value=0.57, normalized=0.785, flagged=True, magnitude=0.7)
+    def test_below_cut_not_grounded(self) -> None:
+        r = DGIResult(value=0.20, normalized=0.60, flagged=True, magnitude=0.7)
         v = check_for_dgi(r)
-        assert v.level == "review"
-        assert v.label == "Partly grounded"
+        assert v.level == "risk"
+        assert v.label == "Not grounded"
 
     def test_not_grounded(self) -> None:
         r = DGIResult(value=-0.12, normalized=0.44, flagged=True, magnitude=0.9)
