@@ -36,6 +36,8 @@ An LLM will answer confidently whether or not it used the document you gave it. 
 
 Groundlens measures the *geometry* of an answer, where it sits relative to its source and to the question, and turns that into a plain reading: **did this answer come from the source, or not?** It runs in milliseconds, gives the same result every time, and uses no second language model. Its job is to let the clearly grounded answers through and flag the ones worth a closer look, so the slow and expensive checks only run where they are needed.
 
+> **Groundlens does not measure truth.** It measures grounding: whether an answer came from its source (SGI) or moves like a well grounded answer (DGI). A statement that is factually wrong but well grounded in the source can pass, and a true statement that ignores the source can be flagged. For truth you need a source of truth: a lookup, a knowledge base, a rule, or a person. Groundlens tells you which answers to send there.
+
 Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the front of it and decides what reaches the expensive back.
 
 | # | Step | The question it answers | Included |
@@ -46,7 +48,7 @@ Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the f
 | 4 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | NO |
 | 5 | **Human Review** | The last step of the pipeline. | NO |
 
-Groundlens cove steps 1 to 3 and don't need a second LLM. Steps 4 and 5 runs only on what the earlier steps filter. 
+Groundlens covers steps 1 to 3 and needs no second LLM. Steps 4 and 5 run only on what the earlier steps flag.
 ---
 
 ## 🚀 The basics
@@ -55,7 +57,7 @@ Groundlens cove steps 1 to 3 and don't need a second LLM. Steps 4 and 5 runs onl
 pip install groundlens
 ```
 
-Four checks, each answering a different question. You rarely need all three; pick the one that fits your case.
+Four checks, each answering a different question. You rarely need all of them; pick the one that fits your case.
 
 ### SGI: did the answer come from its source?
 
@@ -67,24 +69,31 @@ This is the core. You give Groundlens a question, an answer, and (when you have 
 ```python
 from groundlens import compute_sgi, check
 
-question = "What is the daily transfer limit?"
-context  = "The daily transfer limit is 1,000 EUR per transaction and 2,000 EUR per day."
-response = "The daily limit is 500 EUR per transaction."   # wrong: not in the source
+question = "How long do international transfers take, and is there a fee?"
+context = (
+    "International transfers sent before 3:00 PM on a business day are processed the same day and "
+    "typically arrive within 1 to 3 business days, depending on the destination country and the "
+    "receiving bank. A flat fee of 15 EUR applies per international transfer, except for transfers "
+    "within the SEPA area, which are exempt."
+)
+response = (
+    "International transfers sent before 3:00 PM on a business day usually arrive within 1 to 3 "
+    "business days. There is a flat 15 EUR fee per transfer, and SEPA transfers are exempt."
+)
 
 sgi = compute_sgi(question=question, context=context, response=response)
 print(check(sgi).render())
-# CHECK: Not supported by the document (Semantic Grounding Index - SGI=...)
-# The answer stays closer to the question than to the source, so it may not
-# come from the document. Check it before trusting it.
+# CHECK: Supported by the document (Semantic Grounding Index - SGI=...)
+# The answer draws on the source and does not add claims beyond it.
 ```
 
 Read the **level**, not the decimal. `check(sgi).level` is `"ok"`, `"review"`, or `"risk"`, and that is what you act on. The raw SGI number depends on which embedding model you use, so it is a relative signal, not an absolute grade.
 
 | Reading | SGI (default encoder) |
 |---|---|
-| :green_circle: came from the source | higher 1.20 |
-| :orange_circle: partly | between 0.95 and 1.2 |
-| :stop_sign: not from the source | below 0.95|
+| :green_circle: came from the source | 1.20 or higher |
+| :orange_circle: partly | 0.95 to 1.20 |
+| :stop_sign: not from the source | below 0.95 |
 
 ### DGI: check an answer when there is no source
 
@@ -94,31 +103,31 @@ When there is no retrieved document (one-shot prompting, tool use, an agent talk
 ```python
 from groundlens import compute_dgi, check
 
-question = "What is the capital of Australia?"
-response = "The capital of Australia is Canberra."
+question = "What is compound interest, in simple terms?"
+response = (
+    "Compound interest is interest calculated on the original amount and on the interest already "
+    "added, so a balance grows faster over time than it would with simple interest."
+)
 
-dgi = compute_dgi(question=question, response=response)
-print(check(dgi).render())
-# CHECK: Looks grounded (Directional Grounding Index - DGI=...)
-# The answer moves the way well-grounded answers usually do.
-# No source given — judged by the shape of the answer.
+# One global reference direction:
+reading = check(compute_dgi(question=question, response=response))
+
+# Local variant (Gamma_k): a query-specific reference built from the k calibration
+# questions nearest to yours. Sharper when your reference set spans several domains.
+reading_local = check(compute_dgi(question=question, response=response, k=10))
+
+print(reading_local.level, reading_local.label)   # act on the level, not the raw number
 ```
 
-Read the **level**, not the decimal, the same as SGI. DGI leans on the embedding model even more than SGI does, so calibrate it on your own domain before you trust the flags. And mind its limit: DGI is a triage signal for off-shape answers; it will not catch a confident wrong fact phrased like a right one (that is a [consistency check](#consistency-checks-does-the-model-agree-with-itself)).
+DGI is a directional triage signal, not a truth test, and it leans on the embedding model and the domain far more than SGI does. Its cut-points are not universal: they depend on your encoder and the style of your data, so read DGI as a relative ranking and set the operating point by calibrating on your own grounded set (see [Calibration](#-calibration)). It will not catch a confident wrong fact phrased like a right one; that is what the [consistency checks](#consistency-checks-does-the-model-agree-with-itself) and rules are for.
 
-| Reading | DGI (default encoder) |
-|---|---|
-| :green_circle: looks grounded | 0.594 or higher |
-| :orange_circle: partly | 0.55 to 0.594 |
-| :red_circle: not grounded | below 0.55 |
-
-**DGI** can be calibrated per domain (finance, healthcare, legal, coding): a domain-specific reference sharpens which answers it flags. Calibration tunes where it escalates, not the blind spot — see [Calibration](#-calibration).
+The local variant `k=...` shown above builds a query-specific reference from the calibration questions nearest to yours, which sharpens DGI when your reference set spans several domains.
 
 ### Consistency checks: does the model agree with itself?
 
 Geometry has one blind spot: a confident answer that is wrong on a single fact but phrased exactly like a correct one (right topic, right wording, one wrong number). It sits right next to a grounded answer, so no geometric score separates them.
 
-When there is no source to check against and DGI suggets that the answer could be wrong, , we can ask the model again and see if it stays consistent. A model that knows the answer repeats it; a model that is guessing wanders. Groundlens provides two ways to measure that, and they differ in *what* you vary between samples:
+When there is no source to check against and DGI suggests that the answer could be wrong, you can ask the model again and see if it stays consistent. A model that knows the answer repeats it; a model that is guessing wanders. Groundlens provides two ways to measure that, and they differ in *what* you vary between samples:
 
 - **Resample** — ask the *same* question several times with sampling on. Variation comes from the model's own randomness. Simple, but needs several samples.
 - **Reword** — rephrase the *question* a few ways and answer each once. Variation comes from the input. It surfaces the signal with fewer calls, because one or two rewordings already expose a guess.
@@ -133,8 +142,8 @@ pip install "groundlens[verify]"
 from groundlens.verify import two_stage
 
 result = two_stage(
-    question="What is the capital of Australia?",
-    answer="Sydney",                                  # confident, and wrong
+    question="What is the standard maximum annual Roth IRA contribution for someone under 50 in 2024?",
+    answer="The maximum is 8,000 USD.",               # confident, and wrong (it is 7,000)
     model="Qwen/Qwen2.5-7B-Instruct",                 # any HF model, or generator=... for an API
 )
 print(result.escalated)   # True: geometry couldn't settle it, so the model was resampled
@@ -148,8 +157,8 @@ The cut-points here are provisional; calibrate them on your own data with `fit_t
 ```python
 from groundlens.verify import SampleConsistency, AnthropicGenerator, OpenAIGenerator, GeminiGenerator
 
-q = "What is the capital of Australia?"
-a = "Sydney"   # confident, and wrong
+q = "What is the standard maximum annual Roth IRA contribution for someone under 50 in 2024?"
+a = "The maximum is 8,000 USD."   # confident, and wrong (it is 7,000)
 
 # Claude, scored with the embedding scorer (reuses the SGI/DGI encoder, no torch)
 checker = SampleConsistency(generator=AnthropicGenerator(model="claude-3-5-haiku-latest"), scorer="embedding")
