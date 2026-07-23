@@ -80,7 +80,6 @@ class TestResetCache:
     """Test the calibration cache reset function."""
 
     def test_reset_clears_cache(self) -> None:
-
         # Insert a fake entry
         _mu_hat_cache[("test", "key")] = np.zeros(3, dtype=np.float32)
         assert len(_mu_hat_cache) > 0

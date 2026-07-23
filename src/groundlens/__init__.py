@@ -16,6 +16,13 @@ pipelines (routing, RAG, specialized / tool-using agents). Two layers:
   :func:`groundlens.agents.rag_rules`,
   :func:`groundlens.agents.specialized_agent_rules`.
 
+Optional second stage (:mod:`groundlens.verify`, ``pip install "groundlens[verify]"``):
+when the geometry cannot settle a case, escalate to a model-based check that
+samples the model and scores self-consistency (SelfCheckGPT-NLI and a low-budget
+paraphrase variant). It returns the same :class:`~groundlens.check.Check` type and
+runs only on the cases the first stage flags. Importing ``groundlens`` never loads
+a model; the second stage is kept out of this import path on purpose.
+
 Quick start::
 
     >>> from groundlens import compute_sgi, compute_dgi, evaluate
