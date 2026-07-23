@@ -367,7 +367,31 @@ The check **level** (`ok` / `review` / `risk`, on `check(...).level`) comes only
 | **SGI** | Supported by the document · Partly supported · Not supported by the document | SGI ≥ 1.20 / ≥ 0.95 / below |
 | **DGI** | Looks grounded · Partly grounded · Not grounded | DGI ≥ 0.30 / ≥ 0.0 / below |
 
-## :gear: Custom encoders 
+## Second stage (`groundlens.verify`)
+
+Everything above escalates the cases geometry cannot settle. `groundlens.verify` is that second stage, shipped in the same library and returning the same `Check`. It is optional and kept out of the core import path, so `import groundlens` never loads a model.
+
+```bash
+pip install "groundlens[verify]"
+```
+
+```python
+from groundlens.verify import two_stage
+
+# Stage 1 runs first (deterministic, free). Stage 2 runs only if Stage 1 escalates.
+result = two_stage(
+    question="What is the capital of Spain?",
+    answer="Madrid",
+    context="Spain is a country in Europe. Its capital is Madrid.",
+    model="Qwen/Qwen2.5-7B-Instruct",   # any HF model; or pass generator=... for an API client
+)
+print(result.escalated)   # False here: SGI settled it, no model call was made
+print(result.final)       # the CHECK to act on
+```
+
+The model-based check samples the model and scores self-consistency. `SelfCheckNLI` reproduces SelfCheckGPT-NLI (resample, then score with NLI, the validated 92.50 AUC-PR method); `ParaphraseCheck` rewords the question instead, which front-loads the signal at a low sample budget. Both are model-agnostic: pass any object exposing `generate` (a thin wrapper around an API client, for instance) as `generator=...`. The result carries its samples and seed, so a stochastic stage still leaves an audit trail. Second-stage cut-points are provisional, not calibrated like SGI and DGI; calibrate them on your data with `fit_thresholds`.
+
+## Custom encoders / no-torch
 
 By default Groundlens loads a `sentence-transformers` model on first use. You can supply your own embedding function instead — to reuse a hosted embedding API, an in-house model, or precomputed vectors, and to run SGI/DGI **without installing torch** (the custom-encoder path never imports `sentence-transformers`).
 

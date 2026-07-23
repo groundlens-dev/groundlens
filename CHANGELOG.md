@@ -58,6 +58,17 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
 
 ### Added
 
+- **`groundlens.verify` -- the model-based second stage, shipped in the library.**
+  When the deterministic first stage escalates, `groundlens.verify` samples the
+  model and scores self-consistency, returning the same `Check` type. `SelfCheckNLI`
+  reproduces SelfCheckGPT-NLI (the validated 92.50 AUC-PR method); `ParaphraseCheck`
+  rewords the question for a low sample budget; `two_stage(...)` runs the pipeline
+  and calls the model only on escalated cases. It is model-agnostic (pass any
+  object exposing `generate`), reuses the same `Check` vocabulary, and sits behind
+  the optional `[verify]` extra so `import groundlens` never loads a model. The
+  bundled `HFTextGenerator` batches generation. Second-stage cut-points are
+  provisional and not yet calibrated.
+
 - **`Check.escalate` and `Check.handoff`** — every check now carries a
   second-stage signal. `escalate` is `True` on the review and risk bands;
   `handoff` is a plain line naming the handoff. On a passing check it states
