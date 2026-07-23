@@ -54,7 +54,7 @@ class AnthropicGenerator:
         self._client = client
 
     def _ensure(self) -> Any:
-        if self._client is None:
+        if self._client is None:  # pragma: no cover - builds a real SDK client; needs the extra
             try:
                 import anthropic
             except ImportError as exc:  # pragma: no cover - exercised only without the extra
@@ -106,7 +106,7 @@ class OpenAIGenerator:
         self._client = client
 
     def _ensure(self) -> Any:
-        if self._client is None:
+        if self._client is None:  # pragma: no cover - builds a real SDK client; needs the extra
             try:
                 import openai
             except ImportError as exc:  # pragma: no cover - exercised only without the extra
@@ -149,7 +149,7 @@ class GeminiGenerator:
         self._model_obj = client
 
     def _ensure(self) -> Any:
-        if self._model_obj is None:
+        if self._model_obj is None:  # pragma: no cover - builds a real SDK client; needs the extra
             try:
                 import google.generativeai as genai
             except ImportError as exc:  # pragma: no cover - exercised only without the extra
