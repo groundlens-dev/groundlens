@@ -5,6 +5,13 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## Unreleased
+
+### Fixed
+
+- ``evaluate_batch()`` now rejects blank ``question`` / ``response`` values up
+  front with the item index, matching the single-item validation in SGI/DGI.
+
 ## 2026.7.13 -- The register wall: retraction, and the controls
 
 ### Removed (retraction)
