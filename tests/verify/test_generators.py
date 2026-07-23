@@ -97,3 +97,19 @@ def test_generator_plugs_into_sample_consistency() -> None:
         generator=AnthropicGenerator(client=_AnthropicClient()), scorer="embedding"
     )
     assert sc._generator is not None
+
+
+class _BlockedResp:
+    @property
+    def text(self) -> str:
+        raise ValueError("candidate blocked by safety filters")
+
+
+class _GeminiBlockedModel:
+    def generate_content(self, prompt: str, **kwargs: Any) -> Any:
+        return _BlockedResp()
+
+
+def test_gemini_blocked_response_yields_empty_string() -> None:
+    g = GeminiGenerator(client=_GeminiBlockedModel())
+    assert g.generate("x", 1) == [""]
