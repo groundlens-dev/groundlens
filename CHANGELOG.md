@@ -23,6 +23,9 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
 
 ### Added
 
+- **Local DGI variant `Gamma_k`.** `compute_dgi(..., k=...)` and `DGI(k=...)` build a
+  query-specific reference direction from the k nearest calibration questions (paper Eq. 4),
+  instead of one global mean. Sharper when the reference set spans several domains.
 - **Bundled certified DGI reference** (`groundlens/data/generic_reference.json`):
   the precomputed reference direction (`mu_hat`) and threshold for sentence-t5-large,
   from 212 human-crafted confabulations across 9 domains (AUROC 0.786). DGI loads
