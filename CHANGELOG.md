@@ -17,20 +17,19 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   every deployment relying on the default. Snowflake remains available via
   `model="Snowflake/snowflake-arctic-embed-l-v2.0"` (still loads with
   `trust_remote_code=True`); recalibrate thresholds and `mu_hat` if you use it.
-- **DGI pass threshold is now 0.594** (was 0.30), the certified operating point
-  (Youden's J) for the default encoder, with a review floor at 0.55: `ok` >= 0.594,
-  `review` in [0.55, 0.594), `risk` below 0.55.
+- **DGI is a single binary cut at `DGI_PASS = 0.3`** for the default encoder (ok at
+  or above 0.3, not grounded below). It is a domain- and encoder-specific operating
+  point; recalibrate on your own grounded set.
 
 ### Added
 
 - **Local DGI variant `Gamma_k`.** `compute_dgi(..., k=...)` and `DGI(k=...)` build a
   query-specific reference direction from the k nearest calibration questions (paper Eq. 4),
   instead of one global mean. Sharper when the reference set spans several domains.
-- **Bundled certified DGI reference** (`groundlens/data/generic_reference.json`):
-  the precomputed reference direction (`mu_hat`) and threshold for sentence-t5-large,
-  from 212 human-crafted confabulations across 9 domains (AUROC 0.786). DGI loads
-  this directly instead of re-embedding the calibration corpus on first use, so the
-  default path obtains `mu_hat` with no model load and is instant and deterministic.
+- **DGI reference direction is computed from the bundled `reference_pairs.csv`**
+  (212 human-crafted confabulations across 9 domains) in the active encoder's own
+  space, so it reproduces exactly from the shipped data. First DGI use embeds the
+  set, then caches.
 
 ### Fixed
 

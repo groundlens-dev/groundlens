@@ -62,7 +62,6 @@ from groundlens._internal.embeddings import (
     get_default_encoder,
 )
 from groundlens._internal.geometry import displacement_vector, unit_normalize
-from groundlens._internal.reference import load_certified_reference
 from groundlens._internal.thresholds import (
     DGI_PASS,
     _warn_default_thresholds_with_custom_encoder,
@@ -247,34 +246,21 @@ def _get_mu_hat(
                 "DGI.calibrate(pairs=...) on a DGI instance before scoring."
             )
             raise RuntimeError(msg)
-        # Default path: use the precomputed, certified reference direction.
-        # It is only valid for the exact encoder it was calibrated on, so we
-        # use it ONLY when there is no bring-your-own encoder and no custom CSV
-        # and the model matches. Any other encoder lives in a different space;
-        # dotting against a foreign mu_hat is silently wrong, so we recompute.
-        ref = load_certified_reference()
-        if reference_csv is None and active_encoder is None and model_name == ref.embedding_model:
-            logger.info(
-                "Loaded certified DGI reference (model=%s, dims=%d).",
-                ref.embedding_model,
-                ref.mu_hat.shape[0],
-            )
-            _mu_hat_cache[cache_key] = ref.mu_hat
-        else:
-            logger.info(
-                "Computing DGI reference direction (model=%s, data=%s)...",
-                model_name,
-                reference_csv or "bundled",
-            )
-            pairs = load_reference_pairs(reference_csv)
-            _mu_hat_cache[cache_key] = _compute_reference_direction(
-                pairs, model_name, encoder=encoder
-            )
-            logger.info(
-                "DGI reference direction ready (dims=%d, pairs=%d).",
-                _mu_hat_cache[cache_key].shape[0],
-                len(pairs),
-            )
+        # Compute the reference direction from the bundled reference set (or a
+        # user CSV) in the active encoder's own space, so it always reproduces
+        # from the shipped data. First use embeds the set, then caches.
+        logger.info(
+            "Computing DGI reference direction (model=%s, data=%s)...",
+            model_name,
+            reference_csv or "bundled",
+        )
+        pairs = load_reference_pairs(reference_csv)
+        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name, encoder=encoder)
+        logger.info(
+            "DGI reference direction ready (dims=%d, pairs=%d).",
+            _mu_hat_cache[cache_key].shape[0],
+            len(pairs),
+        )
 
     return _mu_hat_cache[cache_key]
 
