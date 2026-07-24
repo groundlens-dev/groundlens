@@ -20,9 +20,9 @@ graph LR
 
 ## The Embedding Space
 
-groundlens uses sentence transformers (default: `all-MiniLM-L6-v2`) to map text into $\mathbb{R}^{384}$. In this space:
+groundlens uses sentence transformers (default: `sentence-transformers/sentence-t5-large`) to map text into $\mathbb{R}^{768}$. In this space:
 
-- Each text becomes a 384-dimensional vector
+- Each text becomes a 768-dimensional vector
 - Semantic similarity correlates with geometric proximity
 - The space has rich structure: clusters for topics, gradients for specificity, and characteristic directions for question-answer relationships
 
@@ -80,6 +80,18 @@ groundlens uses empirically-derived thresholds to flag responses:
 
 !!! warning "Thresholds are for triage, not for truth"
     groundlens scores are verification triage signals --- they help you prioritize which outputs need human review. A high score does not guarantee factual accuracy; a low score does not guarantee hallucination. The value is in **efficiently directing human attention** to the outputs most likely to need it.
+
+## The verification pipeline
+
+groundlens is the deterministic first stage of a staged pipeline. Each stage is cheaper and more certain than the one after it, so most outputs are settled early and only the residue reaches the expensive checks:
+
+1. **Geometry (SGI or DGI).** When context is available, SGI compares the response against the source; when it is not, DGI reads the displacement direction from question to response. This stage is deterministic, single-pass, and sends nothing out.
+2. **Consistency.** For the cases geometry cannot settle, a model-based consistency check asks the same question in more than one way and reads whether the model agrees with itself. Low agreement reads as risk.
+3. **Rules.** Deterministic predicates encode domain policy. They flag an output that violates a hard requirement regardless of its geometric score.
+4. **LLM judge.** A model reads the response against a supplied source. This is where within-frame factual errors that geometry cannot see get caught.
+5. **Human review.** The remaining, highest-stakes residue goes to a person.
+
+The order is what makes it efficient: geometry clears the clearly grounded and catches the clearly ungrounded cheaply, so the model-based and human stages run on far fewer outputs.
 
 ## What groundlens Cannot Do
 

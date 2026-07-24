@@ -12,7 +12,7 @@ $$
 
 where:
 
-- $\phi(\cdot)$ is the sentence embedding function (default: `all-MiniLM-L6-v2`)
+- $\phi(\cdot)$ is the sentence embedding function (default: `sentence-transformers/sentence-t5-large`)
 - $d(\cdot, \cdot)$ is Euclidean distance in $\mathbb{R}^n$
 - $r$ is the LLM response
 - $q$ is the input question
@@ -30,11 +30,18 @@ Geometrically, the SGI = 1 boundary is the **perpendicular bisector hyperplane**
 
 ## Threshold Zones
 
-| Zone | SGI Range | Interpretation | Action |
-|---|---|---|---|
-| Strong pass | SGI >= 1.20 | Response strongly engaged with context | Accept |
-| Partial | 0.95 <= SGI < 1.20 | Some context influence detected | Review recommended |
-| Flagged | SGI < 0.95 | Weak context engagement | Human review required |
+| Zone | SGI Range | Level | Interpretation | Action |
+|---|---|---|---|---|
+| Grounded | SGI >= 1.20 | `ok` | Response strongly engaged with context | Accept |
+| Partly | 0.95 <= SGI < 1.20 | `review` | Some context influence detected | Review recommended |
+| Not grounded | SGI < 0.95 | `risk` | Weak context engagement | Human review required |
+
+These thresholds are the ones bundled for the default encoder (`sentence-transformers/sentence-t5-large`). If you change the encoder, re-fit them with [`fit_thresholds`](calibration.md).
+
+!!! example "Two real readings"
+    With the default encoder, a faithful answer that restates the source scored **3.34** and read *"Supported by the document"*. An on-topic answer that contradicts the source scored **1.17** and read *"Partly supported"*: it stayed in the topic's neighborhood, so geometry placed it in the review band rather than the risk band.
+
+    This is the caveat that matters: SGI measures **grounding, not truth**. A plausible wrong fact stated in the right frame can still score above the pass threshold, because it sits close to the source in embedding space. SGI tells you whether an answer was drawn from the source, not whether it is correct.
 
 ## Normalization
 
@@ -89,11 +96,11 @@ result = compute_sgi(
     question="What is the capital of France?",
     context="France is in Western Europe. Its capital is Paris.",
     response="The capital of France is Paris.",
-    model="all-MiniLM-L6-v2",  # optional
+    model="sentence-transformers/sentence-t5-large",  # optional
 )
 
 # Class API (reusable)
-sgi = SGI(model="all-MiniLM-L6-v2")
+sgi = SGI(model="sentence-transformers/sentence-t5-large")
 result = sgi.score(
     question="What is X?",
     context="X is Y.",

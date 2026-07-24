@@ -11,7 +11,7 @@
 pip install groundlens
 ```
 
-This installs the core library with SGI, DGI, calibration, and CLI support. The default embedding model (`all-MiniLM-L6-v2`) is downloaded automatically on first use via the `sentence-transformers` package.
+This installs the core library with SGI, DGI, calibration, and CLI support. The default embedding model (`sentence-transformers/sentence-t5-large`) is downloaded automatically on first use via the `sentence-transformers` package.
 
 ## Optional Extras
 
@@ -73,11 +73,11 @@ print(result.explanation)  # Human-readable interpretation
 ```
 
 !!! note "First-run model download"
-    The first call to any scoring function triggers a one-time download of the `all-MiniLM-L6-v2` sentence-transformer model (~80 MB). Subsequent calls use the cached model.
+    The first call to any scoring function triggers a one-time download of the `sentence-transformers/sentence-t5-large` sentence-transformer model (~640 MB). Subsequent calls use the cached model.
 
 ## Embedding Model Selection
 
-groundlens defaults to `all-MiniLM-L6-v2` (384 dimensions, ~80 MB). You can use any sentence-transformer model by passing the `model` parameter:
+groundlens defaults to `sentence-transformers/sentence-t5-large` (768 dimensions, ~640 MB). You can use any sentence-transformer model by passing the `model` parameter:
 
 ```python
 from groundlens import compute_sgi
@@ -86,7 +86,7 @@ result = compute_sgi(
     question="...",
     context="...",
     response="...",
-    model="all-mpnet-base-v2",  # 768 dimensions, higher quality
+    model="all-mpnet-base-v2",  # 768-dimensional alternative encoder
 )
 ```
 
@@ -98,7 +98,7 @@ result = compute_sgi(
 | Component | Minimum | Recommended |
 |---|---|---|
 | RAM | 1 GB | 4 GB |
-| Disk | 200 MB (model cache) | 500 MB |
+| Disk | 1 GB (model cache) | 2 GB |
 | GPU | Not required | Not required |
 | Python | 3.10 | 3.12+ |
 

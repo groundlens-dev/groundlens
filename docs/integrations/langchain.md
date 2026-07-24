@@ -34,7 +34,7 @@ results = ls_evaluate(
 
 ```python
 evaluator = GroundlensEvaluator(
-    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Embedding model
     input_key="question",                 # Key for question in run inputs
     output_key="output",                  # Key for response in run outputs
     context_key="context",                # Key for context in example inputs
@@ -43,7 +43,7 @@ evaluator = GroundlensEvaluator(
 
 | Parameter | Default | Description |
 |---|---|---|
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Sentence-transformer for scoring |
 | `input_key` | `"question"` | Key to extract question from run inputs |
 | `output_key` | `"output"` | Key to extract response from run outputs |
 | `context_key` | `"context"` | Key to extract context from example inputs |
@@ -87,7 +87,7 @@ for run_id, score in cb.scores.items():
 
 ```python
 cb = GroundlensCallback(
-    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Embedding model
     context_key="context",                # Metadata key for context
 )
 ```

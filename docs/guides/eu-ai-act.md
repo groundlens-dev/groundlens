@@ -148,7 +148,7 @@ def auditable_evaluate(question, response, context=None, **kwargs):
             "explanation": score.explanation,
         },
         "config": {
-            "model": kwargs.get("model", "all-MiniLM-L6-v2"),
+            "model": kwargs.get("model", "sentence-transformers/sentence-t5-large"),
             "reference_csv": kwargs.get("reference_csv"),
         },
     }

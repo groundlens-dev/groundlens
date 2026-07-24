@@ -33,26 +33,57 @@ result.final       # the Check to act on
 
 When stage one escalates (its `Check.escalate` is set), `two_stage` runs the model-based detector and `result.final` becomes the stage-two reading.
 
-## The methods
+## The two consistency methods
 
-Two presets, both returning a `Check`:
+The second stage reads consistency. It perturbs either the model or the input, generates more than once, and measures whether the readings agree. Low agreement means the model disagrees with itself, which reads as risk. Both methods return a consistency score in [0, 1] and a `Check`.
 
-- **`SelfCheckNLI`** resamples the model and scores contradiction with NLI. This reproduces SelfCheckGPT-NLI, the validated method (92.50 AUC-PR on WikiBio-GPT3, Manakul et al., EMNLP 2023).
-- **`ParaphraseCheck`** rewords the question and answers each rewording. It front-loads the signal, reaching good detection at a low sample budget, but saturates, since a question has only so many genuinely different phrasings.
+- **`SampleConsistency`** resamples the same question several times with sampling on. The variation comes from the model's own randomness, so it needs several samples before the signal is stable.
+- **`ParaphraseCheck`** rewords the question and answers each rewording once. The variation comes from the input rather than from sampling, so it reaches a useful signal at a lower sample budget. It saturates, since a question has only so many genuinely different phrasings.
 
 ```python
-from groundlens.verify import SelfCheckNLI
+from groundlens.verify import ParaphraseCheck
 
-checker = SelfCheckNLI(model="Qwen/Qwen2.5-7B-Instruct", n_samples=7)
+checker = ParaphraseCheck(model="Qwen/Qwen2.5-7B-Instruct", n_samples=7)
 reading = checker.check("What is the capital of Spain?", "Madrid")
 reading.level        # "ok" / "review" / "risk"
+```
+
+`SampleConsistency` has the same shape and reads the model's own randomness instead:
+
+```python
+from groundlens.verify import SampleConsistency
+
+checker = SampleConsistency(model="Qwen/Qwen2.5-7B-Instruct", n_samples=10)
+reading = checker.check("What is the capital of Spain?", "Madrid")
 ```
 
 Use `checker.verify(...)` instead of `checker.check(...)` to get the full `Verification`: the `Check` plus the samples, the consistency score, the seed, and the wall-clock time. A stochastic stage inside an auditable library should leave that trail.
 
 ## Any model, not just Hugging Face
 
-The detector depends only on a small `TextGenerator` protocol (`generate(prompt, n)` and `generate_many(prompts)`). The bundled `HFTextGenerator` is the local, batched default; to use an API model, wrap your client in an object with those two methods and pass it as `generator=...`. Pick the scorer with `scorer="nli"` (validated, needs the extra) or `scorer="embedding"` (reuses the core sentence encoder, no extra needed).
+The detector depends only on a small `TextGenerator` protocol (`generate(prompt, n)` and `generate_many(prompts)`). The bundled `HFTextGenerator` is the local, batched default; to use an API model, wrap your client in an object with those two methods and pass it as `generator=...`. Pick the scorer with `scorer="nli"` (entailment, needs `groundlens[verify]`) or `scorer="embedding"` (reuses the core sentence encoder, torch-free, no extra needed).
+
+## Using an API provider
+
+The second stage runs against a local Hugging Face model by default, but you can point it at a hosted API instead. Three adapters ship with the library:
+
+| Adapter | Default model | Install |
+|---|---|---|
+| `AnthropicGenerator` | `claude-3-5-haiku-latest` | `pip install "groundlens[anthropic]"` |
+| `OpenAIGenerator` | `gpt-4o-mini` | `pip install "groundlens[openai]"` |
+| `GeminiGenerator` | `gemini-1.5-flash` | `pip install "groundlens[google]"` |
+
+`OpenAIGenerator` also accepts a `base_url`, so it drives any OpenAI-compatible endpoint.
+
+```python
+from groundlens.verify import ParaphraseCheck, AnthropicGenerator
+
+checker = ParaphraseCheck(generator=AnthropicGenerator())
+reading = checker.check("What is the capital of Spain?", "Madrid")
+```
+
+!!! warning "Where your data goes"
+    With a local model the second stage sends nothing out. With an API adapter, your prompt and the answer go to that provider under your own key and their terms. groundlens holds no key of its own and has no server in the path. See [Data Handling and Privacy](data-handling.md).
 
 ## Calibration
 

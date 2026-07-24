@@ -133,7 +133,7 @@ For repeated evaluations, use the class-based API to avoid passing `model` every
 from groundlens import SGI, DGI
 
 # SGI scorer
-sgi = SGI(model="all-MiniLM-L6-v2")
+sgi = SGI(model="sentence-transformers/sentence-t5-large")
 result = sgi.score(
     question="What is X?",
     context="X is defined as Y in the specification.",

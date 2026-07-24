@@ -246,7 +246,7 @@ Rather than verifying against an external source, these methods detect hallucina
 
 **Tools:**
 
-- **[SelfCheckGPT](https://github.com/potsawee/selfcheckgpt)** --- Samples multiple responses to the same question and measures consistency. If the model says different things each time, at least some of the responses are hallucinated. Effective for Type III detection because within-frame factual errors tend to be inconsistent across samples while correct facts are stable.
+- **Resampling for consistency** --- Sample multiple responses to the same question and measure whether they agree. If the model says different things each time, at least some of them are fabricated. Useful against within-frame errors because a correct fact tends to stay stable across samples while a confabulation does not. groundlens ships this as its own second stage: see [Second stage](../guides/second-stage.md).
 - **Semantic entropy** (Kuhn et al., 2023) --- Clusters sampled responses by semantic equivalence and measures the entropy of the cluster distribution. High entropy indicates uncertainty, which correlates with hallucination.
 
 !!! note "Cost tradeoff"

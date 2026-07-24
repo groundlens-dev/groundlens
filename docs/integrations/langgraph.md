@@ -45,14 +45,14 @@ Flagged: fact_check (DGI=0.180)
 
 ```python
 gl = GroundlensLangGraphCallback(
-    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Embedding model
     context_key="context",                  # Metadata key for explicit context
 )
 ```
 
 | Parameter | Default | Description |
 |---|---|---|
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer model for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Sentence-transformer model for scoring |
 | `context_key` | `"context"` | Metadata key for explicit context override |
 
 ### Auto Context Detection

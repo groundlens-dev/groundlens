@@ -109,7 +109,7 @@ Tu DGI ya está más afinado. Si quieres una ronda más, repite el paso 2 con el
 ## Qué hacer cuando algo va mal
 
 **El revisor dice `out_of_scope` en casi todo.**
-Casi siempre significa que el encoder no entiende tu idioma. El default `all-MiniLM-L6-v2` es mayoritariamente inglés. Para español o multilingüe:
+Casi siempre significa que el encoder no entiende tu idioma. El default `sentence-transformers/sentence-t5-large` es mayoritariamente inglés. Para español o multilingüe:
 
 ```python
 from groundlens import DGI, MULTILINGUAL_MINI

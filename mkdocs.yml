@@ -89,6 +89,7 @@ nav:
   - Guides:
     - RAG Verification: guides/rag-verification.md
     - Second Stage (model-based): guides/second-stage.md
+    - Data Handling & Privacy: guides/data-handling.md
     - Custom Encoders / No-Torch: guides/custom-encoders.md
     - Active-Learning Bootstrap (propose_labels): guides/active-learning.md
     - Domain Calibration: guides/domain-calibration.md

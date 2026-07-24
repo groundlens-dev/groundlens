@@ -23,7 +23,7 @@ kernel.add_filter("function_invocation", filt)
 
 ```python
 filt = GroundlensFilter(
-    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Embedding model
     input_key="input",                    # Key for question in function args
     context_key="context",                # Key for context in function args
 )
@@ -31,7 +31,7 @@ filt = GroundlensFilter(
 
 | Parameter | Default | Description |
 |---|---|---|
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Sentence-transformer for scoring |
 | `input_key` | `"input"` | Key to extract question from function arguments |
 | `context_key` | `"context"` | Key to extract context from function arguments |
 

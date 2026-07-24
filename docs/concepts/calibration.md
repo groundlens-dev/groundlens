@@ -134,7 +134,7 @@ The saved JSON contains all fields needed to reconstruct the reference direction
     ```
 
 !!! warning "Model consistency"
-    The calibration must use the same embedding model as the scoring. If you calibrate with `all-MiniLM-L6-v2`, you must score with `all-MiniLM-L6-v2`. Mixing models produces undefined behavior because the embedding spaces are geometrically different.
+    The calibration must use the same embedding model as the scoring. If you calibrate with `sentence-transformers/sentence-t5-large`, you must score with `sentence-transformers/sentence-t5-large`. Mixing models produces undefined behavior because the embedding spaces are geometrically different.
 
 ## Fitting decision thresholds (`fit_thresholds`)
 
