@@ -14,10 +14,13 @@
 
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_claude_mcp.gif" alt="A grounding CHECK printed live under every answer inside Claude" width="62%">
 
-<sub>A deterministic CHECK printed under every answer, live inside Claude.</sub>
+
+See our live demo:
+
+[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-md.svg)](https://huggingface.co/spaces/groundlens/demo)
+
 
 </div>
-
 
 ## The verification pipeline
 
@@ -287,7 +290,13 @@ with open_log("triage.db") as log:
 The log is **hash-chained** — any decision can be replayed and verified byte-for-byte, years later.
 
 
-## Integrate it
+## Frameworks
+
+<div align="center">
+    
+![LangChain Badge](https://img.shields.io/badge/LangChain-7FC8FF?logo=langchain&logoColor=fff&style=for-the-badge) ![LangGraph Badge](https://img.shields.io/badge/LangGraph-7FC8FF?logo=langgraph&logoColor=fff&style=for-the-badge) ![CrewAI Badge](https://img.shields.io/badge/CrewAI-FF5A50?logo=crewai&logoColor=fff&style=for-the-badge)
+
+</div>
 
 ```bash
 pip install "groundlens[langchain]"   # also: langgraph · crewai · semantic-kernel · autogen
@@ -305,7 +314,13 @@ for run_id, score in cb.scores.items():
 
 No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `ruleset.evaluate` after each generation yourself — same pattern.
 
-**In your editor** — the [MCP server](https://github.com/groundlens-dev/groundlens-mcp) prints a CHECK under every answer inside Claude, Cursor, and VS Code, with no model in the scoring path.
+## MCP Server 
+
+![Model Context Protocol Badge](https://img.shields.io/badge/Model%20Context%20Protocol-000?logo=modelcontextprotocol&logoColor=fff&style=for-the-badge)
+
+**In your editor** — the MCP prints a CHECK under every answer inside Claude, Cursor, and VS Code, with no model in the scoring path. More information in [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp)
+
+Direct integrations: 
 
 [![Add to Cursor](https://img.shields.io/badge/Cursor-Add_MCP-000000?style=flat-square&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=groundlens&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJncm91bmRsZW5zLW1jcCJdfQ%3D%3D)
 [![Add to VS Code](https://img.shields.io/badge/VS_Code-Add_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=groundlens&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22groundlens-mcp%22%5D%7D)
@@ -315,8 +330,7 @@ No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `ruleset.evaluat
 
 - 📚 **Docs** — [docs.groundlens.dev](https://docs.groundlens.dev)
 - 🧪 **Tutorials** — [`examples/tutorials/`](https://github.com/groundlens-dev/groundlens/tree/main/examples/tutorials)
-- 🎮 **Live demo** — [Hugging Face Space](https://huggingface.co/spaces/groundlens/demo)
-- 📍 **Compliance** — [SR 26-2](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/sr-11-7.md) · [EU AI Act](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/eu-ai-act.md) · [NIST AI RMF](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/nist-ai-rmf.md)
+- 📍 **Compliance map** — [SR 26-2](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/sr-11-7.md) · [EU AI Act](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/eu-ai-act.md) · [NIST AI RMF](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/nist-ai-rmf.md)
 - 📄 **Research** — [SGI (arXiv:2512.13771)](https://arxiv.org/abs/2512.13771) · [Hallucination taxonomy (arXiv:2602.13224)](https://arxiv.org/abs/2602.13224) · [How transformers reject wrong answers (arXiv:2603.13259)](https://arxiv.org/abs/2603.13259)
 
 ---
