@@ -159,6 +159,7 @@ known-first-party = ["groundlens"]
 "examples/**/*.ipynb" = ["D", "ANN", "T20"]    # Relaxed for notebooks
 "benchmarks/**/*.py" = ["D", "ANN", "T20"]
 "src/groundlens/cli/**/*.py" = ["T20"]           # CLI needs print
+"fuzz/**/*.py" = ["D", "ANN", "N802", "INP001", "T20"]  # fuzz harnesses (atheris naming)
 
 # ── mypy (strict) ───────────────────────────────────────────────────────────
 
