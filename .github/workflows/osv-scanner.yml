@@ -26,6 +26,8 @@ permissions:
   security-events: write
   # Read commit contents
   contents: read
+  # Read workflow runs (required by osv-scanner-reusable v2)
+  actions: read
 
 jobs:
   scan-scheduled:
