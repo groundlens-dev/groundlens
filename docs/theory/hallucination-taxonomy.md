@@ -177,7 +177,7 @@ The taxonomy paper was submitted to ACL ARR and received detailed reviewer feedb
 
 The original submission reported only groundlens metrics. The revision adds NLI (cross-encoder/nli-deberta-v3-small) and cosine similarity as baselines in every results table. Cosine reaches 0.941 on HaluEval QA — higher than SGI (0.805). This is discussed honestly: HaluEval hallucinations diverge enough that surface proximity suffices. SGI's value is the diagnostic ratio, not raw discrimination.
 
-White-box methods (hidden-state trajectories), multi-sample methods (SelfCheckGPT, semantic entropy), and source-grounded methods (AlignScore on context-free experiments) are excluded from comparison with explicit justification: different access model, different cost profile, or different input requirements.
+White-box methods (hidden-state trajectories), multi-sample consistency methods (resampling the same question, semantic entropy), and source-grounded methods (AlignScore on context-free experiments) are excluded from comparison with explicit justification: different access model, different cost profile, or different input requirements.
 
 ### Positioning relative to concurrent work
 

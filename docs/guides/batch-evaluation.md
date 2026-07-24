@@ -46,7 +46,7 @@ Each item is a dict with:
 ```python
 results = evaluate_batch(
     items,
-    model="all-MiniLM-L6-v2",          # Sentence-transformer model
+    model="sentence-transformers/sentence-t5-large",          # Sentence-transformer model
     reference_csv="domain_pairs.csv",    # DGI calibration (for items without context)
 )
 ```

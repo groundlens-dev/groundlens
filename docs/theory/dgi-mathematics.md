@@ -179,7 +179,7 @@ $$
 
 For well-calibrated domains ($\kappa \geq 10$, $n = 384$), $A_n(\kappa) \approx 1 - (n-1)/(2\kappa)$, which is close to 1.
 
-The DGI threshold of 0.30 is approximately $6\sigma$ above the null hypothesis mean, providing strong statistical confidence.
+The DGI threshold of 0.525 sits well above the null hypothesis mean, providing strong specificity against a uniformly random direction.
 
 ## Linear Normalization
 
@@ -218,9 +218,9 @@ DGI can be framed as a one-sided hypothesis test:
 - $H_0$: The displacement direction is uniform on $S^{n-1}$ (no grounding signal).
 - $H_1$: The displacement direction follows $\text{vMF}(\hat{\boldsymbol{\mu}}, \kappa)$ with $\kappa > 0$ (grounded).
 
-The DGI score is the test statistic. The threshold DGI = 0.30 defines the rejection region. Under $H_0$, the probability of DGI > 0.30 is vanishingly small (since $0.30 / 0.051 \approx 5.9\sigma$), giving the test high specificity.
+The DGI score is the test statistic. The threshold DGI = 0.525 defines the rejection region. Under $H_0$ (a uniformly random direction) the probability of exceeding it is small, giving the test high specificity.
 
-Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.30. Note what the null is here: a **uniformly random direction**, not a competent confabulation. Against an in-register confabulation the separation is far smaller, and no threshold choice recovers it: with authorship held constant the empirical AUROC is ≈ 0.68. The vMF argument gives the *form* of the statistic. It does not license the uncontrolled numbers this section used to quote.
+Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.525. Note what the null is here: a **uniformly random direction**, not a competent confabulation. Against an in-register confabulation the separation is far smaller, and no threshold choice recovers it: with authorship held constant the empirical AUROC is ≈ 0.68. The vMF argument gives the *form* of the statistic. It does not license the uncontrolled numbers this section used to quote.
 
 ## Geometric Visualization
 
@@ -232,7 +232,7 @@ $$
 
 - Grounded responses cluster near the north pole (small $\theta$, high DGI).
 - Hallucinated responses are scattered away from the north pole (large $\theta$, low DGI).
-- The DGI = 0.30 threshold corresponds to $\theta \approx 72.5°$.
+- The DGI = 0.525 threshold corresponds to $\theta \approx 58.3°$.
 - The DGI = 0.00 threshold corresponds to $\theta = 90°$ (equator).
 
 The vMF distribution gives the "density of grounded responses" as a function of polar angle: highest at the pole, decaying exponentially as $\theta$ increases, with the rate of decay controlled by $\kappa$.

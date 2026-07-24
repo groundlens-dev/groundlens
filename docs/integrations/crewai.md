@@ -41,7 +41,7 @@ Explanation: SGI=1.234 -- strong context engagement (pass)
 tool = GroundlensTool(
     name="groundlens_verify",           # Tool name visible to the agent
     description="Verify a response...",  # Custom description
-    groundlens_model="all-MiniLM-L6-v2",  # Embedding model
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Embedding model
 )
 ```
 
@@ -49,7 +49,7 @@ tool = GroundlensTool(
 |---|---|---|
 | `name` | `"groundlens_verify"` | Tool name for agent tool selection |
 | `description` | (built-in) | Description shown to the agent |
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Sentence-transformer for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Sentence-transformer for scoring |
 
 ## Using in a CrewAI Agent
 

@@ -236,7 +236,7 @@ rule set is then visible in the audit trail.
 Banking environments typically require self-hosted deployment, not SaaS.
 groundlens has no required external services:
 
-- The embedding model (`all-MiniLM-L6-v2`, 80MB) ships with
+- The embedding model (`sentence-transformers/sentence-t5-large`, ~640 MB) ships with
   `sentence-transformers` and can be cached locally or in an internal
   artifact registry.
 - The audit log uses SQLite, which is single-file and embeddable.
@@ -250,7 +250,7 @@ FROM python:3.12-slim
 # Pre-fetch the embedding model into the image
 RUN pip install --no-cache-dir groundlens \
     && python -c "from sentence_transformers import SentenceTransformer; \
-       SentenceTransformer('all-MiniLM-L6-v2')"
+       SentenceTransformer('sentence-transformers/sentence-t5-large')"
 
 # Audit log volume mount
 VOLUME ["/var/lib/groundlens"]

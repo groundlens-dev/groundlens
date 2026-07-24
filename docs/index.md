@@ -1,95 +1,71 @@
 # Groundlens
 
-<div align="center">
-  <img src="assets/logo.png" alt="groundlens" width="200">
-</div>
+**Check whether an LLM's answer actually came from its source. Fast, deterministic, no second LLM.**
 
-# Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
+An LLM answers confidently whether or not it used the document you gave it. Sometimes it draws on the source; sometimes it answers from memory, or drifts to the topic of the question. You cannot tell which by reading the answer, and re-reading every answer by hand, or paying a second LLM to judge each one, does not scale.
 
+Groundlens measures the *geometry* of an answer, where it sits relative to its source and to the question, and turns that into a plain reading: **did this answer come from the source, or not?** It runs in milliseconds, returns the same result every time, and uses no second language model. Its job is to let the clearly grounded answers through and flag the ones worth a closer look, so the slow and expensive checks run only where they are needed.
 
+!!! warning "Groundlens does not measure truth"
+    It measures grounding: whether an answer came from its source (SGI) or moves like a well grounded answer (DGI). A statement that is factually wrong but well grounded in the source can pass, and a true statement that ignores the source can be flagged. For truth you need a source of truth: a lookup, a knowledge base, a rule, or a person. Groundlens tells you which answers to send there.
 
-Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human reviewer) runs only on the outputs that actually need it. It provides two complementary scoring methods:
+## The pipeline
 
-- **SGI (Semantic Grounding Index)** --- measures whether a response engaged with provided source context, using distance ratios in embedding space.
-- **DGI (Directional Grounding Index)** --- evaluates response grounding without any context, using directional statistics on displacement vectors.
+Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the front of it and decides what reaches the expensive back.
 
-Both methods are deterministic, sub-second, and produce auditable numeric scores. Groundlens runs *before* any LLM-as-judge, not instead of one: it is the deterministic filter that decides what the expensive check even has to look at.
+| # | Step | The question it answers | In Groundlens |
+|---|---|---|---|
+| 1 | **Geometry** (SGI / DGI) | Did the answer come from its source, or drift off it? | Yes |
+| 2 | **Consistency** | With no source to compare against, does the model agree with itself? | Yes |
+| 3 | **Rules** | Did the answer break a policy, invent a number, skip a disclosure? | Yes |
+| 4 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | No |
+| 5 | **Human review** | The last step of the pipeline. | No |
 
-## Why Groundlens
-Groundlens is **Stage 1**: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to **Stage 2**, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.
+Groundlens covers steps 1 to 3 and needs no second LLM. Steps 4 and 5 run only on what the earlier steps flag.
 
-## Key Features
+## The four checks
 
-| Feature | Description |
-|---|---|
-| **MCP available** | [Groundlens MCP](https://github.com/groundlens-dev/groundlens-mcp) |
-| **Two scoring modes** | SGI (with context) and DGI (context-free) cover all verification scenarios |
-| **Deterministic** | Same inputs always produce the same score --- no sampling variance |
-| **Sub-second** | Sentence-transformer inference, not LLM generation |
-| **Domain calibration** | SGI accepts domain calibration to reach AUROC > 0.8 | 
-| **EU AI Act ready** | No opaque second LLM --- fully auditable decision pipeline |
-| **Provider wrappers** | OpenAI, Anthropic, Google Gemini with automatic scoring |
-| **Framework integrations** | LangChain, CrewAI, Semantic Kernel, AutoGen |
+- **[SGI](concepts/sgi.md)**, did the answer come from its source? Use it when you have the retrieved document (a RAG pipeline).
+- **[DGI](concepts/dgi.md)**, check an answer when there is no source. It works from the question and the answer alone, comparing the direction the answer takes with how grounded answers usually move.
+- **[Consistency](guides/second-stage.md)**, does the model agree with itself? The second stage you escalate to when geometry cannot settle a case.
+- **[Rules](adr/0001-rule-set-architecture.md)**, did the answer break a specific policy? Named checks that catch invented figures, missing disclosures, and out-of-remit claims.
 
-## Quick Install
+## Install
 
 ```bash
 pip install groundlens
 ```
 
-For provider-specific extras:
+The default encoder is `sentence-transformers/sentence-t5-large` (768-dimensional). `import groundlens` stays lightweight and never loads a second language model; the optional model-based second stage is installed separately with `pip install "groundlens[verify]"`.
 
-```bash
-pip install "groundlens[openai]"       # OpenAI provider
-pip install "groundlens[langchain]"    # LangChain integration
-pip install "groundlens[all]"          # Everything
-```
-
-## Basic example
+## A first reading
 
 ```python
-from groundlens import evaluate
+from groundlens import compute_sgi, check
 
-score = evaluate(
-    question="What is the capital of France?",
-    response="The capital of France is Paris.",
-    context="France is in Western Europe. Its capital is Paris.",
-)
-print(score.flagged)   # False
-print(score.method)    # 'sgi'
-print(score.value)     # 1.23 (example)
+question = "What is the daily transfer limit?"
+context  = "The daily transfer limit is 1,000 EUR per day."
+response = "The daily limit is 500 EUR per transaction."   # not in the source
 
-# ...or a plain-language reading for a person:
-from groundlens import check
-print(check(score).line())
-# CHECK: Supported by the document (Semantic Grounding Index - SGI=1.23)
+print(check(compute_sgi(question=question, context=context, response=response)).render())
+# CHECK: ... (Semantic Grounding Index - SGI=...)
 ```
 
-## Quick Setup
+Read the **level** (`"ok"`, `"review"`, `"risk"`), not the raw decimal. The number depends on the encoder, so treat it as a relative signal and set the operating point by [calibrating on your own data](concepts/calibration.md).
 
-1. **Embed** the question, response, and (optionally) context into $\mathbb{R}^n$ using a sentence transformer.
-2. **Compute a geometric score**:
-    - *With context*: SGI = ratio of distances --- is the response closer to context or to the question?
-    - *Without context*: DGI = cosine similarity of the question-to-response displacement against a calibrated reference direction.
-3. **Flag** responses that fall below empirically-derived thresholds.
+## Where to go next
 
-No token generation. No prompt engineering. No stochastic sampling. Pure geometry.
+- New here: [Installation](getting-started/installation.md) and [Quickstart](getting-started/quickstart.md).
+- Understand the method: [How it works](concepts/how-it-works.md), [SGI](concepts/sgi.md), [DGI](concepts/dgi.md), [Calibration](concepts/calibration.md).
+- Escalate the hard cases: [Second stage](guides/second-stage.md) and the provider adapters for [OpenAI](providers/openai.md), [Anthropic](providers/anthropic.md), [Google](providers/google.md).
+- Privacy: [Data handling](guides/data-handling.md).
+- Compliance: [EU AI Act](guides/eu-ai-act.md), [SR 11-7](guides/sr-11-7.md), [NIST AI RMF](guides/nist-ai-rmf.md).
+- Editor / chat integration: the [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp).
 
-## Research Papers
+## Research
 
-| Paper | Index | Preprint |
-|---|---|---|
-| Semantic Grounding Index for LLM Hallucination Detection | SGI | [2512.13771](https://arxiv.org/abs/2512.13771) |
-| A Geometric Taxonomy of Hallucinations in LLMs | DGI | [2602.13224](https://arxiv.org/pdf/2602.13224v3) |
-| How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing | Mechanistic Interpretability | [2603.13259](https://arxiv.org/abs/2603.13259) |
+The methods are documented in three preprints:
 
-## Contributing to Groundlens
-
-All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. A detailed overview on how to contribute can be found in the contributing guide.
-
-If you are simply looking to start working with the pandas codebase, navigate to the GitHub "issues" tab and start looking through interesting issues. There are a number of issues listed under Docs and good first issue where you could start out.
-
-Feel free to ask questions: [javier@groundlens.dev](mailto:javier@groundlens.dev) / [javier@jmarin.info](mailto:javier@jmarin.info)
-
-
-*As contributors and maintainers to this project, you are expected to abide by groundlens' code of conduct. More information can be found at: Contributor Code of Conduct*
+- *Semantic Grounding Index: geometric bounds on context engagement in RAG systems* (2025), [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
+- *A Geometric Taxonomy of Hallucinations in LLMs* (2026), [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+- *How Transformers Reject Wrong Answers* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)

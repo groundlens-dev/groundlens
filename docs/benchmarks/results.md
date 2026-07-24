@@ -1,6 +1,6 @@
 # Benchmark Results
 
-All results use the default embedding model (`all-MiniLM-L6-v2`, 384 dimensions) unless otherwise noted. AUROC is the primary metric.
+All results use the default embedding model (`sentence-transformers/sentence-t5-large`, 768 dimensions) unless otherwise noted. AUROC is the primary metric.
 
 !!! danger "Retraction, 2026-07"
     The figures previously published on this page (DGI 0.958, domain-calibrated AUROC 0.90–0.99, 87.8% detection on human confabulations, and an NLI baseline near chance) are **withdrawn**.

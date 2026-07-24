@@ -1,7 +1,7 @@
 # Custom encoders / running without torch
 
 groundlens defaults to loading a `sentence-transformers` model
-(`Snowflake/snowflake-arctic-embed-l-v2.0`) on first use. You can override
+(`sentence-transformers/sentence-t5-large`) on first use. You can override
 this entirely by supplying **your own embedding function**. This lets you:
 
 - bring an encoder groundlens does not load itself (a hosted embedding API,

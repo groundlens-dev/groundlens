@@ -35,7 +35,7 @@ print(resp.groundlens_score.method)         # 'dgi'
 llm = GroundlensAnthropic(
     api_key="sk-ant-...",
     model="claude-sonnet-4-20250514",      # Claude model for generation
-    groundlens_model="all-MiniLM-L6-v2",    # Sentence-transformer for scoring
+    groundlens_model="sentence-transformers/sentence-t5-large",    # Sentence-transformer for scoring
     groundlens_threshold=0.45,               # Reserved for future use
 )
 ```
@@ -44,7 +44,7 @@ llm = GroundlensAnthropic(
 |---|---|---|
 | `api_key` | Required | Anthropic API key |
 | `model` | `"claude-sonnet-4-20250514"` | Claude model for generation |
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Embedding model for scoring |
 | `groundlens_threshold` | `0.45` | Reserved for future threshold customization |
 
 ## Response Object

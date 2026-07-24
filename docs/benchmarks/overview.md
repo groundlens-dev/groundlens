@@ -108,7 +108,7 @@ pip install datasets scikit-learn  # Required for benchmark command
 
 To ensure fair comparison, all benchmarks follow the same protocol:
 
-1. **Fixed embedding model**: Default `all-MiniLM-L6-v2` unless stated otherwise.
+1. **Fixed embedding model**: Default `sentence-transformers/sentence-t5-large` unless stated otherwise.
 2. **No threshold tuning on test data**: Thresholds are fixed before evaluation.
 3. **Separate calibration and test sets**: For DGI, calibration pairs are never in the test set.
 4. **Stratified evaluation**: AUROC is computed separately for each hallucination type (divergent, tangential, confabulation).

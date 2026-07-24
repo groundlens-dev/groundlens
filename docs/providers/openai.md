@@ -37,7 +37,7 @@ print(resp.groundlens_score.method)         # 'dgi'
 llm = GroundlensOpenAI(
     api_key="sk-...",
     model="gpt-4o",                     # OpenAI model for generation
-    groundlens_model="all-MiniLM-L6-v2",  # Sentence-transformer for scoring
+    groundlens_model="sentence-transformers/sentence-t5-large",  # Sentence-transformer for scoring
     groundlens_threshold=0.45,             # Reserved for future use
 )
 ```
@@ -46,7 +46,7 @@ llm = GroundlensOpenAI(
 |---|---|---|
 | `api_key` | Required | OpenAI API key |
 | `model` | `"gpt-4o"` | Chat model for generation |
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Embedding model for scoring |
 | `groundlens_threshold` | `0.45` | Reserved for future threshold customization |
 
 ## Response Object

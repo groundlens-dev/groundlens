@@ -16,7 +16,7 @@ A three-stage check over a tiny retrieval-augmented pipeline:
 
 ## Before you start
 
-You need Python 3.10 or newer. That is the only requirement. The first `compute_dgi` or `compute_sgi` call downloads a small sentence-transformer model (about 90 MB) and caches it; everything after that is offline and local.
+You need Python 3.10 or newer. That is the only requirement. The first `compute_dgi` or `compute_sgi` call downloads the default sentence-transformer model (about 640 MB) and caches it; everything after that is offline and local.
 
 ## The parts
 

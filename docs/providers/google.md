@@ -37,7 +37,7 @@ print(resp.groundlens_score.method)         # 'dgi'
 llm = GroundlensGemini(
     api_key="AI...",
     model="gemini-2.0-flash",             # Gemini model for generation
-    groundlens_model="all-MiniLM-L6-v2",    # Sentence-transformer for scoring
+    groundlens_model="sentence-transformers/sentence-t5-large",    # Sentence-transformer for scoring
     groundlens_threshold=0.45,               # Reserved for future use
 )
 ```
@@ -46,7 +46,7 @@ llm = GroundlensGemini(
 |---|---|---|
 | `api_key` | Required | Google AI API key |
 | `model` | `"gemini-2.0-flash"` | Gemini model for generation |
-| `groundlens_model` | `"all-MiniLM-L6-v2"` | Embedding model for scoring |
+| `groundlens_model` | `"sentence-transformers/sentence-t5-large"` | Embedding model for scoring |
 | `groundlens_threshold` | `0.45` | Reserved for future threshold customization |
 
 ## Response Object

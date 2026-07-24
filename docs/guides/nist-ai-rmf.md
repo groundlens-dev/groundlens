@@ -228,7 +228,7 @@ Document the following in the deployment's AI RMF profile under MAP
    underlying language patterns of the calibration corpus. Schedule
    refresh in line with the deployment's risk appetite.
 3. **Embedding model is a dependency.** The underlying sentence
-   transformer (default: `all-MiniLM-L6-v2`) is a component of the
+   transformer (default: `sentence-transformers/sentence-t5-large`) is a component of the
    measurement system. Include it in the model inventory and version-
    pin it.
 
