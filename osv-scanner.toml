@@ -1,0 +1,14 @@
+# OSV-Scanner configuration.
+# https://google.github.io/osv-scanner/configuration/
+
+[[IgnoredVulns]]
+id = "GHSA-rrmf-rvhw-rf47"        # CVE-2025-3000 / PYSEC-2025-194
+ignoreUntil = 2026-10-24        # revisit: remove once the scanner clears it on its own
+reason = """
+torch memory corruption via torch.jit.script. Local access, low severity
+(CVSS 3.1 = 5.3, CVSS 4.0 = 1.9). It does not apply to this project: the deploy
+API and the library never compile untrusted input with torch.jit.script; torch
+is used only for sentence-transformers encoding and the optional NLI second
+stage. The advisory lists last_affected = 2.12.0, and deploy/api/requirements.txt
+already pins torch == 2.12.1, which is past the affected range.
+"""
