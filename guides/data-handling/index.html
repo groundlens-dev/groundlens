@@ -12,13 +12,13 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/concepts/dgi/">
+        <link rel="canonical" href="https://docs.groundlens.dev/guides/data-handling/">
       
       
-        <link rel="prev" href="../sgi/">
+        <link rel="prev" href="../second-stage/">
       
       
-        <link rel="next" href="../calibration/">
+        <link rel="next" href="../custom-encoders/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>DGI: Directional Grounding Index - groundlens</title>
+        <title>Data Handling & Privacy - groundlens</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dgi-directional-grounding-index" class="md-skip">
+        <a href="#data-handling-privacy" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              DGI: Directional Grounding Index
+              Data Handling & Privacy
             
           </span>
         </div>
@@ -287,13 +287,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../how-it-works/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../concepts/how-it-works/" class="md-tabs__link">
           
   
   
@@ -333,11 +331,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/rag-verification/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../rag-verification/" class="md-tabs__link">
           
   
   
@@ -858,10 +858,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -877,22 +875,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -910,7 +907,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -928,7 +925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how-it-works/" class="md-nav__link">
+      <a href="../../concepts/how-it-works/" class="md-nav__link">
         
   
   
@@ -956,7 +953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sgi/" class="md-nav__link">
+      <a href="../../concepts/sgi/" class="md-nav__link">
         
   
   
@@ -981,37 +978,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    DGI: Directional Grounding Index
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../concepts/dgi/" class="md-nav__link">
         
   
   
@@ -1027,153 +997,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#formula" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Formula
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#geometric-interpretation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Geometric interpretation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#two-real-readings" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Two real readings
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-reference-direction" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The reference direction
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The reference direction">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-grounded-direction-is-not-a-single-global-vector" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The grounded direction is not a single global vector
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#calibration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Calibration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Normalization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-dgi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use DGI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Limitations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dgi-depends-on-the-encoder-more-than-sgi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DGI depends on the encoder more than SGI
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1186,7 +1009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calibration/" class="md-nav__link">
+      <a href="../../concepts/calibration/" class="md-nav__link">
         
   
   
@@ -1431,8 +1254,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1462,21 +1287,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1494,7 +1320,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1512,7 +1338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/rag-verification/" class="md-nav__link">
+      <a href="../rag-verification/" class="md-nav__link">
         
   
   
@@ -1540,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/second-stage/" class="md-nav__link">
+      <a href="../second-stage/" class="md-nav__link">
         
   
   
@@ -1565,10 +1391,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/data-handling/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1584,6 +1437,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-stays-on-your-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What stays on your machine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-leaves-your-machine-and-only-then" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What leaves your machine, and only then
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify it yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fully-offline-air-gapped-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully offline / air-gapped operation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1596,7 +1524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/custom-encoders/" class="md-nav__link">
+      <a href="../custom-encoders/" class="md-nav__link">
         
   
   
@@ -1624,7 +1552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/active-learning/" class="md-nav__link">
+      <a href="../active-learning/" class="md-nav__link">
         
   
   
@@ -1652,7 +1580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/domain-calibration/" class="md-nav__link">
+      <a href="../domain-calibration/" class="md-nav__link">
         
   
   
@@ -1680,7 +1608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/batch-evaluation/" class="md-nav__link">
+      <a href="../batch-evaluation/" class="md-nav__link">
         
   
   
@@ -1708,7 +1636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/banking-deployment/" class="md-nav__link">
+      <a href="../banking-deployment/" class="md-nav__link">
         
   
   
@@ -1736,7 +1664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/eu-ai-act/" class="md-nav__link">
+      <a href="../eu-ai-act/" class="md-nav__link">
         
   
   
@@ -1764,7 +1692,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/sr-11-7/" class="md-nav__link">
+      <a href="../sr-11-7/" class="md-nav__link">
         
   
   
@@ -1792,7 +1720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/nist-ai-rmf/" class="md-nav__link">
+      <a href="../nist-ai-rmf/" class="md-nav__link">
         
   
   
@@ -2456,10 +2384,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#formula" class="md-nav__link">
+  <a href="#what-stays-on-your-machine" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Formula
+        What stays on your machine
       
     </span>
   </a>
@@ -2467,10 +2395,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#geometric-interpretation" class="md-nav__link">
+  <a href="#what-leaves-your-machine-and-only-then" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Geometric interpretation
+        What leaves your machine, and only then
       
     </span>
   </a>
@@ -2478,10 +2406,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#two-real-readings" class="md-nav__link">
+  <a href="#verify-it-yourself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Two real readings
+        Verify it yourself
       
     </span>
   </a>
@@ -2489,38 +2417,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-reference-direction" class="md-nav__link">
+  <a href="#fully-offline-air-gapped-operation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The reference direction
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The reference direction">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-grounded-direction-is-not-a-single-global-vector" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The grounded direction is not a single global vector
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#calibration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Calibration
+        Fully offline / air-gapped operation
       
     </span>
   </a>
@@ -2528,54 +2428,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
+  <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Normalization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-dgi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use DGI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Limitations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dgi-depends-on-the-encoder-more-than-sgi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DGI depends on the encoder more than SGI
+        See also
       
     </span>
   </a>
@@ -2602,198 +2458,39 @@
   
 
 
-<h1 id="dgi-directional-grounding-index">DGI: Directional Grounding Index<a class="headerlink" href="#dgi-directional-grounding-index" title="Permanent link">&para;</a></h1>
-<p>The Directional Grounding Index (DGI) evaluates whether an LLM response follows the characteristic semantic displacement pattern of grounded responses, <strong>without requiring any source context</strong>. It needs only a question and a response, plus calibration data defining the "grounded direction."</p>
-<p><strong>Paper</strong>: Marin (2026). <em>A Geometric Taxonomy of Hallucinations in LLMs</em>. <a href="https://arxiv.org/pdf/2602.13224v3">arXiv:2602.13224</a>.</p>
-<h2 id="formula">Formula<a class="headerlink" href="#formula" title="Permanent link">&para;</a></h2>
-<div class="arithmatex">\[
-\delta = \phi(r) - \phi(q)
-\]</div>
-<div class="arithmatex">\[
-\text{DGI} = \frac{\delta}{\|\delta\|} \cdot \hat{\mu}
-\]</div>
-<p>where:</p>
-<ul>
-<li><span class="arithmatex">\(\phi(\cdot)\)</span> is the sentence embedding function (default encoder: <code>sentence-transformers/sentence-t5-large</code>, 768-dimensional)</li>
-<li><span class="arithmatex">\(\delta\)</span> is the <strong>displacement vector</strong> from question to response in embedding space</li>
-<li><span class="arithmatex">\(\hat{\mu}\)</span> is the <strong>reference direction</strong>, the mean displacement direction computed from verified grounded (question, response) pairs</li>
-</ul>
-<h2 id="geometric-interpretation">Geometric interpretation<a class="headerlink" href="#geometric-interpretation" title="Permanent link">&para;</a></h2>
-<p>DGI is the <strong>cosine similarity</strong> between the displacement direction of the current (question, response) pair and the average displacement direction of known grounded pairs. When an LLM answers a question with a grounded response, it performs a characteristic move in embedding space, from the question toward its factual elaboration, and that move has a consistent direction across questions. A fabrication tends to move differently.</p>
-<p>Read DGI against a single calibrated cut:</p>
-<ul>
-<li><strong>At or above the cut</strong>: the displacement aligns with the grounded reference direction. Reads as grounded.</li>
-<li><strong>Below the cut</strong>: the displacement does not follow the grounded direction. Reads as a risk to send to the second stage.</li>
-</ul>
-<p>With the default encoder the cut is <strong>0.525</strong> for the global reference direction and <strong>0.545</strong> for the local variant described below. These cut points are not universal: they depend on the encoder and on the style of your data, so treat DGI as a relative ranking and set the operating point by calibrating on your own grounded set.</p>
-<h2 id="two-real-readings">Two real readings<a class="headerlink" href="#two-real-readings" title="Permanent link">&para;</a></h2>
-<p>Measured with the default encoder on the shipped reference set:</p>
-<table>
-<thead>
-<tr>
-<th>Question</th>
-<th>Answer</th>
-<th>DGI</th>
-<th>Reading</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>What is the difference between a traditional IRA and a Roth IRA?</td>
-<td>A correct explanation of the tax treatment</td>
-<td>0.54</td>
-<td>Looks grounded</td>
-</tr>
-<tr>
-<td>What is the primary function of red blood cells?</td>
-<td>A fabricated answer about "red coloration"</td>
-<td>0.37</td>
-<td>Not grounded</td>
-</tr>
-</tbody>
-</table>
-<p>The grounded answer lands above the 0.525 cut; the fabrication lands below it.</p>
-<h2 id="the-reference-direction">The reference direction<a class="headerlink" href="#the-reference-direction" title="Permanent link">&para;</a></h2>
-<p>The reference direction <span class="arithmatex">\(\hat{\mu}\)</span> is the maximum-likelihood estimate of the mean direction of a <strong>von Mises-Fisher distribution</strong> on the unit hypersphere <span class="arithmatex">\(S^{n-1}\)</span>. It is computed as:</p>
+<h1 id="data-handling-privacy">Data Handling &amp; Privacy<a class="headerlink" href="#data-handling-privacy" title="Permanent link">&para;</a></h1>
+<p>Groundlens is a client-side Python library. It has no server, no account, and no telemetry in the scoring path. This page states what the library does and does not do with your data, and how you can verify each claim yourself. The canonical, versioned statement lives in <a href="https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md"><code>DATA_HANDLING.md</code></a> at the repository root.</p>
+<h2 id="what-stays-on-your-machine">What stays on your machine<a class="headerlink" href="#what-stays-on-your-machine" title="Permanent link">&para;</a></h2>
+<p>The deterministic core (SGI, DGI, rules) and the <code>check()</code> renderer run entirely in your process. They compute embeddings and geometry locally and return a result. Nothing about your questions, sources, or answers is sent anywhere.</p>
+<p>Local scoring sends nothing out. There is no Groundlens endpoint in the path, because Groundlens holds no API key of its own and runs no server. This is a structural property, not a promise: the core scoring path imports no HTTP client and no socket.</p>
+<p>The only thing Groundlens writes to disk is the audit log, and only when you open one yourself with <code>groundlens.audit.open_log(path)</code>. It is a local SQLite file at a path you choose, on your infrastructure.</p>
+<h2 id="what-leaves-your-machine-and-only-then">What leaves your machine, and only then<a class="headerlink" href="#what-leaves-your-machine-and-only-then" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Collect <span class="arithmatex">\(N\)</span> verified (question, response) pairs where the response is known to be grounded.</li>
-<li>For each pair <span class="arithmatex">\(i\)</span>, compute <span class="arithmatex">\(\delta_i = \phi(r_i) - \phi(q_i)\)</span>.</li>
-<li>Normalize each displacement: <span class="arithmatex">\(\hat{\delta}_i = \delta_i / \|\delta_i\|\)</span>.</li>
-<li>Average the unit vectors and re-normalize: <span class="arithmatex">\(\hat{\mu} = \text{normalize}\bigl(\frac{1}{N}\sum_i \hat{\delta}_i\bigr)\)</span>.</li>
+<li>
+<p><strong>Model download, one time.</strong> On first use, the embedding model (and, for the optional consistency checks, a local generation model and NLI model) is downloaded from Hugging Face and cached locally. This is inbound: the model comes to you, your questions and answers are not uploaded. After the download, scoring runs offline.</p>
+</li>
+<li>
+<p><strong>A hosted API provider, only if you configure one.</strong> If you run the second-stage consistency check against a hosted model through <code>AnthropicGenerator</code>, <code>OpenAIGenerator</code>, or <code>GeminiGenerator</code>, your prompt and the model's answer go to <strong>that provider</strong>, using <strong>your</strong> API key, under <strong>that provider's</strong> terms. Groundlens sends them nowhere else. With a local model instead, the second stage also sends nothing out.</p>
+</li>
 </ol>
-<p>The library ships a reference direction computed this way from a bundled set of 212 grounded/fabricated pairs across nine domains (<code>reference_pairs.csv</code>). It is recomputed from that file, so the shipped direction is reproducible by construction rather than a frozen vector you have to trust.</p>
-<h3 id="the-grounded-direction-is-not-a-single-global-vector">The grounded direction is not a single global vector<a class="headerlink" href="#the-grounded-direction-is-not-a-single-global-vector" title="Permanent link">&para;</a></h3>
-<p>The mean direction <span class="arithmatex">\(\hat{\mu}\)</span> above treats "being grounded" as one fixed direction for all questions. It is not. The direction that separates grounded from fabricated answers <strong>varies by domain</strong>: a finance question and a medical question move through embedding space along related but distinct grounded directions. A single global <span class="arithmatex">\(\hat{\mu}\)</span> averages over that structure and leaves signal on the table.</p>
-<p>The <strong>local variant</strong> <span class="arithmatex">\(\Gamma_k\)</span> exploits this. Instead of one global direction, it builds a query-specific reference from the <span class="arithmatex">\(k\)</span> calibration questions nearest to yours, and measures your displacement against that local direction:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">check</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># global reference direction</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">reading</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">))</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># local variant: reference built from the k nearest calibration questions</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">reading_local</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
-</span></code></pre></div>
-<p>On the shipped reference set (leave-one-out) this raises detection from <strong>AUROC 0.78</strong> with the global direction to <strong>0.81</strong> with the local variant. The gain is largest when your calibration set spans several domains, because that is exactly when a single global direction is the poorest fit. Note that this set is not authorship-controlled; under the stricter authorship control the register wall lowers the ceiling for the whole embedding-similarity class (see <a href="../../benchmarks/overview/">Benchmarks</a>).</p>
-<h2 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Permanent link">&para;</a></h2>
-<p>DGI depends heavily on the quality of <span class="arithmatex">\(\hat{\mu}\)</span> and on the encoder. Calibrate it on your own labelled grounded set and pick the operating point with <code>fit_thresholds</code> (which uses Youden's J to place the cut). Calibration moves the operating point; it does not remove the blind spot below. See the <a href="../../guides/domain-calibration/">Domain Calibration Guide</a>.</p>
-<h2 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h2>
-<p>DGI raw scores are in [-1, 1] (cosine similarity range). Linear normalization to [0, 1]:</p>
-<div class="arithmatex">\[
-\text{DGI}_{\text{norm}} = \frac{\text{DGI} + 1}{2}
-\]</div>
-<table>
-<thead>
-<tr>
-<th>Raw DGI</th>
-<th>Normalized</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-1.0</td>
-<td>0.000</td>
-</tr>
-<tr>
-<td>0.0</td>
-<td>0.500</td>
-</tr>
-<tr>
-<td>0.525</td>
-<td>0.763</td>
-</tr>
-<tr>
-<td>1.0</td>
-<td>1.000</td>
-</tr>
-</tbody>
-</table>
-<h2 id="when-to-use-dgi">When to use DGI<a class="headerlink" href="#when-to-use-dgi" title="Permanent link">&para;</a></h2>
-<p>DGI is the right choice when you <strong>do not have source context</strong>:</p>
+<h2 id="verify-it-yourself">Verify it yourself<a class="headerlink" href="#verify-it-yourself" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Chat / dialogue verification</strong>: no retrieval context available</li>
-<li><strong>Agent self-verification</strong>: agents checking their own outputs before returning results</li>
-<li><strong>Batch evaluation</strong>: scoring large datasets of LLM outputs at scale</li>
-<li><strong>Pre-deployment testing</strong>: evaluating model quality before release</li>
+<li><strong>No-egress test (runs in CI):</strong> <code>tests/unit/test_no_egress.py</code> blocks every socket connection, then scores with an in-memory encoder. If any part of local scoring tried to reach the network, the test fails. It passes, and it is reproducible.</li>
+<li><strong>Under a network monitor:</strong> run your scoring under <code>tcpdump</code> or in a no-egress container. During local scoring, after the one-time model download, there are zero outbound connections. With an API generator, the only traffic is to the endpoint you configured.</li>
+<li><strong>Read the source:</strong> the library is open source (Apache-2.0). The core scoring path imports no HTTP client (<code>requests</code>, <code>urllib</code>, <code>httpx</code>) and no <code>socket</code>, so you can confirm there is no telemetry or exfiltration.</li>
 </ul>
-<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Grounding, not truth</p>
-<p>DGI measures whether a response moves like a grounded one, not whether it is true. It cannot distinguish a factually correct statement from a confabulation that mimics the displacement of a grounded response (an in-frame factual error). This is a fundamental limit of the embedding-similarity class, not a tuning problem. See <a href="../../theory/confabulation-boundary/">Confabulation Boundary</a> and hand off these cases to the <a href="../../guides/second-stage/">second stage</a>.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Encoder and domain sensitivity</p>
-<p>The grounded direction is learned and lives in one specific embedding space. Change the encoder and the direction has to be relearned, and some encoders do not lay grounded and ungrounded answers along a clean direction at all. DGI leans on the encoder and the domain far more than SGI does. Calibrate and measure it on your own data before you trust it.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Displacement magnitude</p>
-<p>The DGI <em>score</em> uses only the <em>direction</em> of displacement, not its <em>magnitude</em>. A response very similar to the question (small displacement) might score well by chance of alignment. The degenerate case (identical question and response) produces a zero displacement vector and is automatically flagged. The magnitude is still returned on <code>DGIResult.magnitude</code> as a second signal (how far the response moved from the question); it does not enter the score.</p>
-</div>
-<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">DGI</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Function API</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">,</span>   <span class="c1"># optional</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">reference_csv</span><span class="o">=</span><span class="s2">&quot;domain_pairs.csv&quot;</span><span class="p">,</span>                  <span class="c1"># optional</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>                                              <span class="c1"># optional: local variant</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">)</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Class API (reusable, with custom calibration)</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">DGI</span><span class="p">(</span><span class="n">reference_csv</span><span class="o">=</span><span class="s2">&quot;my_domain_pairs.csv&quot;</span><span class="p">)</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">result</span> <span class="o">=</span> <span class="n">dgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">)</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1"># Inline calibration</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">DGI</span><span class="p">()</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="n">dgi</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">pairs</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;Q1?&quot;</span><span class="p">,</span> <span class="s2">&quot;A1.&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Q2?&quot;</span><span class="p">,</span> <span class="s2">&quot;A2.&quot;</span><span class="p">)])</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="n">result</span> <span class="o">=</span> <span class="n">dgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;Q?&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;A.&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p>The <code>DGIResult</code> contains:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>value</code></td>
-<td><code>float</code></td>
-<td>Raw DGI score, the <em>direction</em> (cosine similarity to the reference direction)</td>
-</tr>
-<tr>
-<td><code>magnitude</code></td>
-<td><code>float</code></td>
-<td><code>\|\|phi(response) - phi(question)\|\|</code>, how far the response moved from the question. Not used by the score; a second signal.</td>
-</tr>
-<tr>
-<td><code>normalized</code></td>
-<td><code>float</code></td>
-<td>Score in [0, 1]</td>
-</tr>
-<tr>
-<td><code>flagged</code></td>
-<td><code>bool</code></td>
-<td>True if below the pass threshold</td>
-</tr>
-<tr>
-<td><code>method</code></td>
-<td><code>str</code></td>
-<td>Always <code>"dgi"</code></td>
-</tr>
-<tr>
-<td><code>explanation</code></td>
-<td><code>str</code></td>
-<td>Plain-language interpretation</td>
-</tr>
-</tbody>
-</table>
-<h2 id="dgi-depends-on-the-encoder-more-than-sgi">DGI depends on the encoder more than SGI<a class="headerlink" href="#dgi-depends-on-the-encoder-more-than-sgi" title="Permanent link">&para;</a></h2>
-<p>DGI works by checking whether the step from question to answer points in the same direction as known grounded answers. That direction is learned from data and lives in one specific embedding space. Change the encoder and the direction has to be relearned, and some encoders simply do not lay grounded and ungrounded answers along a clean direction.</p>
-<p>In our reasoning-chains benchmark, DGI ran through seven base language models used as encoders and stayed near chance on all of them, while SGI still showed the expected pattern. The practical takeaway is short: SGI is the safer default when you are unsure about your encoder, and DGI should be calibrated and measured on your own data before you trust it. See <a href="../../guides/custom-encoders/">Custom encoders</a> and the reasoning-chains benchmark in the project README.</p>
+<h2 id="fully-offline-air-gapped-operation">Fully offline / air-gapped operation<a class="headerlink" href="#fully-offline-air-gapped-operation" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Pre-download your encoder on a connected machine, or supply your own via <code>encoder=</code> / <code>set_default_encoder(...)</code>. The custom-encoder path never imports <code>sentence-transformers</code>.</li>
+<li>Set <code>HF_HUB_OFFLINE=1</code> (and <code>TRANSFORMERS_OFFLINE=1</code> if you use the local consistency checks).</li>
+<li>Score. SGI, DGI, and rules run with no network at all.</li>
+</ol>
+<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md"><code>DATA_HANDLING.md</code></a> at the repository root: the canonical statement.</li>
+<li><a href="../second-stage/">Second stage (model-based)</a>: when and how a hosted provider enters the path.</li>
+<li><a href="../custom-encoders/">Custom Encoders / No-Torch</a>: supplying your own encoder for air-gapped use.</li>
+</ul>
 
 
 

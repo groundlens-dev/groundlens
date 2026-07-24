@@ -1406,6 +1406,8 @@
       
         
       
+        
+      
     
     
     
@@ -1496,6 +1498,34 @@
     
   
     Second Stage (model-based)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/data-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
   
 
     
@@ -2481,7 +2511,7 @@
 \]</div>
 <p>where:</p>
 <ul>
-<li><span class="arithmatex">\(\phi(\cdot)\)</span> is the sentence embedding function (default: <code>all-MiniLM-L6-v2</code>)</li>
+<li><span class="arithmatex">\(\phi(\cdot)\)</span> is the sentence embedding function (default: <code>sentence-transformers/sentence-t5-large</code>)</li>
 <li><span class="arithmatex">\(d(\cdot, \cdot)\)</span> is Euclidean distance in <span class="arithmatex">\(\mathbb{R}^n\)</span></li>
 <li><span class="arithmatex">\(r\)</span> is the LLM response</li>
 <li><span class="arithmatex">\(q\)</span> is the input question</li>
@@ -2501,31 +2531,41 @@
 <tr>
 <th>Zone</th>
 <th>SGI Range</th>
+<th>Level</th>
 <th>Interpretation</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Strong pass</td>
+<td>Grounded</td>
 <td>SGI &gt;= 1.20</td>
+<td><code>ok</code></td>
 <td>Response strongly engaged with context</td>
 <td>Accept</td>
 </tr>
 <tr>
-<td>Partial</td>
+<td>Partly</td>
 <td>0.95 &lt;= SGI &lt; 1.20</td>
+<td><code>review</code></td>
 <td>Some context influence detected</td>
 <td>Review recommended</td>
 </tr>
 <tr>
-<td>Flagged</td>
+<td>Not grounded</td>
 <td>SGI &lt; 0.95</td>
+<td><code>risk</code></td>
 <td>Weak context engagement</td>
 <td>Human review required</td>
 </tr>
 </tbody>
 </table>
+<p>These thresholds are the ones bundled for the default encoder (<code>sentence-transformers/sentence-t5-large</code>). If you change the encoder, re-fit them with <a href="../calibration/"><code>fit_thresholds</code></a>.</p>
+<div class="admonition example">
+<p class="admonition-title">Two real readings</p>
+<p>With the default encoder, a faithful answer that restates the source scored <strong>3.34</strong> and read <em>"Supported by the document"</em>. An on-topic answer that contradicts the source scored <strong>1.17</strong> and read <em>"Partly supported"</em>: it stayed in the topic's neighborhood, so geometry placed it in the review band rather than the risk band.</p>
+<p>This is the caveat that matters: SGI measures <strong>grounding, not truth</strong>. A plausible wrong fact stated in the right frame can still score above the pass threshold, because it sits close to the source in embedding space. SGI tells you whether an answer was drawn from the source, not whether it is correct.</p>
+</div>
 <h2 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h2>
 <p>The raw SGI score is normalized to [0, 1] using a tanh mapping:</p>
 <div class="arithmatex">\[
@@ -2593,11 +2633,11 @@
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France is in Western Europe. Its capital is Paris.&quot;</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>  <span class="c1"># optional</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">,</span>  <span class="c1"># optional</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Class API (reusable)</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">)</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">result</span> <span class="o">=</span> <span class="n">sgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>

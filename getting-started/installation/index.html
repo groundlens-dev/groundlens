@@ -1406,6 +1406,8 @@
       
         
       
+        
+      
     
     
     
@@ -1496,6 +1498,34 @@
     
   
     Second Stage (model-based)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/data-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
   
 
     
@@ -2481,7 +2511,7 @@
 <h2 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>groundlens
 </span></code></pre></div>
-<p>This installs the core library with SGI, DGI, calibration, and CLI support. The default embedding model (<code>all-MiniLM-L6-v2</code>) is downloaded automatically on first use via the <code>sentence-transformers</code> package.</p>
+<p>This installs the core library with SGI, DGI, calibration, and CLI support. The default embedding model (<code>sentence-transformers/sentence-t5-large</code>) is downloaded automatically on first use via the <code>sentence-transformers</code> package.</p>
 <h2 id="optional-extras">Optional Extras<a class="headerlink" href="#optional-extras" title="Permanent link">&para;</a></h2>
 <p>groundlens uses optional dependency groups to keep the core install lightweight. Install only what you need:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Provider extras</label><label for="__tabbed_1_2">Integration extras</label><label for="__tabbed_1_3">Everything</label></div>
@@ -2529,17 +2559,17 @@
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">First-run model download</p>
-<p>The first call to any scoring function triggers a one-time download of the <code>all-MiniLM-L6-v2</code> sentence-transformer model (~80 MB). Subsequent calls use the cached model.</p>
+<p>The first call to any scoring function triggers a one-time download of the <code>sentence-transformers/sentence-t5-large</code> sentence-transformer model (~640 MB). Subsequent calls use the cached model.</p>
 </div>
 <h2 id="embedding-model-selection">Embedding Model Selection<a class="headerlink" href="#embedding-model-selection" title="Permanent link">&para;</a></h2>
-<p>groundlens defaults to <code>all-MiniLM-L6-v2</code> (384 dimensions, ~80 MB). You can use any sentence-transformer model by passing the <code>model</code> parameter:</p>
+<p>groundlens defaults to <code>sentence-transformers/sentence-t5-large</code> (768 dimensions, ~640 MB). You can use any sentence-transformer model by passing the <code>model</code> parameter:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;all-mpnet-base-v2&quot;</span><span class="p">,</span>  <span class="c1"># 768 dimensions, higher quality</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;all-mpnet-base-v2&quot;</span><span class="p">,</span>  <span class="c1"># 768-dimensional alternative encoder</span>
 </span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition warning">
@@ -2563,8 +2593,8 @@
 </tr>
 <tr>
 <td>Disk</td>
-<td>200 MB (model cache)</td>
-<td>500 MB</td>
+<td>1 GB (model cache)</td>
+<td>2 GB</td>
 </tr>
 <tr>
 <td>GPU</td>

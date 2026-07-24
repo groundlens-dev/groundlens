@@ -18,7 +18,7 @@
         <link rel="prev" href="../rag-verification/">
       
       
-        <link rel="next" href="../custom-encoders/">
+        <link rel="next" href="../data-handling/">
       
       
         
@@ -1281,6 +1281,8 @@
       
         
       
+        
+      
     
     
     
@@ -1446,10 +1448,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-methods" class="md-nav__link">
+  <a href="#the-two-consistency-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The methods
+        The two consistency methods
       
     </span>
   </a>
@@ -1461,6 +1463,17 @@
     <span class="md-ellipsis">
       
         Any model, not just Hugging Face
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-an-api-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using an API provider
       
     </span>
   </a>
@@ -1493,6 +1506,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2387,10 +2428,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-methods" class="md-nav__link">
+  <a href="#the-two-consistency-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The methods
+        The two consistency methods
       
     </span>
   </a>
@@ -2402,6 +2443,17 @@
     <span class="md-ellipsis">
       
         Any model, not just Hugging Face
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-an-api-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using an API provider
       
     </span>
   </a>
@@ -2473,21 +2525,65 @@
 </span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">result</span><span class="o">.</span><span class="n">final</span>       <span class="c1"># the Check to act on</span>
 </span></code></pre></div>
 <p>When stage one escalates (its <code>Check.escalate</code> is set), <code>two_stage</code> runs the model-based detector and <code>result.final</code> becomes the stage-two reading.</p>
-<h2 id="the-methods">The methods<a class="headerlink" href="#the-methods" title="Permanent link">&para;</a></h2>
-<p>Two presets, both returning a <code>Check</code>:</p>
+<h2 id="the-two-consistency-methods">The two consistency methods<a class="headerlink" href="#the-two-consistency-methods" title="Permanent link">&para;</a></h2>
+<p>The second stage reads consistency. It perturbs either the model or the input, generates more than once, and measures whether the readings agree. Low agreement means the model disagrees with itself, which reads as risk. Both methods return a consistency score in [0, 1] and a <code>Check</code>.</p>
 <ul>
-<li><strong><code>SelfCheckNLI</code></strong> resamples the model and scores contradiction with NLI. This reproduces SelfCheckGPT-NLI, the validated method (92.50 AUC-PR on WikiBio-GPT3, Manakul et al., EMNLP 2023).</li>
-<li><strong><code>ParaphraseCheck</code></strong> rewords the question and answers each rewording. It front-loads the signal, reaching good detection at a low sample budget, but saturates, since a question has only so many genuinely different phrasings.</li>
+<li><strong><code>SampleConsistency</code></strong> resamples the same question several times with sampling on. The variation comes from the model's own randomness, so it needs several samples before the signal is stable.</li>
+<li><strong><code>ParaphraseCheck</code></strong> rewords the question and answers each rewording once. The variation comes from the input rather than from sampling, so it reaches a useful signal at a lower sample budget. It saturates, since a question has only so many genuinely different phrasings.</li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelfCheckNLI</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParaphraseCheck</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">checker</span> <span class="o">=</span> <span class="n">SelfCheckNLI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-7B-Instruct&quot;</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">checker</span> <span class="o">=</span> <span class="n">ParaphraseCheck</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-7B-Instruct&quot;</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">reading</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;What is the capital of Spain?&quot;</span><span class="p">,</span> <span class="s2">&quot;Madrid&quot;</span><span class="p">)</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">reading</span><span class="o">.</span><span class="n">level</span>        <span class="c1"># &quot;ok&quot; / &quot;review&quot; / &quot;risk&quot;</span>
 </span></code></pre></div>
+<p><code>SampleConsistency</code> has the same shape and reads the model's own randomness instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleConsistency</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">checker</span> <span class="o">=</span> <span class="n">SampleConsistency</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-7B-Instruct&quot;</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">reading</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;What is the capital of Spain?&quot;</span><span class="p">,</span> <span class="s2">&quot;Madrid&quot;</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Use <code>checker.verify(...)</code> instead of <code>checker.check(...)</code> to get the full <code>Verification</code>: the <code>Check</code> plus the samples, the consistency score, the seed, and the wall-clock time. A stochastic stage inside an auditable library should leave that trail.</p>
 <h2 id="any-model-not-just-hugging-face">Any model, not just Hugging Face<a class="headerlink" href="#any-model-not-just-hugging-face" title="Permanent link">&para;</a></h2>
-<p>The detector depends only on a small <code>TextGenerator</code> protocol (<code>generate(prompt, n)</code> and <code>generate_many(prompts)</code>). The bundled <code>HFTextGenerator</code> is the local, batched default; to use an API model, wrap your client in an object with those two methods and pass it as <code>generator=...</code>. Pick the scorer with <code>scorer="nli"</code> (validated, needs the extra) or <code>scorer="embedding"</code> (reuses the core sentence encoder, no extra needed).</p>
+<p>The detector depends only on a small <code>TextGenerator</code> protocol (<code>generate(prompt, n)</code> and <code>generate_many(prompts)</code>). The bundled <code>HFTextGenerator</code> is the local, batched default; to use an API model, wrap your client in an object with those two methods and pass it as <code>generator=...</code>. Pick the scorer with <code>scorer="nli"</code> (entailment, needs <code>groundlens[verify]</code>) or <code>scorer="embedding"</code> (reuses the core sentence encoder, torch-free, no extra needed).</p>
+<h2 id="using-an-api-provider">Using an API provider<a class="headerlink" href="#using-an-api-provider" title="Permanent link">&para;</a></h2>
+<p>The second stage runs against a local Hugging Face model by default, but you can point it at a hosted API instead. Three adapters ship with the library:</p>
+<table>
+<thead>
+<tr>
+<th>Adapter</th>
+<th>Default model</th>
+<th>Install</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AnthropicGenerator</code></td>
+<td><code>claude-3-5-haiku-latest</code></td>
+<td><code>pip install "groundlens[anthropic]"</code></td>
+</tr>
+<tr>
+<td><code>OpenAIGenerator</code></td>
+<td><code>gpt-4o-mini</code></td>
+<td><code>pip install "groundlens[openai]"</code></td>
+</tr>
+<tr>
+<td><code>GeminiGenerator</code></td>
+<td><code>gemini-1.5-flash</code></td>
+<td><code>pip install "groundlens[google]"</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>OpenAIGenerator</code> also accepts a <code>base_url</code>, so it drives any OpenAI-compatible endpoint.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParaphraseCheck</span><span class="p">,</span> <span class="n">AnthropicGenerator</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">checker</span> <span class="o">=</span> <span class="n">ParaphraseCheck</span><span class="p">(</span><span class="n">generator</span><span class="o">=</span><span class="n">AnthropicGenerator</span><span class="p">())</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">reading</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;What is the capital of Spain?&quot;</span><span class="p">,</span> <span class="s2">&quot;Madrid&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Where your data goes</p>
+<p>With a local model the second stage sends nothing out. With an API adapter, your prompt and the answer go to that provider under your own key and their terms. groundlens holds no key of its own and has no server in the path. See <a href="../data-handling/">Data Handling and Privacy</a>.</p>
+</div>
 <h2 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Permanent link">&para;</a></h2>
 <p>The second-stage cut-points (<code>SC_CONSISTENT</code>, <code>SC_MIXED</code>) are provisional. Unlike the SGI and DGI thresholds they are not calibrated against a labeled benchmark. Calibrate them on your own data with <a href="../../concepts/calibration/"><code>fit_thresholds</code></a> before relying on the level in production.</p>
 <h2 id="what-it-does-not-do">What it does not do<a class="headerlink" href="#what-it-does-not-do" title="Permanent link">&para;</a></h2>

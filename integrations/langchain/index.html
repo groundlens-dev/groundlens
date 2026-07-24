@@ -1279,6 +1279,8 @@
       
         
       
+        
+      
     
     
     
@@ -1369,6 +1371,34 @@
     
   
     Second Stage (model-based)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/data-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
   
 
     
@@ -2651,7 +2681,7 @@
 </span></code></pre></div>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">evaluator</span> <span class="o">=</span> <span class="n">GroundlensEvaluator</span><span class="p">(</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">groundlens_model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>  <span class="c1"># Embedding model</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">groundlens_model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">,</span>  <span class="c1"># Embedding model</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">input_key</span><span class="o">=</span><span class="s2">&quot;question&quot;</span><span class="p">,</span>                 <span class="c1"># Key for question in run inputs</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">output_key</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>                  <span class="c1"># Key for response in run outputs</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">context_key</span><span class="o">=</span><span class="s2">&quot;context&quot;</span><span class="p">,</span>                <span class="c1"># Key for context in example inputs</span>
@@ -2668,7 +2698,7 @@
 <tbody>
 <tr>
 <td><code>groundlens_model</code></td>
-<td><code>"all-MiniLM-L6-v2"</code></td>
+<td><code>"sentence-transformers/sentence-t5-large"</code></td>
 <td>Sentence-transformer for scoring</td>
 </tr>
 <tr>
@@ -2716,7 +2746,7 @@
 </span></code></pre></div>
 <h3 id="configuration_1">Configuration<a class="headerlink" href="#configuration_1" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">cb</span> <span class="o">=</span> <span class="n">GroundlensCallback</span><span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">groundlens_model</span><span class="o">=</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">,</span>  <span class="c1"># Embedding model</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">groundlens_model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">,</span>  <span class="c1"># Embedding model</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">context_key</span><span class="o">=</span><span class="s2">&quot;context&quot;</span><span class="p">,</span>                <span class="c1"># Metadata key for context</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">)</span>
 </span></code></pre></div>

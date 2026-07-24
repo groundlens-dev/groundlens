@@ -522,6 +522,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -538,6 +556,91 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-four-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-first-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A first reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1287,6 +1390,8 @@
       
         
       
+        
+      
     
     
     
@@ -1377,6 +1482,34 @@
     
   
     Second Stage (model-based)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/data-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Handling & Privacy
   
 
     
@@ -2250,6 +2383,80 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-four-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-first-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A first reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2269,130 +2476,96 @@
 
 
 <h1 id="groundlens">Groundlens<a class="headerlink" href="#groundlens" title="Permanent link">&para;</a></h1>
-<div align="center">
-  <img src="assets/logo.png" alt="groundlens" width="200">
+<p><strong>Check whether an LLM's answer actually came from its source. Fast, deterministic, no second LLM.</strong></p>
+<p>An LLM answers confidently whether or not it used the document you gave it. Sometimes it draws on the source; sometimes it answers from memory, or drifts to the topic of the question. You cannot tell which by reading the answer, and re-reading every answer by hand, or paying a second LLM to judge each one, does not scale.</p>
+<p>Groundlens measures the <em>geometry</em> of an answer, where it sits relative to its source and to the question, and turns that into a plain reading: <strong>did this answer come from the source, or not?</strong> It runs in milliseconds, returns the same result every time, and uses no second language model. Its job is to let the clearly grounded answers through and flag the ones worth a closer look, so the slow and expensive checks run only where they are needed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Groundlens does not measure truth</p>
+<p>It measures grounding: whether an answer came from its source (SGI) or moves like a well grounded answer (DGI). A statement that is factually wrong but well grounded in the source can pass, and a true statement that ignores the source can be flagged. For truth you need a source of truth: a lookup, a knowledge base, a rule, or a person. Groundlens tells you which answers to send there.</p>
 </div>
-
-<h1 id="deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable">Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.<a class="headerlink" href="#deterministic-first-stage-hallucination-triage-it-decides-what-your-expensive-check-has-to-look-at-single-pass-auditable" title="Permanent link">&para;</a></h1>
-<p>Groundlens is a Python library that triages LLM outputs using embedding geometry, so an expensive second-stage check (an LLM judge or a human reviewer) runs only on the outputs that actually need it. It provides two complementary scoring methods:</p>
-<ul>
-<li><strong>SGI (Semantic Grounding Index)</strong> --- measures whether a response engaged with provided source context, using distance ratios in embedding space.</li>
-<li><strong>DGI (Directional Grounding Index)</strong> --- evaluates response grounding without any context, using directional statistics on displacement vectors.</li>
-</ul>
-<p>Both methods are deterministic, sub-second, and produce auditable numeric scores. Groundlens runs <em>before</em> any LLM-as-judge, not instead of one: it is the deterministic filter that decides what the expensive check even has to look at.</p>
-<h2 id="why-groundlens">Why Groundlens<a class="headerlink" href="#why-groundlens" title="Permanent link">&para;</a></h2>
-<p>Groundlens is <strong>Stage 1</strong>: a deterministic, single-pass, no-judge filter that catches semantic disengagement, whether an answer actually engaged its source. It does not verify facts. A plausible wrong fact stated in the right frame (in-register substitution) is provably invisible to any embedding method and must be escalated to <strong>Stage 2</strong>, an LLM judge or a human. Groundlens makes that expensive stage affordable by shrinking what it has to check.</p>
-<h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">&para;</a></h2>
+<p>Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the front of it and decides what reaches the expensive back.</p>
 <table>
 <thead>
 <tr>
-<th>Feature</th>
-<th>Description</th>
+<th>#</th>
+<th>Step</th>
+<th>The question it answers</th>
+<th>In Groundlens</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>MCP available</strong></td>
-<td><a href="https://github.com/groundlens-dev/groundlens-mcp">Groundlens MCP</a></td>
+<td>1</td>
+<td><strong>Geometry</strong> (SGI / DGI)</td>
+<td>Did the answer come from its source, or drift off it?</td>
+<td>Yes</td>
 </tr>
 <tr>
-<td><strong>Two scoring modes</strong></td>
-<td>SGI (with context) and DGI (context-free) cover all verification scenarios</td>
+<td>2</td>
+<td><strong>Consistency</strong></td>
+<td>With no source to compare against, does the model agree with itself?</td>
+<td>Yes</td>
 </tr>
 <tr>
-<td><strong>Deterministic</strong></td>
-<td>Same inputs always produce the same score --- no sampling variance</td>
+<td>3</td>
+<td><strong>Rules</strong></td>
+<td>Did the answer break a policy, invent a number, skip a disclosure?</td>
+<td>Yes</td>
 </tr>
 <tr>
-<td><strong>Sub-second</strong></td>
-<td>Sentence-transformer inference, not LLM generation</td>
+<td>4</td>
+<td><strong>LLM as judge</strong></td>
+<td>The hard cases that need real reasoning over the evidence.</td>
+<td>No</td>
 </tr>
 <tr>
-<td><strong>Domain calibration</strong></td>
-<td>SGI accepts domain calibration to reach AUROC &gt; 0.8</td>
-</tr>
-<tr>
-<td><strong>EU AI Act ready</strong></td>
-<td>No opaque second LLM --- fully auditable decision pipeline</td>
-</tr>
-<tr>
-<td><strong>Provider wrappers</strong></td>
-<td>OpenAI, Anthropic, Google Gemini with automatic scoring</td>
-</tr>
-<tr>
-<td><strong>Framework integrations</strong></td>
-<td>LangChain, CrewAI, Semantic Kernel, AutoGen</td>
+<td>5</td>
+<td><strong>Human review</strong></td>
+<td>The last step of the pipeline.</td>
+<td>No</td>
 </tr>
 </tbody>
 </table>
-<h2 id="quick-install">Quick Install<a class="headerlink" href="#quick-install" title="Permanent link">&para;</a></h2>
+<p>Groundlens covers steps 1 to 3 and needs no second LLM. Steps 4 and 5 run only on what the earlier steps flag.</p>
+<h2 id="the-four-checks">The four checks<a class="headerlink" href="#the-four-checks" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="concepts/sgi/">SGI</a></strong>, did the answer come from its source? Use it when you have the retrieved document (a RAG pipeline).</li>
+<li><strong><a href="concepts/dgi/">DGI</a></strong>, check an answer when there is no source. It works from the question and the answer alone, comparing the direction the answer takes with how grounded answers usually move.</li>
+<li><strong><a href="guides/second-stage/">Consistency</a></strong>, does the model agree with itself? The second stage you escalate to when geometry cannot settle a case.</li>
+<li><strong><a href="adr/0001-rule-set-architecture/">Rules</a></strong>, did the answer break a specific policy? Named checks that catch invented figures, missing disclosures, and out-of-remit claims.</li>
+</ul>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>groundlens
 </span></code></pre></div>
-<p>For provider-specific extras:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;groundlens[openai]&quot;</span><span class="w">       </span><span class="c1"># OpenAI provider</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;groundlens[langchain]&quot;</span><span class="w">    </span><span class="c1"># LangChain integration</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;groundlens[all]&quot;</span><span class="w">          </span><span class="c1"># Everything</span>
+<p>The default encoder is <code>sentence-transformers/sentence-t5-large</code> (768-dimensional). <code>import groundlens</code> stays lightweight and never loads a second language model; the optional model-based second stage is installed separately with <code>pip install "groundlens[verify]"</code>.</p>
+<h2 id="a-first-reading">A first reading<a class="headerlink" href="#a-first-reading" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">check</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">question</span> <span class="o">=</span> <span class="s2">&quot;What is the daily transfer limit?&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">context</span>  <span class="o">=</span> <span class="s2">&quot;The daily transfer limit is 1,000 EUR per day.&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">response</span> <span class="o">=</span> <span class="s2">&quot;The daily limit is 500 EUR per transaction.&quot;</span>   <span class="c1"># not in the source</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">))</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># CHECK: ... (Semantic Grounding Index - SGI=...)</span>
 </span></code></pre></div>
-<h2 id="basic-example">Basic example<a class="headerlink" href="#basic-example" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France is in Western Europe. Its capital is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">)</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">flagged</span><span class="p">)</span>   <span class="c1"># False</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>    <span class="c1"># &#39;sgi&#39;</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>     <span class="c1"># 1.23 (example)</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># ...or a plain-language reading for a person:</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1"># CHECK: Supported by the document (Semantic Grounding Index - SGI=1.23)</span>
-</span></code></pre></div>
-<h2 id="quick-setup">Quick Setup<a class="headerlink" href="#quick-setup" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Embed</strong> the question, response, and (optionally) context into <span class="arithmatex">\(\mathbb{R}^n\)</span> using a sentence transformer.</li>
-<li><strong>Compute a geometric score</strong>:<ul>
-<li><em>With context</em>: SGI = ratio of distances --- is the response closer to context or to the question?</li>
-<li><em>Without context</em>: DGI = cosine similarity of the question-to-response displacement against a calibrated reference direction.</li>
+<p>Read the <strong>level</strong> (<code>"ok"</code>, <code>"review"</code>, <code>"risk"</code>), not the raw decimal. The number depends on the encoder, so treat it as a relative signal and set the operating point by <a href="concepts/calibration/">calibrating on your own data</a>.</p>
+<h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li>New here: <a href="getting-started/installation/">Installation</a> and <a href="getting-started/quickstart/">Quickstart</a>.</li>
+<li>Understand the method: <a href="concepts/how-it-works/">How it works</a>, <a href="concepts/sgi/">SGI</a>, <a href="concepts/dgi/">DGI</a>, <a href="concepts/calibration/">Calibration</a>.</li>
+<li>Escalate the hard cases: <a href="guides/second-stage/">Second stage</a> and the provider adapters for <a href="providers/openai/">OpenAI</a>, <a href="providers/anthropic/">Anthropic</a>, <a href="providers/google/">Google</a>.</li>
+<li>Privacy: <a href="guides/data-handling/">Data handling</a>.</li>
+<li>Compliance: <a href="guides/eu-ai-act/">EU AI Act</a>, <a href="guides/sr-11-7/">SR 11-7</a>, <a href="guides/nist-ai-rmf/">NIST AI RMF</a>.</li>
+<li>Editor / chat integration: the <a href="https://github.com/groundlens-dev/groundlens-mcp">Groundlens MCP server</a>.</li>
 </ul>
-</li>
-<li><strong>Flag</strong> responses that fall below empirically-derived thresholds.</li>
-</ol>
-<p>No token generation. No prompt engineering. No stochastic sampling. Pure geometry.</p>
-<h2 id="research-papers">Research Papers<a class="headerlink" href="#research-papers" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Paper</th>
-<th>Index</th>
-<th>Preprint</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Semantic Grounding Index for LLM Hallucination Detection</td>
-<td>SGI</td>
-<td><a href="https://arxiv.org/abs/2512.13771">2512.13771</a></td>
-</tr>
-<tr>
-<td>A Geometric Taxonomy of Hallucinations in LLMs</td>
-<td>DGI</td>
-<td><a href="https://arxiv.org/pdf/2602.13224v3">2602.13224</a></td>
-</tr>
-<tr>
-<td>How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing</td>
-<td>Mechanistic Interpretability</td>
-<td><a href="https://arxiv.org/abs/2603.13259">2603.13259</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="contributing-to-groundlens">Contributing to Groundlens<a class="headerlink" href="#contributing-to-groundlens" title="Permanent link">&para;</a></h2>
-<p>All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. A detailed overview on how to contribute can be found in the contributing guide.</p>
-<p>If you are simply looking to start working with the pandas codebase, navigate to the GitHub "issues" tab and start looking through interesting issues. There are a number of issues listed under Docs and good first issue where you could start out.</p>
-<p>Feel free to ask questions: <a href="mailto:javier@groundlens.dev">javier@groundlens.dev</a> / <a href="mailto:javier@jmarin.info">javier@jmarin.info</a></p>
-<p><em>As contributors and maintainers to this project, you are expected to abide by groundlens' code of conduct. More information can be found at: Contributor Code of Conduct</em></p>
+<h2 id="research">Research<a class="headerlink" href="#research" title="Permanent link">&para;</a></h2>
+<p>The methods are documented in three preprints:</p>
+<ul>
+<li><em>Semantic Grounding Index: geometric bounds on context engagement in RAG systems</em> (2025), <a href="https://arxiv.org/abs/2512.13771">arXiv:2512.13771</a></li>
+<li><em>A Geometric Taxonomy of Hallucinations in LLMs</em> (2026), <a href="https://arxiv.org/abs/2602.13224">arXiv:2602.13224</a></li>
+<li><em>How Transformers Reject Wrong Answers</em> (2026), <a href="https://arxiv.org/abs/2603.13259">arXiv:2603.13259</a></li>
+</ul>
 
 
 
