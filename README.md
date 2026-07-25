@@ -307,16 +307,23 @@ for run_id, score in cb.scores.items():
 
 No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `ruleset.evaluate` after each generation yourself — same pattern.
 
+
+
+## MCP Server
+
+<div align="center">
+
+[![groundlens-mcp MCP server](https://glama.ai/mcp/servers/groundlens-dev/groundlens-mcp/badges/card.svg)](https://glama.ai/mcp/servers/groundlens-dev/groundlens-mcp)
+
+</div>
+
+
 **In your editor** — the [MCP server](https://github.com/groundlens-dev/groundlens-mcp) prints a CHECK under every answer inside Claude, Cursor, and VS Code, with no model in the scoring path.
-
-[![Add to Cursor](https://img.shields.io/badge/Cursor-Add_MCP-000000?style=flat-square&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=groundlens&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJncm91bmRsZW5zLW1jcCJdfQ%3D%3D)
-[![Add to VS Code](https://img.shields.io/badge/VS_Code-Add_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=groundlens&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22groundlens-mcp%22%5D%7D)
-
 
 ## Learn more
 
 - 📚 **Docs** — [docs.groundlens.dev](https://docs.groundlens.dev)
-- 🧪 **Tutorials** — [`examples/tutorials/`](https://github.com/groundlens-dev/groundlens/tree/main/examples/tutorials)
+- 🧪 **Examples** — [`examples/`](https://github.com/groundlens-dev/groundlens/tree/main/examples)
 - 📍 **Compliance** — [SR 26-2](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/sr-11-7.md) · [EU AI Act](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/eu-ai-act.md) · [NIST AI RMF](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/nist-ai-rmf.md)
 - 📄 **Research** — [SGI (arXiv:2512.13771)](https://arxiv.org/abs/2512.13771) · [Hallucination taxonomy (arXiv:2602.13224)](https://arxiv.org/abs/2602.13224) · [How transformers reject wrong answers (arXiv:2603.13259)](https://arxiv.org/abs/2603.13259)
 
