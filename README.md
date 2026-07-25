@@ -14,10 +14,15 @@
 
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_claude_mcp.gif" alt="A grounding CHECK printed live under every answer inside Claude" width="62%">
 
-<sub>A deterministic CHECK printed under every answer, live inside Claude.</sub>
+</br>
+
+See our demo here:
+
+[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-lg.svg)](https://huggingface.co/spacesgroundlens/demo)
+
 
 </div>
-
+</br>
 
 ## The verification pipeline
 
@@ -58,9 +63,6 @@ Groundlens measures:
 ```bash
 pip install groundlens
 ```
-
-`pip install groundlens` stays light — just NumPy and an embedding model, **no torch**. The four checks below each answer a different question; you rarely need all of them, so pick the one that fits your case.
-
 
 ## Stage 1
 
@@ -315,7 +317,6 @@ No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `ruleset.evaluat
 
 - 📚 **Docs** — [docs.groundlens.dev](https://docs.groundlens.dev)
 - 🧪 **Tutorials** — [`examples/tutorials/`](https://github.com/groundlens-dev/groundlens/tree/main/examples/tutorials)
-- 🎮 **Live demo** — [Hugging Face Space](https://huggingface.co/spaces/groundlens/demo)
 - 📍 **Compliance** — [SR 26-2](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/sr-11-7.md) · [EU AI Act](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/eu-ai-act.md) · [NIST AI RMF](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/nist-ai-rmf.md)
 - 📄 **Research** — [SGI (arXiv:2512.13771)](https://arxiv.org/abs/2512.13771) · [Hallucination taxonomy (arXiv:2602.13224)](https://arxiv.org/abs/2602.13224) · [How transformers reject wrong answers (arXiv:2603.13259)](https://arxiv.org/abs/2603.13259)
 
@@ -327,5 +328,9 @@ Contributions and feedback are welcome — see [CONTRIBUTING.md](https://github.
 
 ## License
 
-Apache-2.0. Groundlens is named for the idea that a hallucination is something not grounded in reality.
+Apache-2.0. 
+
+---
+
+The name "ground+lens" is named for the idea that a hallucination is something not grounded in reality by can be observerd anyway. We hust need the right lens :eyeglasses:.
 
