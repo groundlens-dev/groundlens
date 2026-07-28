@@ -28,25 +28,26 @@ See our demo here:
 
 You have to verify every LLM call. You can't afford to verify them all the expensive way.
 
-Verification is a pipeline of **five stages, ordered cheapest to most expensive**. Each stage is a filter: it settles what it can and passes only the doubtful cases forward. **Groundlens is stages 1–3** — so the slow, costly stages 4–5 only ever see the few answers that were actually flagged.
+Verification is a pipeline of **six stages, ordered cheapest to most expensive**. Each stage is a filter: it settles what it can and passes only the doubtful cases forward. **Groundlens is stages 1–4** — so the slow, costly stages 5–6 only ever see the few answers that were actually flagged.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/pipeline.png" alt="Five-stage verification pipeline: stages 1-3 (Geometry, Consistency, Rules) are Groundlens; stages 4-5 (LLM as judge, Human review) you add. Each stage filters what reaches the next." width="100%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/pipeline.png" alt="Verification pipeline: Geometry, Switch, Consistency, Rules are Groundlens; LLM as judge and Human review you add. Each stage filters what reaches the next." width="100%">
 </div>
 
 | Stage | Approach | The question it answers | Cost | Groundlens |
 |---|---|---|---|---|
 | 1 | **Geometry**  | Did the answer come from its source, or drift off it? | no model · deterministic | Included |
-| 2 | **Consistency** | No source? Does the model agree with itself when asked again? | small open model · cheap | Included |
-| 3 | **Rules** | Did it break a policy, invent a number, skip a disclosure? | deterministic | Included |
-| 4 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | frontier API · costs tokens | Not included |
-| 5 | **Human review** | A person makes the final call. | costs a person | Not included |
+| 2 | **Switch** | May this answer be written into agent or RAG state? | no model · deterministic | Included |
+| 3 | **Consistency** | No source? Does the model agree with itself when asked again? | small open model · cheap | Included |
+| 4 | **Rules** | Did it break a policy, invent a number, skip a disclosure? | deterministic | Included |
+| 5 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | frontier API · costs tokens | Not included |
+| 6 | **Human review** | A person makes the final call. | costs a person | Not included |
 
 </div>
 
 > **This is the whole reason Groundlens exists.** Use it as triage at the front of the pipeline: clear the obvious cases in milliseconds and escalate only what's flagged to a judge model or a human reviewer. Same coverage on every call — a fraction of the time and cost.
 
-> **SGI and DGI measure grounding, not truth.** They tell you whether an answer is *grounded* in its source — not whether it is *true*. A **hallucination** (an answer not grounded in the source it was given) phrased faithfully can still score as grounded. That gap is exactly why **Stage 2, Consistency, probes truth** by resampling the model. Read an SGI/DGI score as *"did this come from the source?"*, and lean on Stage 2 for *"does the model actually know this?"*
+> **SGI and DGI measure grounding, not truth.** They tell you whether an answer is *grounded* in its source — not whether it is *true*. A **hallucination** (an answer not grounded in the source it was given) phrased faithfully can still score as grounded. That gap is exactly why **Stage 3, Consistency, probes truth** by resampling the model. Read an SGI/DGI score as *"did this come from the source?"*, and lean on Stage 3 for *"does the model actually know this?"*
 
 
 ## What Groundlens does
@@ -55,6 +56,7 @@ An LLM answers with the same confidence whether or not it used the document you 
 
 Groundlens measures:
 - the **geometry** of an answer: where it sits relative to its source and its question. From that it reads one thing — *did this come from the source, or not?* — in milliseconds, with the same result every time, letting the clearly-grounded answers through so the slow checks only run where they're needed.
+- the **switch** on that signal: may this answer enter agent or RAG state, or would writing it contaminate the next turn?
 - the **consistency** of an answer across different calls to check if the model agree with itself.
 
 
@@ -119,7 +121,7 @@ grounded    SGI=  2.29  -> ok      Supported by the document
 off-source  SGI=  1.01  -> review  Partly supported
 ```
 
-**Interpretation**: SGI sorts every answer into one of three segments. In two of them the geometry is clear: at or above 1.20 the answer is grounded in the source, below 0.95 it is not. Between them, from 0.95 to 1.20, sits the third segment, where the geometric signal is uncertain and cannot settle the case on its own. The two clear segments you can act on right away, pass or flag. The uncertain middle is what you send to the second stage.
+**Interpretation**: SGI sorts every answer into one of three segments. In two of them the geometry is clear: at or above 1.20 the answer is grounded in the source, below 0.95 it is not. Between them, from 0.95 to 1.20, sits the third segment, where the geometric signal is uncertain and cannot settle the case on its own. The two clear segments you can act on right away, pass or flag. The uncertain middle is what you send to the next stages.
 
 | SGI below 0.95 | SGI between 0.95 and 1.2 | SGI higher than 1.2 | 
 |---|---|---|
@@ -167,7 +169,39 @@ DGI fabricated : 0.37 | Not aligned with the quesion
 
 **Interpretation**:DGI uses a single cut, not three segments. At or above the cut the answer moves like a grounded one; below it, like a fabrication. The cut sits near 0.52 with the global reference direction and 0.54 with the local variant. That value is not universal: it depends on your encoder and the kind of text you check, so read DGI as a relative ranking rather than an absolute grade. Calibrate the cut on your own grounded answers for a specific domain (see `fit_thresholds`) and the separation gets sharper.
 
-## Stage 2
+## Stage 2 · Switch — may this answer enter state?
+
+Geometry tells you whether the answer came from the source. The Switch turns that signal into a **control decision**: write the answer into agent or RAG state, or keep it out so a contaminated turn does not poison the next one.
+
+Default policy: clearly grounded → `accept`; clearly ungrounded → `fallback` (discard context influence); uncertain → `escalate` to Consistency.
+
+```python
+from groundlens import compute_sgi, GroundingSwitch, SwitchAction
+
+switch = GroundingSwitch()  # on_reject="fallback" by default
+
+sgi = compute_sgi(question=question, context=context, response=answer_grounded)
+decision = switch.decide(sgi)
+
+if decision.write_to_state:
+    state.append(answer_grounded)          # safe: geometry is strong
+elif decision.action is SwitchAction.FALLBACK:
+    # ungrounded — do not write into state; answer without this context
+    ...
+elif decision.action is SwitchAction.ESCALATE:
+    # uncertain band — continue to Consistency / LLM-as-judge
+    ...
+```
+
+```json
+Results (shape):
+grounded    action=accept   write_to_state=True
+ungrounded  action=fallback write_to_state=False
+```
+
+**Interpretation**: `write_to_state` is `True` only on `accept`. Every other action refuses to put the response into the next turn's context. That is the whole point in long agents and RAG loops: the geometric flag becomes a gate on state, not only a line in a log. Full actions and thresholds: [docs → Switch](https://docs.groundlens.dev/concepts/switch/).
+
+## Stage 3
 
 ### Consistency — does the model agree with itself?
 
@@ -246,7 +280,7 @@ The model does not answer consistently here. Send it to a human reviewer.
 The answer was made up (red blood cells "give blood its color"), with no source to check against. Stage one used DGI, said "Not grounded," and escalated. Stage two then asked the model itself five times. All five samples said the correct thing ("carry/transport oxygen"), which disagrees with the answer under test. Consistency fell to 0.36, below the cut, so it was flagged "Inconsistent" and sent to a human. The fabrication got caught, and by a different mechanism than the geometry: not by shape, but because the model itself won't back the claim.
 
 
-## Stage 3 · Rules — did the answer break a policy?
+## Stage 4 · Rules — did the answer break a policy?
 
 A small, named check that returns pass/fail with evidence and a citation to why it exists. Catches the mechanical failures geometry doesn't: an invented figure, a missing disclosure, a claim outside the agent's remit.
 
@@ -270,20 +304,26 @@ With a hosted API, your prompts go to that provider under your key. Groundlens h
 ## Score every answer, keep the trail
 
 ```python
-from groundlens import compute_sgi, check
+from groundlens import compute_sgi, check, GroundingSwitch
 from groundlens.agents import customer_support_rules
 from groundlens.audit import open_log
 
 rules = customer_support_rules()
+switch = GroundingSwitch()
 
 with open_log("triage.db") as log:
     for question, context, response in your_pipeline_outputs:
-        sgi     = compute_sgi(question=question, context=context, response=response)
-        audit   = rules.evaluate(question=question, response=response, context=context)
-        flagged = check(sgi).level != "ok" or audit.flagged
-        log.record(identifier=question, method="sgi+rules", score=sgi.normalized,
-                   flagged=flagged, metadata={"audit": audit.audit_explanation})
-        (send_to_review if flagged else send_to_user)(response)
+        sgi      = compute_sgi(question=question, context=context, response=response)
+        decision = switch.decide(sgi)
+        audit    = rules.evaluate(question=question, response=response, context=context)
+        flagged  = (not decision.write_to_state) or audit.flagged
+        log.record(identifier=question, method="sgi+switch+rules", score=sgi.normalized,
+                   flagged=flagged, metadata={"action": decision.action.value,
+                                              "audit": audit.audit_explanation})
+        if decision.write_to_state and not audit.flagged:
+            send_to_user(response)
+        else:
+            send_to_review(response)
 ```
 
 The log is **hash-chained** — any decision can be replayed and verified byte-for-byte, years later.
@@ -305,7 +345,7 @@ for run_id, score in cb.scores.items():
     print(check(score).render())
 ```
 
-No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `ruleset.evaluate` after each generation yourself — same pattern.
+No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `GroundingSwitch` / `ruleset.evaluate` after each generation yourself — same pattern.
 
 
 

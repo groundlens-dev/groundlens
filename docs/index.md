@@ -16,18 +16,20 @@ Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the f
 | # | Step | The question it answers | In Groundlens |
 |---|---|---|---|
 | 1 | **Geometry** (SGI / DGI) | Did the answer come from its source, or drift off it? | Yes |
-| 2 | **Consistency** | With no source to compare against, does the model agree with itself? | Yes |
-| 3 | **Rules** | Did the answer break a policy, invent a number, skip a disclosure? | Yes |
-| 4 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | No |
-| 5 | **Human review** | The last step of the pipeline. | No |
+| 2 | **Switch** | May this answer be written into agent/RAG state? | Yes |
+| 3 | **Consistency** | With no source to compare against, does the model agree with itself? | Yes |
+| 4 | **Rules** | Did the answer break a policy, invent a number, skip a disclosure? | Yes |
+| 5 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | No |
+| 6 | **Human review** | The last step of the pipeline. | No |
 
-Groundlens covers steps 1 to 3 and needs no second LLM. Steps 4 and 5 run only on what the earlier steps flag.
+Groundlens covers steps 1 to 4 and needs no second LLM for geometry, the Switch, or rules. Steps 5 and 6 run only on what the earlier steps flag.
 
-## The four checks
+## The five checks
 
 - **[SGI](concepts/sgi.md)**, did the answer come from its source? Use it when you have the retrieved document (a RAG pipeline).
 - **[DGI](concepts/dgi.md)**, check an answer when there is no source. It works from the question and the answer alone, comparing the direction the answer takes with how grounded answers usually move.
-- **[Consistency](guides/second-stage.md)**, does the model agree with itself? The second stage you escalate to when geometry cannot settle a case.
+- **[Switch](concepts/switch.md)**, may this answer enter agent or RAG state? Turns the geometric score into a control action so contaminated context does not propagate.
+- **[Consistency](guides/second-stage.md)**, does the model agree with itself? The stage you escalate to when geometry cannot settle a case.
 - **[Rules](adr/0001-rule-set-architecture.md)**, did the answer break a specific policy? Named checks that catch invented figures, missing disclosures, and out-of-remit claims.
 
 ## Install
@@ -56,7 +58,7 @@ Read the **level** (`"ok"`, `"review"`, `"risk"`), not the raw decimal. The numb
 ## Where to go next
 
 - New here: [Installation](getting-started/installation.md) and [Quickstart](getting-started/quickstart.md).
-- Understand the method: [How it works](concepts/how-it-works.md), [SGI](concepts/sgi.md), [DGI](concepts/dgi.md), [Calibration](concepts/calibration.md).
+- Understand the method: [How it works](concepts/how-it-works.md), [SGI](concepts/sgi.md), [DGI](concepts/dgi.md), [Switch](concepts/switch.md), [Calibration](concepts/calibration.md).
 - Escalate the hard cases: [Second stage](guides/second-stage.md) and the provider adapters for [OpenAI](providers/openai.md), [Anthropic](providers/anthropic.md), [Google](providers/google.md).
 - Privacy: [Data handling](guides/data-handling.md).
 - Compliance: [EU AI Act](guides/eu-ai-act.md), [SR 11-7](guides/sr-11-7.md), [NIST AI RMF](guides/nist-ai-rmf.md).

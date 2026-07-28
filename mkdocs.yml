@@ -79,6 +79,7 @@ nav:
     - How It Works: concepts/how-it-works.md
     - "SGI: Semantic Grounding Index": concepts/sgi.md
     - "DGI: Directional Grounding Index": concepts/dgi.md
+    - "Switch: context protection": concepts/switch.md
     - Calibration: concepts/calibration.md
   - Theory:
     - Hallucination Taxonomy: theory/hallucination-taxonomy.md
