@@ -8,7 +8,6 @@ from groundlens.check import Check, check_for_dgi, check_for_sgi, check_for_veri
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.switch import GroundingSwitch, SwitchAction, SwitchDecision
 
-
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 
