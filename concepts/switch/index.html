@@ -15,6 +15,10 @@
         <link rel="canonical" href="https://docs.groundlens.dev/concepts/switch/">
       
       
+        <link rel="prev" href="../dgi/">
+      
+      
+        <link rel="next" href="../calibration/">
       
       
         
@@ -25,7 +29,7 @@
     
     
       
-        <title>GroundingSwitch - groundlens</title>
+        <title>Switch: context protection - groundlens</title>
       
     
     
@@ -115,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GroundingSwitch
+              Switch: context protection
             
           </span>
         </div>
@@ -283,10 +287,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../how-it-works/" class="md-tabs__link">
           
   
@@ -852,8 +858,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -865,25 +873,28 @@
       
         
       
+        
+      
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -901,7 +912,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -991,6 +1002,325 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Switch: context protection
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Switch: context protection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-it-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why it exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-on_reject" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing on_reject
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision rules
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sgi-three-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SGI (three zones)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dgi-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DGI (binary)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-geometric-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-geometric inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decide-__call__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decide / __call__
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rag-path-sgi-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RAG path (SGI → Switch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-loop-protect-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent loop (protect state)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-source-path-dgi-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No-source path (DGI → Switch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#relationship-to-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship to check()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost and dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2284,6 +2614,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#actions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2291,6 +2632,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-on_reject" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing on_reject
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2303,13 +2661,174 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Decision rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sgi-three-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SGI (three zones)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dgi-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DGI (binary)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-geometric-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-geometric inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage
+        API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decide-__call__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decide / __call__
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rag-path-sgi-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RAG path (SGI → Switch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-loop-protect-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent loop (protect state)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-source-path-dgi-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No-source path (DGI → Switch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#relationship-to-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship to check()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost and dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example
       
     </span>
   </a>
@@ -2348,17 +2867,53 @@
 
 
 <h1 id="groundingswitch">GroundingSwitch<a class="headerlink" href="#groundingswitch" title="Permanent link">&para;</a></h1>
-<p><strong>Stage 2 of the verification pipeline.</strong> Converts a geometric score into a decision about whether a response may be written into agent or RAG state.</p>
-<h2 id="why-it-exists">Why it exists<a class="headerlink" href="#why-it-exists" title="Permanent link">&para;</a></h2>
-<p>In long-running agents and RAG pipelines the <em>context</em> (conversation history, retrieved documents, previous model outputs) can dominate the model's parametric memory. When that context is contaminated — a prior hallucination, a bad retrieval, a degraded compaction — the model tends to propagate the error.</p>
-<p>Geometry (SGI/DGI) already detects the misalignment. The Switch turns that signal into an <strong>action</strong> that prevents the bad answer from entering the next turn's context.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>01 Geometry      SGI / DGI
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>02 Switch        ← this page
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>03 Consistency   resample
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>04 Rules         policy checks
+<p><strong>Stage 2 of the verification pipeline.</strong> Converts a geometric score (SGI or DGI) into a control decision: may this response be written into agent or RAG state, or would that contaminate the next turn?</p>
+<p>Geometry answers <em>"did the answer come from the source?"</em>. The Switch answers <em>"what should the system do with that signal?"</em>.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>01 Geometry      SGI / DGI          (deterministic, no model)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>02 Switch        THIS PAGE         (deterministic, no model)
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>03 Consistency   resample          (small open model)
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>04 Rules         policy checks     (deterministic)
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>05 LLM-as-judge
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>06 Human review
 </span></code></pre></div>
+<h2 id="why-it-exists">Why it exists<a class="headerlink" href="#why-it-exists" title="Permanent link">&para;</a></h2>
+<p>In long-running agents and RAG pipelines the <em>context</em> — conversation history, retrieved documents, previous model outputs, compacted summaries — can dominate the model's parametric memory. When that context is contaminated (a prior hallucination, a bad retrieval, a degraded compaction), the model tends to <strong>propagate the error</strong> into the next turn.</p>
+<p>Geometry (SGI/DGI) already detects the misalignment. Without a control layer, that detection is only a score in a log. The Switch turns the score into an <strong>action</strong> that prevents the bad answer from entering the next turn's state.</p>
+<p>Typical failure modes the Switch is designed for:</p>
+<table>
+<thead>
+<tr>
+<th>Failure mode</th>
+<th>What happens without the Switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contaminated RAG retrieval</td>
+<td>A wrong chunk is retrieved; the model answers from it; the answer is written back into history and poisons later turns.</td>
+</tr>
+<tr>
+<td>Agent self-contamination</td>
+<td>An earlier hallucinated tool result or message stays in the agent state; later steps treat it as fact.</td>
+</tr>
+<tr>
+<td>Compaction drift</td>
+<td>A long conversation is compacted; the summary drops a constraint or invents one; subsequent answers inherit the error.</td>
+</tr>
+<tr>
+<td>Fluent off-source answer</td>
+<td>SGI/DGI flags the answer, but the pipeline still appends it to the transcript because nothing consumes the flag.</td>
+</tr>
+</tbody>
+</table>
+<p>The Switch does not invent new geometric signal. It makes the existing signal <strong>operational</strong>.</p>
+<h2 id="what-it-does-not-do">What it does not do<a class="headerlink" href="#what-it-does-not-do" title="Permanent link">&para;</a></h2>
+<ul>
+<li>It does <strong>not</strong> measure truth. Like SGI/DGI, it measures grounding geometry and turns that into routing.</li>
+<li>It does <strong>not</strong> call a model. Importing and running the Switch never loads embeddings or LLMs beyond what geometry already used.</li>
+<li>It does <strong>not</strong> replace Consistency or Rules. Ambiguous geometry still escalates; policy violations still need Stage 4.</li>
+<li>It does <strong>not</strong> rewrite the answer. Recovery (<code>fallback</code>, <code>regenerate</code>) is the caller's responsibility.</li>
+</ul>
 <h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2366,73 +2921,316 @@
 <th>Action</th>
 <th><code>write_to_state</code></th>
 <th>Meaning</th>
+<th>Typical next step</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>accept</code></td>
 <td><code>True</code></td>
-<td>Clearly grounded. Safe to write into state.</td>
+<td>Clearly grounded. Safe to keep.</td>
+<td>Append to history / return to user.</td>
 </tr>
 <tr>
 <td><code>reject</code></td>
 <td><code>False</code></td>
-<td>Clearly ungrounded. Drop the response.</td>
+<td>Clearly ungrounded. Drop it.</td>
+<td>Return an error or a canned refusal.</td>
 </tr>
 <tr>
 <td><code>fallback</code></td>
 <td><code>False</code></td>
-<td>Ungrounded. Discard context influence / fall back to parametric knowledge.</td>
+<td>Ungrounded; context is the likely cause.</td>
+<td>Discard or down-weight retrieved context; answer from parametric knowledge or a clean source.</td>
 </tr>
 <tr>
 <td><code>regenerate</code></td>
 <td><code>False</code></td>
-<td>Ungrounded. Ask the model again (optionally with less context weight).</td>
+<td>Ungrounded; try again.</td>
+<td>Re-ask the model, optionally with less context or a stricter prompt.</td>
 </tr>
 <tr>
 <td><code>escalate</code></td>
 <td><code>False</code></td>
-<td>Geometry is ambiguous. Continue to Consistency.</td>
+<td>Geometry is ambiguous.</td>
+<td>Continue to Consistency / Rules / LLM-as-judge.</td>
 </tr>
 </tbody>
 </table>
-<p>Default <code>on_reject</code> is <code>fallback</code> — the most common failure mode is contaminated context dominating the answer.</p>
+<p><code>write_to_state</code> is <code>True</code> <strong>only</strong> for <code>accept</code>. Every other action refuses to put the response into the next turn's context.</p>
+<h3 id="choosing-on_reject">Choosing <code>on_reject</code><a class="headerlink" href="#choosing-on_reject" title="Permanent link">&para;</a></h3>
+<p>The constructor argument <code>on_reject</code> sets what happens when geometry is clearly negative. Allowed values: <code>fallback</code>, <code>reject</code>, <code>regenerate</code>, <code>escalate</code>. Default: <strong><code>fallback</code></strong>.</p>
+<table>
+<thead>
+<tr>
+<th><code>on_reject</code></th>
+<th>When to use it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fallback</code> (default)</td>
+<td>Contaminated context is the main risk. You prefer to answer without the bad retrieval rather than fail hard.</td>
+</tr>
+<tr>
+<td><code>reject</code></td>
+<td>Strict pipelines where any ungrounded answer must not reach the user.</td>
+</tr>
+<tr>
+<td><code>regenerate</code></td>
+<td>You have budget to re-sample and the model often recovers on a second try.</td>
+</tr>
+<tr>
+<td><code>escalate</code></td>
+<td>You always want Consistency / a judge on negative geometry, never an automatic recovery.</td>
+</tr>
+</tbody>
+</table>
+<p><code>accept</code> is <strong>not</strong> a valid <code>on_reject</code> value.</p>
 <h2 id="decision-rules">Decision rules<a class="headerlink" href="#decision-rules" title="Permanent link">&para;</a></h2>
-<p><strong>SGI (three zones)</strong></p>
-<ul>
-<li><code>≥ 1.20</code> → <code>accept</code></li>
-<li><code>&lt; 0.95</code> → <code>on_reject</code> (default <code>fallback</code>)</li>
-<li>in between → <code>escalate</code></li>
-</ul>
-<p><strong>DGI (binary)</strong></p>
-<ul>
-<li><code>≥ 0.525</code> → <code>accept</code></li>
-<li><code>&lt; 0.525</code> → <code>on_reject</code></li>
-</ul>
 <p>Thresholds are the same calibrated constants used by <code>check()</code>.</p>
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">GroundingSwitch</span><span class="p">,</span> <span class="n">SwitchAction</span>
+<h3 id="sgi-three-zones">SGI (three zones)<a class="headerlink" href="#sgi-three-zones" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>≥ 1.20</code> (<code>SGI_STRONG_PASS</code>)</td>
+<td><code>accept</code></td>
+</tr>
+<tr>
+<td><code>&lt; 0.95</code> (<code>SGI_REVIEW</code>)</td>
+<td><code>on_reject</code> (default <code>fallback</code>)</td>
+</tr>
+<tr>
+<td>in <code>[0.95, 1.20)</code></td>
+<td><code>escalate</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dgi-binary">DGI (binary)<a class="headerlink" href="#dgi-binary" title="Permanent link">&para;</a></h3>
+<p>DGI has no middle band in the current calibration.</p>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>≥ 0.525</code> (<code>DGI_PASS</code>)</td>
+<td><code>accept</code></td>
+</tr>
+<tr>
+<td><code>&lt; 0.525</code></td>
+<td><code>on_reject</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="non-geometric-inputs">Non-geometric inputs<a class="headerlink" href="#non-geometric-inputs" title="Permanent link">&para;</a></h3>
+<p>If you pass a Consistency <code>Check</code> (method like <code>selfcheck_nli</code>), the Switch does not reinterpret it. It returns <code>escalate</code> and leaves the decision to later stages.</p>
+<h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
+<h3 id="construction">Construction<a class="headerlink" href="#construction" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroundingSwitch</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">()</span>  <span class="c1"># on_reject=&quot;fallback&quot; by default</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">if</span> <span class="n">decision</span><span class="o">.</span><span class="n">write_to_state</span><span class="p">:</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">FALLBACK</span><span class="p">:</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="c1"># discard retrieved context; re-ask or use parametric path</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="o">...</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">ESCALATE</span><span class="p">:</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="c1"># continue to Consistency / LLM-as-judge</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="o">...</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">()</span>  <span class="c1"># defaults: SGI 1.20 / 0.95, DGI 0.525, on_reject=&quot;fallback&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">(</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">accept_threshold_sgi</span><span class="o">=</span><span class="mf">1.20</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">reject_threshold_sgi</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">accept_threshold_dgi</span><span class="o">=</span><span class="mf">0.525</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">on_reject</span><span class="o">=</span><span class="s2">&quot;fallback&quot;</span><span class="p">,</span>  <span class="c1"># or &quot;reject&quot; | &quot;regenerate&quot; | &quot;escalate&quot;</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>The Switch accepts <code>SGIResult</code>, <code>DGIResult</code>, <code>GroundlensScore</code>, or an already-built <code>Check</code>. It has <strong>no model dependency</strong> and stays in the deterministic core.</p>
+<p>Raises <code>ValueError</code> if <code>reject_threshold_sgi &gt; accept_threshold_sgi</code> or if <code>on_reject</code> is invalid.</p>
+<h3 id="decide-__call__"><code>decide</code> / <code>__call__</code><a class="headerlink" href="#decide-__call__" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">sgi_or_dgi</span><span class="p">)</span>  <span class="c1"># or switch(sgi_or_dgi)</span>
+</span></code></pre></div>
+<p>Accepted input types:</p>
+<ul>
+<li><code>SGIResult</code></li>
+<li><code>DGIResult</code></li>
+<li><code>GroundlensScore</code></li>
+<li><code>Check</code></li>
+</ul>
+<p>Returns a frozen <code>SwitchDecision</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>action</code></td>
+<td><code>SwitchAction</code></td>
+<td>The control action.</td>
+</tr>
+<tr>
+<td><code>write_to_state</code></td>
+<td><code>bool</code></td>
+<td>Whether it is safe to write the response into agent/RAG state.</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td><code>str</code></td>
+<td>Short plain-language explanation.</td>
+</tr>
+<tr>
+<td><code>check</code></td>
+<td><code>Check</code></td>
+<td>The canonical geometric check for the underlying score.</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td><code>float</code></td>
+<td>Raw geometric value.</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td><code>str</code></td>
+<td><code>"sgi"</code> or <code>"dgi"</code> (or the non-geometric method if escalated).</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td><code>str</code></td>
+<td><code>"ok"</code> / <code>"review"</code> / <code>"risk"</code> from the Check.</td>
+</tr>
+</tbody>
+</table>
+<p><code>SwitchAction</code> is a <code>str</code> Enum (<code>"accept"</code>, <code>"reject"</code>, <code>"fallback"</code>, <code>"regenerate"</code>, <code>"escalate"</code>), so it serialises cleanly in logs and JSON.</p>
+<h2 id="usage-patterns">Usage patterns<a class="headerlink" href="#usage-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="rag-path-sgi-switch">RAG path (SGI → Switch)<a class="headerlink" href="#rag-path-sgi-switch" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">GroundingSwitch</span><span class="p">,</span> <span class="n">SwitchAction</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">()</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">retrieved</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">if</span> <span class="n">decision</span><span class="o">.</span><span class="n">write_to_state</span><span class="p">:</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">return</span> <span class="n">answer</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">FALLBACK</span><span class="p">:</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="c1"># Bad retrieval is the likely cause. Answer without this context.</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">return</span> <span class="n">answer_without_context</span><span class="p">(</span><span class="n">question</span><span class="p">)</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">ESCALATE</span><span class="p">:</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="k">return</span> <span class="n">run_consistency_or_judge</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">retrieved</span><span class="p">)</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="k">return</span> <span class="n">refuse</span><span class="p">(</span><span class="n">decision</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="agent-loop-protect-state">Agent loop (protect state)<a class="headerlink" href="#agent-loop-protect-state" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">(</span><span class="n">on_reject</span><span class="o">=</span><span class="s2">&quot;fallback&quot;</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">for</span> <span class="n">turn</span> <span class="ow">in</span> <span class="n">conversation</span><span class="p">:</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">answer</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">turn</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">score</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">turn</span><span class="o">.</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">turn</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="k">if</span> <span class="n">decision</span><span class="o">.</span><span class="n">write_to_state</span><span class="p">:</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">FALLBACK</span><span class="p">:</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="c1"># Do not append. Optionally strip turn.context for the next attempt.</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="o">...</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="k">elif</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">SwitchAction</span><span class="o">.</span><span class="n">ESCALATE</span><span class="p">:</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="c1"># Hand off to Consistency / human; still do not append until resolved.</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        <span class="o">...</span>
+</span></code></pre></div>
+<p>The invariant: <strong>nothing enters <code>state</code> unless <code>write_to_state</code> is True.</strong></p>
+<h3 id="no-source-path-dgi-switch">No-source path (DGI → Switch)<a class="headerlink" href="#no-source-path-dgi-switch" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">GroundingSwitch</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">(</span><span class="n">on_reject</span><span class="o">=</span><span class="s2">&quot;escalate&quot;</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">dgi</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">if</span> <span class="n">decision</span><span class="o">.</span><span class="n">write_to_state</span><span class="p">:</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="k">return</span> <span class="n">answer</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="c1"># DGI is binary: no middle band. Negative geometry goes straight to on_reject.</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="k">return</span> <span class="n">run_consistency</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="custom-thresholds">Custom thresholds<a class="headerlink" href="#custom-thresholds" title="Permanent link">&para;</a></h3>
+<p>If you calibrated SGI/DGI on your domain with <code>fit_thresholds</code>, pass the same cuts into the Switch so routing and <code>check()</code> agree:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">(</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">accept_threshold_sgi</span><span class="o">=</span><span class="n">fit</span><span class="o">.</span><span class="n">sgi_strong_pass</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">reject_threshold_sgi</span><span class="o">=</span><span class="n">fit</span><span class="o">.</span><span class="n">sgi_review</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">accept_threshold_dgi</span><span class="o">=</span><span class="n">fit</span><span class="o">.</span><span class="n">dgi_pass</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="relationship-to-check">Relationship to <code>check()</code><a class="headerlink" href="#relationship-to-check" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>check(score)</code></td>
+<td>Human-readable verdict (<code>ok</code> / <code>review</code> / <code>risk</code>) and audit text.</td>
+</tr>
+<tr>
+<td><code>GroundingSwitch.decide(score)</code></td>
+<td>Machine-readable <strong>control action</strong> for state and routing.</td>
+</tr>
+</tbody>
+</table>
+<p>They share thresholds. Use both: log <code>check(...).render()</code> for the trail; branch on <code>decision.action</code> / <code>decision.write_to_state</code> for control flow.</p>
+<h2 id="cost-and-dependencies">Cost and dependencies<a class="headerlink" href="#cost-and-dependencies" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>No model dependency.</strong> The Switch is pure Python over scores you already computed.</li>
+<li><strong>No network.</strong> Nothing is sent anywhere.</li>
+<li><strong>Latency.</strong> Microseconds after geometry has finished.</li>
+</ul>
+<p>It stays in the deterministic core of Groundlens. <code>import groundlens</code> does not load the Switch's logic with any encoder or LLM.</p>
+<h2 id="worked-example">Worked example<a class="headerlink" href="#worked-example" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">GroundingSwitch</span><span class="p">,</span> <span class="n">SwitchAction</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">question</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">&quot;A user of our cloud backup service wants to understand the data retention &quot;</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s2">&quot;rules for the Business plan: how long deleted files can still be recovered.&quot;</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">context</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="s2">&quot;On the Business plan, deleted files are moved to a recovery area and can be &quot;</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="s2">&quot;restored for 90 days from the date of deletion; after 90 days they are &quot;</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="s2">&quot;permanently purged and cannot be recovered.&quot;</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">answer_grounded</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="s2">&quot;On the Business plan you can restore a deleted file for 90 days after it was &quot;</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="s2">&quot;deleted; once those 90 days pass it is purged for good.&quot;</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="p">)</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="n">answer_ungrounded</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>    <span class="s2">&quot;Deleted files on the Business plan are kept forever and can always be &quot;</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="s2">&quot;restored at any time, so there is no purge window to worry about.&quot;</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="p">)</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="n">switch</span> <span class="o">=</span> <span class="n">GroundingSwitch</span><span class="p">()</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">answer</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;grounded&quot;</span><span class="p">,</span> <span class="n">answer_grounded</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;ungrounded&quot;</span><span class="p">,</span> <span class="n">answer_ungrounded</span><span class="p">)):</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>    <span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">answer</span><span class="p">)</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>    <span class="n">decision</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">decide</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">check</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="n">decision</span><span class="o">.</span><span class="n">action</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;write=&quot;</span><span class="p">,</span> <span class="n">decision</span><span class="o">.</span><span class="n">write_to_state</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Expected shape of the output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>grounded    Supported by the document -&gt; accept   write= True
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ungrounded  ...                       -&gt; fallback write= False
+</span></code></pre></div>
+<p>(Exact SGI labels depend on the encoder; the Switch action follows the thresholds above.)</p>
 <h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../sgi/">SGI</a></li>
-<li><a href="../dgi/">DGI</a></li>
-<li><a href="../how-it-works/">How it works</a></li>
-<li>Example: <a href="https://github.com/groundlens-dev/groundlens/blob/main/examples/grounding_switch.py"><code>examples/grounding_switch.py</code></a></li>
+<li><a href="../sgi/">SGI</a> — geometric score when context is present</li>
+<li><a href="../dgi/">DGI</a> — geometric score when context is absent</li>
+<li><a href="../how-it-works/">How it works</a> — pipeline overview</li>
+<li><a href="../../guides/second-stage/">Second stage</a> — Consistency after <code>escalate</code></li>
+<li>Example script: <a href="https://github.com/groundlens-dev/groundlens/blob/main/examples/grounding_switch.py"><code>examples/grounding_switch.py</code></a></li>
 </ul>
 
 

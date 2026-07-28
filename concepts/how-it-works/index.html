@@ -873,6 +873,8 @@
       
         
       
+        
+      
     
     
     
@@ -1138,6 +1140,34 @@
     
   
     DGI: Directional Grounding Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../switch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Switch: context protection
   
 
     
@@ -2641,7 +2671,7 @@
 </tr>
 <tr>
 <td><code>DGI_PASS</code></td>
-<td>0.30</td>
+<td>0.525</td>
 <td>Above this: aligned with grounded patterns</td>
 </tr>
 </tbody>
@@ -2651,15 +2681,17 @@
 <p>groundlens scores are verification triage signals --- they help you prioritize which outputs need human review. A high score does not guarantee factual accuracy; a low score does not guarantee hallucination. The value is in <strong>efficiently directing human attention</strong> to the outputs most likely to need it.</p>
 </div>
 <h2 id="the-verification-pipeline">The verification pipeline<a class="headerlink" href="#the-verification-pipeline" title="Permanent link">&para;</a></h2>
-<p>groundlens is the deterministic first stage of a staged pipeline. Each stage is cheaper and more certain than the one after it, so most outputs are settled early and only the residue reaches the expensive checks:</p>
+<p>groundlens is the deterministic front of a staged pipeline. Each stage is cheaper and more certain than the one after it, so most outputs are settled early and only the residue reaches the expensive checks:</p>
 <ol>
 <li><strong>Geometry (SGI or DGI).</strong> When context is available, SGI compares the response against the source; when it is not, DGI reads the displacement direction from question to response. This stage is deterministic, single-pass, and sends nothing out.</li>
+<li><strong>Switch.</strong> Turns the geometric score into a control decision: may this response be written into agent or RAG state? Prevents contaminated context from propagating into the next turn. Still deterministic, no model.</li>
 <li><strong>Consistency.</strong> For the cases geometry cannot settle, a model-based consistency check asks the same question in more than one way and reads whether the model agrees with itself. Low agreement reads as risk.</li>
 <li><strong>Rules.</strong> Deterministic predicates encode domain policy. They flag an output that violates a hard requirement regardless of its geometric score.</li>
 <li><strong>LLM judge.</strong> A model reads the response against a supplied source. This is where within-frame factual errors that geometry cannot see get caught.</li>
 <li><strong>Human review.</strong> The remaining, highest-stakes residue goes to a person.</li>
 </ol>
-<p>The order is what makes it efficient: geometry clears the clearly grounded and catches the clearly ungrounded cheaply, so the model-based and human stages run on far fewer outputs.</p>
+<p>The order is what makes it efficient: geometry and the Switch clear the clearly grounded and block the clearly ungrounded cheaply, so the model-based and human stages run on far fewer outputs.</p>
+<p>See <a href="../switch/">GroundingSwitch</a> for actions, thresholds, and agent/RAG patterns.</p>
 <h2 id="what-groundlens-cannot-do">What groundlens Cannot Do<a class="headerlink" href="#what-groundlens-cannot-do" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Verify factual truth</strong>: groundlens measures geometric properties of embeddings, not correspondence to external reality. See the <a href="../../theory/hallucination-taxonomy/">Hallucination Taxonomy</a> for which types of errors are detectable and which are not.</li>
@@ -2670,6 +2702,7 @@
 <ul>
 <li><a href="../sgi/">SGI Deep Dive</a> --- formula, thresholds, geometric interpretation</li>
 <li><a href="../dgi/">DGI Deep Dive</a> --- reference direction, calibration, von Mises-Fisher</li>
+<li><a href="../switch/">GroundingSwitch</a> --- context-protection control after geometry</li>
 <li><a href="../../theory/embedding-geometry/">Embedding Geometry Theory</a> --- the mathematics behind the embeddings</li>
 </ul>
 

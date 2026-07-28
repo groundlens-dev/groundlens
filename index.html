@@ -584,10 +584,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-four-checks" class="md-nav__link">
+  <a href="#the-five-checks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The four checks
+        The five checks
       
     </span>
   </a>
@@ -982,6 +982,8 @@
       
         
       
+        
+      
     
     
     
@@ -1100,6 +1102,34 @@
     
   
     DGI: Directional Grounding Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/switch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Switch: context protection
   
 
     
@@ -2401,10 +2431,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-four-checks" class="md-nav__link">
+  <a href="#the-five-checks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The four checks
+        The five checks
       
     </span>
   </a>
@@ -2503,36 +2533,43 @@
 </tr>
 <tr>
 <td>2</td>
+<td><strong>Switch</strong></td>
+<td>May this answer be written into agent/RAG state?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>3</td>
 <td><strong>Consistency</strong></td>
 <td>With no source to compare against, does the model agree with itself?</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td>3</td>
+<td>4</td>
 <td><strong>Rules</strong></td>
 <td>Did the answer break a policy, invent a number, skip a disclosure?</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td>4</td>
+<td>5</td>
 <td><strong>LLM as judge</strong></td>
 <td>The hard cases that need real reasoning over the evidence.</td>
 <td>No</td>
 </tr>
 <tr>
-<td>5</td>
+<td>6</td>
 <td><strong>Human review</strong></td>
 <td>The last step of the pipeline.</td>
 <td>No</td>
 </tr>
 </tbody>
 </table>
-<p>Groundlens covers steps 1 to 3 and needs no second LLM. Steps 4 and 5 run only on what the earlier steps flag.</p>
-<h2 id="the-four-checks">The four checks<a class="headerlink" href="#the-four-checks" title="Permanent link">&para;</a></h2>
+<p>Groundlens covers steps 1 to 4 and needs no second LLM for geometry, the Switch, or rules. Steps 5 and 6 run only on what the earlier steps flag.</p>
+<h2 id="the-five-checks">The five checks<a class="headerlink" href="#the-five-checks" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><a href="concepts/sgi/">SGI</a></strong>, did the answer come from its source? Use it when you have the retrieved document (a RAG pipeline).</li>
 <li><strong><a href="concepts/dgi/">DGI</a></strong>, check an answer when there is no source. It works from the question and the answer alone, comparing the direction the answer takes with how grounded answers usually move.</li>
-<li><strong><a href="guides/second-stage/">Consistency</a></strong>, does the model agree with itself? The second stage you escalate to when geometry cannot settle a case.</li>
+<li><strong><a href="concepts/switch/">Switch</a></strong>, may this answer enter agent or RAG state? Turns the geometric score into a control action so contaminated context does not propagate.</li>
+<li><strong><a href="guides/second-stage/">Consistency</a></strong>, does the model agree with itself? The stage you escalate to when geometry cannot settle a case.</li>
 <li><strong><a href="adr/0001-rule-set-architecture/">Rules</a></strong>, did the answer break a specific policy? Named checks that catch invented figures, missing disclosures, and out-of-remit claims.</li>
 </ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
@@ -2553,7 +2590,7 @@
 <h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
 <ul>
 <li>New here: <a href="getting-started/installation/">Installation</a> and <a href="getting-started/quickstart/">Quickstart</a>.</li>
-<li>Understand the method: <a href="concepts/how-it-works/">How it works</a>, <a href="concepts/sgi/">SGI</a>, <a href="concepts/dgi/">DGI</a>, <a href="concepts/calibration/">Calibration</a>.</li>
+<li>Understand the method: <a href="concepts/how-it-works/">How it works</a>, <a href="concepts/sgi/">SGI</a>, <a href="concepts/dgi/">DGI</a>, <a href="concepts/switch/">Switch</a>, <a href="concepts/calibration/">Calibration</a>.</li>
 <li>Escalate the hard cases: <a href="guides/second-stage/">Second stage</a> and the provider adapters for <a href="providers/openai/">OpenAI</a>, <a href="providers/anthropic/">Anthropic</a>, <a href="providers/google/">Google</a>.</li>
 <li>Privacy: <a href="guides/data-handling/">Data handling</a>.</li>
 <li>Compliance: <a href="guides/eu-ai-act/">EU AI Act</a>, <a href="guides/sr-11-7/">SR 11-7</a>, <a href="guides/nist-ai-rmf/">NIST AI RMF</a>.</li>
