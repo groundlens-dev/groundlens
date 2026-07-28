@@ -46,7 +46,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
 
 from groundlens._internal.thresholds import (
     DGI_PASS,
@@ -55,9 +54,6 @@ from groundlens._internal.thresholds import (
 )
 from groundlens.check import Check, check
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
-
-if TYPE_CHECKING:
-    pass
 
 # ── Actions ─────────────────────────────────────────────────────────────────
 
