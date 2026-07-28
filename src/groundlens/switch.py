@@ -178,13 +178,17 @@ class GroundingSwitch:
             )
             raise ValueError(msg)
 
-        action = (
-            on_reject
-            if isinstance(on_reject, SwitchAction)
-            else SwitchAction(str(on_reject).lower())
-        )
+        allowed = ", ".join(sorted(a.value for a in _ON_REJECT_ACTIONS))
+        if isinstance(on_reject, SwitchAction):
+            action = on_reject
+        else:
+            try:
+                action = SwitchAction(str(on_reject).lower())
+            except ValueError as exc:
+                msg = f"on_reject must be one of {{{allowed}}}, got {on_reject!r}."
+                raise ValueError(msg) from exc
+
         if action not in _ON_REJECT_ACTIONS:
-            allowed = ", ".join(sorted(a.value for a in _ON_REJECT_ACTIONS))
             msg = f"on_reject must be one of {{{allowed}}}, got {on_reject!r}."
             raise ValueError(msg)
 
