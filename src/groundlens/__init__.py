@@ -54,6 +54,12 @@ Quick start::
     >>> rag = rag_rules()
     >>> rag.name
     'groundlens_banking_v1'
+    >>>
+    >>> # Context-protection switch (stage 2)
+    >>> from groundlens import GroundingSwitch
+    >>> decision = GroundingSwitch().decide(result)
+    >>> decision.write_to_state
+    True
 
 References:
     Marin (2025). Semantic Grounding Index. arXiv:2512.13771.
@@ -103,6 +109,7 @@ from groundlens.rules import (
 )
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
+from groundlens.switch import GroundingSwitch, SwitchAction, SwitchDecision
 
 __all__ = [
     "DEFAULT_MODEL",
@@ -117,6 +124,7 @@ __all__ = [
     "ChecklistRule",
     "DGIResult",
     "EmbeddingFn",
+    "GroundingSwitch",
     "GroundlensScore",
     "ProposedLabel",
     "PropositionBatch",
@@ -126,6 +134,8 @@ __all__ = [
     "RuleSetResult",
     "SGIResult",
     "SeedExample",
+    "SwitchAction",
+    "SwitchDecision",
     "ThresholdFit",
     # Meta
     "__version__",
