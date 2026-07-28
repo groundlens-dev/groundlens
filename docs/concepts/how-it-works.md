@@ -76,22 +76,25 @@ groundlens uses empirically-derived thresholds to flag responses:
 |---|---|---|
 | `SGI_STRONG_PASS` | 1.20 | Strong context engagement |
 | `SGI_REVIEW` | 0.95 | Below this: flagged for review |
-| `DGI_PASS` | 0.30 | Above this: aligned with grounded patterns |
+| `DGI_PASS` | 0.525 | Above this: aligned with grounded patterns |
 
 !!! warning "Thresholds are for triage, not for truth"
     groundlens scores are verification triage signals --- they help you prioritize which outputs need human review. A high score does not guarantee factual accuracy; a low score does not guarantee hallucination. The value is in **efficiently directing human attention** to the outputs most likely to need it.
 
 ## The verification pipeline
 
-groundlens is the deterministic first stage of a staged pipeline. Each stage is cheaper and more certain than the one after it, so most outputs are settled early and only the residue reaches the expensive checks:
+groundlens is the deterministic front of a staged pipeline. Each stage is cheaper and more certain than the one after it, so most outputs are settled early and only the residue reaches the expensive checks:
 
 1. **Geometry (SGI or DGI).** When context is available, SGI compares the response against the source; when it is not, DGI reads the displacement direction from question to response. This stage is deterministic, single-pass, and sends nothing out.
-2. **Consistency.** For the cases geometry cannot settle, a model-based consistency check asks the same question in more than one way and reads whether the model agrees with itself. Low agreement reads as risk.
-3. **Rules.** Deterministic predicates encode domain policy. They flag an output that violates a hard requirement regardless of its geometric score.
-4. **LLM judge.** A model reads the response against a supplied source. This is where within-frame factual errors that geometry cannot see get caught.
-5. **Human review.** The remaining, highest-stakes residue goes to a person.
+2. **Switch.** Turns the geometric score into a control decision: may this response be written into agent or RAG state? Prevents contaminated context from propagating into the next turn. Still deterministic, no model.
+3. **Consistency.** For the cases geometry cannot settle, a model-based consistency check asks the same question in more than one way and reads whether the model agrees with itself. Low agreement reads as risk.
+4. **Rules.** Deterministic predicates encode domain policy. They flag an output that violates a hard requirement regardless of its geometric score.
+5. **LLM judge.** A model reads the response against a supplied source. This is where within-frame factual errors that geometry cannot see get caught.
+6. **Human review.** The remaining, highest-stakes residue goes to a person.
 
-The order is what makes it efficient: geometry clears the clearly grounded and catches the clearly ungrounded cheaply, so the model-based and human stages run on far fewer outputs.
+The order is what makes it efficient: geometry and the Switch clear the clearly grounded and block the clearly ungrounded cheaply, so the model-based and human stages run on far fewer outputs.
+
+See [GroundingSwitch](switch.md) for actions, thresholds, and agent/RAG patterns.
 
 ## What groundlens Cannot Do
 
@@ -103,4 +106,5 @@ The order is what makes it efficient: geometry clears the clearly grounded and c
 
 - [SGI Deep Dive](sgi.md) --- formula, thresholds, geometric interpretation
 - [DGI Deep Dive](dgi.md) --- reference direction, calibration, von Mises-Fisher
+- [GroundingSwitch](switch.md) --- context-protection control after geometry
 - [Embedding Geometry Theory](../theory/embedding-geometry.md) --- the mathematics behind the embeddings
