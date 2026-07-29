@@ -5,6 +5,16 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## Unreleased
+
+### Fixed
+
+- ``evaluate_batch()`` now rejects blank ``question`` / ``response`` values up
+  front with the item index, matching the single-item validation in SGI/DGI.
+  A blank field in a batch previously fell through to ``compute_sgi()`` /
+  ``compute_dgi()`` and raised a generic ``ValueError`` with no indication of
+  which item failed.
+
 ## 2026.7.23 -- Default encoder to sentence-t5-large; certified DGI reference
 
 ### Changed (BREAKING)
