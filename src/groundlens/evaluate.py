@@ -114,6 +114,7 @@ def evaluate_batch(
 
     Raises:
         KeyError: If any item is missing ``question`` or ``response``.
+        ValueError: If any item has a blank ``question`` or ``response``.
 
     Example:
         >>> from groundlens import evaluate_batch
@@ -135,9 +136,18 @@ def evaluate_batch(
             msg = f"Item {i} missing required key 'response'."
             raise KeyError(msg)
 
+        question = item["question"]
+        response = item["response"]
+        if not question.strip():
+            msg = f"Item {i}: question must be a non-empty string."
+            raise ValueError(msg)
+        if not response.strip():
+            msg = f"Item {i}: response must be a non-empty string."
+            raise ValueError(msg)
+
         score = evaluate(
-            question=item["question"],
-            response=item["response"],
+            question=question,
+            response=response,
             context=item.get("context"),
             model=model,
             reference_csv=reference_csv,
