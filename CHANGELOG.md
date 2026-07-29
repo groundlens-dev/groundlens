@@ -5,6 +5,28 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## 2026.7.28 -- evaluate_batch blank-field validation; GroundingSwitch
+
+### Fixed
+
+- ``evaluate_batch()`` now rejects blank ``question`` / ``response`` values up
+  front with the item index, matching the single-item validation in SGI/DGI.
+  A blank field in a batch previously fell through to ``compute_sgi()`` /
+  ``compute_dgi()`` and raised a generic ``ValueError`` with no indication of
+  which item failed (thanks [@SOHAM240104](https://github.com/SOHAM240104)).
+
+### Added
+
+- **``GroundingSwitch``** — Stage 2 of the verification pipeline. Converts an
+  SGI/DGI score into a control decision (``accept`` / ``reject`` / ``fallback`` /
+  ``regenerate`` / ``escalate``) so contaminated answers are not written into
+  agent or RAG state. Deterministic, no model dependency.
+
+### Changed
+
+- Package version set to ``2026.7.28`` (``pyproject.toml`` and
+  ``_version.py`` kept in sync).
+
 ## 2026.7.23 -- Default encoder to sentence-t5-large; certified DGI reference
 
 ### Changed (BREAKING)
@@ -221,7 +243,7 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   - **Multilingual** (100+ languages including Spanish/Catalan/Galician/
     English/Portuguese) — relevant for European bank deployments
   - **1024 dims, 568M params, 8192-token context** — better signal in
-    long-context RAG scenarios
+  long-context RAG scenarios
   - **Naturally L2-normalized output** — keeps the canonical angular SGI
     formulation numerically stable
   - **Calibrated in shipped cookbooks** and validated on RAGTruth + RAGBench
@@ -240,7 +262,7 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   Cross-domain validation on RAGBench showed PGI does not generalize beyond
   RAGTruth-style hallucinations, and the underlying motivation (a precision
   "ceiling" of SGI ≈ 0.40 on RAGTruth) was traced to a structural property
-  of the test dataset (mix of Type I and Type III hallucinations) rather
+  of the test set (mix of Type I and Type III hallucinations) rather
   than the primitive. The geometric taxonomy of Marin (2026,
   arXiv:2602.13224v3) predicts this: Type III (within-frame factual errors)
   are not detectable by angular geometry. See documented negative result on
