@@ -7,15 +7,19 @@ S^(n-1) when vectors are L2-normalized.
 
 Key concepts:
 
-- **Euclidean distance** in R^n is used by SGI to compare how far the
-  response embedding is from the question vs. the context.
+- **Angular (geodesic) distance** on S^(n-1) is what SGI uses: it L2-normalizes
+  the three embeddings and takes ``theta(a, b) = arccos(a_hat . b_hat)``. The
+  ``euclidean_distance`` helper below is kept for callers and for the DGI
+  displacement magnitude; SGI has not used it since the angular rewrite.
 
 - **Displacement vectors** (r - q) capture the semantic "movement" from
   question to response. DGI projects these onto a reference direction.
 
 - **Unit normalization** maps vectors to S^(n-1). On the unit hypersphere,
-  dot product equals cosine similarity, and Euclidean distance is a
-  monotonic function of angular distance.
+  dot product equals cosine similarity, and Euclidean (chord) distance is a
+  monotonic function of angular distance: ``||a_hat - b_hat|| = 2 sin(theta/2)``.
+  Monotonic is not proportional — a ratio of chord distances is not the same
+  number as a ratio of angles, which is why SGI takes the angles directly.
 
 References:
     Marin (2025). Semantic Grounding Index. arXiv:2512.13771.

@@ -26,16 +26,21 @@ from groundlens._internal.thresholds import (
 class SGIResult:
     """Result of Semantic Grounding Index computation.
 
-    SGI measures whether a response engaged with the provided context
+    SGI is the ratio of two angular (geodesic) distances on the unit
+    hypersphere, not of Euclidean distances. It measures whether a response
+    engaged with the provided context
     or stayed anchored to the question. Higher values indicate stronger
     context engagement (grounded).
 
     Attributes:
-        value: Raw SGI score = dist(response, question) / dist(response, context).
+        value: Raw SGI score = theta(response, question) / theta(response, context).
         normalized: Score mapped to [0, 1] via tanh normalization.
         flagged: ``True`` if the score is below the review threshold.
-        q_dist: Euclidean distance from response to question embedding.
-        ctx_dist: Euclidean distance from response to context embedding.
+        q_dist: Angular (geodesic) distance from the response to the question
+            on the unit hypersphere, ``arccos(r_hat . q_hat)``, in radians,
+            range ``[0, pi]``. NOT a Euclidean distance.
+        ctx_dist: Angular (geodesic) distance from the response to the context,
+            ``arccos(r_hat . c_hat)``, in radians, range ``[0, pi]``.
         method: Always ``"sgi"``.
         explanation: Human-readable interpretation of the score.
     """

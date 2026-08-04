@@ -100,7 +100,7 @@ console.log(data.handoff); // what geometry cannot settle
   "flagged": false,
   "method": "DGI (Directional Grounding Index)",
   "score": 0.4521,
-  "threshold": 0.30,
+  "threshold": 0.525,
   "explanation": "The answer moves the way well-grounded answers usually do.",
   "detail": {
     "interpretation": "Positive directional alignment with grounded response patterns."
