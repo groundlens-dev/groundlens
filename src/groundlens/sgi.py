@@ -86,6 +86,30 @@ def _l2_normalize(v: NDArray[np.float32]) -> NDArray[np.float32]:
     return v / norm
 
 
+def _degenerate_embeddings(embeddings: NDArray[np.float32]) -> str:
+    """Return a reason string if the embeddings cannot support a valid SGI.
+
+    Guards two failure modes that would otherwise pass silently:
+
+    - **Non-finite values.** ``_angular_distance`` clamps with ``min``/``max``,
+      and ``min(1.0, nan)`` is ``1.0``, so a NaN dot product becomes
+      ``arccos(1.0) = 0`` — an angular distance of zero. That lands in the
+      "response is identical to the context" branch and returns ``SGI = 10.0``
+      with ``flagged=False``: a broken encoder would read as a strong pass.
+    - **Zero-norm rows.** An all-zero embedding stays all-zero through
+      ``_l2_normalize``, every dot product is 0, both distances are pi/2 and
+      the ratio is exactly 1.0 — again unflagged.
+
+    Returns an empty string when the embeddings are usable.
+    """
+    if not bool(np.all(np.isfinite(embeddings))):
+        return "non-finite (NaN/inf) values"
+    norms = np.linalg.norm(embeddings, axis=1)
+    if bool(np.any(norms < _EPS)):
+        return "a zero-norm vector"
+    return ""
+
+
 def compute_sgi(
     question: str,
     context: str,
@@ -100,7 +124,10 @@ def compute_sgi(
         question: The input query.
         context: Source document, retrieved chunks, or reference text.
         response: The LLM output to evaluate.
-        model: Sentence transformer model name. Default ``all-MiniLM-L6-v2``.
+        model: Sentence transformer model name. Defaults to
+            :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
         encoder: Optional bring-your-own-embeddings callable taking
             ``list[str]`` and returning an ``(n, d)`` array. Bypasses
             sentence-transformers (no torch required) when provided.
@@ -135,6 +162,17 @@ def compute_sgi(
         _warn_default_thresholds_with_custom_encoder("compute_sgi", model, encoder is not None)
 
     embeddings = encode_texts([question, context, response], model_name=model, encoder=encoder)
+
+    # Fail safe, not silent: a broken encoder must never read as a strong pass.
+    reason = _degenerate_embeddings(embeddings)
+    if reason:
+        logger.warning(
+            "compute_sgi: encoder returned %s; returning a flagged result. "
+            "Check the encoder and the inputs.",
+            reason,
+        )
+        return SGIResult(value=0.0, normalized=0.0, flagged=True, q_dist=0.0, ctx_dist=0.0)
+
     q_emb, ctx_emb, resp_emb = embeddings[0], embeddings[1], embeddings[2]
 
     # L2-normalize to project onto the unit hypersphere (paper Algorithm 1).
@@ -146,7 +184,8 @@ def compute_sgi(
     q_dist = _angular_distance(r_hat, q_hat)
     ctx_dist = _angular_distance(r_hat, c_hat)
 
-    # Degenerate case: response identical to context (theta(r, c) ≈ 0).
+    # Degenerate case: response identical to context (theta(r, c) ≈ 0). The
+    # ratio diverges, so 10.0 is a saturation sentinel, not a measured score.
     if ctx_dist < _EPS:
         return SGIResult(
             value=10.0,
@@ -156,7 +195,8 @@ def compute_sgi(
             ctx_dist=round(ctx_dist, 4),
         )
 
-    # Degenerate case: response identical to question (theta(r, q) ≈ 0).
+    # Degenerate case: response identical to question (theta(r, q) ≈ 0):
+    # the answer restated the prompt and engaged nothing. Flag it.
     if q_dist < _EPS:
         return SGIResult(
             value=0.0,
@@ -185,7 +225,7 @@ class SGI:
     to avoid repeating the ``model`` parameter.
 
     Example:
-        >>> sgi = SGI(model="all-MiniLM-L6-v2")
+        >>> sgi = SGI()
         >>> result = sgi.score(
         ...     question="What is X?",
         ...     context="X is Y.",

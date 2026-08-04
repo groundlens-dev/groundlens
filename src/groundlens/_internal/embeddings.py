@@ -163,18 +163,20 @@ def get_encoder(
 ) -> Any:
     """Load a sentence transformer model, caching for process lifetime.
 
-    The model is downloaded on first use (cached to ``~/.cache/torch/``
-    by sentence-transformers) and kept in memory for the duration of the
-    process. Changing ``model_name`` between calls loads the new model
-    and replaces the cache.
+    The model is downloaded on first use (cached under
+    ``$HF_HOME``/``~/.cache/huggingface/hub`` by huggingface_hub) and kept in
+    memory for the duration of the process. Changing ``model_name`` between
+    calls loads the new model and replaces the cache. The default encoder is
+    ~640 MB on disk, so the first call on a cold cache is a download.
 
     Args:
         model_name: HuggingFace model name or local path. Must be
             compatible with the sentence-transformers library.
         trust_remote_code: Whether to pass ``trust_remote_code=True`` when
             loading. ``None`` (default) auto-resolves via
-            :func:`_resolve_trust_remote_code` — the bundled default model
-            ships custom pooling code and requires it.
+            :func:`_resolve_trust_remote_code`. The default model
+            (``sentence-t5-large``) does NOT need it; only the models listed
+            in :data:`_TRUST_REMOTE_CODE_MODELS` do.
 
     Returns:
         A ``SentenceTransformer`` instance ready for ``.encode()``.
@@ -240,7 +242,9 @@ def encode_texts(
 
     Returns:
         Array of shape ``(len(texts), embedding_dim)`` with float32 values.
-        Embeddings are NOT L2-normalized (raw encoder output).
+        Embeddings are NOT L2-normalized (raw encoder output). Whatever the
+        encoder returns for an empty or whitespace string is passed through
+        unchanged; the scorers reject empty inputs before reaching here.
     """
     fn = encoder if encoder is not None else _custom_encoder
     if fn is not None:

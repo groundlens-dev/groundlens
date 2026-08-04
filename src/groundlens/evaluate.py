@@ -126,8 +126,10 @@ def evaluate_batch(
         >>> len(results)
         2
     """
-    results: list[GroundlensScore] = []
-
+    # Validate the WHOLE batch before scoring any of it. Validating inside the
+    # scoring loop meant a bad item at index N was only reported after N
+    # embedding passes — on the default encoder that is a model download plus
+    # N forward passes thrown away in order to report a blank string.
     for i, item in enumerate(items):
         if "question" not in item:
             msg = f"Item {i} missing required key 'question'."
@@ -145,14 +147,16 @@ def evaluate_batch(
             msg = f"Item {i}: response must be a non-empty string."
             raise ValueError(msg)
 
-        score = evaluate(
-            question=question,
-            response=response,
+    results: list[GroundlensScore] = [
+        evaluate(
+            question=item["question"],
+            response=item["response"],
             context=item.get("context"),
             model=model,
             reference_csv=reference_csv,
         )
-        results.append(score)
+        for item in items
+    ]
 
     logger.info(
         "Evaluated %d items (%d flagged).", len(results), sum(1 for r in results if r.flagged)

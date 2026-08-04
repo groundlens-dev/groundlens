@@ -1,6 +1,6 @@
 """Unit tests for groundlens.calibrate — CalibrationResult and calibrate().
 
-All tests mock encode_texts / _compute_reference_direction so no
+All tests mock encode_texts so no
 embedding model is loaded.
 
 Note: ``groundlens.__init__`` re-exports ``calibrate`` as a function,
@@ -99,12 +99,10 @@ class TestCalibrateValidation:
         with pytest.raises(ValueError, match="at least 5 pairs"):
             calibrate(pairs=[("Q?", "A.") for _ in range(3)])
 
-    @patch.object(_cal_mod, "_compute_reference_direction", return_value=_FAKE_MU)
     @patch("groundlens._internal.embeddings.encode_texts")
     def test_happy_path_returns_result(
         self,
         mock_encode,
-        mock_ref_dir,
     ) -> None:
         rng = np.random.default_rng(0)
         # 10 pairs → 20 texts
@@ -114,14 +112,14 @@ class TestCalibrateValidation:
         assert result.n_pairs == 10
         assert result.embedding_dim == 3
         assert result.concentration > 0
-        np.testing.assert_array_equal(result.mu_hat, _FAKE_MU)
+        # mu_hat is now derived from the same single encode pass as R-bar.
+        assert result.mu_hat.shape == (3,)
+        np.testing.assert_allclose(float(np.linalg.norm(result.mu_hat)), 1.0, atol=1e-5)
 
-    @patch.object(_cal_mod, "_compute_reference_direction", return_value=_FAKE_MU)
     @patch("groundlens._internal.embeddings.encode_texts")
     def test_metadata_stored(
         self,
         mock_encode,
-        mock_ref_dir,
     ) -> None:
         rng = np.random.default_rng(1)
         mock_encode.return_value = rng.standard_normal((10, 3)).astype(np.float32)
@@ -133,12 +131,10 @@ class TestCalibrateValidation:
         assert result.metadata == {"domain": "medical"}
 
     @patch("groundlens._internal.csv_loader.load_reference_pairs")
-    @patch.object(_cal_mod, "_compute_reference_direction", return_value=_FAKE_MU)
     @patch("groundlens._internal.embeddings.encode_texts")
     def test_csv_path_loads_pairs(
         self,
         mock_encode,
-        mock_ref_dir,
         mock_loader,
     ) -> None:
         pairs = [("Q?", "A.") for _ in range(10)]
