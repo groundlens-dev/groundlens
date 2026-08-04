@@ -50,7 +50,7 @@ class TestGroundlensAnthropicChat:
                             or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("groundlens.providers.anthropic.evaluate") as mock_eval,
+                    patch("groundlens.providers._base.evaluate") as mock_eval,
                 ):
                     mock_eval.return_value = MagicMock()
                     llm = GroundlensAnthropic(api_key="sk-ant-test")
@@ -75,7 +75,7 @@ class TestGroundlensAnthropicChat:
                             or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("groundlens.providers.anthropic.evaluate") as mock_eval,
+                    patch("groundlens.providers._base.evaluate") as mock_eval,
                 ):
                     mock_score = MagicMock()
                     mock_score.flagged = False

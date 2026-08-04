@@ -25,6 +25,7 @@ import groundlens.evaluate  # noqa: F401
 _eval_mod = sys.modules["groundlens.evaluate"]
 _cal_mod = sys.modules["groundlens.calibrate"]
 
+from groundlens._internal.embeddings import DEFAULT_MODEL  # noqa: E402
 from groundlens.cli.main import (  # noqa: E402
     _build_parser,
     _cmd_calibrate,
@@ -83,7 +84,7 @@ class TestParser:
     def test_default_model(self) -> None:
         parser = _build_parser()
         args = parser.parse_args(["check", "--question", "Q?", "--response", "A."])
-        assert args.model == "all-MiniLM-L6-v2"
+        assert args.model == DEFAULT_MODEL
 
 
 # ---------------------------------------------------------------------------

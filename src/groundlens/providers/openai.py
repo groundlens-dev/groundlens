@@ -16,8 +16,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from groundlens.evaluate import evaluate
-from groundlens.providers._base import LLMResponse
+from groundlens._internal.embeddings import DEFAULT_MODEL
+from groundlens.providers._base import LLMResponse, _score_or_none
 
 if TYPE_CHECKING:
     import openai
@@ -58,7 +58,9 @@ class GroundlensOpenAI:
         api_key: OpenAI API key.
         model: Chat model to use for generation. Defaults to ``"gpt-4o"``.
         groundlens_model: Sentence-transformer model for groundlens scoring.
-            Defaults to ``"all-MiniLM-L6-v2"``.
+            Defaults to :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
         groundlens_threshold: Score threshold override (reserved for future use).
             Defaults to ``0.45``.
 
@@ -72,7 +74,7 @@ class GroundlensOpenAI:
         self,
         api_key: str,
         model: str = "gpt-4o",
-        groundlens_model: str = "all-MiniLM-L6-v2",
+        groundlens_model: str = DEFAULT_MODEL,
         groundlens_threshold: float = 0.45,
     ) -> None:
         self._client = _get_openai_client(api_key)
@@ -102,6 +104,14 @@ class GroundlensOpenAI:
         Raises:
             openai.OpenAIError: If the API call fails.
 
+        Note:
+            When the provider returns no text — a tool-call-only turn, a
+            content-filter block, a zero-length completion — the response is
+            returned with ``groundlens_score=None``. Scoring an empty string
+            raises in ``compute_sgi`` / ``compute_dgi``, so the wrapper used
+            to turn a legitimate empty completion into a ``ValueError`` from
+            the scoring layer.
+
         Example:
             >>> llm = GroundlensOpenAI(api_key="sk-...")
             >>> resp = llm.chat("What causes tides?")
@@ -118,8 +128,9 @@ class GroundlensOpenAI:
             **kwargs,
         )
 
-        choice = completion.choices[0]
-        text = choice.message.content or ""
+        # A content-filter block can come back with no choices at all.
+        choices = completion.choices or []
+        text = (choices[0].message.content or "") if choices else ""
 
         usage: dict[str, Any] = {}
         if completion.usage is not None:
@@ -129,19 +140,7 @@ class GroundlensOpenAI:
                 "total_tokens": completion.usage.total_tokens,
             }
 
-        score = evaluate(
-            question=prompt,
-            response=text,
-            context=context,
-            model=self._groundlens_model,
-        )
-
-        logger.info(
-            "OpenAI response scored: method=%s value=%.3f flagged=%s",
-            score.method,
-            score.value,
-            score.flagged,
-        )
+        score = _score_or_none(text, prompt, context, self._groundlens_model, "OpenAI")
 
         return LLMResponse(
             text=text,

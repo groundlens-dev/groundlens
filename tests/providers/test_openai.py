@@ -7,7 +7,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import groundlens.providers._base as _base_mod
 import groundlens.providers.openai as openai_mod
+from groundlens._internal.embeddings import DEFAULT_MODEL
 
 
 class TestGroundlensOpenAIInit:
@@ -21,7 +23,7 @@ class TestGroundlensOpenAIInit:
         ):
             llm = openai_mod.GroundlensOpenAI(api_key="sk-test-key")
             assert llm._model == "gpt-4o"
-            assert llm._groundlens_model == "all-MiniLM-L6-v2"
+            assert llm._groundlens_model == DEFAULT_MODEL
 
     def test_init_custom_model(self, mock_openai_client: MagicMock) -> None:
         with patch.object(
@@ -44,7 +46,7 @@ class TestGroundlensOpenAIChat:
     def test_chat_returns_llm_response(self, mock_openai_client: MagicMock) -> None:
         with (
             patch.object(openai_mod, "_get_openai_client", return_value=mock_openai_client),
-            patch.object(openai_mod, "evaluate") as mock_evaluate,
+            patch.object(_base_mod, "evaluate") as mock_evaluate,
         ):
             mock_score = MagicMock()
             mock_score.method = "dgi"
@@ -62,7 +64,7 @@ class TestGroundlensOpenAIChat:
     def test_chat_calls_openai_api(self, mock_openai_client: MagicMock) -> None:
         with (
             patch.object(openai_mod, "_get_openai_client", return_value=mock_openai_client),
-            patch.object(openai_mod, "evaluate") as mock_evaluate,
+            patch.object(_base_mod, "evaluate") as mock_evaluate,
         ):
             mock_evaluate.return_value = MagicMock()
 
@@ -74,7 +76,7 @@ class TestGroundlensOpenAIChat:
     def test_chat_with_context_passes_to_evaluate(self, mock_openai_client: MagicMock) -> None:
         with (
             patch.object(openai_mod, "_get_openai_client", return_value=mock_openai_client),
-            patch.object(openai_mod, "evaluate") as mock_evaluate,
+            patch.object(_base_mod, "evaluate") as mock_evaluate,
         ):
             mock_evaluate.return_value = MagicMock()
 
@@ -88,7 +90,7 @@ class TestGroundlensOpenAIChat:
     def test_chat_usage_metadata(self, mock_openai_client: MagicMock) -> None:
         with (
             patch.object(openai_mod, "_get_openai_client", return_value=mock_openai_client),
-            patch.object(openai_mod, "evaluate") as mock_evaluate,
+            patch.object(_base_mod, "evaluate") as mock_evaluate,
         ):
             mock_evaluate.return_value = MagicMock()
 
@@ -102,7 +104,7 @@ class TestGroundlensOpenAIChat:
     def test_complete_delegates_to_chat(self, mock_openai_client: MagicMock) -> None:
         with (
             patch.object(openai_mod, "_get_openai_client", return_value=mock_openai_client),
-            patch.object(openai_mod, "evaluate") as mock_evaluate,
+            patch.object(_base_mod, "evaluate") as mock_evaluate,
         ):
             mock_evaluate.return_value = MagicMock()
 
