@@ -204,6 +204,7 @@ def _run_sgi(question: str, context: str, response: str) -> GroundingResult:
 
 def _run_dgi(question: str, response: str) -> GroundingResult:
     from groundlens import compute_dgi
+    from groundlens._internal.thresholds import DGI_PASS
 
     t0 = time.monotonic()
     result = compute_dgi(question=question, response=response)
@@ -220,7 +221,7 @@ def _run_dgi(question: str, response: str) -> GroundingResult:
         flagged=result.flagged,
         method="DGI (Directional Grounding Index)",
         score=round(result.value, 4),
-        threshold=0.30,
+        threshold=DGI_PASS,
         explanation=v.message,
         detail=DGIDetail(
             interpretation=result.explanation,

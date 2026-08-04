@@ -7,8 +7,10 @@ server, and the remote (HTTP) MCP — so the wording is identical everywhere.
 Design principles:
 
 - **The check LEVEL is the only calibrated part.** It comes from the
-  empirically derived thresholds (SGI 1.20 / 0.95; DGI 0.30 / 0.0 — see
-  :mod:`groundlens._internal.thresholds`). Nothing else claims calibration.
+  empirically derived thresholds — SGI 1.20 / 0.95 (three bands) and the
+  single DGI cut at ``DGI_PASS`` (0.525 for the default encoder). The values
+  live in :mod:`groundlens._internal.thresholds` and are imported, never
+  restated: read them from there. Nothing else claims calibration.
 - **The LABEL and MESSAGE are plain language.** No jargon in the user-facing
   text: "grounding" and "hallucination" do not appear in a label. The headline
   word is ``CHECK``; the metric's full name ("Semantic Grounding Index")

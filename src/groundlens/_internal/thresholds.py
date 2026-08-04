@@ -85,15 +85,31 @@ def _warn_default_thresholds_with_custom_encoder(
 
 # ── Normalization ───────────────────────────────────────────────────────────
 
+_SGI_DISPLAY_OFFSET: float = 0.3
+"""Empirical DISPLAY-ONLY offset in :func:`normalize_sgi`. Not calibrated.
+
+This is not a decision boundary and is not derived from any experiment in
+arXiv:2512.13771. It exists so that the observed raw-SGI mass (roughly 0.5 to
+2.0) spreads across most of [0, 1] instead of bunching near the top of the
+tanh curve, which makes dashboard bars readable. No flag in groundlens is
+computed from the normalized value, so changing this constant changes what a
+chart looks like and nothing else. Left at its historical value on purpose.
+"""
+
 
 def normalize_sgi(raw_sgi: float) -> float:
     """Normalize raw SGI score to [0, 1] range.
 
     Uses tanh mapping with offset to produce a smooth sigmoid curve:
-        normalized = tanh(max(0, raw - 0.3))
+        normalized = tanh(max(0, raw - _SGI_DISPLAY_OFFSET))
 
     This maps the raw SGI range (~0.5 to ~2.0) into a [0, 1] range
     suitable for dashboards and threshold comparison.
+
+    The offset is a display constant, not a calibrated cut-point. See
+    :data:`_SGI_DISPLAY_OFFSET`. Nothing in the library branches on the
+    normalized value — every flag is computed from the raw score against
+    :data:`SGI_REVIEW` / :data:`SGI_STRONG_PASS`.
 
     Mapping reference points:
         SGI 0.30 → 0.000 (floor)
@@ -107,7 +123,9 @@ def normalize_sgi(raw_sgi: float) -> float:
     Returns:
         Score in [0.0, 1.0].
     """
-    shifted = max(0.0, raw_sgi - 0.3)
+    if math.isnan(raw_sgi):
+        return 0.0
+    shifted = max(0.0, raw_sgi - _SGI_DISPLAY_OFFSET)
     return min(1.0, max(0.0, math.tanh(shifted)))
 
 
@@ -128,4 +146,6 @@ def normalize_dgi(raw_dgi: float) -> float:
     Returns:
         Score in [0.0, 1.0].
     """
+    if math.isnan(raw_dgi):
+        return 0.0
     return min(1.0, max(0.0, (raw_dgi + 1.0) / 2.0))
