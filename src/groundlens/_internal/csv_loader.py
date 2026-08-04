@@ -3,8 +3,16 @@
 Two sources of reference pairs:
 
 1. **Bundled dataset**: Ships with groundlens in ``groundlens/data/reference_pairs.csv``.
-   Contains verified grounded (question, response) pairs across finance,
-   medical, science, and history domains. Used when no user CSV is provided.
+   212 verified grounded (question, response) pairs across 9 domains:
+   python_coding (47), finance (40), medical (40), science (21),
+   typescript_coding (18), history (14), law (11), general (11),
+   geography (10). Columns are ``id, domain, question, grounded_response,
+   fabricated_response``; only ``question`` and ``grounded_response`` are
+   read here. Used when no user CSV is provided.
+
+   This is also the set that defines the bundled DGI reference direction
+   ``mu_hat`` and the Youden's-J cut ``DGI_PASS``. Anything scored from it is
+   scored on its own calibration data — do not use these rows as a demo.
 
 2. **User-provided CSV**: Domain-specific pairs that sharpen the reference
    direction. Calibration sets the operating point; it does not remove the
@@ -12,7 +20,8 @@ Two sources of reference pairs:
 
 User CSV format:
     - Comma or semicolon delimited (auto-detected from first 1024 bytes).
-    - Required columns: ``question`` and one of ``response``, ``answer``, or ``output``.
+    - Required columns: ``question`` and one of ``response``, ``answer``,
+      ``output``, or ``grounded_response`` (checked in that order).
     - Header row required. UTF-8 encoding.
     - Each row must be a **verified grounded** (question, response) pair.
       Do NOT include hallucinated responses — they degrade calibration.
@@ -118,7 +127,8 @@ def _load_user_csv(path: str) -> list[tuple[str, str]]:
         if response_col is None:
             msg = (
                 f"CSV missing response column. "
-                f"Expected one of: 'response', 'answer', 'output'. "
+                f"Expected one of: 'response', 'answer', 'output', "
+                f"'grounded_response'. "
                 f"Found columns: {fieldnames}"
             )
             raise ValueError(msg)

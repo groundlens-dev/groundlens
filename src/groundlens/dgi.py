@@ -17,10 +17,17 @@ response moved from the question) is returned separately on
 
 Geometric interpretation:
 
-    - DGI >= 0.594: aligns with the grounded reference direction (ok).
-    - 0.55 <= DGI < 0.594: weak alignment, worth a look (review).
-    - DGI < 0.55: diverges from grounded patterns (risk).
-    (Cut-points for the default sentence-t5-large encoder.)
+    - DGI >= 0.525: aligns with the grounded reference direction (ok).
+    - DGI < 0.525: diverges from grounded patterns (risk).
+
+    DGI is a SINGLE binary cut, not a three-band scheme: ``compute_dgi``
+    computes ``flagged = value < DGI_PASS`` and nothing else. The cut is the
+    Youden's-J operating point on the bundled 212-pair reference set with the
+    default sentence-t5-large encoder (AUROC 0.78 global; the local variant
+    ``k=...`` separates best nearer 0.545). It is encoder- and domain-specific:
+    recalibrate with ``fit_thresholds`` / ``DGI.calibrate``. The canonical
+    value lives in :data:`groundlens._internal.thresholds.DGI_PASS` — read it
+    from there rather than copying the number.
 
 Calibration and ceiling:
 
@@ -89,6 +96,22 @@ _bank_cache: dict[
 ] = {}
 
 
+def _active_encoder_id(encoder: EmbeddingFn | None) -> int | None:
+    """Identity of the encoder that ``encode_texts`` will actually use.
+
+    ``encode_texts`` resolves an explicit ``encoder`` first and falls back to
+    the process-global one set by :func:`groundlens.set_default_encoder`. Every
+    cache key must be derived the same way, or a direction written under one
+    key is looked up under another. That is exactly what used to break
+    ``DGI.calibrate(pairs=...)`` under ``set_default_encoder``: ``calibrate``
+    keyed on ``self.encoder`` (``None``) while ``_get_mu_hat`` keyed on the
+    active global encoder, so ``score()`` raised "inline calibration not
+    initialized" for a scorer that had just been calibrated.
+    """
+    active = encoder if encoder is not None else get_default_encoder()
+    return id(active) if active is not None else None
+
+
 def _compute_reference_direction(
     pairs: list[tuple[str, str]],
     model_name: str = DEFAULT_MODEL,
@@ -127,10 +150,8 @@ def _compute_reference_direction(
         q_emb = embeddings[i * 2]
         r_emb = embeddings[i * 2 + 1]
         delta = displacement_vector(q_emb, r_emb)
-        delta_hat = unit_normalize(delta)
-        norm = float(np.linalg.norm(delta))
-        if norm > 1e-8:
-            displacements.append(delta_hat)
+        if float(np.linalg.norm(delta)) > 1e-8:
+            displacements.append(unit_normalize(delta))
 
     if not displacements:
         msg = "No valid displacement vectors computed from reference pairs."
@@ -153,11 +174,10 @@ def _get_reference_bank(
     (for nearest-neighbour selection) and ``D`` the matching unit-normalized
     grounded displacements. Cached like the global direction.
     """
-    active_encoder = encoder if encoder is not None else get_default_encoder()
     key = (
         model_name,
         reference_csv or "__bundled__",
-        id(active_encoder) if active_encoder is not None else None,
+        _active_encoder_id(encoder),
     )
     if key not in _bank_cache:
         if reference_csv == "__inline__":
@@ -229,11 +249,10 @@ def _get_mu_hat(
     # A process-global encoder (set_default_encoder) is a hidden second input
     # to encode_texts; fold it in so the certified vector is never dotted against
     # a foreign embedding space and the cache never returns a stale direction.
-    active_encoder = encoder if encoder is not None else get_default_encoder()
     cache_key = (
         model_name,
         reference_csv or "__bundled__",
-        id(active_encoder) if active_encoder is not None else None,
+        _active_encoder_id(encoder),
     )
 
     if cache_key not in _mu_hat_cache:
@@ -289,6 +308,8 @@ def compute_dgi(
             direction from the ``k`` reference queries nearest to ``question``,
             instead of one global mean direction. Needs the reference set (the
             bundled data or ``reference_csv``); the first local call embeds it.
+            Clamped to ``[1, len(reference_set)]``, so ``k=0`` and negative
+            values behave as ``k=1``.
 
     Returns:
         DGIResult with raw score, normalized score, and flag status.
@@ -418,7 +439,7 @@ class DGI:
         Raises:
             ValueError: If neither ``pairs`` nor ``csv_path`` is provided.
         """
-        enc_id = id(self.encoder) if self.encoder is not None else None
+        enc_id = _active_encoder_id(self.encoder)
 
         if csv_path is not None:
             self.reference_csv = csv_path
@@ -456,7 +477,7 @@ class DGI:
         if self.reference_csv == "__inline__":
             # Guard: the inline mu_hat must already be in the cache, since
             # there is no on-disk CSV to fall back to.
-            enc_id = id(self.encoder) if self.encoder is not None else None
+            enc_id = _active_encoder_id(self.encoder)
             cache_key = (self.model, "__inline__", enc_id)
             if cache_key not in _mu_hat_cache:
                 msg = "Call calibrate() before score() when using inline pairs."

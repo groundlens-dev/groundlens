@@ -16,9 +16,9 @@ Workflow:
 
 Example:
     >>> from groundlens import calibrate
-    >>> result = calibrate(pairs=[("Q1?", "A1."), ("Q2?", "A2.")])
-    >>> result.auroc_estimate
-    0.69
+    >>> result = calibrate(pairs=[(f"Q{i}?", f"A{i}.") for i in range(20)])
+    >>> result.n_pairs
+    20
     >>> result.save("my_domain_calibration.json")
 """
 
@@ -33,7 +33,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from groundlens._internal.embeddings import DEFAULT_MODEL
-from groundlens.dgi import _compute_reference_direction
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -154,14 +153,16 @@ def calibrate(
 
     logger.info("Calibrating DGI with %d pairs using model %s.", len(pairs), model)
 
-    mu_hat = _compute_reference_direction(pairs, model, encoder=encoder)
-
     # Estimate concentration parameter (kappa) from resultant length.
     # This is a rough estimate — the true MLE for von Mises-Fisher is
     # more complex, but the resultant length R-bar is a sufficient
     # indicator of calibration quality.
+    #
+    # Embed ONCE and derive both mu_hat and R-bar from the same pass. This
+    # used to call _compute_reference_direction() and then encode the whole
+    # corpus a second time, doubling the cost of every calibration.
     from groundlens._internal.embeddings import encode_texts
-    from groundlens._internal.geometry import displacement_vector, unit_normalize
+    from groundlens._internal.geometry import displacement_vector, mean_direction, unit_normalize
 
     texts: list[str] = []
     for q, r in pairs:
@@ -175,10 +176,12 @@ def calibrate(
         if norm > 1e-8:
             unit_displacements.append(unit_normalize(delta))
 
-    if unit_displacements:
-        r_bar = float(np.linalg.norm(np.mean(np.stack(unit_displacements), axis=0)))
-    else:
-        r_bar = 0.0
+    if not unit_displacements:
+        msg = "No valid displacement vectors computed from reference pairs."
+        raise ValueError(msg)
+
+    mu_hat = mean_direction(unit_displacements)
+    r_bar = float(np.linalg.norm(np.mean(np.stack(unit_displacements), axis=0)))
 
     # Approximate kappa from R-bar (Sra, 2012).
     d = mu_hat.shape[0]
@@ -201,6 +204,17 @@ class ThresholdFit:
     Thresholds are chosen by maximizing Youden's J for the rule
     "value >= threshold implies grounded" over the supplied examples.
 
+    .. warning::
+
+       These thresholds are fitted **in sample**. :func:`fit_thresholds`
+       sweeps Youden's J over every example it is given: there is no
+       train/test split, no cross-validation and no bootstrap. The cut it
+       returns is therefore optimistically biased, and the bias grows as
+       ``n`` shrinks and as the two classes overlap. It is an operating
+       point, not a performance estimate, and it must never be reported as
+       one. To get an honest number, hold out a set these examples never
+       touched and evaluate the returned threshold there.
+
     Attributes:
         sgi_review: Fitted SGI review threshold, or ``None`` if no contexts
             were supplied (SGI requires context).
@@ -209,6 +223,8 @@ class ThresholdFit:
         n: Number of examples used for fitting.
         model: Sentence transformer model the scores were computed with.
         metric: Name of the criterion used to pick thresholds.
+        in_sample: Always ``True``. The fit used every supplied example, so
+            any accuracy measured on the same data is optimistic.
     """
 
     sgi_review: float | None
@@ -216,6 +232,7 @@ class ThresholdFit:
     n: int
     model: str
     metric: str = "youden_j"
+    in_sample: bool = True
 
 
 def _youden_threshold(
@@ -267,6 +284,16 @@ def fit_thresholds(
     For each example this computes DGI (and SGI when a ``context`` is
     present), then picks each threshold by maximizing Youden's J for the
     rule "value >= threshold implies grounded".
+
+    .. warning::
+
+       **In-sample fit.** The sweep sees every example, so the returned
+       thresholds are optimistically biased and the sensitivity/specificity
+       they achieve on ``examples`` is not an out-of-sample estimate. There
+       is no split, no cross-validation and no bootstrap here on purpose —
+       the function's job is to place an operating point, not to measure
+       one. Report performance on data this call never saw. The returned
+       :class:`ThresholdFit` carries ``in_sample=True`` as a reminder.
 
     Args:
         examples: A list of mappings, each with keys ``question`` (str),
