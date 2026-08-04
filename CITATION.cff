@@ -1,0 +1,82 @@
+cff-version: 1.2.0
+message: "If you use Groundlens in your research, please cite both the software and the paper below."
+title: "Groundlens: deterministic first-stage grounding triage for LLM outputs"
+abstract: >-
+  Groundlens measures whether an LLM answer was drawn from its source using the
+  geometry of sentence-embedding space. It computes two deterministic scores —
+  the Semantic Grounding Index (SGI), a ratio of angular distances between
+  response, question and context, and the Directional Grounding Index (DGI), the
+  alignment of the question-to-response displacement with a calibrated reference
+  direction — with no LLM in the scoring path. It is designed as the cheap first
+  stage of a verification pipeline: it clears the clear cases and escalates the
+  rest, and it publishes its own blind spot (in-register factual substitution)
+  as a number rather than a footnote.
+type: software
+authors:
+  - family-names: Marin
+    given-names: Javier
+    email: javier@jmarin.info
+    # TODO(javier): add your ORCID here, e.g.
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    # An ORCID on the CITATION.cff is what lets indexers tie this software,
+    # the arXiv preprints and any future co-authored paper to one identity.
+repository-code: "https://github.com/groundlens-dev/groundlens"
+url: "https://groundlens.dev"
+repository-artifact: "https://pypi.org/project/groundlens/"
+license: Apache-2.0
+version: 2026.7.28
+date-released: "2026-07-28"
+keywords:
+  - hallucination-detection
+  - llm-evaluation
+  - embedding-geometry
+  - grounding
+  - retrieval-augmented-generation
+  - ai-safety
+  - model-risk-management
+# TODO(javier): mint a Zenodo DOI for the repository and add it here as
+#   doi: "10.5281/zenodo.XXXXXXX"
+# This needs your GitHub account: turn on the Zenodo GitHub integration for
+# groundlens-dev/groundlens, then cut a release. Zenodo mints a concept DOI
+# that always resolves to the newest version plus a version DOI per release.
+# A software DOI is what makes the library citable as an object in its own
+# right rather than only as a footnote to the preprint.
+preferred-citation:
+  type: article
+  title: "Semantic Grounding Index: Geometric Bounds on Context Engagement in RAG Systems"
+  authors:
+    - family-names: Marin
+      given-names: Javier
+      email: javier@jmarin.info
+  year: 2025
+  journal: "arXiv preprint"
+  identifiers:
+    - type: other
+      value: "arXiv:2512.13771"
+      description: The arXiv preprint identifier
+  url: "https://arxiv.org/abs/2512.13771"
+references:
+  - type: article
+    title: "A Geometric Taxonomy of Hallucinations in Large Language Models"
+    authors:
+      - family-names: Marin
+        given-names: Javier
+    year: 2026
+    journal: "arXiv preprint"
+    identifiers:
+      - type: other
+        value: "arXiv:2602.13224"
+        description: The arXiv preprint identifier
+    url: "https://arxiv.org/abs/2602.13224"
+  - type: article
+    title: "Rotational Dynamics of Factual Constraint Processing in Large Language Models"
+    authors:
+      - family-names: Marin
+        given-names: Javier
+    year: 2026
+    journal: "arXiv preprint"
+    identifiers:
+      - type: other
+        value: "arXiv:2603.13259"
+        description: The arXiv preprint identifier
+    url: "https://arxiv.org/abs/2603.13259"
