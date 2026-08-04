@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from groundlens._internal.embeddings import DEFAULT_MODEL
 from groundlens.evaluate import evaluate
 
 if TYPE_CHECKING:
@@ -55,7 +56,9 @@ class GroundlensTool:
             ``"groundlens_verify"``.
         description: Tool description for agent tool selection.
         groundlens_model: Sentence-transformer model for groundlens scoring.
-            Defaults to ``"all-MiniLM-L6-v2"``.
+            Defaults to :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
 
     Example:
         >>> from groundlens.integrations.crewai import GroundlensTool
@@ -81,7 +84,7 @@ class GroundlensTool:
         self,
         name: str = "groundlens_verify",
         description: str | None = None,
-        groundlens_model: str = "all-MiniLM-L6-v2",
+        groundlens_model: str = DEFAULT_MODEL,
     ) -> None:
         self.name = name
         if description is not None:

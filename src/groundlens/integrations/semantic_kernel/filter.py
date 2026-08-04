@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from groundlens._internal.embeddings import DEFAULT_MODEL
 from groundlens.evaluate import evaluate
 
 if TYPE_CHECKING:
@@ -51,7 +52,9 @@ class GroundlensFilter:
 
     Args:
         groundlens_model: Sentence-transformer model for groundlens scoring.
-            Defaults to ``"all-MiniLM-L6-v2"``.
+            Defaults to :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
         input_key: Key to extract the question from function arguments.
             Defaults to ``"input"``.
         context_key: Key to extract context from function arguments.
@@ -68,7 +71,7 @@ class GroundlensFilter:
 
     def __init__(
         self,
-        groundlens_model: str = "all-MiniLM-L6-v2",
+        groundlens_model: str = DEFAULT_MODEL,
         input_key: str = "input",
         context_key: str = "context",
     ) -> None:

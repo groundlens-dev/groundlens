@@ -24,18 +24,27 @@ def _cmd_check(args: argparse.Namespace) -> None:
     """Handle the ``check`` subcommand."""
     from groundlens.evaluate import evaluate
 
-    score = evaluate(
-        question=args.question,
-        response=args.response,
-        context=args.context,
-        model=args.model,
-    )
+    try:
+        score = evaluate(
+            question=args.question,
+            response=args.response,
+            context=args.context,
+            model=args.model,
+        )
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
+    from groundlens.check import check as _check
+
+    reading = _check(score)
     print(f"Method:      {score.method}")
+    print(f"Model:       {args.model}")
     print(f"Score:       {score.value:.4f}")
     print(f"Normalized:  {score.normalized:.4f}")
     print(f"Flagged:     {score.flagged}")
-    print(f"Explanation: {score.explanation}")
+    print(f"Check:       {reading.label}")
+    print(f"Explanation: {reading.message}")
 
 
 def _cmd_evaluate(args: argparse.Namespace) -> None:
@@ -392,6 +401,7 @@ def _cmd_benchmark(args: argparse.Namespace) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     """Build the argument parser for the groundlens CLI."""
+    from groundlens._internal.embeddings import DEFAULT_MODEL
     from groundlens._version import __version__
 
     parser = argparse.ArgumentParser(
@@ -417,9 +427,7 @@ def _build_parser() -> argparse.ArgumentParser:
     check_parser.add_argument("--question", required=True, help="The input question.")
     check_parser.add_argument("--response", required=True, help="The LLM response to evaluate.")
     check_parser.add_argument("--context", default=None, help="Source context (enables SGI).")
-    check_parser.add_argument(
-        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model."
-    )
+    check_parser.add_argument("--model", default=DEFAULT_MODEL, help="Sentence transformer model.")
 
     # ── evaluate ───────────────────────────────────────────────────────────
     eval_parser = subparsers.add_parser(
@@ -428,9 +436,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     eval_parser.add_argument("input_csv", help="Input CSV with question,response[,context].")
     eval_parser.add_argument("--output", required=True, help="Output CSV path.")
-    eval_parser.add_argument(
-        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model."
-    )
+    eval_parser.add_argument("--model", default=DEFAULT_MODEL, help="Sentence transformer model.")
     eval_parser.add_argument("--reference-csv", default=None, help="DGI calibration CSV path.")
 
     # ── calibrate ──────────────────────────────────────────────────────────
@@ -442,9 +448,7 @@ def _build_parser() -> argparse.ArgumentParser:
     cal_parser.add_argument(
         "--output", required=True, help="Output JSON path for calibration data."
     )
-    cal_parser.add_argument(
-        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model."
-    )
+    cal_parser.add_argument("--model", default=DEFAULT_MODEL, help="Sentence transformer model.")
 
     # ── doctor ─────────────────────────────────────────────────────────────
     doctor_parser = subparsers.add_parser(
@@ -452,7 +456,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Check environment health: dependencies, model, scoring.",
     )
     doctor_parser.add_argument(
-        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model to test."
+        "--model", default=DEFAULT_MODEL, help="Sentence transformer model to test."
     )
 
     # ── benchmark ──────────────────────────────────────────────────────────
@@ -465,9 +469,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default="cert-framework/human-confabulation-benchmark",
         help="HuggingFace dataset name.",
     )
-    bench_parser.add_argument(
-        "--model", default="all-MiniLM-L6-v2", help="Sentence transformer model."
-    )
+    bench_parser.add_argument("--model", default=DEFAULT_MODEL, help="Sentence transformer model.")
 
     return parser
 

@@ -16,8 +16,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from groundlens.evaluate import evaluate
-from groundlens.providers._base import LLMResponse
+from groundlens._internal.embeddings import DEFAULT_MODEL
+from groundlens.providers._base import LLMResponse, _score_or_none
 
 if TYPE_CHECKING:
     import anthropic
@@ -59,7 +59,9 @@ class GroundlensAnthropic:
         model: Claude model to use for generation. Defaults to
             ``"claude-sonnet-4-20250514"``.
         groundlens_model: Sentence-transformer model for groundlens scoring.
-            Defaults to ``"all-MiniLM-L6-v2"``.
+            Defaults to :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
         groundlens_threshold: Score threshold override (reserved for future use).
             Defaults to ``0.45``.
 
@@ -73,7 +75,7 @@ class GroundlensAnthropic:
         self,
         api_key: str,
         model: str = "claude-sonnet-4-20250514",
-        groundlens_model: str = "all-MiniLM-L6-v2",
+        groundlens_model: str = DEFAULT_MODEL,
         groundlens_threshold: float = 0.45,
     ) -> None:
         self._client = _get_anthropic_client(api_key)
@@ -103,6 +105,14 @@ class GroundlensAnthropic:
         Raises:
             anthropic.APIError: If the API call fails.
 
+        Note:
+            When the provider returns no text — a tool-call-only turn, a
+            content-filter block, a zero-length completion — the response is
+            returned with ``groundlens_score=None``. Scoring an empty string
+            raises in ``compute_sgi`` / ``compute_dgi``, so the wrapper used
+            to turn a legitimate empty completion into a ``ValueError`` from
+            the scoring layer.
+
         Example:
             >>> llm = GroundlensAnthropic(api_key="sk-ant-...")
             >>> resp = llm.chat("Explain photosynthesis.")
@@ -123,7 +133,7 @@ class GroundlensAnthropic:
         )
 
         text = ""
-        for block in message.content:
+        for block in message.content or []:
             if hasattr(block, "text"):
                 text += block.text
 
@@ -132,19 +142,7 @@ class GroundlensAnthropic:
             "output_tokens": message.usage.output_tokens,
         }
 
-        score = evaluate(
-            question=prompt,
-            response=text,
-            context=context,
-            model=self._groundlens_model,
-        )
-
-        logger.info(
-            "Anthropic response scored: method=%s value=%.3f flagged=%s",
-            score.method,
-            score.value,
-            score.flagged,
-        )
+        score = _score_or_none(text, prompt, context, self._groundlens_model, "Anthropic")
 
         return LLMResponse(
             text=text,

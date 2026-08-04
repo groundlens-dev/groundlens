@@ -16,8 +16,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from groundlens.evaluate import evaluate
-from groundlens.providers._base import LLMResponse
+from groundlens._internal.embeddings import DEFAULT_MODEL
+from groundlens.providers._base import LLMResponse, _score_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,9 @@ class GroundlensGemini:
         model: Gemini model to use for generation. Defaults to
             ``"gemini-2.0-flash"``.
         groundlens_model: Sentence-transformer model for groundlens scoring.
-            Defaults to ``"all-MiniLM-L6-v2"``.
+            Defaults to :data:`~groundlens.DEFAULT_MODEL`
+            (``sentence-transformers/sentence-t5-large``), the encoder the
+            bundled thresholds were calibrated on.
         groundlens_threshold: Score threshold override (reserved for future use).
             Defaults to ``0.45``.
 
@@ -71,7 +73,7 @@ class GroundlensGemini:
         self,
         api_key: str,
         model: str = "gemini-2.0-flash",
-        groundlens_model: str = "all-MiniLM-L6-v2",
+        groundlens_model: str = DEFAULT_MODEL,
         groundlens_threshold: float = 0.45,
     ) -> None:
         self._genai = _configure_genai(api_key)
@@ -102,6 +104,14 @@ class GroundlensGemini:
         Raises:
             google.api_core.exceptions.GoogleAPIError: If the API call fails.
 
+        Note:
+            When the provider returns no text — a tool-call-only turn, a
+            content-filter block, a zero-length completion — the response is
+            returned with ``groundlens_score=None``. Scoring an empty string
+            raises in ``compute_sgi`` / ``compute_dgi``, so the wrapper used
+            to turn a legitimate empty completion into a ``ValueError`` from
+            the scoring layer.
+
         Example:
             >>> llm = GroundlensGemini(api_key="AI...")
             >>> resp = llm.chat("Explain gravity.")
@@ -112,7 +122,12 @@ class GroundlensGemini:
 
         response = self._generative_model.generate_content(prompt, **kwargs)
 
-        text = response.text or ""
+        # ``response.text`` raises on a blocked / empty candidate in some
+        # google-generativeai versions instead of returning None.
+        try:
+            text = response.text or ""
+        except (AttributeError, ValueError, IndexError):
+            text = ""
 
         usage: dict[str, Any] = {}
         if hasattr(response, "usage_metadata") and response.usage_metadata is not None:
@@ -122,19 +137,7 @@ class GroundlensGemini:
                 "total_token_count": response.usage_metadata.total_token_count,
             }
 
-        score = evaluate(
-            question=prompt,
-            response=text,
-            context=context,
-            model=self._groundlens_model,
-        )
-
-        logger.info(
-            "Gemini response scored: method=%s value=%.3f flagged=%s",
-            score.method,
-            score.value,
-            score.flagged,
-        )
+        score = _score_or_none(text, prompt, context, self._groundlens_model, "Gemini")
 
         return LLMResponse(
             text=text,

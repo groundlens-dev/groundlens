@@ -64,7 +64,7 @@ class TestGroundlensGeminiChat:
                             or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("groundlens.providers.google.evaluate") as mock_eval,
+                    patch("groundlens.providers._base.evaluate") as mock_eval,
                 ):
                     mock_eval.return_value = MagicMock()
                     llm = GroundlensGemini(api_key="test-key")
@@ -92,7 +92,7 @@ class TestGroundlensGeminiChat:
                             or setattr(self, "_groundlens_model", "all-MiniLM-L6-v2")
                         ),
                     ),
-                    patch("groundlens.providers.google.evaluate") as mock_eval,
+                    patch("groundlens.providers._base.evaluate") as mock_eval,
                 ):
                     mock_score = MagicMock()
                     mock_score.flagged = True
