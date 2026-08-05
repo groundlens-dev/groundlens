@@ -1,64 +1,60 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.png" alt="Groundlens" width="140">
 
 # Groundlens
 
-### Check whether an LLM's answer actually came from its source.<br>Fast, cheap, and the same result every time.
+### Open tools for verifying the output of language models and agents.
 
-[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
-[![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
-[![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
-[![Version](https://img.shields.io/badge/version-2026.7.14-orange?style=flat-square)](https://github.com/groundlens-dev/groundlens/releases)
-[![License: Apache](https://img.shields.io/badge/license-Apache%202-green?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
-[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
+Geometric metrics, rule sets, calibration, and an MCP server. Deterministic, no generative model in the scoring path, milliseconds per call.
 
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_claude_mcp.gif" alt="A grounding CHECK printed live under every answer inside Claude" width="62%">
-
-</br>
-
-See our demo here:
-
-[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-lg.svg)](https://huggingface.co/spacesgroundlens/demo)
-
+[![PyPI](https://img.shields.io/pypi/v/groundlens?style=flat-square&label=version&color=orange)](https://pypi.org/project/groundlens/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-groundlens.dev-green?style=flat-square)](https://docs.groundlens.dev)
+[![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow?style=flat-square)](https://huggingface.co/spaces/groundlens/demo)
 
 </div>
-</br>
+
+---
+
+## What is in the set
+
+| Tool | What it answers | What it needs |
+|---|---|---|
+| **SGI** · Semantic Grounding Index | Did the answer come from the source it was given? | a question, a source, an answer |
+| **DGI** · Directional Grounding Index | Does the answer move in the direction grounded answers move for this kind of question? | a question and an answer, plus calibration on your own domain |
+| **Switch** | May this answer be written into agent or RAG state? | an SGI or DGI score |
+| **Consistency** | With no source available, does the model agree with itself? | a small open model |
+| **Rules** | Did the answer break a policy, invent a number, skip a disclosure? | a rule set |
+| **Calibration** | What are the right cut points for *my* data? | a few hundred of your own answers |
+| **MCP server** | The same checks inside Claude Desktop, Cursor or Windsurf | [groundlens-mcp](https://github.com/groundlens-dev/groundlens-mcp) |
+
+The two metrics answer different questions and the difference matters.
+
+**SGI measures grounding.** There is a source, and SGI measures how far the answer moved toward it. The word grounding is doing real work: the source is the ground.
+
+**DGI measures alignment.** There is no source. DGI compares the direction from question to answer against the direction grounded answers usually take. It is closer to a Directional *Alignment* Index, and the name is historical: it is the name in the papers. Use it where no source exists, and calibrate it on your own domain first. See [Calibrate DGI before you trust it](#calibrate-dgi-before-you-trust-it).
 
 ## The verification pipeline
 
-You have to verify every LLM call. You can't afford to verify them all the expensive way.
+You have to verify every model call. You cannot afford to verify them all the expensive way.
 
-Verification is a pipeline of **six stages, ordered cheapest to most expensive**. Each stage is a filter: it settles what it can and passes only the doubtful cases forward. **Groundlens is stages 1–4** — so the slow, costly stages 5–6 only ever see the few answers that were actually flagged.
+Verification is a pipeline of **six stages, ordered cheapest to most expensive**. Each stage settles what it can and passes only the doubtful cases forward. **Groundlens is stages 1 to 4**, so the slow, costly stages only ever see the answers that were actually flagged.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/pipeline.png" alt="Verification pipeline: Geometry, Switch, Consistency, Rules are Groundlens; LLM as judge and Human review you add. Each stage filters what reaches the next." width="100%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/pipeline.png" alt="Verification pipeline: Geometry, Switch, Consistency and Rules are Groundlens. LLM as judge and human review you add. Each stage filters what reaches the next." width="100%">
 </div>
 
 | Stage | Approach | The question it answers | Cost | Groundlens |
 |---|---|---|---|---|
-| 1 | **Geometry**  | Did the answer come from its source, or drift off it? | no model · deterministic | Included |
+| 1 | **Geometry** | Did the answer come from its source, or drift off it? | no model · deterministic | Included |
 | 2 | **Switch** | May this answer be written into agent or RAG state? | no model · deterministic | Included |
 | 3 | **Consistency** | No source? Does the model agree with itself when asked again? | small open model · cheap | Included |
 | 4 | **Rules** | Did it break a policy, invent a number, skip a disclosure? | deterministic | Included |
 | 5 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | frontier API · costs tokens | Not included |
 | 6 | **Human review** | A person makes the final call. | costs a person | Not included |
 
-</div>
+Use it as triage at the front of the pipeline. Clear the obvious cases in milliseconds and escalate only what is flagged. Same coverage on every call, a fraction of the time and cost.
 
-> **This is the whole reason Groundlens exists.** Use it as triage at the front of the pipeline: clear the obvious cases in milliseconds and escalate only what's flagged to a judge model or a human reviewer. Same coverage on every call — a fraction of the time and cost.
-
-> **SGI and DGI measure grounding, not truth.** They tell you whether an answer is *grounded* in its source — not whether it is *true*. A **hallucination** (an answer not grounded in the source it was given) phrased faithfully can still score as grounded. That gap is exactly why **Stage 3, Consistency, probes truth** by resampling the model. Read an SGI/DGI score as *"did this come from the source?"*, and lean on Stage 3 for *"does the model actually know this?"*
-
-
-## What Groundlens does
-
-An LLM answers with the same confidence whether or not it used the document you gave it. You can't tell which just by reading the reply, and re-reading every answer by hand — or paying a second LLM to judge each one — doesn't scale.
-
-Groundlens measures:
-- the **geometry** of an answer: where it sits relative to its source and its question. From that it reads one thing — *did this come from the source, or not?* — in milliseconds, with the same result every time, letting the clearly-grounded answers through so the slow checks only run where they're needed.
-- the **switch** on that signal: may this answer enter agent or RAG state, or would writing it contaminate the next turn?
-- the **consistency** of an answer across different calls to check if the model agree with itself.
-
+> **Grounding is not truth.** SGI tells you whether an answer came from the source it was given, not whether it is correct. A wrong fact phrased in the right frame will pass. That gap is why stage 3 exists.
 
 ## Quick setup
 
@@ -66,318 +62,210 @@ Groundlens measures:
 pip install groundlens
 ```
 
-## Stage 1
+First run downloads the default encoder, `sentence-transformers/sentence-t5-large`, about 640 MB. After that everything runs locally on CPU. `sentence-transformers` brings `torch`, so expect a large install. For a smaller footprint see [choosing an encoder](https://docs.groundlens.dev/getting-started/installation/).
 
-### Semantic Grounding Index -SGI: did the answer come from its source?
-
-The core check. Use it when you have the retrieved source (a RAG pipeline: you know which document the model was given).
+## SGI: did the answer come from the source?
 
 ```python
-from groundlens import compute_sgi, check
+from groundlens import compute_sgi
 
 question = (
-    "A user of our cloud backup service wants to understand the data retention rules for the "
-    "Business plan: how long deleted files can still be recovered, what happens to backups when a "
-    "subscription is cancelled, and whether any of this differs for files under a legal hold."
+    "How long does the Northwind warehouse keep a returned item before it is "
+    "restocked, and who signs off on the inspection?"
 )
-
 context = (
-    "On the Business plan, deleted files are moved to a recovery area and can be restored for 90 "
-    "days from the date of deletion; after 90 days they are permanently purged and cannot be "
-    "recovered. Version history is kept for up to 180 days per file. When a subscription is "
-    "cancelled, the account enters a 30-day grace period during which all backups remain intact and "
-    "fully restorable; if the plan is not renewed within those 30 days, every backup associated with "
-    "the account is permanently deleted. Files placed under a legal hold are exempt from both the "
-    "90-day purge and the cancellation deletion: they are preserved unchanged until the hold is "
-    "explicitly lifted by an administrator, regardless of deletion date or subscription status."
+    "Returned items arrive at the Northwind warehouse dock and enter a 14-day "
+    "quarantine bay. During quarantine a floor supervisor inspects the item "
+    "against the original packing slip. Only after the supervisor signs the "
+    "inspection line does the item move to restocking; unsigned items are held "
+    "past 14 days and escalated to the regional manager."
 )
 
-# 1) Answer that stays on the source
-answer_grounded = (
-    "On the Business plan you can restore a deleted file for 90 days after it was deleted; once those "
-    "90 days pass it is purged for good. Each file also keeps up to 180 days of version history. If you "
-    "cancel the subscription there is a 30-day grace period where all backups stay restorable, but if "
-    "you do not renew within that window everything is permanently deleted. Files under a legal hold "
-    "are the exception: they are preserved until an administrator lifts the hold, no matter when they "
-    "were deleted or whether the plan is still active."
+from_source = (
+    "A returned item sits in the quarantine bay for 14 days. A floor supervisor "
+    "checks it against the original packing slip and signs the inspection line; "
+    "only then is it restocked. If nobody signs, it is held beyond the 14 days "
+    "and goes to the regional manager."
 )
-sgi_grounded = compute_sgi(question=question, context=context, response=answer_grounded)
-print("SGI grounded   :", round(sgi_grounded.value, 2), "|", check(sgi_grounded).label)
+not_from_source = (
+    "Northwind restocks returned items the same afternoon they arrive, with no "
+    "quarantine period at all. Inspection is fully automated, so no member of "
+    "staff signs anything, and the regional manager is never involved."
+)
 
-# 2) Answer that leaves the source
-answer_ungrounded = (
-    "Deleted files on the Business plan are kept forever and can always be restored at any time, so "
-    "there is no purge window to worry about. Cancelling the subscription has no effect on your "
-    "backups, and they stay available indefinitely even without an active plan. Legal holds are not "
-    "supported, so every file is treated exactly the same way."
-)
-sgi_ungrounded = compute_sgi(question=question, context=context, response=answer_ungrounded)
-print("SGI ungrounded :", round(sgi_ungrounded.value, 2), "|", check(sgi_ungrounded).label)
+print(round(compute_sgi(question=question, context=context, response=from_source).value, 2))
+print(round(compute_sgi(question=question, context=context, response=not_from_source).value, 2))
 ```
 
-```json
-Results:
-grounded    SGI=  2.29  -> ok      Supported by the document
-off-source  SGI=  1.01  -> review  Partly supported
+```
+1.77
+1.04
 ```
 
-**Interpretation**: SGI sorts every answer into one of three segments. In two of them the geometry is clear: at or above 1.20 the answer is grounded in the source, below 0.95 it is not. Between them, from 0.95 to 1.20, sits the third segment, where the geometric signal is uncertain and cannot settle the case on its own. The two clear segments you can act on right away, pass or flag. The uncertain middle is what you send to the next stages.
+SGI is a ratio of two angles. High means the answer sits closer to the source than to the question, which is what an answer drawn from the source looks like.
 
-| SGI below 0.95 | SGI between 0.95 and 1.2 | SGI higher than 1.2 | 
+| SGI at or above 1.20 | SGI between 0.95 and 1.20 | SGI below 0.95 |
 |---|---|---|
-| 🟢 came from the source | 🟠 partly grounded | 🔴 not from the source |
+| 🟢 came from the source | 🟠 partly grounded | 🔴 did not come from the source |
 
+The middle band is where geometry cannot settle it on its own. Those are the answers to escalate.
 
-### Directional Grounding Index -DGI: check if the answer is aligned with the question when there is no source
+These examples are not drawn from the bundled reference set, so the numbers above are what the library produces on text it has never seen.
 
-No retrieved document (one-shot prompting, tool use, an agent talking to itself)? DGI works from the question and answer alone, measuring the *direction* the answer takes against how grounded answers usually move.
+## DGI: alignment when there is no source
 
-```python
-from groundlens import compute_dgi, check
-
-# ---- Example 1: finance — a grounded answer (expected around 0.6) ----
-question_1 = (
-    "What is the difference between a traditional IRA and a Roth IRA?"
-)
-answer_grounded = (
-    "The main tax difference is when you pay taxes. With a traditional IRA, contributions are "
-    "typically tax-deductible now, but you pay income taxes on withdrawals in retirement. With a "
-    "Roth IRA, contributions are made with after-tax dollars (no upfront deduction), but qualified "
-    "withdrawals in retirement are completely tax-free."
-)
-dgi_grounded = compute_dgi(question=question_1, response=answer_grounded)
-print("DGI grounded   :", round(dgi_grounded.value, 2), "|", check(dgi_grounded).label)
-
-# ---- Example 2: medical — a fabricated answer (expected below the cut) ----
-question_2 = "What is the primary function of red blood cells?"
-answer_fabricated = (
-    "Red blood cells have as their primary function to provide the characteristic red coloration to "
-    "blood, which serves as a visual indicator of circulatory system health during medical "
-    "examinations. The intensity of the red color correlates directly with overall cardiovascular "
-    "fitness and oxygen saturation levels. Pale blood coloration typically indicates anemia or "
-    "reduced physical conditioning."
-)
-dgi_fabricated = compute_dgi(question=question_2, response=answer_fabricated)
-print("DGI fabricated :", round(dgi_fabricated.value, 2), "|", check(dgi_fabricated).label)
-```
-
-```json
-Results:
-DGI grounded   : 0.54 | Looks aligned with the question
-DGI fabricated : 0.37 | Not aligned with the quesion
-```
-
-**Interpretation**:DGI uses a single cut, not three segments. At or above the cut the answer moves like a grounded one; below it, like a fabrication. The cut sits near 0.52 with the global reference direction and 0.54 with the local variant. That value is not universal: it depends on your encoder and the kind of text you check, so read DGI as a relative ranking rather than an absolute grade. Calibrate the cut on your own grounded answers for a specific domain (see `fit_thresholds`) and the separation gets sharper.
-
-## Stage 2 · Switch — may this answer enter state?
-
-Geometry tells you whether the answer came from the source. The Switch turns that signal into a **control decision**: write the answer into agent or RAG state, or keep it out so a contaminated turn does not poison the next one.
-
-Default policy: clearly grounded → `accept`; clearly ungrounded → `fallback` (discard context influence); uncertain → `escalate` to Consistency.
+Sometimes there is no retrieved document: one-shot prompting, tool use, an agent talking to itself. DGI works from the question and the answer alone. It compares the direction the answer takes against a reference direction learned from a corpus of grounded answers.
 
 ```python
-from groundlens import compute_sgi, GroundingSwitch, SwitchAction
+from groundlens import compute_dgi
 
-switch = GroundingSwitch()  # on_reject="fallback" by default
-
-sgi = compute_sgi(question=question, context=context, response=answer_grounded)
-decision = switch.decide(sgi)
-
-if decision.write_to_state:
-    state.append(answer_grounded)          # safe: geometry is strong
-elif decision.action is SwitchAction.FALLBACK:
-    # ungrounded — do not write into state; answer without this context
-    ...
-elif decision.action is SwitchAction.ESCALATE:
-    # uncertain band — continue to Consistency / LLM-as-judge
-    ...
+print(round(compute_dgi(question=question, response=from_source).value, 3))
+print(round(compute_dgi(question=question, response=not_from_source).value, 3))
 ```
 
-```json
-Results (shape):
-grounded    action=accept   write_to_state=True
-ungrounded  action=fallback write_to_state=False
+```
+0.124
+0.031
 ```
 
-**Interpretation**: `write_to_state` is `True` only on `accept`. Every other action refuses to put the response into the next turn's context. That is the whole point in long agents and RAG loops: the geometric flag becomes a gate on state, not only a line in a log. Full actions and thresholds: [docs → Switch](https://docs.groundlens.dev/concepts/switch/).
+The ordering is right and both numbers are low, because the reference direction shipped with the library was not built for warehouse logistics.
 
-## Stage 3
+### Calibrate DGI before you trust it
 
-### Consistency — does the model agree with itself?
+This is the part to read before using DGI in anything that matters.
 
-Geometry's blind spot: an answer wrong on a single fact but phrased exactly like a correct one. When there's no source and DGI is uncertain, ask the model again — one that knows repeats itself, one that's guessing wanders.
+DGI's reference direction, μ̂, is the mean displacement of 212 grounded answers that ship with the library. Those answers were all generated by one model, in one style, answering textbook questions across nine domains. **μ̂ therefore encodes that corpus, not grounding in general.** Text written any other way points somewhere else and scores low no matter how faithful it is.
 
-- Example 1:
+Measured on 2026-08-04 with the default encoder:
+
+| Text | DGI |
+|---|---|
+| the 212 bundled reference answers | 0.2536 to 0.7609, median 0.5569 |
+| a fresh warehouse answer, faithful to its source | 0.1235 |
+| a fresh medical answer, faithful to its source | 0.2177 |
+| `DGI_PASS`, the shipped cut | 0.5250 |
+
+Medical is one of the nine domains the bundled corpus covers, and a freshly written medical answer still scores 0.2177. So the gap is not topic. It is authorship and register.
+
+What follows is simple. **The shipped cut applies to the shipped corpus.** On your data, calibrate:
 
 ```python
-import torch
-from groundlens.verify import SelfCheckNLI, two_stage
+from groundlens import fit_thresholds
 
-MODEL = "Qwen/Qwen2.5-3B-Instruct"   # any HF instruct model; bump to 7B on an L4/A100
-detector = SelfCheckNLI(model=MODEL, n_samples=5)   # loads once; reused below
-
-question = "How long do international transfers take, and is there a fee?"
-context = (
-    "International transfers sent before 3:00 PM on a business day arrive within 1 to 3 business "
-    "days. A flat 15 EUR fee applies, except within the SEPA area, which is exempt."
-)
-answer = (
-    "Transfers sent before 3:00 PM on a business day usually arrive within 1 to 3 business days. "
-    "There is a flat 15 EUR fee, and SEPA transfers are exempt."
-)
-
-r1 = two_stage(question=question, answer=answer, context=context, detector=detector)
-
-print("escalated:", r1.escalated)            # False: geometry settled it, no model call
-print("stage 1  :", r1.stage1.label)
-print("final    :", r1.final.render())
+# a few hundred of your own answers, labelled grounded / not grounded
+fit = fit_thresholds(pairs=my_pairs)
+print(fit.dgi_pass)     # the cut for your domain, not ours
 ```
 
-```json
-escalated: False
-stage 1  : Supported by the document
-final    : CHECK: Supported by the document (Semantic Grounding Index - SGI=2.62)
-The answer draws on the source and adds detail beyond the question.
-Grounding, not facts: a plausible wrong fact in the right frame would pass this check. Verify facts in a second stage.
-```
+On the bundled corpus, Youden's J puts the cut at 0.5236 against a shipped 0.5250, and AUROC at 0.7765. That figure is **in-sample**: μ̂ and the cut were both fitted on those same 212 pairs, so read it as evidence that the constant matches the corpus, not as an accuracy claim.
 
-The answer really came from the source. Stage one scored SGI 2.62, well above the 1.20 line, marked it "Supported," and escalated was False. The key part is what it did not do: it never loaded or called the model. The easy, grounded case was cleared for free. That is the whole point of a cheap first stage.
+If you have a source available, prefer SGI. DGI is for when you do not.
 
+## What the benchmarks give away for free
 
-- Example 2: 
+Before trusting any grounding detector, including this one, it is worth knowing how much of a benchmark score is not about grounding at all. These are measured, and reproducible on a laptop in under a minute.
 
-```
-import torch
-from groundlens.verify import SelfCheckNLI, two_stage
-question = "What is the primary function of red blood cells?"
-answer = (
-    "Red blood cells provide the characteristic red coloration to blood, which serves as a visual "
-    "indicator of circulatory health during medical examinations. The intensity of the red color "
-    "correlates directly with cardiovascular fitness."
-)
+| Benchmark | n | AUROC from claim length alone | AUROC from author identity alone |
+|---|---:|---:|---:|
+| RAGTruth | 2,700 | 0.664 | 0.720 |
+| FaithBench | 800 | 0.590 | 0.615 |
+| SummEdits | 6,348 | 0.510 | 0.565 |
+| HaluEval | 20,000 | **0.972** | **1.000** |
 
-r2 = two_stage(question=question, answer=answer, detector=detector)   # no context -> DGI first
+On HaluEval, counting the words in the answer reaches 0.972. Knowing only who wrote it reaches 1.000, because the correct answers come from human-written corpora and the hallucinated ones were generated by a model. Authorship is the label.
 
-print("escalated:", r2.escalated)            # True: geometry could not settle it
-print("stage 1  :", r2.stage1.label)
-if r2.stage2 is not None:
-    print("consistency:", round(r2.stage2.consistency, 2))
-    print("samples    :", list(r2.stage2.samples))
-print("final    :", r2.final.render())
-```
+SummEdits is what a carefully built benchmark looks like: every incorrect item is a minimal edit of a correct one, so length and authorship carry almost nothing.
 
-```json
-escalated: True
-stage 1  : Not grounded
-consistency: 0.36
-samples    : ['To carry oxygen throughout the body.', 'To transport oxygen throughout the body.', 'To carry oxygen throughout the body.', 'Transport oxygen throughout the body.', 'Transport oxygen throughout the body.']
-final    : CHECK: Inconsistent answer (Sample Consistency - SC=0.36)
-The model gives different answers across samples, a common sign of a made-up answer. Check it before trusting it.
-Provisional cut-points; calibrate with fit_thresholds on your data.
-The model does not answer consistently here. Send it to a human reviewer.
-```
+Any detector reporting a high number on a confounded benchmark has to explain what it did that word-counting did not. That includes ours.
 
-The answer was made up (red blood cells "give blood its color"), with no source to check against. Stage one used DGI, said "Not grounded," and escalated. Stage two then asked the model itself five times. All five samples said the correct thing ("carry/transport oxygen"), which disagrees with the answer under test. Consistency fell to 0.36, below the cut, so it was flagged "Inconsistent" and sent to a human. The fabrication got caught, and by a different mechanism than the geometry: not by shape, but because the model itself won't back the claim.
+## What we withdrew
 
+Earlier releases of this project published DGI figures around 0.958, a domain-calibrated range of 0.90 to 0.99, and an 87.8% detection rate. **Those numbers are withdrawn.** They were an authorship artifact: the grounded class was machine-written and the ungrounded class was human-written, so a detector could score highly by recognising who wrote the text.
 
-## Stage 4 · Rules — did the answer break a policy?
+We also previously described NLI methods as performing at chance in this setting. That was wrong. Natural language inference does not decline in-register and is the stronger method where you can afford it. Groundlens is the cheap first stage, not the best available detector.
 
-A small, named check that returns pass/fail with evidence and a citation to why it exists. Catches the mechanical failures geometry doesn't: an invented figure, a missing disclosure, a claim outside the agent's remit.
+Full detail in the [benchmarks page](https://docs.groundlens.dev/benchmarks/results/) and the [changelog](CHANGELOG.md).
+
+We would rather publish the correction than the number.
+
+## Switch: may this answer enter state?
+
+In an agent loop, a bad answer that gets written into state contaminates every turn after it. `GroundingSwitch` turns a score into a decision.
 
 ```python
-from groundlens.agents import customer_support_rules
+from groundlens import GroundingSwitch
 
-audit = customer_support_rules().evaluate(question=question, response=response, context=context)
-print(audit.flagged)            # True: said 500 EUR, source says 1,000
-print(audit.audit_explanation)  # per-rule trail, each citing why it fired
+switch = GroundingSwitch(on_reject="block")
+decision = switch.decide(question=question, context=context, response=from_source)
+print(decision.allowed, decision.reason)
 ```
 
-Bundled sets: `customer_support_rules`, `routing_rules`, `decision_rationale_rules`, `specialized_agent_rules`. Write your own from `RuleSet` + `ChecklistRule`.
+## Consistency, rules and the rest
 
+- **Consistency** resamples the model and measures whether it agrees with itself. Use it when there is no source to check against. See [two_stage](https://docs.groundlens.dev/concepts/two-stage/).
+- **Rules** are deterministic checklists for regulated settings: invented figures, missing disclosures, unsupported causal claims. They are pattern checks, not measurements, and the docs say so.
+- **Calibration** fits your own cut points with `fit_thresholds` and your own reference direction with `calibrate`.
+- **Audit** writes a scored, timestamped trail of every check.
+
+```bash
+groundlens check --question "..." --context "..." --response "..."
+groundlens calibrate --pairs my_pairs.csv
+groundlens doctor
+```
+
+## Integrations
+
+LangChain · LangGraph · CrewAI · Semantic Kernel · AutoGen · OpenAI · Anthropic · Gemini · Hugging Face.
+
+```python
+from groundlens.integrations.langchain import GroundlensEvaluator
+```
+
+See [integrations](https://docs.groundlens.dev/integrations/).
+
+## MCP server
+
+Run the same checks inside Claude Desktop, Cursor or Windsurf.
+
+```bash
+pip install groundlens-mcp
+```
+
+[groundlens-mcp](https://github.com/groundlens-dev/groundlens-mcp)
 
 ## Privacy
 
-With a hosted API, your prompts go to that provider under your key. Groundlens holds no key and has no server in the path — it never sees or stores your data. For a no-egress option, use a local model. Detail in [DATA_HANDLING.md](https://github.com/groundlens-dev/groundlens/blob/main/DATA_HANDLING.md).
+Nothing leaves your machine. Scoring is local, there is no telemetry, and no text is sent anywhere. A test in the suite opens a socket monitor and fails if scoring makes a single outbound connection. See [DATA_HANDLING.md](DATA_HANDLING.md).
 
----
+## Papers
 
-## Score every answer, keep the trail
+- **Semantic Grounding Index: Geometric Bounds on Context Engagement in RAG Systems** — [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
+- **A Geometric Taxonomy of Hallucinations in Large Language Models** — [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+- **Rotational Dynamics of Factual Constraint Processing in Large Language Models** — [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
 
-```python
-from groundlens import compute_sgi, check, GroundingSwitch
-from groundlens.agents import customer_support_rules
-from groundlens.audit import open_log
+## How to cite
 
-rules = customer_support_rules()
-switch = GroundingSwitch()
-
-with open_log("triage.db") as log:
-    for question, context, response in your_pipeline_outputs:
-        sgi      = compute_sgi(question=question, context=context, response=response)
-        decision = switch.decide(sgi)
-        audit    = rules.evaluate(question=question, response=response, context=context)
-        flagged  = (not decision.write_to_state) or audit.flagged
-        log.record(identifier=question, method="sgi+switch+rules", score=sgi.normalized,
-                   flagged=flagged, metadata={"action": decision.action.value,
-                                              "audit": audit.audit_explanation})
-        if decision.write_to_state and not audit.flagged:
-            send_to_user(response)
-        else:
-            send_to_review(response)
+```bibtex
+@software{marin_groundlens,
+  author  = {Marin, Javier},
+  title   = {Groundlens: open tools for verifying the output of language models and agents},
+  url     = {https://github.com/groundlens-dev/groundlens},
+  license = {Apache-2.0}
+}
 ```
 
-The log is **hash-chained** — any decision can be replayed and verified byte-for-byte, years later.
+For the method itself, cite [arXiv:2512.13771](https://arxiv.org/abs/2512.13771). See [CITATION.cff](CITATION.cff).
 
+## Working on verification at scale?
 
-## Integrate it
+If you are checking generated output in a pipeline that matters, and paying for it in tokens or in people, I am interested in the problem. Calibration on your own domain is usually where the numbers start being useful.
 
-```bash
-pip install "groundlens[langchain]"   # also: langgraph · crewai · semantic-kernel · autogen
-```
-
-```python
-from groundlens import check
-from groundlens.integrations.langchain import GroundlensCallback
-
-cb = GroundlensCallback(context_key="context")   # SGI when context is present, DGI otherwise
-rag_chain.invoke(question, config={"callbacks": [cb], "metadata": {"context": retrieved_context}})
-for run_id, score in cb.scores.items():
-    print(check(score).render())
-```
-
-No adapter for your stack? Call `compute_sgi` / `compute_dgi` / `GroundingSwitch` / `ruleset.evaluate` after each generation yourself — same pattern.
-
-
-
-## MCP Server
-
-<div align="center">
-
-[![groundlens-mcp MCP server](https://glama.ai/mcp/servers/groundlens-dev/groundlens-mcp/badges/card.svg)](https://glama.ai/mcp/servers/groundlens-dev/groundlens-mcp)
-
-</div>
-
-
-**In your editor** — the [MCP server](https://github.com/groundlens-dev/groundlens-mcp) prints a CHECK under every answer inside Claude, Cursor, and VS Code, with no model in the scoring path.
-
-## Learn more
-
-- 📚 **Docs** — [docs.groundlens.dev](https://docs.groundlens.dev)
-- 🧪 **Examples** — [`examples/`](https://github.com/groundlens-dev/groundlens/tree/main/examples)
-- 📍 **Compliance** — [SR 26-2](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/sr-11-7.md) · [EU AI Act](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/eu-ai-act.md) · [NIST AI RMF](https://github.com/groundlens-dev/groundlens/blob/main/docs/guides/nist-ai-rmf.md)
-- 📄 **Research** — [SGI (arXiv:2512.13771)](https://arxiv.org/abs/2512.13771) · [Hallucination taxonomy (arXiv:2602.13224)](https://arxiv.org/abs/2602.13224) · [How transformers reject wrong answers (arXiv:2603.13259)](https://arxiv.org/abs/2603.13259)
-
----
+**javier@groundlens.dev**
 
 ## Contributing
 
-Contributions and feedback are welcome — see [CONTRIBUTING.md](https://github.com/groundlens-dev/groundlens/blob/main/CONTRIBUTING.md).
+Issues and pull requests welcome. If you think a number here is wrong, open an issue with the reproduction — corrections get fixed and credited in the commit. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Apache-2.0. 
-
----
-
-The name "ground+lens" is named for the idea that a hallucination is something not grounded in reality by can be observerd anyway. We hust need the right lens :eyeglasses:.
-
+Apache-2.0. See [LICENSE](LICENSE).
