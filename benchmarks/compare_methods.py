@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["groundlens", "scikit-learn>=1.3.0"]
+# dependencies = ["groundlens[benchmark]"]
 # ///
 """Compare groundlens SGI/DGI vs cosine similarity on the benchmark.
 
@@ -23,7 +23,7 @@ import time
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-from groundlens._internal.embeddings import encode_texts
+from groundlens._internal.embeddings import DEFAULT_MODEL, encode_texts
 from groundlens.dgi import compute_dgi
 from groundlens.sgi import compute_sgi
 
@@ -52,7 +52,7 @@ def load_benchmark() -> list[dict[str, str]]:
         sys.exit(1)
 
 
-def run_comparison(model: str = "all-MiniLM-L6-v2") -> None:
+def run_comparison(model: str = DEFAULT_MODEL) -> None:
     """Compare all methods on the benchmark dataset."""
     pairs = load_benchmark()
     print(f"Loaded {len(pairs)} benchmark items.\n")
