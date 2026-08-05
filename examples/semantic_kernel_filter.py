@@ -10,6 +10,7 @@ Demonstrates a GroundlensFilter that hooks into Semantic Kernel's
 function invocation pipeline to automatically verify LLM outputs.
 """
 
+from groundlens import DEFAULT_MODEL
 from groundlens.evaluate import evaluate
 
 
@@ -30,7 +31,7 @@ class GroundlensFilter:
 
     def __init__(
         self,
-        model: str = "all-MiniLM-L6-v2",
+        model: str = DEFAULT_MODEL,
         block_on_flag: bool = False,
     ) -> None:
         """Initialize the filter.

@@ -2,6 +2,9 @@
 
 This guide covers using `evaluate_batch()` and the CLI `groundlens evaluate` command for scoring large sets of LLM outputs, suitable for CI/CD pipelines, regression testing, and quality monitoring.
 
+
+> **`flagged` vs `escalate`.** `result.flagged` is the single hard cut. It is `False` across the whole SGI review band (0.95 to 1.20), which is exactly the band that needs a second look. To route for review, branch on `check(result).escalate`. Use `flagged` only when you mean the hard-reject set.
+
 ## Python API: evaluate_batch()
 
 ```python

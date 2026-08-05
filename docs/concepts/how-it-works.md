@@ -8,7 +8,7 @@ Every piece of text --- a question, a context document, an LLM response --- can 
 
 groundlens exploits two geometric properties of this space:
 
-1. **Distance ratios** (SGI): If a response truly engaged with the source context, it should be geometrically closer to that context than to the bare question.
+1. **Ratios of angles** (SGI): If a response truly engaged with the source context, it should be geometrically closer to that context than to the bare question.
 2. **Displacement directions** (DGI): Grounded responses create a characteristic "direction of movement" from question to answer. Hallucinations move in different directions.
 
 ```mermaid
@@ -34,12 +34,12 @@ groundlens uses sentence transformers (default: `sentence-transformers/sentence-
   <figcaption>The two scoring methods: SGI compares how close the response is to the context versus the question; DGI checks whether the displacement from question to response aligns with a learned "grounded direction" μ̂.</figcaption>
 </figure>
 
-## SGI: Distance Ratios
+## SGI: A Ratio of Two Angles
 
 When context is available, SGI asks: **is the response closer to the context or to the question?**
 
 $$
-\text{SGI} = \frac{\|\phi(r) - \phi(q)\|}{\|\phi(r) - \phi(\text{ctx})\|}
+\text{SGI} = \frac{\theta(r, q)}{\theta(r, \text{ctx})}, \quad \theta(a,b) = \arccos(\hat{a} \cdot \hat{b})
 $$
 
 - If SGI > 1, the response is closer to the context (grounded)

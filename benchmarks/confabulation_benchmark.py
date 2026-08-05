@@ -31,7 +31,10 @@ Expected dataset columns:
     - question: The input query.
     - response: The LLM output.
     - context: Source text (for SGI evaluation).
-    - label: 1 = grounded (factual), 0 = confabulated (hallucination).
+    - label: 1 = grounded (factual), 0 = confabulated.
+    NOTE: this is the OPPOSITE of the polarity groundlens.fit_thresholds()
+    expects (1 = ungrounded). Flip the column before feeding this file to
+    fit_thresholds, or you will silently fit inverted thresholds. (hallucination).
 """
 
 from __future__ import annotations

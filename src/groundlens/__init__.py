@@ -81,13 +81,6 @@ from groundlens._internal.embeddings import (
     set_default_encoder,
 )
 from groundlens._version import __version__
-from groundlens.agents import (
-    customer_support_rag_rules,  # deprecated alias
-    customer_support_rules,
-    rag_rules,  # deprecated dispatcher
-    routing_rules,
-    specialized_agent_rules,
-)
 from groundlens.calibrate import (
     CalibrationResult,
     ThresholdFit,
@@ -98,16 +91,6 @@ from groundlens.check import Check, check
 from groundlens.dgi import DGI, compute_dgi
 from groundlens.evaluate import evaluate, evaluate_batch
 from groundlens.propose import ProposedLabel, PropositionBatch, SeedExample
-from groundlens.rules import (
-    ChecklistRule,
-    RuleEvidence,
-    RuleResult,
-    RuleSet,
-    RuleSetResult,
-    banking_rules,
-    decision_rationale_rules,
-    groundlens_banking_rules,
-)
 from groundlens.score import DGIResult, GroundlensScore, SGIResult
 from groundlens.sgi import SGI, compute_sgi
 from groundlens.switch import GroundingSwitch, SwitchAction, SwitchDecision
@@ -122,17 +105,12 @@ __all__ = [
     "SGI",
     "CalibrationResult",
     "Check",
-    "ChecklistRule",
     "DGIResult",
     "EmbeddingFn",
     "GroundingSwitch",
     "GroundlensScore",
     "ProposedLabel",
     "PropositionBatch",
-    "RuleEvidence",
-    "RuleResult",
-    "RuleSet",
-    "RuleSetResult",
     "SGIResult",
     "SeedExample",
     "SwitchAction",
@@ -142,25 +120,15 @@ __all__ = [
     "__version__",
     # Submodules
     "agents",
-    # Rule sets (legacy + canonical)
-    "banking_rules",
     "calibrate",
     "check",
     "compute_dgi",
     # Functions
     "compute_sgi",
-    "customer_support_rag_rules",  # deprecated
-    "customer_support_rules",
-    "decision_rationale_rules",
     "evaluate",
     "evaluate_batch",
     "fit_thresholds",
     "get_default_encoder",
-    "groundlens_banking_rules",  # deprecated
-    # Agent-class rule sets
-    "rag_rules",  # deprecated
-    "routing_rules",
     "rules",
     "set_default_encoder",
-    "specialized_agent_rules",
 ]

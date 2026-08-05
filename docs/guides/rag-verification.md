@@ -2,6 +2,9 @@
 
 This guide shows how to integrate groundlens SGI scoring into a Retrieval-Augmented Generation (RAG) pipeline to verify that the LLM actually used the retrieved context when generating its response.
 
+
+> **`flagged` vs `escalate`.** `result.flagged` is the single hard cut. It is `False` across the whole SGI review band (0.95 to 1.20), which is exactly the band that needs a second look. To route for review, branch on `check(result).escalate`. Use `flagged` only when you mean the hard-reject set.
+
 ## The Problem
 
 In a RAG pipeline, you retrieve relevant documents and pass them as context to the LLM. But retrieval does not guarantee usage --- the LLM may:
@@ -114,7 +117,7 @@ print(f"Best SGI: {best.value:.3f} (flagged: {best.flagged})")
 ```
 
 !!! tip "When to use which"
-    **Concatenation** is simpler and works well when chunks are topically coherent. **Per-chunk scoring** is better when chunks cover different aspects of the question --- it avoids penalizing a response that correctly focuses on the most relevant chunk.
+    **Score each chunk separately and take the max.** Concatenation moves the context embedding toward the average of several topics, which inflates `ctx_dist` and depresses SGI even when the answer tracks one chunk exactly. Concatenate only when the chunks are genuinely one passage. **Per-chunk scoring** is better when chunks cover different aspects of the question --- it avoids penalizing a response that correctly focuses on the most relevant chunk.
 
 ## Async RAG Pipeline
 

@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import re
 
-from groundlens import ChecklistRule, RuleEvidence, RuleSet
+from groundlens.rules import ChecklistRule, RuleEvidence, RuleSet
 
 # ── Domain-specific check functions ─────────────────────────────────────────
 
@@ -227,7 +227,7 @@ def main() -> None:
         )
         print(f"\n=== {label} rationale ===")
         print(f"Sub-scores: {result.sub_scores}")
-        print(f"Quality: {result.quality:.3f}")
+        print(f"Checks passed: {result.checks_passed:.3f}")
         print(f"Flagged: {result.flagged}")
         print(f"\n{result.audit_explanation}")
 

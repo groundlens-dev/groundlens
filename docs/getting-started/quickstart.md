@@ -87,8 +87,14 @@ dgi = compute_dgi(
     response="Seasons are caused by Earth's 23.5-degree axial tilt.",
 )
 print(check(dgi).render())
-# CHECK: Looks grounded (Directional Grounding Index - DGI=0.41)
-# The answer moves the way well-grounded answers usually do.
+# CHECK: Not grounded (Directional Grounding Index - DGI=0.41)
+# The answer does not move the way grounded answers do. Check it before trusting it.
+#
+# 0.41 is below DGI_PASS (0.525), so it reads as not grounded even though the
+# answer is correct. That is the DGI limitation, not a bug: the bundled
+# reference direction was fitted on 212 answers written in one style, and text
+# written any other way scores low however faithful it is. Calibrate on your
+# own corpus before relying on DGI, or use SGI where you have a source.
 # No source given — judged by the shape of the answer.
 ```
 
@@ -123,7 +129,8 @@ The `GroundlensScore` returned by `evaluate()` is a unified container:
 ```python
 score.value        # Raw score (SGI ratio or DGI cosine similarity)
 score.normalized   # Mapped to [0, 1]
-score.flagged      # Boolean: needs human review?
+score.flagged      # the hard cut only; False across the whole review band
+check(score).escalate  # True for the review band too -- branch on this
 score.method       # 'sgi' or 'dgi'
 score.explanation  # Human-readable interpretation
 score.detail       # Full SGIResult or DGIResult

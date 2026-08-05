@@ -182,7 +182,7 @@ from groundlens import evaluate
 
 result = evaluate(question=q, response=r, context=ctx)
 
-if result.flagged:
+if check(result).escalate:
     queue_for_human_review(case_id, result)
 else:
     release_to_user(case_id, response)

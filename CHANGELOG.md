@@ -5,6 +5,34 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
+## [Unreleased]
+
+### Changed (BREAKING)
+
+- `RuleSetResult.quality` is now `RuleSetResult.checks_passed`. Same number,
+  clearer name: "quality" reads as a measurement and this is a weighted count
+  of patterns that matched. `.quality` remains as a property and emits a
+  `DeprecationWarning`.
+- Rule sets and agent rule sets are no longer exported from the top level.
+  Import them from `groundlens.rules` and `groundlens.agents` instead. They
+  answer a different question from the geometry and the import path now says
+  so. Nothing was removed from the package.
+
+### Removed (BREAKING)
+
+- The deprecated aliases `rag_rules`, `customer_support_rag_rules`,
+  `groundlens_banking_rules` and `banking_rules` are gone from the top-level
+  namespace. The functions still exist in their own modules.
+
+### Added
+
+- `rules.py` now opens with a "What this is not" section: a rule set is not a
+  measurement, pattern checks are gameable, four rules pass when their
+  metadata is absent, the domain packs are templates rather than standards,
+  and none of it has been validated against regulatory acceptance.
+- The README leads with the verification pipeline diagram and a table of the
+  eight tools, so a first-time reader can name them without scrolling.
+
 ## Unreleased
 
 ### Fixed

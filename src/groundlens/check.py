@@ -182,8 +182,7 @@ def check_for_dgi(result: DGIResult) -> Check:
         level = LEVEL_RISK
         label = "Not grounded"
         message = (
-            "The answer moves opposite to the way grounded answers do. "
-            "Check it before trusting it."
+            "The answer does not move the way grounded answers do. Check it before trusting it."
         )
         escalate, handoff = True, HANDOFF_ESCALATE
     return Check(

@@ -11,6 +11,8 @@ All results use the default embedding model (`sentence-transformers/sentence-t5-
 
 ## The wall
 
+**Register** here means how closely a wrong answer imitates the style of a right one: same vocabulary, same phrasing, same sentence structure, one wrong fact. An out-of-register confabulation reads oddly and is easy to catch. An in-register one reads exactly like a good answer, and that is the case that matters in production.
+
 Bin confabulations by how far they sit from the register of a correct answer, and every distributional and embedding-similarity detector, ours included, declines toward chance as the confabulation moves **into** register: same vocabulary, same phrasing, same structure, one wrong fact.
 
 | Detector | Out of register | In register |
