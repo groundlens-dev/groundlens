@@ -302,9 +302,15 @@ class TestGoldenJobStaysAffordable:
     def test_the_reference_direction_is_computed_at_most_once(self) -> None:
         """No test may clear the calibration cache. The fixture owns that.
 
-        Each clear costs a re-embed of 424 texts through sentence-t5-large:
+        A clear used to cost a re-embed of 424 texts through sentence-t5-large:
         7m43s on the CI runner. Eight of them exceeded the job timeout, so the
         job could not pass at any timeout under about 65 minutes.
+
+        The bundled direction now ships precomputed, so a clear followed by a
+        default-config score is cheap. It is not cheap for a custom encoder or a
+        user CSV, which still derive, and it is not free even here: the point of
+        the fixture is that this file's cost stays bounded no matter which of
+        those a future test reaches for.
 
         If you need a cleared cache for something, use a custom
         ``reference_csv`` or a stub ``encoder``. ``_get_mu_hat`` keys its cache
@@ -325,7 +331,8 @@ class TestGoldenJobStaysAffordable:
         ]
         assert not offenders, (
             f"reset_calibration_cache() called inside test(s): {offenders}. "
-            "Each call costs ~7m43s of re-embedding on the CI runner. The module "
+            "For any configuration that is not the bundled default this costs a "
+            "full re-embed of 424 texts, 7m43s on the CI runner. The module "
             "fixture _calibrated_once already resets before the first test and "
             "after the last."
         )

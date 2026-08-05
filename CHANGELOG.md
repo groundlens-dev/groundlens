@@ -46,6 +46,31 @@ groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY
   to a different default produced scores the bundled thresholds did not apply
   to.
 
+### Changed
+
+- **The DGI reference direction ships precomputed.** `mu_hat` is a pure
+  function of `reference_pairs.csv` and the default encoder, but it was derived
+  at runtime on the first DGI call in every process: 424 texts through
+  `sentence-t5-large`, measured at 7m43s on a CI runner. That cost was paid by
+  CI on every run, by every user on their first call, and by the demo Space on
+  every cold start, to recompute a constant.
+
+  A 3 KB `.npy` now ships beside the CSV. A default-config `compute_dgi()` goes
+  from 426 embedded texts to 2. Scores are unchanged: the shipped array is
+  asserted equal to a fresh derivation, to 1e-5, in
+  `tests/integration/test_frozen_mu_hat.py`.
+
+  Nothing changes for a custom encoder, a process-global encoder set with
+  `set_default_encoder()`, a non-default `model=`, or a user `reference_csv=`.
+  All four still derive their own direction, and the loader refuses the shipped
+  one for each — reusing it across embedding spaces is the bug this guards.
+
+  The companion JSON records the SHA-256 of the CSV the direction was fitted on.
+  If the CSV changes without regeneration, the loader logs a warning and falls
+  back to deriving, so the failure mode is the old behaviour rather than a wrong
+  answer. Regenerate deliberately with
+  `python -m groundlens.tools.freeze_mu_hat`.
+
 ### Added
 
 - **Python 3.14 is tested and supported.** The classifier and the CI matrix now

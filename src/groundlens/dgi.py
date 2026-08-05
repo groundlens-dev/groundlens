@@ -225,6 +225,90 @@ def _local_mu_hat(
     return unit_normalize(mu)
 
 
+#: Filename of the precomputed reference direction that ships with the package.
+#:
+#: ``mu_hat`` is a pure function of the reference CSV and the encoder, so it was
+#: derived from scratch on first use in every process: 424 texts through
+#: sentence-t5-large, measured at 7m43s on a CI runner. That cost was paid by
+#: CI on every run, by every user on their first DGI call, and by the demo Space
+#: on every cold start -- to recompute a value that had not changed since it was
+#: fitted.
+#:
+#: The vector ships instead, 3 KB. What it does not do is replace the check:
+#: ``tests/integration/test_frozen_mu_hat.py`` derives it fresh with the real
+#: encoder and asserts the shipped array matches. The derivation is still
+#: proven, once, in the one place built to pay for it.
+_FROZEN_MU_HAT = "mu_hat_sentence-t5-large.npy"
+_FROZEN_META = "mu_hat_sentence-t5-large.json"
+
+
+def _load_frozen_mu_hat(
+    model_name: str,
+    reference_csv: str | None,
+    encoder: EmbeddingFn | None,
+) -> NDArray[np.float32] | None:
+    """The shipped reference direction, or ``None`` if it does not apply here.
+
+    Returns ``None`` -- falling back to deriving from the CSV -- unless every
+    one of these holds:
+
+    * the bundled reference set is in use (no ``reference_csv``),
+    * the default encoder is in use (no explicit ``encoder``, no process-global
+      one from :func:`groundlens.set_default_encoder`, and ``model_name`` is
+      :data:`DEFAULT_MODEL`),
+    * the file is present, is one unit vector of the recorded width,
+    * and the SHA-256 recorded for ``reference_pairs.csv`` matches the CSV that
+      is actually installed.
+
+    That last condition is the one that matters. A frozen vector is a claim
+    about a CSV; edit the CSV without regenerating and the claim is false. The
+    hash makes that case fall back to deriving rather than silently scoring
+    against a direction fitted on data no longer in the package.
+    """
+    if reference_csv is not None or model_name != DEFAULT_MODEL:
+        return None
+    if encoder is not None or get_default_encoder() is not None:
+        return None
+
+    try:
+        import hashlib
+        import json
+        from importlib.resources import files
+
+        data = files("groundlens.data")
+        meta = json.loads((data / _FROZEN_META).read_text(encoding="utf-8"))
+
+        digest = hashlib.sha256((data / "reference_pairs.csv").read_bytes()).hexdigest()
+        if digest != meta["reference_pairs_sha256"]:
+            logger.warning(
+                "Bundled reference_pairs.csv does not match the precomputed DGI "
+                "direction (expected sha256 %s, found %s). Deriving from the CSV. "
+                "Regenerate with: python -m groundlens.tools.freeze_mu_hat",
+                meta["reference_pairs_sha256"][:12],
+                digest[:12],
+            )
+            return None
+
+        with (data / _FROZEN_MU_HAT).open("rb") as fh:
+            # np.load is typed as returning Any, so bind the type here rather
+            # than letting it leak out through the return.
+            loaded: NDArray[np.float32] = np.load(fh, allow_pickle=False).astype(np.float32)
+        mu = loaded
+    except Exception as exc:  # any failure to read the artifact means derive instead
+        logger.warning("Could not load the precomputed DGI direction (%s). Deriving.", exc)
+        return None
+
+    if mu.ndim != 1 or mu.shape[0] != meta["dims"]:
+        logger.warning("Precomputed DGI direction has shape %s; deriving instead.", mu.shape)
+        return None
+    if not np.isclose(float(np.linalg.norm(mu)), 1.0, atol=1e-5):
+        logger.warning("Precomputed DGI direction is not a unit vector; deriving instead.")
+        return None
+
+    logger.debug("Using the precomputed DGI reference direction (%s).", _FROZEN_MU_HAT)
+    return mu
+
+
 def _get_mu_hat(
     model_name: str = DEFAULT_MODEL,
     reference_csv: str | None = None,
@@ -269,17 +353,27 @@ def _get_mu_hat(
         # user CSV) in the active encoder's own space, so it always reproduces
         # from the shipped data. First use embeds the set, then caches.
         logger.info(
-            "Computing DGI reference direction (model=%s, data=%s)...",
+            "Resolving DGI reference direction (model=%s, data=%s)...",
             model_name,
             reference_csv or "bundled",
         )
-        pairs = load_reference_pairs(reference_csv)
-        _mu_hat_cache[cache_key] = _compute_reference_direction(pairs, model_name, encoder=encoder)
-        logger.info(
-            "DGI reference direction ready (dims=%d, pairs=%d).",
-            _mu_hat_cache[cache_key].shape[0],
-            len(pairs),
-        )
+        frozen = _load_frozen_mu_hat(model_name, reference_csv, encoder)
+        if frozen is not None:
+            _mu_hat_cache[cache_key] = frozen
+            logger.info(
+                "DGI reference direction loaded from package data (dims=%d).",
+                frozen.shape[0],
+            )
+        else:
+            pairs = load_reference_pairs(reference_csv)
+            _mu_hat_cache[cache_key] = _compute_reference_direction(
+                pairs, model_name, encoder=encoder
+            )
+            logger.info(
+                "DGI reference direction ready (dims=%d, pairs=%d).",
+                _mu_hat_cache[cache_key].shape[0],
+                len(pairs),
+            )
 
     return _mu_hat_cache[cache_key]
 
