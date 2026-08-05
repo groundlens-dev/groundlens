@@ -5,43 +5,97 @@ All notable changes to groundlens are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
 
-## [Unreleased]
+## 2026.8.5 -- Python 3.14, calibrated-by-default encoders, one-package rule sets
 
 ### Changed (BREAKING)
+
+- **Rule sets and agent rule sets are no longer exported from the top level.**
+  Thirteen names left `groundlens.__all__`. Nothing was removed from the
+  package; the import path changed. `import groundlens` now shows the geometry
+  and the checks, and the rule sets live where their name says they do.
+
+  | Was | Now |
+  |---|---|
+  | `from groundlens import ChecklistRule` | `from groundlens.rules import ChecklistRule` |
+  | `from groundlens import RuleEvidence` | `from groundlens.rules import RuleEvidence` |
+  | `from groundlens import RuleResult` | `from groundlens.rules import RuleResult` |
+  | `from groundlens import RuleSet` | `from groundlens.rules import RuleSet` |
+  | `from groundlens import RuleSetResult` | `from groundlens.rules import RuleSetResult` |
+  | `from groundlens import banking_rules` | `from groundlens.rules import banking_rules` |
+  | `from groundlens import decision_rationale_rules` | `from groundlens.rules import decision_rationale_rules` |
+  | `from groundlens import groundlens_banking_rules` | `from groundlens.rules import groundlens_banking_rules` |
+  | `from groundlens import rag_rules` | `from groundlens.agents.rag import rag_rules` |
+  | `from groundlens import customer_support_rules` | `from groundlens.agents.customer_support import customer_support_rules` |
+  | `from groundlens import customer_support_rag_rules` | `from groundlens.agents.customer_support import customer_support_rag_rules` |
+  | `from groundlens import routing_rules` | `from groundlens.agents.routing import routing_rules` |
+  | `from groundlens import specialized_agent_rules` | `from groundlens.agents.specialized import specialized_agent_rules` |
+
+  The five `agents` constructors are also re-exported from `groundlens.agents`,
+  so `from groundlens.agents import rag_rules` works too.
 
 - `RuleSetResult.quality` is now `RuleSetResult.checks_passed`. Same number,
   clearer name: "quality" reads as a measurement and this is a weighted count
   of patterns that matched. `.quality` remains as a property and emits a
   `DeprecationWarning`.
-- Rule sets and agent rule sets are no longer exported from the top level.
-  Import them from `groundlens.rules` and `groundlens.agents` instead. They
-  answer a different question from the geometry and the import path now says
-  so. Nothing was removed from the package.
 
-### Removed (BREAKING)
+- **The DGI cut is 0.525 everywhere.** Several docs and one code path still
+  carried older values. `SGI_REVIEW` is 0.95 and `SGI_STRONG_PASS` is 1.20;
+  0.95 is the bottom of the review band, not the pass mark.
 
-- The deprecated aliases `rag_rules`, `customer_support_rag_rules`,
-  `groundlens_banking_rules` and `banking_rules` are gone from the top-level
-  namespace. The functions still exist in their own modules.
+- **Every entry point defaults to the calibrated encoder.** Paths that fell back
+  to a different default produced scores the bundled thresholds did not apply
+  to.
 
 ### Added
 
-- `rules.py` now opens with a "What this is not" section: a rule set is not a
-  measurement, pattern checks are gameable, four rules pass when their
-  metadata is absent, the domain packs are templates rather than standards,
-  and none of it has been validated against regulatory acceptance.
-- The README leads with the verification pipeline diagram and a table of the
-  eight tools, so a first-time reader can name them without scrolling.
-
-## Unreleased
+- **Python 3.14 is tested and supported.** The classifier and the CI matrix now
+  cover 3.10 through 3.14.
+- `CITATION.cff`, so GitHub renders a citation block and reference managers can
+  read the release.
+- `rules.py` opens with a "What this is not" section: a rule set is not a
+  measurement, pattern checks are gameable, four rules pass when their metadata
+  is absent, the domain packs are templates rather than standards, and none of
+  it has been validated against regulatory acceptance.
+- `tests/unit/test_readme_snippets.py` executes every Python block in the
+  README against the real API, with a stub encoder and sockets blocked. Three
+  independent reviewers copied README examples into a shell and all three hit an
+  exception; this makes that impossible to ship again.
+- `tests/unit/test_version_consistency.py` asserts `pyproject.toml`,
+  `_version.py` and `CITATION.cff` carry the same version.
 
 ### Fixed
 
-- ``evaluate_batch()`` now rejects blank ``question`` / ``response`` values up
-  front with the item index, matching the single-item validation in SGI/DGI.
-  A blank field in a batch previously fell through to ``compute_sgi()`` /
-  ``compute_dgi()`` and raised a generic ``ValueError`` with no indication of
-  which item failed.
+- `evaluate_batch()` rejects blank `question` / `response` values up front with
+  the item index, matching the single-item validation in SGI/DGI. A blank field
+  previously fell through to `compute_sgi()` / `compute_dgi()` and raised a
+  generic `ValueError` with no indication of which item failed.
+- `RuleSet.evaluate()` raised `TypeError` on every call in the development tree
+  after the `quality` rename; the audit-explanation helper had not been renamed
+  with it. Never released.
+- Scoring fails safe on broken embeddings, and DGI inline calibration works
+  again.
+- SGI is described as angular, not Euclidean, in `CLAUDE.md`,
+  `docs/concepts/how-it-works.md` and the README. It is
+  `theta(r, q) / theta(r, ctx)` with `theta(a, b) = arccos(a_hat . b_hat)`. A
+  ratio of chord distances is not the same number as a ratio of angles.
+- Label polarity is stated wherever benchmark labels appear: **1 = ungrounded**.
+  Backwards fits inverted thresholds and never raises.
+- `flagged` versus `check(result).escalate` is documented. `flagged` is the hard
+  cut; the SGI review band (0.95 to 1.20) is not in it. Guides that used
+  `.flagged` to gate a decision now use `check(score).escalate`.
+
+### Documentation
+
+- The README leads with the verification pipeline and a table of the tools, so a
+  first-time reader can name them without scrolling.
+- Thresholds, encoder cost and paper titles reconciled across `docs/`.
+
+### Internal
+
+- The golden-scores CI job recomputed the DGI reference direction eight times
+  per run, 7m43s each, against a 30-minute timeout. It had never passed. One
+  module-scoped fixture; eight recalibrations become one.
+- ClusterFuzzLite builds are reproducible and the target is tested directly.
 
 ## 2026.7.23 -- Default encoder to sentence-t5-large; certified DGI reference
 

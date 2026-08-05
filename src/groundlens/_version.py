@@ -12,7 +12,7 @@ from __future__ import annotations
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _dist_version
 
-_FALLBACK = "2026.7.28"
+_FALLBACK = "2026.8.5"
 
 try:
     __version__: str = _dist_version("groundlens")
