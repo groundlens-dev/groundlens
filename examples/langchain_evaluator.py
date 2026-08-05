@@ -12,6 +12,7 @@ LangSmith's ``evaluate()`` function for systematic LLM evaluation.
 
 from typing import TYPE_CHECKING
 
+from groundlens import DEFAULT_MODEL
 from groundlens.evaluate import evaluate
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ class GroundlensEvaluator:
     context is present) or DGI (if context-free).
     """
 
-    def __init__(self, model: str = "all-MiniLM-L6-v2") -> None:
+    def __init__(self, model: str = DEFAULT_MODEL) -> None:
         self.model = model
 
     def __call__(self, run, example) -> dict:

@@ -57,7 +57,7 @@ class TestEvaluateVacuousRationale:
             response="The case requires additional review.",
         )
         # No bshift match -> geometric mean collapses
-        assert result.quality == pytest.approx(0.0)
+        assert result.checks_passed == pytest.approx(0.0)
 
 
 class TestEvaluateMechanicalRationale:
@@ -81,7 +81,7 @@ class TestEvaluateMechanicalRationale:
         assert result.spec > 0.5
         assert result.expl > 0.4
         assert result.bshift > 0.3
-        assert result.quality > 0.0
+        assert result.checks_passed > 0.0
 
 
 class TestDeterminism:
@@ -96,7 +96,7 @@ class TestDeterminism:
         assert r1.spec == r2.spec
         assert r1.expl == r2.expl
         assert r1.bshift == r2.bshift
-        assert r1.quality == r2.quality
+        assert r1.checks_passed == r2.checks_passed
         assert r1.flagged == r2.flagged
         assert r1.audit_explanation == r2.audit_explanation
 
@@ -154,7 +154,7 @@ class TestCustomRuleSet:
         result = rs.evaluate(question="Q", response="anything goes here.")
         assert result.spec == pytest.approx(0.5)
         # expl/bshift have no rules → 0 → quality collapses
-        assert result.quality == pytest.approx(0.0)
+        assert result.checks_passed == pytest.approx(0.0)
         assert result.flagged is True  # expl < 0.3
 
 
@@ -348,7 +348,7 @@ class TestGroundlensBankingDeterminism:
         r1 = rs.evaluate(question=q, response=r)
         r2 = rs.evaluate(question=q, response=r)
         assert r1.sub_scores == r2.sub_scores
-        assert r1.quality == r2.quality
+        assert r1.checks_passed == r2.checks_passed
         assert r1.flagged == r2.flagged
         assert r1.audit_explanation == r2.audit_explanation
 

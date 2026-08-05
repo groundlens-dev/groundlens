@@ -10,6 +10,7 @@ Demonstrates a GroundlensTool that CrewAI agents can use to verify
 their own outputs before returning results.
 """
 
+from groundlens import DEFAULT_MODEL
 from groundlens.evaluate import evaluate
 
 
@@ -35,7 +36,7 @@ class GroundlensTool:
         "Provide question, response, and optionally context."
     )
 
-    def __init__(self, model: str = "all-MiniLM-L6-v2") -> None:
+    def __init__(self, model: str = DEFAULT_MODEL) -> None:
         self.model = model
 
     def _run(self, question: str, response: str, context: str | None = None) -> str:

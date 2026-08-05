@@ -80,7 +80,9 @@ for item in dataset:
     question = item["question"]
     response = item["response"]
     context = item.get("context")
-    label = item["label"]  # 1 = grounded, 0 = hallucinated
+    label = item["label"]  # 1 = ungrounded / hallucinated, 0 = grounded
+    # NOTE: this is the convention fit_thresholds() expects. Getting it
+    # backwards does not raise; it silently fits inverted thresholds.
 
     # SGI (when context is available)
     if context:

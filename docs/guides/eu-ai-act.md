@@ -43,12 +43,12 @@ The EU AI Act requires a risk management system that identifies and mitigates ri
 
 ```python
 # Example: risk monitoring pipeline
-from groundlens import evaluate
+from groundlens import check, evaluate
 
 def risk_monitor(question, response, context=None):
     score = evaluate(question=question, response=response, context=context)
     return {
-        "risk_level": "high" if score.flagged else "low",
+        "risk_level": "high" if check(score).escalate else "low",
         "score": score.value,
         "method": score.method,
         "explanation": score.explanation,

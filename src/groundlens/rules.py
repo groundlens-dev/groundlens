@@ -13,6 +13,34 @@ The rule engine is intentionally rule-based rather than learning-based:
   the matched evidence span in the response text.
 - **No LLM.** Pattern matching, substring tests, and regular expressions.
   Compatible with the no-second-LLM constraint of groundlens.
+
+What this is not
+----------------
+
+**A rule set is not a measurement.** ``checks_passed`` is a weighted count of
+patterns that matched. It is not a probability, a confidence, or an estimate of
+how grounded or truthful a response is. Text containing the right words in the
+right order will score well whether or not it is correct: a rule that looks for
+"because" cannot tell you whether the reason given is a good one.
+
+Four limits worth knowing before you rely on any of this:
+
+- **Pattern checks are gameable.** Anything scored by looking for keywords can
+  be satisfied by including those keywords. These rules assume a cooperative
+  generator, not an adversarial one.
+- **Some rules pass when metadata is absent.** Counterfactual robustness,
+  self-consistency, audit logging and prompt-injection resistance return a pass
+  if you do not supply the corresponding metadata, because they cannot check
+  what they were not given. Supply it, or read those sub-scores as unknown
+  rather than as satisfied.
+- **The domain packs are starting points.** Finance, customer support and
+  routing encode one reading of what those settings require. Treat them as a
+  template to edit, not a standard to comply with.
+- **No rule here has been validated against regulatory acceptance.** They are
+  informed by published frameworks. That is not the same as approval.
+
+For whether an answer came from its source, use SGI. These rules answer a
+different question: did it break a policy.
 - **Domain-specific.** Built-in factories (:func:`banking_rules`) exist
   for regulated domains; custom rule sets can be assembled from
   :class:`ChecklistRule` instances or loaded from configuration.
@@ -145,7 +173,10 @@ class RuleSetResult:
     Attributes:
         sub_scores: Mapping from sub-score name to its capped value in [0, 1].
             By convention, do not mutate.
-        quality: Geometric mean of all sub-score values in :attr:`sub_scores`.
+        checks_passed: Geometric mean of all sub-score values in
+            :attr:`sub_scores`. A weighted count of patterns that matched,
+            NOT a probability and NOT a measurement of groundedness.
+            ``quality`` remains as a deprecated alias.
         flagged: ``True`` when the ruleset's flag predicate is triggered.
         rule_results: One :class:`RuleResult` per rule that was evaluated.
         audit_explanation: Multi-line human-readable summary suitable for
@@ -153,10 +184,26 @@ class RuleSetResult:
     """
 
     sub_scores: dict[str, float]
-    quality: float
+    checks_passed: float
     flagged: bool
     rule_results: tuple[RuleResult, ...]
     audit_explanation: str
+
+    @property
+    def quality(self) -> float:
+        """Deprecated alias for :attr:`checks_passed`.
+
+        Renamed because "quality" reads as a measurement and this number is a
+        weighted count of patterns that matched. Same value, clearer name.
+        """
+        warnings.warn(
+            "RuleSetResult.quality is deprecated; use checks_passed. It is the "
+            "same number, renamed because 'quality' reads as a measurement and "
+            "this is a weighted count of matched patterns.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.checks_passed
 
     # ── Legacy 3-category accessors (banking_rules / De La Chica skeleton)
     @property
@@ -317,7 +364,7 @@ class RuleSet:
         audit = _format_audit_explanation(
             ruleset_name=self.name,
             sub_scores=sub_scores,
-            quality=quality,
+            checks_passed=quality,
             flagged=flagged,
             quality_floor=self.quality_floor,
             results=results,
@@ -325,7 +372,7 @@ class RuleSet:
 
         return RuleSetResult(
             sub_scores=sub_scores,
-            quality=quality,
+            checks_passed=quality,
             flagged=flagged,
             rule_results=tuple(results),
             audit_explanation=audit,
@@ -339,7 +386,7 @@ def _format_audit_explanation(
     *,
     ruleset_name: str,
     sub_scores: dict[str, float],
-    quality: float,
+    checks_passed: float,
     flagged: bool,
     quality_floor: float,
     results: Sequence[RuleResult],
@@ -348,7 +395,7 @@ def _format_audit_explanation(
     lines: list[str] = []
     lines.append(f"Ruleset: {ruleset_name}")
     sub_score_str = ", ".join(f"{name}={value:.3f}" for name, value in sub_scores.items())
-    lines.append(f"Sub-scores: {sub_score_str} (quality={quality:.3f})")
+    lines.append(f"Sub-scores: {sub_score_str} (checks_passed={checks_passed:.3f})")
     result_label = "FLAGGED" if flagged else "PASS"
     lines.append(f"Result: {result_label} (flag threshold={quality_floor})")
 
@@ -1582,7 +1629,7 @@ def decision_rationale_rules(
 
     Example::
 
-        from groundlens import decision_rationale_rules
+        from groundlens.rules import decision_rationale_rules
 
         rs = decision_rationale_rules(
             domain="finance",

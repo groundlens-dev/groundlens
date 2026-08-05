@@ -7,7 +7,7 @@ This file provides context for AI coding agents (Claude Code, Copilot, Codex) wo
 A Python library that triages LLM outputs using embedding geometry, with no LLM in the scoring path. It is the deterministic **first stage** of a two-stage pipeline: it computes auditable scores from spatial relationships in sentence-transformer embedding spaces, and the second stage (an LLM judge or a human) runs only on what it escalates.
 
 Two methods:
-- **SGI** (Semantic Grounding Index): distance ratio, requires context. `dist(r, q) / dist(r, ctx)`.
+- **SGI** (Semantic Grounding Index): ratio of two angular distances on the unit hypersphere, requires context. `theta(r, q) / theta(r, ctx)` where `theta(a, b) = arccos(a_hat . b_hat)`.
 - **DGI** (Directional Grounding Index): cosine alignment with calibrated reference direction, no context required.
 
 The library is used in regulated environments (legal, healthcare, finance). Determinism and auditability are non-negotiable requirements.
@@ -26,7 +26,7 @@ The library is used in regulated environments (legal, healthcare, finance). Dete
 
 6. **No benchmark number ships without the authorship and length controls.** Detectors that appear to beat the register wall are usually reading *who wrote the text*, not whether it is grounded. Before any AUROC, accuracy or detection rate enters a docstring, the README, the docs or a slide: hold authorship constant, match length, and report the per-register-bin curve rather than a pooled figure. A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality. If a number has not been through the controls, label it "pending controls" or do not ship it.
 
-7. **Unit tests must not load the embedding model.** Tests in `tests/unit/` must run without downloading or loading `all-MiniLM-L6-v2`. Mock the encoder in unit tests. Integration tests in `tests/integration/` may load the model.
+7. **Unit tests must not load the embedding model.** Tests in `tests/unit/` must run without downloading or loading the default encoder (`sentence-t5-large`). Mock the encoder in unit tests. Integration tests in `tests/integration/` may load the model.
 
 ## Architecture
 
@@ -125,7 +125,7 @@ If you're modifying SGI/DGI math, check the paper formulas. The code must match 
 
 ## Common pitfalls
 
-- **Don't normalize embeddings before SGI.** SGI uses raw Euclidean distances. L2-normalizing would collapse the distance ratio. `encode_texts()` returns raw encoder output intentionally.
+- **SGI is angular, not Euclidean.** `compute_sgi` L2-normalizes all three embeddings and takes `arccos` of the dot products, so both distances are angles in radians on `[0, pi]`. `encode_texts()` returns raw encoder output and the normalization happens inside `sgi.py`. Do not reintroduce a raw-Euclidean ratio: a ratio of chord distances is not the same number as a ratio of angles.
 - **Don't cache DGI reference directions globally.** The reference direction `mu_hat` depends on the calibration data. Different domains have different directions. The cache is per-model, not per-direction.
 - **Don't add print statements in library code.** Use `logging.getLogger(__name__)`. The CLI is the only place where `print()` is acceptable (ruff T20 is suppressed there).
 - **Don't break the CLI `--help` speed.** All heavy imports (sentence-transformers, numpy) are deferred in `cli/main.py`. Importing at the top level makes `groundlens --help` take 3+ seconds.
