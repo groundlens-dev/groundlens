@@ -1,8 +1,6 @@
 <div align="center">
 
-# Groundlens
-
-### Checks for the output of language models and agents.
+# Groundlens: a set of tools for checking the output of LLMs and agents.
 
 **No generative model in the scoring path.** Geometry uses a sentence encoder, not an LLM; Switch and Rules use no model at all. Deterministic, local, the same answer every time. One stage, Consistency, loads a small local generator, and only for the answers the cheaper stages could not settle.
 
@@ -15,13 +13,12 @@
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
 [![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow?style=flat-square)](https://huggingface.co/spaces/groundlens/demo)
 
+
+[Pipeline](#pipeline) · [Tools](#tools) · [Stage 1](#stage-1) · [Stage 2](#stage-2) · [Stage 3](#stage-3) · [Stage 4](#stage-4) · [Calibration](#calibration) · [Audit tools](#audit-tools) ·  [Integration](#integration) 
+
 </div>
 
-```bash
-pip install groundlens
-```
-
----
+## Pipeline
 
 <div align="center">
 <img src="docs/assets/pipeline.png" alt="Six stages, cheapest first. Groundlens is stages 1 to 4: Geometry, Switch, Consistency, Rules. You add stages 5 and 6: an LLM judge and a human reviewer." width="100%">
@@ -29,11 +26,14 @@ pip install groundlens
 
 **Verification is a pipeline, ordered cheapest first.** Groundlens is stages 1 to 4. They settle what they can and pass only the doubtful cases forward, so an LLM judge or a human reviewer only ever sees what is actually in doubt.
 
-*Funnel percentages in the diagram are illustrative. Yours depend on your data, and `groundlens evaluate` on a labelled sample will tell you what they actually are.*
 
----
+## Tools
 
-## The tools
+What you can find under 
+
+```bash
+pip install groundlens
+```
 
 | | Use it to | Call |
 |---|---|---|
@@ -58,9 +58,9 @@ groundlens benchmark
 
 **Where they sit.** Verification is a pipeline ordered cheapest to most expensive. These are the cheap end: they settle the obvious cases so an LLM judge or a human reviewer only ever sees what is actually doubtful.
 
----
+## Stage 1
 
-## SGI — did the answer come from the source?
+### SGI — did the answer come from the source?
 
 ```python
 from groundlens import compute_sgi
@@ -93,7 +93,7 @@ Branch on `check(result).escalate`. Branching on `result.flagged` silently passe
 
 **Grounding is not truth.** A wrong fact phrased in the right frame will pass. SGI tells you where an answer came from, not whether it is correct.
 
-### What to pass as `context` when retrieval returns several chunks
+#### What to pass as `context` when retrieval returns several chunks
 
 Score each chunk separately and keep the best. An answer is grounded in *a* source, not in the average of five.
 
@@ -110,11 +110,11 @@ Concatenating the chunks moves the context embedding toward the average of sever
 
 Two things to watch. The encoder truncates long inputs, so a chunk much beyond a few hundred words is only partly scored: keep chunks at retrieval size rather than pasting whole documents. And when question and context are near-identical, which is what good retrieval produces, both angles get small and their ratio gets noisy. `result.q_dist` and `result.ctx_dist` are on the result object so you can see when that is happening.
 
-### One number to know about
+#### One number to know about
 
 An answer copied verbatim from the source returns `10.0` with `flagged=False`. That is a saturation sentinel, not a measurement: `ctx_dist` is zero and the ratio is undefined. SGI is maximised by quoting, so it rewards extraction. If your system is meant to synthesise rather than quote, a wall of 10.0s is a finding about your generator, not a clean bill of health.
 
-## DGI — no source available
+### DGI — no source available
 
 ```python
 from groundlens import compute_dgi
@@ -138,7 +138,9 @@ That fixes the *direction*. If your escalation rate is wrong but the direction i
 
 Where a source exists, prefer SGI.
 
-## Switch — may this answer enter state?
+## Stage 2
+
+### Switch — may this answer enter state?
 
 ```python
 from groundlens import GroundingSwitch, compute_sgi
@@ -153,7 +155,9 @@ print(decision.reason)
 
 In an agent loop, one bad answer written into state contaminates every turn after it. Switch turns a score into that decision.
 
-## Consistency — does the model agree with itself?
+## Stage 3
+
+### Consistency — does the model agree with itself?
 
 ```python
 from groundlens.verify import two_stage
@@ -166,7 +170,9 @@ Needs `pip install "groundlens[verify]"`, which brings transformers and torch. T
 
 When there is no source to check against, resample the model and measure agreement. This is the one stage that needs a model, and it only runs on what the earlier stages could not settle.
 
-## Rules — did it break a policy?
+## Stage 4
+
+### Rules — did it break a policy?
 
 ```python
 from groundlens.rules import decision_rationale_rules
@@ -182,7 +188,7 @@ Deterministic checklists for regulated settings: invented figures, missing discl
 
 **Rules are pattern checks, not measurements.** `checks_passed` is a weighted count of patterns that matched, not a probability of anything. Text with the right words in the right order will score well whether or not it is correct. Rules live under `groundlens.rules` rather than the top level for that reason, and the module docstring lists the four limits worth knowing before you rely on them.
 
-## Calibrate — fit the cut points to your data
+## Calibration
 
 Two knobs, and they fix different problems.
 
@@ -206,7 +212,7 @@ print(fit.dgi_pass, fit.sgi_review, fit.in_sample)
 
 Our constants were fitted on our corpus. Yours will differ. A few hundred labelled answers is enough.
 
-## Audit — keep the trail
+## Audit tools
 
 ```python
 from groundlens import compute_sgi
@@ -227,18 +233,28 @@ with open_log("audit.db") as log:
 
 Every entry is hashed against the one before it, so a modified record breaks the chain and `verify_chain()` says so. SQLite, local, no service.
 
----
 
-## Batch, integrations and the MCP server
+## Integration
 
 ```python
 from groundlens import evaluate_batch
 rows = evaluate_batch(items)
 ```
 
-LangChain · LangGraph · CrewAI · Semantic Kernel · AutoGen · OpenAI · Anthropic · Gemini · Hugging Face — see [integrations](https://docs.groundlens.dev/integrations/).
+- LangChain · LangGraph · CrewAI · Semantic Kernel · AutoGen · OpenAI · Anthropic · Gemini · Hugging Face — see [integrations](https://docs.groundlens.dev/integrations/).
 
-The same checks inside Claude Desktop, Cursor and Windsurf: [**groundlens-mcp**](https://github.com/groundlens-dev/groundlens-mcp).
+- The same checks inside Claude Desktop, Cursor and Windsurf: [**groundlens-mcp**](https://github.com/groundlens-dev/groundlens-mcp).
+
+  <div align="center">
+  
+| Provider | Install|
+|------|---------------|
+| Cursor | [![Install in Cursor](https://img.shields.io/badge/Cursor-Add_MCP-000000?style=flat-square&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=groundlens&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJncm91bmRsZW5zLW1jcCJdfQ%3D%3D)|
+| VS Code | [![Install in VS Code](https://img.shields.io/badge/VS_Code-Add_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=groundlens&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22groundlens-mcp%22%5D%7D)|
+| VS Code Insiders |  [![Install in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Add_MCP-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=groundlens&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22groundlens-mcp%22%5D%7D&quality=insiders) |
+  
+</div>
+
 
 ## Install notes
 
@@ -252,9 +268,11 @@ Nothing leaves your machine. Scoring is local, there is no telemetry, and no tex
 
 Every metric here ships with its measured ceiling and its failure modes, and earlier published numbers that did not hold have been withdrawn. Read [the benchmarks page](https://docs.groundlens.dev/benchmarks/results/) before quoting a figure, and the [project overview](https://github.com/groundlens-dev) for what we corrected and why.
 
-## Papers
+## Research papers
 
-[arXiv:2512.13771](https://arxiv.org/abs/2512.13771) · [arXiv:2602.13224](https://arxiv.org/abs/2602.13224) · [arXiv:2603.13259](https://arxiv.org/abs/2603.13259). Preprints, not peer reviewed.
+[arXiv:2512.13771](https://arxiv.org/abs/2512.13771) 
+[arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+[arXiv:2603.13259](https://arxiv.org/abs/2603.13259). 
 
 ## How to cite
 
