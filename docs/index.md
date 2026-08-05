@@ -70,4 +70,4 @@ The methods are documented in three preprints:
 
 - *Semantic Grounding Index: geometric bounds on context engagement in RAG systems* (2025), [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
 - *A Geometric Taxonomy of Hallucinations in LLMs* (2026), [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
-- *How Transformers Reject Wrong Answers* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
+- *Rotational Dynamics of Factual Constraint Processing in Large Language Models* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)

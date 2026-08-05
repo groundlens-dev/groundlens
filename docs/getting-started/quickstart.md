@@ -48,9 +48,22 @@ print(f"Explanation:  {result.explanation}")
 ```
 
 !!! success "Interpreting DGI scores"
-    - **DGI > 0.30**: Displacement aligns with grounded response patterns. Pass.
-    - **0.00 < DGI < 0.30**: Weak alignment --- the response diverges from typical grounded patterns. Flagged.
-    - **DGI < 0.00**: Displacement opposes the grounded direction. High risk.
+    DGI is a **single binary cut**, not a set of bands. `compute_dgi` computes
+    `flagged = value < DGI_PASS` and nothing else.
+
+    - **DGI >= 0.525** (`DGI_PASS`): the displacement aligns with grounded
+      response patterns. Pass.
+    - **DGI < 0.525**: the displacement diverges from grounded patterns. Flagged.
+
+    0.525 is the Youden's-J operating point for the default encoder
+    (`sentence-transformers/sentence-t5-large`) on the bundled 212-pair
+    reference set. It is encoder- and domain-specific: recalibrate with
+    [`fit_thresholds`](../api/index.md) on your own data. Read the value from
+    the code rather than copying it:
+
+    ```python
+    from groundlens._internal.thresholds import DGI_PASS   # 0.525
+    ```
 
 ## Plain-language checks
 

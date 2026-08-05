@@ -151,7 +151,9 @@ $$
 \mathbb{E}[\cos\theta] = 0, \quad \text{Var}[\cos\theta] \approx \frac{1}{n}
 $$
 
-For $n = 384$, this gives $\sigma \approx 0.051$. This means that cosine similarities of $\pm 0.1$ are already $\approx 2\sigma$ deviations from the mean --- statistically significant. DGI exploits this: a cosine similarity of 0.30 between the displacement direction and the reference direction is a $\approx 6\sigma$ event under the null hypothesis of random direction, giving high confidence in the grounding signal.
+For the default encoder, $n = 768$, so $\sigma \approx 0.0361$. Cosine similarities of $\pm 0.1$ are already $\approx 2.8\sigma$ deviations from the mean --- statistically significant. DGI exploits this: the pass threshold `DGI_PASS` $= 0.525$ between the displacement direction and the reference direction is a $\approx 15\sigma$ event under the null hypothesis of a uniformly random direction. (The earlier $n = 384$ figure in this section predated the move to `sentence-t5-large`; for reference, $n = 384$ gives $\sigma \approx 0.0510$.)
+
+What this argument does and does not buy you: it says a DGI of 0.525 is not something a random direction produces, so the score is not noise. It says nothing about whether a *confabulated* displacement direction is distinguishable from a grounded one — that is an empirical question, and the answer is the register wall (AUROC 0.606 with authorship held constant, ~0.68 for the whole embedding-similarity class). Specificity against randomness is not sensitivity against a confabulation.
 
 ### The "Hub" Phenomenon
 

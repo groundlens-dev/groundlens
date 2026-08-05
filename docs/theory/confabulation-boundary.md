@@ -26,7 +26,7 @@ These are responses where the LLM's output moves in a direction that is clearly 
 - **Detectable** by DGI with high confidence
 
 $$
-\hat{\boldsymbol{\delta}}_{\text{divergent}} \cdot \hat{\boldsymbol{\mu}} \ll 0.30
+\hat{\boldsymbol{\delta}}_{\text{divergent}} \cdot \hat{\boldsymbol{\mu}} \ll 0.525
 $$
 
 ### Type 2: Tangential Hallucinations
@@ -38,7 +38,7 @@ Responses that partially follow the grounded direction but with significant late
 - **Partially detectable** by DGI
 
 $$
-0 < \hat{\boldsymbol{\delta}}_{\text{tangential}} \cdot \hat{\boldsymbol{\mu}} < 0.30
+0 < \hat{\boldsymbol{\delta}}_{\text{tangential}} \cdot \hat{\boldsymbol{\mu}} < 0.525
 $$
 
 ### Type 3: Distributional Confabulations
@@ -50,7 +50,7 @@ Responses that perfectly mimic the distributional properties of grounded text wh
 - **Not detectable** by any embedding-based method
 
 $$
-\hat{\boldsymbol{\delta}}_{\text{confab}} \cdot \hat{\boldsymbol{\mu}} \geq 0.30
+\hat{\boldsymbol{\delta}}_{\text{confab}} \cdot \hat{\boldsymbol{\mu}} \geq 0.525
 $$
 
 ## Why LLM-Generated Hallucinations Are Detectable
