@@ -3020,7 +3020,7 @@
 <li><strong>Detectable</strong> by DGI with high confidence</li>
 </ul>
 <div class="arithmatex">\[
-\hat{\boldsymbol{\delta}}_{\text{divergent}} \cdot \hat{\boldsymbol{\mu}} \ll 0.30
+\hat{\boldsymbol{\delta}}_{\text{divergent}} \cdot \hat{\boldsymbol{\mu}} \ll 0.525
 \]</div>
 <h3 id="type-2-tangential-hallucinations">Type 2: Tangential Hallucinations<a class="headerlink" href="#type-2-tangential-hallucinations" title="Permanent link">&para;</a></h3>
 <p>Responses that partially follow the grounded direction but with significant lateral deviation. They contain some relevant content mixed with fabricated details.</p>
@@ -3030,7 +3030,7 @@
 <li><strong>Partially detectable</strong> by DGI</li>
 </ul>
 <div class="arithmatex">\[
-0 &lt; \hat{\boldsymbol{\delta}}_{\text{tangential}} \cdot \hat{\boldsymbol{\mu}} &lt; 0.30
+0 &lt; \hat{\boldsymbol{\delta}}_{\text{tangential}} \cdot \hat{\boldsymbol{\mu}} &lt; 0.525
 \]</div>
 <h3 id="type-3-distributional-confabulations">Type 3: Distributional Confabulations<a class="headerlink" href="#type-3-distributional-confabulations" title="Permanent link">&para;</a></h3>
 <p>Responses that perfectly mimic the distributional properties of grounded text while being factually wrong. These are the <strong>undetectable</strong> cases:</p>
@@ -3040,7 +3040,7 @@
 <li><strong>Not detectable</strong> by any embedding-based method</li>
 </ul>
 <div class="arithmatex">\[
-\hat{\boldsymbol{\delta}}_{\text{confab}} \cdot \hat{\boldsymbol{\mu}} \geq 0.30
+\hat{\boldsymbol{\delta}}_{\text{confab}} \cdot \hat{\boldsymbol{\mu}} \geq 0.525
 \]</div>
 <h2 id="why-llm-generated-hallucinations-are-detectable">Why LLM-Generated Hallucinations Are Detectable<a class="headerlink" href="#why-llm-generated-hallucinations-are-detectable" title="Permanent link">&para;</a></h2>
 <p>When an LLM generates a hallucinated response, the generation process itself introduces a geometric signature. The transformer's internal representations undergo different computational paths for grounded versus hallucinated outputs:</p>

@@ -2860,8 +2860,8 @@ procedure.</p>
 codebase:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens._internal.thresholds</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">SGI_REVIEW</span><span class="p">,</span>        <span class="c1"># 0.95 — flagged below this</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">SGI_STRONG_PASS</span><span class="p">,</span>   <span class="c1"># 1.20 — strong pass above this</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">DGI_PASS</span><span class="p">,</span>          <span class="c1"># 0.30 — DGI pass threshold</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">SGI_STRONG_PASS</span><span class="p">,</span>   <span class="c1"># 1.20 — strong pass at or above this</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">DGI_PASS</span><span class="p">,</span>          <span class="c1"># 0.525 — DGI pass threshold (single binary cut)</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>For domain-specific risk tolerance, the rules module accepts a
