@@ -33,6 +33,39 @@ from groundlens.sgi import compute_sgi
 
 pytestmark = pytest.mark.slow
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _calibrated_once() -> object:
+    """Compute the DGI reference direction once for the whole module.
+
+    ``mu_hat`` is a pure function of the shipped reference CSV and the active
+    encoder, and ``_get_mu_hat`` already keys its cache on both -- a custom
+    encoder or a custom CSV gets its own entry and can never read a stale
+    bundled direction. So clearing the cache inside a test protects against
+    nothing, and it costs a full re-embed of all 212 reference pairs: 424
+    texts through sentence-t5-large.
+
+    That is not a small cost. Measured on the ubuntu-latest runner, a single
+    recalibration takes **7 minutes 43 seconds**. This file used to call
+    ``reset_calibration_cache()`` at the top of eight separate tests, so the
+    job needed 62 minutes of recomputation to finish and had a 30-minute
+    timeout. It never finished. It reported ``The operation was canceled``
+    partway through the DGI class on every single run, which reads as
+    infrastructure flakiness rather than as the deterministic arithmetic it
+    actually was.
+
+    The tell is in the log: ``test_flag_boundary_is_dgi_pass_and_nothing_else``
+    is the one DGI test that never called the reset, and it took 1.8 seconds
+    against 463 for each of its neighbours.
+
+    One reset here, before the first test, and one after the last so the
+    module leaves no cached state behind for anything that runs after it.
+    """
+    reset_calibration_cache()
+    yield
+    reset_calibration_cache()
+
+
 # Tolerance. Tight enough that an encoder swap fails, loose enough to absorb
 # CPU/BLAS non-determinism and minor torch/sentence-transformers releases.
 ATOL = 0.02
@@ -167,14 +200,12 @@ class TestGoldenDGI:
     """The bundled mu_hat must reproduce from the shipped CSV, to a fixed value."""
 
     def test_grounded_pair_scores_the_golden_value(self, golden_values: dict[str, float]) -> None:
-        reset_calibration_cache()
         result = compute_dgi(question=GOLDEN_QUESTION, response=GOLDEN_GROUNDED)
         assert result.value == pytest.approx(golden_values["dgi_grounded"], abs=ATOL)
 
     def test_ungrounded_pair_scores_the_golden_value(
         self, golden_values: dict[str, float]
     ) -> None:
-        reset_calibration_cache()
         result = compute_dgi(question=GOLDEN_QUESTION, response=GOLDEN_UNGROUNDED)
         assert result.value == pytest.approx(golden_values["dgi_ungrounded"], abs=ATOL)
 
@@ -183,14 +214,12 @@ class TestGoldenDGI:
         assert result.flagged == (result.value < DGI_PASS)
 
     def test_fresh_grounded_scores_the_golden_value(self, golden_values: dict[str, float]) -> None:
-        reset_calibration_cache()
         result = compute_dgi(question=FRESH_QUESTION, response=FRESH_GROUNDED)
         assert result.value == pytest.approx(golden_values["dgi_fresh_grounded"], abs=ATOL)
 
     def test_fresh_ungrounded_scores_the_golden_value(
         self, golden_values: dict[str, float]
     ) -> None:
-        reset_calibration_cache()
         result = compute_dgi(question=FRESH_QUESTION, response=FRESH_UNGROUNDED)
         assert result.value == pytest.approx(golden_values["dgi_fresh_ungrounded"], abs=ATOL)
 
@@ -215,13 +244,11 @@ class TestGoldenDGI:
         That failure is the point. It means the limitation is gone, and the
         test should then be inverted deliberately, in a commit that says so.
         """
-        reset_calibration_cache()
         fresh = compute_dgi(question=FRESH_QUESTION, response=FRESH_GROUNDED)
         assert fresh.value < DGI_PASS
         assert fresh.flagged is True
 
     def test_fresh_grounded_outscores_fresh_ungrounded(self) -> None:
-        reset_calibration_cache()
         grounded = compute_dgi(question=FRESH_QUESTION, response=FRESH_GROUNDED)
         ungrounded = compute_dgi(question=FRESH_QUESTION, response=FRESH_UNGROUNDED)
         assert grounded.value > ungrounded.value
@@ -234,7 +261,6 @@ class TestGoldenDGI:
         rows. They score 0.1235 and 0.2177. If coverage were the mechanism,
         the medical pair would land near the calibration median of 0.5569.
         """
-        reset_calibration_cache()
         medical = compute_dgi(question=FRESH_QUESTION, response=FRESH_GROUNDED).value
         warehouse = compute_dgi(question=GOLDEN_QUESTION, response=GOLDEN_GROUNDED).value
         assert medical < DGI_PASS
@@ -244,7 +270,6 @@ class TestGoldenDGI:
     def test_mu_hat_is_a_unit_vector_of_the_encoder_width(self) -> None:
         from groundlens.dgi import _get_mu_hat
 
-        reset_calibration_cache()
         mu = _get_mu_hat()
         assert mu.shape == (768,)
         assert float(np.linalg.norm(mu)) == pytest.approx(1.0, abs=1e-5)
@@ -262,3 +287,51 @@ class TestGoldenThresholds:
         assert SGI_STRONG_PASS == 1.20
         assert SGI_REVIEW == 0.95
         assert DGI_PASS == 0.525
+
+
+class TestGoldenJobStaysAffordable:
+    """Guards on the cost of this file, not on the numbers in it.
+
+    This job loads the real encoder, so it is the one place in the suite where
+    a careless line costs eight minutes instead of eight milliseconds. It went
+    unnoticed for as long as it did because the failure surfaced as ``The
+    operation was canceled`` -- a message that reads as a runner problem and
+    sends you to look at the infrastructure rather than at the test file.
+    """
+
+    def test_the_reference_direction_is_computed_at_most_once(self) -> None:
+        """No test may clear the calibration cache. The fixture owns that.
+
+        Each clear costs a re-embed of 424 texts through sentence-t5-large:
+        7m43s on the CI runner. Eight of them exceeded the job timeout, so the
+        job could not pass at any timeout under about 65 minutes.
+
+        If you need a cleared cache for something, use a custom
+        ``reference_csv`` or a stub ``encoder``. ``_get_mu_hat`` keys its cache
+        on both, so either gets you a fresh direction for free.
+        """
+        import ast
+        import pathlib
+
+        tree = ast.parse(pathlib.Path(__file__).read_text(encoding="utf-8"))
+        offenders = [
+            f"{fn.name}:{call.lineno}"
+            for fn in ast.walk(tree)
+            if isinstance(fn, ast.FunctionDef) and fn.name.startswith("test_")
+            for call in ast.walk(fn)
+            if isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Name)
+            and call.func.id == "reset_calibration_cache"
+        ]
+        assert not offenders, (
+            f"reset_calibration_cache() called inside test(s): {offenders}. "
+            "Each call costs ~7m43s of re-embedding on the CI runner. The module "
+            "fixture _calibrated_once already resets before the first test and "
+            "after the last."
+        )
+
+    def test_a_second_call_hits_the_cache_rather_than_recomputing(self) -> None:
+        """Same key, same array object. This is what makes one reset enough."""
+        from groundlens.dgi import _get_mu_hat
+
+        assert _get_mu_hat() is _get_mu_hat()

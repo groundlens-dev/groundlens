@@ -74,7 +74,12 @@ jobs:
     name: Golden scores (real encoder)
     runs-on: ubuntu-latest
     needs: lint
-    timeout-minutes: 30
+    # One recalibration of the DGI reference direction embeds all 212
+    # reference pairs -- 424 texts through sentence-t5-large -- and takes
+    # 7m43s on this runner. The test file now does exactly one, so the job
+    # runs in about 11 minutes cold. 20 leaves room for a slow runner and
+    # still fails fast if the count of recalibrations ever creeps back up.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -82,19 +87,37 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache HuggingFace models
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+      # restore/save rather than the combined action: the combined one only
+      # writes the cache when the job succeeds. While this job was timing out
+      # that meant the encoder was re-downloaded on every run and the cache
+      # key stayed empty forever, which is a loop that cannot break itself.
+      - name: Restore HuggingFace cache
+        id: hf-cache
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
         with:
           path: ~/.cache/huggingface
           key: hf-${{ runner.os }}-sentence-t5-large-v1
           restore-keys: hf-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: pip install -e ".[dev]"
+      # This job sets CUDA_VISIBLE_DEVICES="" and there is no GPU on the
+      # runner, but the default index resolves torch to the CUDA build and
+      # pulls ~2.5 GB of nvidia-* wheels to sit unused on disk. The CPU wheel
+      # satisfies torch>=1.11.0 just the same.
+      - name: Install dependencies (CPU-only torch)
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install -e ".[dev]"
 
       - name: Run golden score regressions
         env:
           # CPU only; no GPU on the runner and none needed.
           CUDA_VISIBLE_DEVICES: ""
           TOKENIZERS_PARALLELISM: "false"
-        run: pytest tests/integration/test_golden_scores.py -v
+        run: pytest tests/integration/test_golden_scores.py -v --durations=0
+
+      - name: Save HuggingFace cache
+        if: always() && steps.hf-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ runner.os }}-sentence-t5-large-v1
