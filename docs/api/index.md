@@ -125,7 +125,7 @@ Signatures, parameters, return types and examples below are generated directly f
 |---|---|---|---|
 | `SGI_STRONG_PASS` | 1.20 | `groundlens._internal.thresholds` | SGI strong pass threshold |
 | `SGI_REVIEW` | 0.95 | `groundlens._internal.thresholds` | SGI review/flag threshold |
-| `DGI_PASS` | 0.30 | `groundlens._internal.thresholds` | DGI pass threshold |
+| `DGI_PASS` | 0.525 | `groundlens._internal.thresholds` | DGI pass threshold (single binary cut, default encoder) |
 | `DEFAULT_MODEL` | `"sentence-transformers/sentence-t5-large"` | `groundlens._internal.embeddings` | Default sentence-transformer model |
 
 ## Type Summary

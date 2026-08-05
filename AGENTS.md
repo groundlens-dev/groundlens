@@ -4,12 +4,12 @@ This file helps AI coding agents (Claude Code, Codex, Copilot Workspace, etc.) n
 
 ## What groundlens does
 
-groundlens triages LLM outputs using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `all-MiniLM-L6-v2`), with no LLM in the scoring path. It is the first stage of a two-stage pipeline; the second-stage judge or human runs only on what it escalates.
+groundlens triages LLM outputs using embedding geometry. It computes deterministic scores from spatial relationships in an embedding space (default: `sentence-transformers/sentence-t5-large`, 768 dims, ~640MB --- the encoder the shipped thresholds and DGI `mu_hat` were calibrated on), with no LLM in the scoring path. It is the first stage of a two-stage pipeline; the second-stage judge or human runs only on what it escalates.
 
 **House rule, non-negotiable: no benchmark number ships without the authorship and length controls.** Detectors that appear to beat the register wall are usually reading *who wrote the text*, not whether it is grounded. Before any AUROC, accuracy or detection rate enters a docstring, the README, the docs or a slide: hold authorship constant, match length, and report the per-register-bin curve rather than a pooled figure. A reported 0.9+ in this class is a signal to go looking for a shortcut, not a signal of quality. If a number has not been through the controls, label it "pending controls" or do not ship it.
 
 Two scoring methods:
-- **SGI (Semantic Grounding Index):** ratio-based, requires context. `SGI = dist(response, question) / dist(response, context)`.
+- **SGI (Semantic Grounding Index):** ratio-based, requires context. `SGI = theta(response, question) / theta(response, context)` where `theta(a, b) = arccos(a_hat . b_hat)` is the **angular** (geodesic) distance on the unit hypersphere, not the Euclidean distance.
 - **DGI (Directional Grounding Index):** direction-based, context-free. `DGI = dot(normalize(delta), mu_hat)` where `delta = phi(response) - phi(question)`.
 
 ## Repository layout
@@ -77,7 +77,7 @@ Pure numpy operations: `euclidean_distance`, `unit_normalize`, `displacement_vec
 
 ### Thresholds (_internal/thresholds.py)
 
-Decision boundaries: `SGI_REVIEW=0.95`, `SGI_STRONG_PASS=1.20`, `DGI_PASS=0.30`. Normalization functions: `normalize_sgi()` (tanh), `normalize_dgi()` (linear).
+Decision boundaries: `SGI_REVIEW=0.95`, `SGI_STRONG_PASS=1.20`, `DGI_PASS=0.525`. SGI has three bands; DGI is a **single binary cut**. Normalization functions: `normalize_sgi()` (tanh, display-only) and `normalize_dgi()` (linear). **Never restate a threshold as a literal** --- import it from `groundlens._internal.thresholds`. Every stale copy of a cut-point in this repo has been a copied literal.
 
 ### Provider protocol (providers/_base.py)
 

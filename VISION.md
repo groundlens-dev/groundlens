@@ -30,7 +30,7 @@ The core insight is that when an LLM engages with source material, the spatial r
 
 ### SGI -- Semantic Grounding Index
 
-SGI measures whether a response moved toward the provided context or stayed near the question in embedding space. The score is a ratio of Euclidean distances:
+SGI measures whether a response moved toward the provided context or stayed near the question in embedding space. The score is a ratio of **angular (geodesic) distances** on the unit hypersphere --- the embeddings are L2-normalized and `dist(a, b) = arccos(a_hat . b_hat)`, in radians:
 
 ```
 SGI = dist(response, question) / dist(response, context)
@@ -55,7 +55,7 @@ Calibration moves the operating point, not the wall. Overall AUROC moves 0.684 -
 
 ### What makes this work
 
-- **Single embedding model.** `all-MiniLM-L6-v2` is 80MB. No GPU required. Sub-second inference.
+- **Single embedding model.** The default is `sentence-transformers/sentence-t5-large`: 335M parameters, ~640MB downloaded once and cached. No GPU required; CPU inference is tens of milliseconds per call. It is the encoder the shipped thresholds and the DGI reference direction were calibrated on, so it is a correctness constraint, not a default. `all-MiniLM-L6-v2` (22M params, 80MB) is still available as `LIGHTWEIGHT_MINILM` for latency-critical deployments --- recalibrate before trusting its flags.
 - **Deterministic.** Same inputs always produce the same score. Reproducible across runs, machines, and time.
 - **Auditable.** Every score decomposes into distances and angles that can be inspected, logged, and explained.
 - **Bounded, and it says so.** The blind spot is published as a number, not a footnote: in-register factual substitution is invisible to any embedding-similarity score and is escalated, not guessed.
