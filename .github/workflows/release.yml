@@ -12,6 +12,12 @@ jobs:
   build:
     name: Build sdist & wheel
     runs-on: ubuntu-latest
+    outputs:
+      # base64 of `sha256sum <files>`, which is what the SLSA generator takes
+      # as its subjects. Computed here because this is the only job that sees
+      # the artifacts before they are uploaded, and provenance has to attest to
+      # the bytes that actually shipped.
+      hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -24,6 +30,11 @@ jobs:
 
       - name: Build distributions
         run: python -m build
+
+      - name: Compute artifact digests
+        id: hash
+        working-directory: dist
+        run: echo "hashes=$(sha256sum -- * | base64 -w0)" >> "$GITHUB_OUTPUT"
 
       - name: Upload distributions
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -51,43 +62,106 @@ jobs:
         with:
           attestations: true
 
-  # Supply-chain: SBOM + Sigstore signatures + a GitHub Release with assets.
-  # NOTE: this job is intentionally non-blocking (continue-on-error) so it can
-  # never break the PyPI publish. The pip installs below are unpinned pending a
-  # hashed requirements file; the installs below are range-bounded, not
-  # hash-pinned. Pin exact versions with hashes and verify on the first tag.
-  supply-chain:
-    name: SBOM + signed release assets
+  # The GitHub Release, its assets, and the Sigstore signatures over them.
+  #
+  # This job used to be `continue-on-error: true` so it could never break the
+  # PyPI publish. That also meant it could fail on every tag without anyone
+  # noticing, which is what OpenSSF Scorecard eventually reported: four
+  # consecutive releases with no signature and no provenance.
+  #
+  # It now fails loudly. The publish job does not depend on it, so a failure
+  # here still cannot stop a release reaching PyPI -- it just stops being
+  # invisible. The SBOM step keeps step-level continue-on-error, because a
+  # broken dependency scan is not a reason to ship an unsigned release.
+  release:
+    name: Signed GitHub Release
     runs-on: ubuntu-latest
     needs: build
-    continue-on-error: true
     permissions:
-      contents: write   # create the GitHub Release and upload assets
-      id-token: write    # Sigstore keyless signing (OIDC)
+      contents: write   # create the release and upload assets
+      id-token: write   # Sigstore keyless signing (OIDC)
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
+
       - name: Download distributions
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: dist
           path: dist/
-      - name: Generate CycloneDX SBOM
-        run: |
-          pip install "cyclonedx-bom>=4,<6"
-          pip install dist/*.whl
-          cyclonedx-py environment -o groundlens.cdx.json
+
+      # Scorecard's releasesAreSigned probe matches asset names against
+      # (".asc", ".minisig", ".sig", ".sign", ".sigstore", ".sigstore.json").
+      # sigstore-python 3.x writes "<file>.sigstore.json" by default, which is
+      # on that list -- so the signatures never failed to count because of how
+      # they were named. They failed to count because they were not produced.
       - name: Sign distributions with Sigstore
         run: |
           pip install "sigstore>=3,<4"
           python -m sigstore sign dist/*.whl dist/*.tar.gz
-      - name: Create GitHub Release with assets
+          echo "signed:"
+          ls -1 dist/*.sigstore.json
+
+      - name: Fail if nothing was signed
+        run: |
+          count=$(ls -1 dist/*.sigstore.json 2>/dev/null | wc -l)
+          if [ "$count" -lt 2 ]; then
+            echo "::error::expected a signature for the wheel and the sdist, found $count"
+            exit 1
+          fi
+
+      - name: Generate CycloneDX SBOM
+        continue-on-error: true
+        run: |
+          pip install "cyclonedx-bom>=4,<6"
+          pip install dist/*.whl
+          cyclonedx-py environment -o groundlens.cdx.json
+
+      - name: Create the release with every asset
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            dist/* groundlens.cdx.json \
-            --generate-notes --verify-tag || \
-          gh release upload "${GITHUB_REF_NAME}" dist/* groundlens.cdx.json --clobber
+          assets=(dist/*)
+          [ -f groundlens.cdx.json ] && assets+=(groundlens.cdx.json)
+          gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
+            --generate-notes --verify-tag ||
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
+
+      - name: Confirm the signatures reached the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "assets on ${GITHUB_REF_NAME}:"
+          gh release view "${GITHUB_REF_NAME}" \
+            --json assets --jq '.assets[].name' | tee /tmp/assets.txt
+          if ! grep -q '\.sigstore\.json$' /tmp/assets.txt; then
+            echo "::error::no .sigstore.json asset on the release; Scorecard scores this 0"
+            exit 1
+          fi
+
+  # SLSA build provenance, attached to the release as `.intoto.jsonl`.
+  #
+  # Worth its own job: Scorecard scores a release with provenance 10 and one
+  # with only a signature 8, and provenance *supersedes* the signature rather
+  # than adding to it. A signature says "the maintainer vouches for these
+  # bytes". Provenance says "this workflow, at this commit, produced them",
+  # which is the claim that survives a compromised maintainer account.
+  #
+  # `needs: release` so the release already exists and the generator uploads
+  # into it instead of racing to create it.
+  provenance:
+    name: SLSA provenance
+    needs: [build, release]
+    permissions:
+      actions: read     # read the workflow run that produced the artifacts
+      id-token: write   # sign the provenance
+      contents: write   # attach it to the release
+    # Must be pinned to a full vX.Y.Z tag. The generator re-resolves itself by
+    # tag at runtime and refuses short tags and commit SHAs.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: ${{ needs.build.outputs.hashes }}
+      upload-assets: true
