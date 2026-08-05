@@ -1,0 +1,8 @@
+{
+  "_comment": "Precomputed DGI reference direction. Regenerate with `python -m groundlens.tools.freeze_mu_hat` when reference_pairs.csv or the default encoder changes on purpose, and never otherwise. The loader verifies reference_pairs_sha256 and falls back to deriving from the CSV if it does not match.",
+  "encoder": "sentence-transformers/sentence-t5-large",
+  "dims": 768,
+  "reference_pairs": 212,
+  "reference_pairs_sha256": "925fcabdb366cbd0bd5b64508a025fd40b339c48fb4fb7dec4946f6c744ff9c9",
+  "dtype": "float32"
+}
