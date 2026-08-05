@@ -86,6 +86,15 @@ dev = [
     "pip-audit>=2.7",
 ]
 
+# Benchmarks (benchmarks/*.py). Not needed to use groundlens; needed to
+# reproduce the numbers. scikit-learn and datasets were imported by
+# benchmarks/confabulation_benchmark.py and benchmarks/compare_methods.py
+# without appearing in any extra, so the weekly benchmark job could not run.
+benchmark = [
+    "scikit-learn>=1.3.0",
+    "datasets>=2.14.0",
+]
+
 # Documentation
 docs = [
     "mkdocs-material>=9.5",
@@ -225,4 +234,9 @@ exclude_lines = [
     "raise NotImplementedError",
     "^\\s*\\.\\.\\.\\s*$",  # Protocol / stub bodies
 ]
-# fail_under = 85  # Enforced locally with slow tests; CI runs non-slow only
+# Enforced floor, measured not aspirational. `pytest -m "not slow"` (what CI
+# runs) currently reports 58%. 55 leaves three points of headroom so an
+# unrelated PR does not go red on rounding, while still failing the build if a
+# change deletes coverage wholesale. This is a RATCHET: when the number goes
+# up and stays up, raise the floor in the same PR. Do not lower it.
+fail_under = 55

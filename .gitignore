@@ -46,3 +46,4 @@ Thumbs.db
 *.pem
 .env.local
 gl/
+benchmarks/results/

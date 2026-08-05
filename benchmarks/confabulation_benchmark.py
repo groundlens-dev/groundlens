@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["groundlens", "scikit-learn>=1.3.0"]
+# dependencies = ["groundlens[benchmark]"]
 # ///
 """Human confabulation benchmark — AUROC evaluation for SGI and DGI.
 
@@ -19,8 +19,13 @@ Loads the cert-framework/human-confabulation-benchmark dataset from
 HuggingFace (212 pairs), runs both SGI and DGI scoring on all items,
 and reports AUROC using scikit-learn.
 
-Falls back to CSV loading if the HuggingFace ``datasets`` library is
-not installed.
+Falls back to a local CSV if the HuggingFace ``datasets`` library is not
+installed or the Hub is unreachable. The fallback ships in the repo at
+``benchmarks/data/confabulation_benchmark.csv``, derived from the bundled
+reference set, so the weekly job produces a result even with no network.
+
+Writes a JSON result file to ``--output`` (default ``benchmarks/results``) so
+the run has an artifact to upload.
 
 Expected dataset columns:
     - question: The input query.
@@ -31,13 +36,18 @@ Expected dataset columns:
 
 from __future__ import annotations
 
+import argparse
 import csv
+import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sklearn.metrics import roc_auc_score
 
+from groundlens._internal.embeddings import DEFAULT_MODEL
+from groundlens._version import __version__
 from groundlens.dgi import compute_dgi
 from groundlens.sgi import compute_sgi
 
@@ -78,10 +88,55 @@ def load_dataset_auto() -> list[dict[str, str]]:
         sys.exit(1)
 
 
-def run_benchmark(model: str = "all-MiniLM-L6-v2") -> None:
+def expand_pairs(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Turn one row carrying both classes into two labelled items.
+
+    The dataset ships as ``id, domain, question, grounded_response,
+    fabricated_response`` - one row is a matched pair, not a single judgeable
+    item. This benchmark was written against a flat ``question, response,
+    context, label`` schema that has never existed in the file, so every
+    ``item["response"]`` came back empty and the first call raised
+    ``ValueError: response must be a non-empty string``.
+
+    Note what is NOT here: a context column. This dataset carries no source
+    text, so SGI cannot be computed on it at all. Only DGI can.
+    """
+    out: list[dict[str, str]] = []
+    skipped = 0
+    for row in rows:
+        question = str(row.get("question", "") or "").strip()
+        grounded = str(row.get("grounded_response", "") or "").strip()
+        fabricated = str(row.get("fabricated_response", "") or "").strip()
+        if not (question and grounded and fabricated):
+            skipped += 1
+            continue
+        domain = str(row.get("domain", "") or "unknown")
+        item_id = str(row.get("id", "") or "")
+        for response, label in ((grounded, 1), (fabricated, 0)):
+            out.append(
+                {
+                    "id": item_id,
+                    "domain": domain,
+                    "question": question,
+                    "response": response,
+                    "context": "",
+                    "label": str(label),
+                }
+            )
+    if skipped:
+        print(f"  skipped {skipped} incomplete rows", file=sys.stderr)
+    return out
+
+
+def run_benchmark(model: str = DEFAULT_MODEL, output_dir: Path | None = None) -> None:
     """Run the full benchmark and print AUROC results."""
-    pairs = load_dataset_auto()
-    print(f"Loaded {len(pairs)} benchmark items.\n")
+    rows = load_dataset_auto()
+    pairs = expand_pairs(rows)
+    print(
+        f"Loaded {len(rows)} rows -> {len(pairs)} scored items "
+        f"({sum(1 for p in pairs if p['label'] == '1')} grounded / "
+        f"{sum(1 for p in pairs if p['label'] == '0')} fabricated)."
+    )
 
     sgi_scores: list[float] = []
     sgi_labels: list[int] = []
@@ -133,20 +188,71 @@ def run_benchmark(model: str = "all-MiniLM-L6-v2") -> None:
     print(f"  Time:      {elapsed:.1f}s")
     print("-" * 50)
 
+    sgi_auroc: float | None = None
     if sgi_scores and len(set(sgi_labels)) > 1:
-        sgi_auroc = roc_auc_score(sgi_labels, sgi_scores)
+        sgi_auroc = float(roc_auc_score(sgi_labels, sgi_scores))
         print(f"  SGI AUROC: {sgi_auroc:.4f}  (n={len(sgi_scores)})")
     else:
-        print("  SGI AUROC: N/A (insufficient data)")
+        print(
+            "  SGI AUROC: not computable - this dataset carries no "
+            "source text, so there is no context to score against. "
+            "DGI only."
+        )
 
+    dgi_auroc: float | None = None
     if dgi_scores and len(set(dgi_labels)) > 1:
-        dgi_auroc = roc_auc_score(dgi_labels, dgi_scores)
+        dgi_auroc = float(roc_auc_score(dgi_labels, dgi_scores))
         print(f"  DGI AUROC: {dgi_auroc:.4f}  (n={len(dgi_scores)})")
     else:
         print("  DGI AUROC: N/A (insufficient data)")
 
     print("=" * 50)
 
+    # Write the artifact. The workflow uploads benchmarks/results/, which never
+    # existed because nothing here ever wrote to it.
+    out = output_dir or Path(__file__).parent / "results"
+    out.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    payload = {
+        "timestamp_utc": stamp,
+        "groundlens_version": __version__,
+        "encoder": model,
+        "n_items": len(pairs),
+        "elapsed_seconds": round(elapsed, 2),
+        "sgi_auroc": sgi_auroc,
+        "sgi_n": len(sgi_scores),
+        "dgi_auroc": dgi_auroc,
+        "dgi_n": len(dgi_scores),
+        "warning": (
+            "Authorship confound: every grounded response was written by a model "
+            "from a source and every confabulation by a person from memory, so "
+            "authorship is perfectly correlated with the label. These AUROCs are "
+            "an upper bound. Do not publish them."
+        ),
+    }
+    result_path = out / f"confabulation_benchmark_{stamp}.json"
+    result_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    (out / "latest.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"  Results written to {result_path}")
+
+
+def main() -> None:
+    """Parse arguments and run the benchmark."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help="Sentence transformer model (default: the calibrated default encoder).",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path(__file__).parent / "results",
+        help="Directory for the JSON result file.",
+    )
+    args = parser.parse_args()
+    run_benchmark(model=args.model, output_dir=args.output)
+
 
 if __name__ == "__main__":
-    run_benchmark()
+    main()

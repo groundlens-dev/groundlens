@@ -34,18 +34,34 @@ def embedding_model():
 # ---------------------------------------------------------------------------
 
 
+# Dimensionality of the default encoder (sentence-t5-large). Derived, not
+# guessed: a mock that returns a different width than the real encoder tests a
+# geometry that ships nowhere, and it is exactly what let two silent default-
+# encoder changes through. This fixture returned 384 (the retired MiniLM width)
+# for the whole life of the 768-dim default.
+MOCK_EMBEDDING_DIM = 768
+
+
+def test_mock_matches_the_real_default_width() -> None:
+    """Guard: the mock width must track the default encoder's width."""
+    from groundlens._internal.embeddings import DEFAULT_MODEL
+
+    assert DEFAULT_MODEL == "sentence-transformers/sentence-t5-large"
+    assert MOCK_EMBEDDING_DIM == 768
+
+
 @pytest.fixture
 def mock_encode_texts():
     """Patch ``encode_texts`` to return deterministic fake embeddings.
 
-    The mock returns random-but-reproducible vectors so geometry tests
-    that sit above the embedding layer can run without downloading a
-    real model.
+    The mock returns random-but-reproducible vectors of the *default encoder's*
+    width, so geometry tests that sit above the embedding layer can run without
+    downloading a real model and still exercise the real dimensionality.
     """
     rng = np.random.default_rng(42)
 
     def _fake_encode(texts: list[str], model_name: str = "mock") -> NDArray[np.float32]:
-        return rng.standard_normal((len(texts), 384)).astype(np.float32)
+        return rng.standard_normal((len(texts), MOCK_EMBEDDING_DIM)).astype(np.float32)
 
     with patch("groundlens._internal.embeddings.encode_texts", side_effect=_fake_encode) as m:
         yield m
