@@ -2663,6 +2663,9 @@ LLM-based scoring and triage pipelines.</p>
 <p>groundlens is designed to support SR 11-7 compliance through deterministic
 scoring, full audit trail, and explicit documentation of design intent
 against the standard's clauses.</p>
+<blockquote>
+<p><strong><code>flagged</code> vs <code>escalate</code>.</strong> <code>result.flagged</code> is the single hard cut. It is <code>False</code> across the whole SGI review band (0.95 to 1.20), which is exactly the band that needs a second look. To route for review, branch on <code>check(result).escalate</code>. Use <code>flagged</code> only when you mean the hard-reject set.</p>
+</blockquote>
 <h2 id="why-groundlens-fits-sr-11-7">Why groundlens fits SR 11-7<a class="headerlink" href="#why-groundlens-fits-sr-11-7" title="Permanent link">&para;</a></h2>
 <p>SR 11-7 sets expectations around four pillars: model development,
 implementation, and use; validation; governance, policies, and controls;

@@ -1012,10 +1012,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sgi-distance-ratios" class="md-nav__link">
+  <a href="#sgi-a-ratio-of-two-angles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SGI: Distance Ratios
+        SGI: A Ratio of Two Angles
       
     </span>
   </a>
@@ -2480,10 +2480,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sgi-distance-ratios" class="md-nav__link">
+  <a href="#sgi-a-ratio-of-two-angles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SGI: Distance Ratios
+        SGI: A Ratio of Two Angles
       
     </span>
   </a>
@@ -2582,7 +2582,7 @@
 <p>Every piece of text --- a question, a context document, an LLM response --- can be mapped to a point in a high-dimensional vector space using a sentence transformer. In this space, texts with similar meaning are close together; texts with different meaning are far apart.</p>
 <p>groundlens exploits two geometric properties of this space:</p>
 <ol>
-<li><strong>Distance ratios</strong> (SGI): If a response truly engaged with the source context, it should be geometrically closer to that context than to the bare question.</li>
+<li><strong>Ratios of angles</strong> (SGI): If a response truly engaged with the source context, it should be geometrically closer to that context than to the bare question.</li>
 <li><strong>Displacement directions</strong> (DGI): Grounded responses create a characteristic "direction of movement" from question to answer. Hallucinations move in different directions.</li>
 </ol>
 <pre class="mermaid"><code>graph LR
@@ -2605,10 +2605,10 @@
   <figcaption>The two scoring methods: SGI compares how close the response is to the context versus the question; DGI checks whether the displacement from question to response aligns with a learned "grounded direction" μ̂.</figcaption>
 </figure>
 
-<h2 id="sgi-distance-ratios">SGI: Distance Ratios<a class="headerlink" href="#sgi-distance-ratios" title="Permanent link">&para;</a></h2>
+<h2 id="sgi-a-ratio-of-two-angles">SGI: A Ratio of Two Angles<a class="headerlink" href="#sgi-a-ratio-of-two-angles" title="Permanent link">&para;</a></h2>
 <p>When context is available, SGI asks: <strong>is the response closer to the context or to the question?</strong></p>
 <div class="arithmatex">\[
-\text{SGI} = \frac{\|\phi(r) - \phi(q)\|}{\|\phi(r) - \phi(\text{ctx})\|}
+\text{SGI} = \frac{\theta(r, q)}{\theta(r, \text{ctx})}, \quad \theta(a,b) = \arccos(\hat{a} \cdot \hat{b})
 \]</div>
 <ul>
 <li>If SGI &gt; 1, the response is closer to the context (grounded)</li>

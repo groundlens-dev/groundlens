@@ -2629,6 +2629,9 @@ US / EU bank deployments.</p>
 <p>The patterns below are the deployment shape groundlens is designed
 for. Each component (rules, audit, calibration, compliance) can be
 adopted independently; they compose well when used together.</p>
+<blockquote>
+<p><strong><code>flagged</code> vs <code>escalate</code>.</strong> <code>result.flagged</code> is the single hard cut. It is <code>False</code> across the whole SGI review band (0.95 to 1.20), which is exactly the band that needs a second look. To route for review, branch on <code>check(result).escalate</code>. Use <code>flagged</code> only when you mean the hard-reject set.</p>
+</blockquote>
 <h2 id="architectural-overview">Architectural overview<a class="headerlink" href="#architectural-overview" title="Permanent link">&para;</a></h2>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                  LLM-powered banking workflow                   │

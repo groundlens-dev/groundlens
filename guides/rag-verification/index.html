@@ -2590,6 +2590,9 @@
 
 <h1 id="rag-verification">RAG Verification<a class="headerlink" href="#rag-verification" title="Permanent link">&para;</a></h1>
 <p>This guide shows how to integrate groundlens SGI scoring into a Retrieval-Augmented Generation (RAG) pipeline to verify that the LLM actually used the retrieved context when generating its response.</p>
+<blockquote>
+<p><strong><code>flagged</code> vs <code>escalate</code>.</strong> <code>result.flagged</code> is the single hard cut. It is <code>False</code> across the whole SGI review band (0.95 to 1.20), which is exactly the band that needs a second look. To route for review, branch on <code>check(result).escalate</code>. Use <code>flagged</code> only when you mean the hard-reject set.</p>
+</blockquote>
 <h2 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p>In a RAG pipeline, you retrieve relevant documents and pass them as context to the LLM. But retrieval does not guarantee usage --- the LLM may:</p>
 <ol>
@@ -2686,7 +2689,7 @@
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">When to use which</p>
-<p><strong>Concatenation</strong> is simpler and works well when chunks are topically coherent. <strong>Per-chunk scoring</strong> is better when chunks cover different aspects of the question --- it avoids penalizing a response that correctly focuses on the most relevant chunk.</p>
+<p><strong>Score each chunk separately and take the max.</strong> Concatenation moves the context embedding toward the average of several topics, which inflates <code>ctx_dist</code> and depresses SGI even when the answer tracks one chunk exactly. Concatenate only when the chunks are genuinely one passage. <strong>Per-chunk scoring</strong> is better when chunks cover different aspects of the question --- it avoids penalizing a response that correctly focuses on the most relevant chunk.</p>
 </div>
 <h2 id="async-rag-pipeline">Async RAG Pipeline<a class="headerlink" href="#async-rag-pipeline" title="Permanent link">&para;</a></h2>
 <p>For production systems handling concurrent requests:</p>
