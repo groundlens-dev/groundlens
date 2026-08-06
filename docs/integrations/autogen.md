@@ -30,11 +30,11 @@ print(result)
 
 ```python
 {
-    "score": 0.452,
-    "normalized": 0.726,
+    "score": 0.612,
+    "normalized": 0.806,
     "flagged": False,
     "method": "dgi",
-    "explanation": "DGI=0.452 -- aligns with grounded patterns (pass)",
+    "explanation": "DGI=0.612 -- aligns with grounded patterns (pass)",
 }
 ```
 

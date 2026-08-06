@@ -17,7 +17,7 @@ AUROC ranges from 0.0 to 1.0:
 | 0.50 | Random chance --- no discrimination |
 
 !!! danger "Read this scale against the ceiling of the method"
-    For embedding-similarity detectors, an **authorship-controlled** AUROC in the high 0.6s is at the ceiling of what the whole class can do. Nothing in this family lands in the 0.9 band on a controlled evaluation.
+    For DGI and for logistic/MLP probes over the same embeddings, an **authorship-controlled** AUROC in the high 0.6s is the measured ceiling. That is a measurement on those detectors, not a proof about every embedding-similarity method: stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high register alignment. What we have not seen is anything in this family landing in the 0.9 band on an authorship- and length-controlled evaluation.
 
     So a reported 0.9+ here is not a signal of quality. It is a signal to go looking for a shortcut: authorship, length, or a generation-condition artifact. We know, because we published one. See [Results](results.md).
 
@@ -37,6 +37,12 @@ The primary benchmark dataset, published alongside arXiv:2603.13259. It contains
 - Context-annotated examples (for SGI evaluation)
 
 **Dataset**: `cert-framework/human-confabulation-benchmark` on HuggingFace.
+
+### The Outer Geometry corpus
+
+The register-alignment study — *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection* ("The Register Wall") — evaluates on **6,487 pairs**: GL-212 (212), TruthfulQA (2,275) and RAGTruth (4,000). Its pooled headline figures are DGI overall AUROC **0.897** on TruthfulQA, **0.712** on GL-212 and **0.617** on RAGTruth. Register alignment ranks against AUROC at Spearman **−0.90** over 15 quintile points, and a cross-encoder control reaches Spearman **−1.00** in 4 of 6 dataset/direction pairs. The paper also carries a Lean 4 verified core (3 lemmas, clean `#print axioms`, no `sorryAx`), available on request.
+
+**The notebooks and the authorship-matched split are not yet released**, so none of this can be re-run from this repository. The figures are pooled and uncontrolled; the authorship- and length-controlled numbers are the ones to quote as performance, and 0.897 is a **DGI** result, not the SGI TruthfulQA result (AUC 0.478). See [Results](results.md) for both and for the scope rules that govern them.
 
 ### Domain-Specific Benchmarks
 

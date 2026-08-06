@@ -50,7 +50,7 @@ $$
 \Gamma(q, r) = \hat{\delta}(q, r)^\top \hat{\mu} \ll \mathbb{E}[\hat{\delta}_i^\top \hat{\mu}]
 $$
 
-**Detection:** DGI separates this **while the confabulation stays out of register**. As it moves into register, DGI declines toward chance like every embedding-similarity method: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the ceiling of the whole class. Escalate the in-register cases.
+**Detection:** DGI separates this **while the confabulation stays out of register**. As it moves into register, DGI declines toward chance: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the measured ceiling for DGI and for logistic/MLP probes over the same embeddings. That is a measurement on those detectors, not a proof about every embedding-similarity method — stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high register alignment. Escalate the in-register cases.
 
 #### Three confabulation mechanisms
 
@@ -147,13 +147,33 @@ The pattern is itself a prediction: $\Gamma$ wins when errors are predominantly 
 
 ### What groundlens can and cannot detect
 
-| Hallucination type | Detection | Typical AUROC |
-|---|---|---|
-| Context-ignoring responses (Type I) | **Strong** — SGI | 0.80–0.95 |
-| Mechanism inversion confabulations (Type II) | **Strong** — DGI | 0.85–0.99 |
-| Topic drift / irrelevant responses (Type II) | **Strong** — DGI | 0.85–0.95 |
-| Template-filling confabulations (Type II/III boundary) | **Weak** — DGI | 0.50–0.60 |
-| Within-frame factual errors (Type III) | **None** | ~0.50 |
+The per-type AUROC table that used to sit here has been removed. Its figures were
+unattributed, were never reproduced under the authorship and length controls, and its DGI
+ranges overlapped the 0.90–0.99 band withdrawn in July 2026. They should not be quoted
+anywhere, and this page does not replace them with a guess.
+
+Measured numbers live in [Benchmark results](../benchmarks/results.md): the register-binned
+curve, the authorship-matched figures, and the length-matched external benchmarks. Read them
+under four scope rules.
+
+- **SGI is not DGI.** SGI scores a response against a supplied source; DGI is reference-free.
+  The authorship control was run on DGI and on supervised probes over the same embeddings,
+  **not on SGI**. TruthfulQA AUC 0.478 is an SGI result; TruthfulQA 0.897 is a DGI result.
+  Never state one as if it were the other.
+- **The ≈ 0.68 ceiling is measured for DGI and for the logistic and MLP probes over those
+  embeddings.** It is not a demonstrated ceiling for every embedding-similarity method:
+  stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high
+  register alignment.
+- **Register sufficiency is an assumption, not a theorem, and it is only partially true.**
+  After register alignment is controlled, residual surface features still carry rank
+  correlation up to Spearman 0.37.
+- **The formal bound covers only detectors that are functions of a single frozen sentence
+  embedding.** Not activations, not log-probabilities, not multi-sample methods, not retrieval.
+
+What the taxonomy still predicts is the *ordering*, not a number: Type I is the case SGI is
+built for; Type II is separable by DGI while the confabulation stays out of register, and
+stops being separable as it moves in; Type III — a within-frame factual error — leaves no
+angular signature at all and has to be escalated to the second stage.
 
 ### Deployment guidance
 

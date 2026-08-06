@@ -2,7 +2,7 @@
 
 # Groundlens: a set of tools for checking the output of LLMs and agents.
 
-**No generative model in the scoring path.** Geometry uses a sentence encoder, not an LLM; Switch and Rules use no model at all. Deterministic, local, the same answer every time. One stage, Consistency, loads a small local generator, and only for the answers the cheaper stages could not settle.
+**Embedding similarity detects hallucination at 88–97% on the standard benchmark. Hold the questions fixed, write negatives that stay in the register of the correct answer, and the same detectors fall to the low seventies.** That gap is what this library is built around: deterministic geometric triage that settles the cases geometry can settle and escalates the ones no embedding score can. No generative model in the scoring path. Geometry uses a sentence encoder, not an LLM; Switch and Rules use no model at all. One stage, Consistency, loads a small local generator, and only for the answers the cheaper stages could not settle.
 
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue?style=flat-square)](https://github.com/groundlens-dev/groundlens)
 [![CI](https://img.shields.io/github/actions/workflow/status/groundlens-dev/groundlens/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/groundlens-dev/groundlens/actions)
@@ -14,9 +14,51 @@
 [![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow?style=flat-square)](https://huggingface.co/spaces/groundlens/demo)
 
 
-[Pipeline](#pipeline) · [Tools](#tools) · [Stage 1](#stage-1) · [Stage 2](#stage-2) · [Stage 3](#stage-3) · [Stage 4](#stage-4) · [Calibration](#calibration) · [Audit tools](#audit-tools) ·  [Integration](#integration) 
+[What the numbers say](#what-the-numbers-say) · [Pipeline](#pipeline) · [Tools](#tools) · [Stage 1](#stage-1) · [Stage 2](#stage-2) · [Stage 3](#stage-3) · [Stage 4](#stage-4) · [Calibration](#calibration) · [Audit tools](#audit-tools) · [Integration](#integration) · [Papers](#research-papers)
 
 </div>
+
+## What the numbers say
+
+| Benchmark | Detection accuracy | Paired similarity cos(g,c) |
+|---|--:|--:|
+| HaluEval (LLM-generated) | 88–97% | 0.10–0.78 |
+| LLM confabulations, same questions | 73–76% | 0.86–0.96 |
+| **Human confabulations (GL-212)** | **69–78%** | **0.72–0.92** |
+
+Ranges are across four encoders: `all-MiniLM-L6-v2`, `all-mpnet-base-v2`, `bge-small-en-v1.5`, `gte-small`. The metric is pairwise-detection accuracy — the fraction of pairs where cos(question, grounded) > cos(question, confabulation).
+
+Read it in that order. On the standard benchmark, embedding similarity detects hallucination at 88–97%, and that benchmark's negatives sit at paired similarity 0.10–0.78: they are nowhere near the correct answer to begin with. Hold the questions fixed and write negatives that stay in the register of the correct answer, so paired similarity rises above 0.72, and detection falls to the low seventies. **The 88–97% figure is therefore substantially a property of how the negatives were constructed, not of detector quality.**
+
+The middle row is the control. Those negatives were written by a language model rather than by a person, on the same questions, and they land in the same place. The effect is about register, not about who did the writing. Note also that the two lower rows overlap (73–76% against 69–78%) and the model-written row carries the *higher* paired similarity: nothing here says human confabulations are harder than machine-written ones.
+
+## What this library does
+
+Groundlens implements the two geometric scores from that work — SGI, which needs a source document, and DGI, which does not — as the cheap first stage of a verification pipeline. Deterministic, local, one sentence encoder, the same answer every time. It clears what it can clear and escalates the rest, because the table above is a statement about what the rest costs.
+
+**Scope, stated plainly.**
+
+- Grounding is not truth. SGI tells you where an answer came from, not whether it is correct. A wrong fact phrased in the right frame passes.
+- In-register factual substitution is the published blind spot of this whole class of method. Groundlens escalates it rather than guessing at it.
+- The measured ceiling of about 0.68 AUROC is a ceiling for DGI and for logistic/MLP probes over these embeddings. It is not a demonstrated ceiling for every embedding-similarity method: stronger classifiers (random forest, XGBoost) keep residual signal up to 0.88 where register alignment is highest.
+- Register sufficiency is an assumption, not a theorem, and it is only partly true — residual surface features retain a partial Spearman up to 0.37 once register alignment is controlled.
+- Of the headline figures, the 69–78% row is reproducible from the public GL-212 dataset today. The AUROCs below come from the manuscript; the notebooks are not released yet.
+
+### Measured, in the manuscript
+
+From *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection* (preprint), over 6,487 pairs — GL-212 (212), TruthfulQA (2,275), RAGTruth (4,000):
+
+| Result | Value |
+|---|--:|
+| DGI overall AUROC, TruthfulQA | 0.897 |
+| DGI overall AUROC, GL-212 | 0.712 |
+| DGI overall AUROC, RAGTruth | 0.617 |
+| Register alignment against AUROC | Spearman −0.90 across 15 quintile points |
+| Cross-encoder control | Spearman −1.00 in 4 of 6 dataset/direction pairs |
+
+The −0.90 is the line to read: pool the register-alignment quintiles of all three datasets and detector skill falls as alignment rises, over all 15 points. The cross-encoder control repeats the pattern in a different embedding space, so it is not an artefact of one encoder. Appendix F of the same paper carries a machine-checked Lean 4 core — three lemmas, a clean `#print axioms`, no `sorryAx` — bounding what a detector can do when it is a function of a single frozen sentence embedding. The bound covers exactly that case: not activations, not log-probabilities, not multi-sample methods, not retrieval.
+
+None of the numbers in this second table can be reproduced from this repository yet. The notebooks and the authorship-matched split have not been released, so cite the manuscript rather than the code until they are.
 
 ## Pipeline
 
@@ -270,11 +312,21 @@ Every metric here ships with its measured ceiling and its failure modes, and ear
 
 ## Research papers
 
-[arXiv:2512.13771](https://arxiv.org/abs/2512.13771) 
-[arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
-[arXiv:2603.13259](https://arxiv.org/abs/2603.13259). 
+| # | Paper | ID |
+|---|---|---|
+| 1 | Semantic Grounding Index: Geometric Bounds on Context Engagement in RAG Systems | [arXiv:2512.13771](https://arxiv.org/abs/2512.13771) |
+| 2 | A Geometric Taxonomy of Hallucination in LLMs | [arXiv:2602.13224](https://arxiv.org/abs/2602.13224) |
+| 3 | How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing | [arXiv:2603.13259](https://arxiv.org/abs/2603.13259) |
+| 4 | The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection | preprint, not yet announced |
+| 5 | The Geometry of Validity: What a Reasoning Chain's Trajectory Shows That a Probe Does Not | preprint, not yet announced |
+
+**Status.** Papers 1–3: arXiv preprints. Each has been through peer review at COLM, NeurIPS or ACL, three reviewers per paper, and each current version was revised to address every point raised. None is accepted at a venue yet. Papers 4 and 5 are new preprints, not yet announced and not yet through a review cycle.
+
+Paper 3 is the seven-model mechanistic study of how a transformer rejects a wrong answer. It is not the register-wall paper. Paper 4 is, and its title is *The Outer Geometry of Truth*; everything under [What the numbers say](#what-the-numbers-say) comes from it.
 
 ## How to cite
+
+Cite the software:
 
 ```bibtex
 @software{marin_groundlens,
@@ -285,7 +337,21 @@ Every metric here ships with its measured ceiling and its failure modes, and ear
 }
 ```
 
-See [CITATION.cff](CITATION.cff).
+Cite the method (the preferred citation in [CITATION.cff](CITATION.cff)):
+
+```bibtex
+@misc{marin_sgi_2025,
+  author = {Marin, Javier},
+  title  = {Semantic Grounding Index: Geometric Bounds on Context Engagement
+            in RAG Systems},
+  year   = {2025},
+  eprint = {2512.13771},
+  archivePrefix = {arXiv},
+  url    = {https://arxiv.org/abs/2512.13771}
+}
+```
+
+There is no DOI yet. [CITATION.cff](CITATION.cff) carries a marked placeholder for the Zenodo DOI; it gets filled in when the first Zenodo-backed release is cut.
 
 ## Contributing
 

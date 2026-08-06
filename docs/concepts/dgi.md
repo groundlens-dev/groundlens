@@ -69,7 +69,7 @@ reading = check(compute_dgi(question=question, response=response))
 reading_local = check(compute_dgi(question=question, response=response, k=10))
 ```
 
-On the shipped reference set (leave-one-out) this raises detection from **AUROC 0.78** with the global direction to **0.81** with the local variant. The gain is largest when your calibration set spans several domains, because that is exactly when a single global direction is the poorest fit. Note that this set is not authorship-controlled; under the stricter authorship control the register wall lowers the ceiling for the whole embedding-similarity class (see [Benchmarks](../benchmarks/overview.md)).
+On the shipped reference set (leave-one-out) this raises detection from **AUROC 0.78** with the global direction to **0.81** with the local variant. The gain is largest when your calibration set spans several domains, because that is exactly when a single global direction is the poorest fit. Note that this set is not authorship-controlled; under the stricter authorship control the register wall lowers the measured ceiling for DGI and for logistic/MLP probes over the same embeddings to roughly 0.68 (see [Benchmarks](../benchmarks/overview.md)).
 
 ## Calibration
 

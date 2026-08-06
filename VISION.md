@@ -72,8 +72,11 @@ The value proposition is verification triage: prioritize what to review, flag wh
 
 - SGI for grounded hallucination detection in RAG pipelines (arXiv:2512.13771)
 - DGI for context-free hallucination detection via directional analysis (arXiv:2602.13224v3)
-- Confabulation boundary characterization via rotational dynamics (arXiv:2603.13259)
-- Characterization of the register wall, the authorship control, and the ceiling of the embedding-similarity class (*The Register Wall*, under review)
+- How a transformer rejects a wrong answer: rotational dynamics of factual constraint processing, seven models (arXiv:2603.13259)
+- Characterization of the register wall, the authorship control, and the ceiling of the embedding-similarity class (*The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection*)
+- What a reasoning chain's trajectory shows that a probe does not (*The Geometry of Validity*)
+
+**Status of all five.** Papers 1-3: arXiv preprints. Each has been through peer review at COLM, NeurIPS or ACL, three reviewers per paper, and each current version was revised to address every point raised. None is accepted at a venue yet. *The Outer Geometry of Truth* and *The Geometry of Validity* are new preprints, not yet announced and not yet through a review cycle.
 
 ### Active research
 

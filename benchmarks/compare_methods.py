@@ -12,7 +12,13 @@ score falls to AUROC 0.606 and the ceiling of the whole embedding-similarity
 class is about 0.68.
 
 Do not quote a number from this script. Run it to see the confound, not to
-measure grounding. See *The Register Wall* for the controlled evaluation.
+measure grounding. See *The Outer Geometry of Truth: Register Alignment and the
+Limits of Embedding-Based Hallucination Detection* for the controlled
+evaluation.
+
+SCOPE OF THIS COMPARISON: two inline cosine baselines and nothing else. See the
+TODO(baselines) block below before describing this script as a comparison
+against the literature.
 """
 
 from __future__ import annotations
@@ -28,6 +34,26 @@ from groundlens.dgi import compute_dgi
 from groundlens.sgi import compute_sgi
 
 DATASET_NAME = "cert-framework/human-confabulation-benchmark"
+
+# ── TODO(baselines): NOT IMPLEMENTED ─────────────────────────────────────────
+# This script compares SGI and DGI against exactly two baselines, both defined
+# inline below: cosine(question, response) and cosine(context, response). The
+# documentation discusses a wider comparison set that no code in this
+# repository runs. Until the following exist here, no claim of the form
+# "groundlens beats X" is backed by anything runnable:
+#
+#   - NLI cross-encoder entailment over (context, response)
+#   - MiniCheck
+#   - AlignScore
+#   - SelfCheckGPT
+#   - HHEM (Vectara Hallucination Evaluation Model)
+#   - LettuceDetect
+#
+# Each of these needs the authorship-matched and length-matched split before
+# its number means anything (CLAUDE.md, constraint 6). Deliberately left
+# unimplemented: an unrun baseline listed honestly is better than a
+# half-controlled one reported as a win.
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
@@ -142,7 +168,8 @@ def run_comparison(model: str = DEFAULT_MODEL) -> None:
     print("  were written by a person from memory. Authorship is correlated")
     print("  with the label, so any separation above is confounded with it.")
     print("  Hold authorship constant and the directional score falls to 0.606.")
-    print("  Do not quote these numbers. See The Register Wall.")
+    print("  Do not quote these numbers. See The Outer Geometry of Truth.")
+    print("  Baselines here are two cosine scores only; see TODO(baselines).")
 
 
 if __name__ == "__main__":

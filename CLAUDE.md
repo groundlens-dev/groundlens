@@ -119,7 +119,11 @@ CalVer: `YYYY.M.D`. The version lives in `src/groundlens/_version.py` and in `py
 groundlens implements methods from three papers:
 1. SGI — arXiv:2512.13771 (Marin, 2025)
 2. DGI + geometric taxonomy — arXiv:2602.13224v3 (Marin, 2026)
-3. Confabulation benchmark — arXiv:2603.13259 (Marin, 2026)
+3. *How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing* — arXiv:2603.13259 (Marin, 2026). The seven-model mechanistic study, and the source of the confabulation benchmark. It is **not** the Register Wall paper.
+
+Status sentence, use verbatim: arXiv preprints. Each has been through peer review at COLM, NeurIPS or ACL, three reviewers per paper, and each current version was revised to address every point raised. None is accepted at a venue yet.
+
+The corrected benchmark numbers in `docs/benchmarks/` come from a fourth, newer preprint: the register-alignment result ("The Register Wall"), *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection*. On arXiv, not yet announced, not through that review cycle, notebooks not yet released. Never refer to it as "The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure" — no paper by that title exists.
 
 If you're modifying SGI/DGI math, check the paper formulas. The code must match the published definitions.
 

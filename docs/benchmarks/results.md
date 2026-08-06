@@ -7,7 +7,11 @@ All results use the default embedding model (`sentence-transformers/sentence-t5-
 
     All of them rested on evaluations in which the grounded and the confabulated text had **different authors**. Authorship was correlated with the label, so the detectors were being scored on a shortcut. Hold authorship constant and the skill collapses. NLI does not collapse: it is the strongest method at the in-register end, and it is now the recommended second stage.
 
-    The controlled evaluation is in *The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure* (under review). This page reports it.
+    The controlled evaluation is the register-alignment result ("The Register Wall"), reported in
+    *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination
+    Detection*. That paper is an arXiv preprint, newer than papers 1--3 and not yet announced; unlike
+    them it has not been through a venue review cycle, and it is not accepted anywhere. This page
+    reports it.
 
 ## The wall
 
@@ -36,7 +40,16 @@ Hold authorship constant and the skill disappears:
 | MLP | 0.935 | **0.675** |
 | Directional score (DGI) | high | **0.606** |
 
-With authorship matched, even the best supervised decoder over these embeddings sits in the high 0.6s. **DGI's ≈ 0.68 is not a weak estimator. It is the ceiling of the entire class.** Extra model capacity buys nothing: the MLP, with far more parameters than DGI, reaches 0.675.
+With authorship matched, DGI and the logistic and MLP probes over these embeddings sit in the high 0.6s. **DGI's ≈ 0.68 is not a weak estimator. It is the measured ceiling for DGI and for those probes.** Extra capacity of that kind buys nothing: the MLP, with far more parameters than DGI, reaches 0.675.
+
+!!! warning "How far this ceiling generalises"
+    ≈ 0.68 is a **measurement on DGI and on logistic/MLP probes over these embeddings**. It is not a
+    demonstrated ceiling for every embedding-similarity method. Stronger classifiers (random forest,
+    XGBoost) retain residual signal up to **0.88** at high register alignment.
+
+    The authorship control was run on DGI and on those probes. **It was not run on SGI**, which scores
+    against a supplied source and is a different method. Nothing on this page is an authorship-controlled
+    SGI number.
 
 ## Calibration, corrected
 
@@ -70,6 +83,29 @@ RAGTruth's apparent skill was a length artifact: the grounded and hallucinated r
 | FACTS Grounding (provenance) | ≈ 0.95 | **Pending.** The two arms differ in generation condition, which is the shortcut the controls exist to expose. Labels are LLM-judge derived. |
 
 SGI, with context, is the road forward. Its numbers predate the controls and have not been re-run under them. Treat them as provisional, and do not quote them as validated.
+
+## From the Outer Geometry paper (not yet reproducible)
+
+These figures come from the register-alignment result ("The Register Wall"): *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection*. **The notebooks, the authorship-matched split and the Lean 4 file are not yet released**, so nothing in this section can be re-run from this repository today. Cite the manuscript, not this page.
+
+| Result | Value |
+|---|--:|
+| DGI overall AUROC, TruthfulQA | 0.897 |
+| DGI overall AUROC, GL-212 | 0.712 |
+| DGI overall AUROC, RAGTruth | 0.617 |
+| Rank correlation, register alignment vs AUROC | Spearman −0.90 across 15 quintile points |
+| Cross-encoder control | Spearman −1.00 in 4 of 6 dataset/direction pairs |
+| Corpus | 6,487 pairs (GL-212 212, TruthfulQA 2,275, RAGTruth 4,000) |
+| Lean 4 verified core | 3 lemmas, clean `#print axioms`, no `sorryAx` — available on request |
+
+The Spearman −0.90 is the paper's central claim: AUROC falls as register alignment rises, monotonically, across 15 quintile points. The cross-encoder control reproduces that decline with a different scoring family, reaching Spearman −1.00 in four of the six dataset/direction pairs, which is what rules out an artefact of one embedding panel.
+
+!!! danger "These are pooled, uncontrolled numbers. Read them with the scope rules."
+    - **0.897 on TruthfulQA is a DGI number.** The SGI TruthfulQA result is AUC 0.478 (arXiv:2512.13771). The two are different methods on different setups and must never be quoted as if they were the same measurement.
+    - These are **pooled overall AUROCs, not authorship- or length-matched**. They are the input to the register-binned analysis, not a refutation of it. The controlled figures are in the tables above, and those are the ones to quote as performance.
+    - This page also reports TruthfulQA at chance under the length-matched external protocol above. That evaluation and this one use different corpora, different pairings and different controls, and **the discrepancy is not yet reconciled in print**. Until the notebooks are released, treat it as open rather than picking whichever number is more convenient.
+    - Register sufficiency is an assumption in that paper, not a theorem, and only partially true: after register alignment is controlled, residual surface features still carry rank correlation up to Spearman 0.37.
+    - The formal bound covers only detectors that are functions of a **single frozen sentence embedding** — not activations, not log-probabilities, not multi-sample methods, not retrieval.
 
 ## What "reproducible" does and does not mean
 

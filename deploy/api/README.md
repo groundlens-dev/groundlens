@@ -5,7 +5,7 @@ colorFrom: yellow
 colorTo: red
 sdk: docker
 pinned: false
-license: mit
+license: apache-2.0
 tags:
 - hallucination-detection
 - llm-evaluation

@@ -220,7 +220,7 @@ DGI can be framed as a one-sided hypothesis test:
 
 The DGI score is the test statistic. The threshold DGI = 0.525 defines the rejection region. Under $H_0$ (a uniformly random direction) the probability of exceeding it is small, giving the test high specificity.
 
-Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.525. Note what the null is here: a **uniformly random direction**, not a competent confabulation. Against an in-register confabulation the separation is far smaller, and no threshold choice recovers it: with authorship held constant the empirical AUROC is ≈ 0.68. The vMF argument gives the *form* of the statistic. It does not license the uncontrolled numbers this section used to quote.
+Under $H_1$ with domain-specific calibration ($\kappa \geq 10$), the expected DGI for grounded responses is well above 0.525. Note what the null is here: a **uniformly random direction**, not a competent confabulation. Against an in-register confabulation the separation is far smaller, and no threshold choice recovers it: with authorship held constant DGI reaches AUROC 0.606, and ≈ 0.68 is the measured ceiling for DGI and for logistic/MLP probes over the same embeddings. The vMF argument gives the *form* of the statistic. It does not license the uncontrolled numbers this section used to quote.
 
 ## Geometric Visualization
 
