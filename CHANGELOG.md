@@ -927,6 +927,14 @@ batch = dgi.propose_labels(
 - **DGI (Directional Grounding Index):** context-free hallucination detection via directional alignment with a calibrated reference direction. Implements the method from arXiv:2602.13224v3.
 - **`evaluate()` and `evaluate_batch()`:** high-level API that auto-selects SGI (when context is provided) or DGI (when context is absent).
 - **Domain calibration:** `calibrate()` function and `CalibrationResult` for computing domain-specific DGI reference directions. 20-100 verified pairs improve AUROC from ~0.76 to 0.90-0.99.
+
+  > **Retraction note added 2026-08-06.** The historical entry above is left as written
+  > because a changelog is a record. Its numbers are wrong. The "~0.76 to 0.90-0.99"
+  > calibration range was withdrawn in July 2026 (see 2026.7.13): it came from an
+  > evaluation in which grounded and confabulated text had different authors, so the
+  > label was correlated with authorship. Hold authorship constant and calibration moves
+  > overall AUROC 0.684 to 0.736, with the in-register bin moving only 0.626 to 0.689.
+  > Do not quote the 0.90-0.99 range from this entry. See `docs/benchmarks/results.md`.
 - **Result types:** `SGIResult`, `DGIResult`, and `GroundlensScore` frozen dataclasses with scores, flags, and human-readable explanations.
 - **CLI:** `groundlens check`, `groundlens evaluate`, `groundlens calibrate`, `groundlens benchmark` commands.
 - **LLM providers:** OpenAI, Anthropic, and Google Generative AI wrappers with automatic hallucination scoring on every response.

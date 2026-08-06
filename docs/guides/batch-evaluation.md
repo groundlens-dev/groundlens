@@ -77,7 +77,7 @@ The output includes all original columns plus groundlens scores:
 ```csv
 question,response,context,groundlens_method,groundlens_score,groundlens_normalized,groundlens_flagged,groundlens_explanation
 "What is X?","X is Y.","According to docs, X is Y.",sgi,1.2341,0.6142,False,"SGI=1.234 -- strong context engagement (pass)"
-"What causes Z?","Z happens because of W.",,dgi,0.4521,0.7261,False,"DGI=0.452 -- aligns with grounded patterns (pass)"
+"What causes Z?","Z happens because of W.",,dgi,0.6120,0.8060,False,"DGI=0.612 -- aligns with grounded patterns (pass)"
 ```
 
 With domain calibration:

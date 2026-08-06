@@ -68,6 +68,16 @@ Read the **level** (`"ok"`, `"review"`, `"risk"`), not the raw decimal. The numb
 
 The methods are documented in three preprints:
 
-- *Semantic Grounding Index: geometric bounds on context engagement in RAG systems* (2025), [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
-- *A Geometric Taxonomy of Hallucinations in LLMs* (2026), [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
-- *Rotational Dynamics of Factual Constraint Processing in Large Language Models* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
+- *Semantic Grounding Index: Geometric Bounds on Context Engagement in RAG Systems* (2025), [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
+- *A Geometric Taxonomy of Hallucination in LLMs* (2026), [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
+- *How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259) — the seven-model mechanistic study, **not** the Register Wall paper
+
+arXiv preprints. Each has been through peer review at COLM, NeurIPS or ACL, three reviewers per
+paper, and each current version was revised to address every point raised. None is accepted at a
+venue yet.
+
+The corrected benchmark numbers on this site come from a fourth, newer preprint: the
+register-alignment result ("The Register Wall"), *The Outer Geometry of Truth: Register Alignment
+and the Limits of Embedding-Based Hallucination Detection*. It is on arXiv but not yet announced,
+and it has not been through the review cycle above. Its notebooks are not yet released. See
+[Benchmark results](benchmarks/results.md).
