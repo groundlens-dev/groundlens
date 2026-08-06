@@ -2791,7 +2791,7 @@
 <p>The output includes all original columns plus groundlens scores:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>question,response,context,groundlens_method,groundlens_score,groundlens_normalized,groundlens_flagged,groundlens_explanation
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&quot;What is X?&quot;,&quot;X is Y.&quot;,&quot;According to docs, X is Y.&quot;,sgi,1.2341,0.6142,False,&quot;SGI=1.234 -- strong context engagement (pass)&quot;
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&quot;What causes Z?&quot;,&quot;Z happens because of W.&quot;,,dgi,0.4521,0.7261,False,&quot;DGI=0.452 -- aligns with grounded patterns (pass)&quot;
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&quot;What causes Z?&quot;,&quot;Z happens because of W.&quot;,,dgi,0.6120,0.8060,False,&quot;DGI=0.612 -- aligns with grounded patterns (pass)&quot;
 </span></code></pre></div>
 <p>With domain calibration:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>groundlens<span class="w"> </span>evaluate<span class="w"> </span>input.csv<span class="w"> </span>--output<span class="w"> </span>results.csv<span class="w"> </span>--reference-csv<span class="w"> </span>domain_pairs.csv

@@ -2252,6 +2252,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#from-the-outer-geometry-paper-not-yet-reproducible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the Outer Geometry paper (not yet reproducible)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-reproducible-does-and-does-not-mean" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2480,6 +2491,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#from-the-outer-geometry-paper-not-yet-reproducible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the Outer Geometry paper (not yet reproducible)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-reproducible-does-and-does-not-mean" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2516,7 +2538,11 @@
 <p class="admonition-title">Retraction, 2026-07</p>
 <p>The figures previously published on this page (DGI 0.958, domain-calibrated AUROC 0.90–0.99, 87.8% detection on human confabulations, and an NLI baseline near chance) are <strong>withdrawn</strong>.</p>
 <p>All of them rested on evaluations in which the grounded and the confabulated text had <strong>different authors</strong>. Authorship was correlated with the label, so the detectors were being scored on a shortcut. Hold authorship constant and the skill collapses. NLI does not collapse: it is the strongest method at the in-register end, and it is now the recommended second stage.</p>
-<p>The controlled evaluation is in <em>The Register Wall: What Similarity-Based Hallucination Detectors Actually Measure</em> (under review). This page reports it.</p>
+<p>The controlled evaluation is the register-alignment result ("The Register Wall"), reported in
+<em>The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination
+Detection</em>. That paper is an arXiv preprint, newer than papers 1--3 and not yet announced; unlike
+them it has not been through a venue review cycle, and it is not accepted anywhere. This page
+reports it.</p>
 </div>
 <h2 id="the-wall">The wall<a class="headerlink" href="#the-wall" title="Permanent link">&para;</a></h2>
 <p><strong>Register</strong> here means how closely a wrong answer imitates the style of a right one: same vocabulary, same phrasing, same sentence structure, one wrong fact. An out-of-register confabulation reads oddly and is easy to catch. An in-register one reads exactly like a good answer, and that is the case that matters in production.</p>
@@ -2582,7 +2608,16 @@
 </tr>
 </tbody>
 </table>
-<p>With authorship matched, even the best supervised decoder over these embeddings sits in the high 0.6s. <strong>DGI's ≈ 0.68 is not a weak estimator. It is the ceiling of the entire class.</strong> Extra model capacity buys nothing: the MLP, with far more parameters than DGI, reaches 0.675.</p>
+<p>With authorship matched, DGI and the logistic and MLP probes over these embeddings sit in the high 0.6s. <strong>DGI's ≈ 0.68 is not a weak estimator. It is the measured ceiling for DGI and for those probes.</strong> Extra capacity of that kind buys nothing: the MLP, with far more parameters than DGI, reaches 0.675.</p>
+<div class="admonition warning">
+<p class="admonition-title">How far this ceiling generalises</p>
+<p>≈ 0.68 is a <strong>measurement on DGI and on logistic/MLP probes over these embeddings</strong>. It is not a
+demonstrated ceiling for every embedding-similarity method. Stronger classifiers (random forest,
+XGBoost) retain residual signal up to <strong>0.88</strong> at high register alignment.</p>
+<p>The authorship control was run on DGI and on those probes. <strong>It was not run on SGI</strong>, which scores
+against a supplied source and is a different method. Nothing on this page is an authorship-controlled
+SGI number.</p>
+</div>
 <h2 id="calibration-corrected">Calibration, corrected<a class="headerlink" href="#calibration-corrected" title="Permanent link">&para;</a></h2>
 <p>Domain calibration moves the operating point, not the wall.</p>
 <table>
@@ -2665,6 +2700,57 @@
 </tbody>
 </table>
 <p>SGI, with context, is the road forward. Its numbers predate the controls and have not been re-run under them. Treat them as provisional, and do not quote them as validated.</p>
+<h2 id="from-the-outer-geometry-paper-not-yet-reproducible">From the Outer Geometry paper (not yet reproducible)<a class="headerlink" href="#from-the-outer-geometry-paper-not-yet-reproducible" title="Permanent link">&para;</a></h2>
+<p>These figures come from the register-alignment result ("The Register Wall"): <em>The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection</em>. <strong>The notebooks, the authorship-matched split and the Lean 4 file are not yet released</strong>, so nothing in this section can be re-run from this repository today. Cite the manuscript, not this page.</p>
+<table>
+<thead>
+<tr>
+<th>Result</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DGI overall AUROC, TruthfulQA</td>
+<td style="text-align: right;">0.897</td>
+</tr>
+<tr>
+<td>DGI overall AUROC, GL-212</td>
+<td style="text-align: right;">0.712</td>
+</tr>
+<tr>
+<td>DGI overall AUROC, RAGTruth</td>
+<td style="text-align: right;">0.617</td>
+</tr>
+<tr>
+<td>Rank correlation, register alignment vs AUROC</td>
+<td style="text-align: right;">Spearman −0.90 across 15 quintile points</td>
+</tr>
+<tr>
+<td>Cross-encoder control</td>
+<td style="text-align: right;">Spearman −1.00 in 4 of 6 dataset/direction pairs</td>
+</tr>
+<tr>
+<td>Corpus</td>
+<td style="text-align: right;">6,487 pairs (GL-212 212, TruthfulQA 2,275, RAGTruth 4,000)</td>
+</tr>
+<tr>
+<td>Lean 4 verified core</td>
+<td style="text-align: right;">3 lemmas, clean <code>#print axioms</code>, no <code>sorryAx</code> — available on request</td>
+</tr>
+</tbody>
+</table>
+<p>The Spearman −0.90 is the paper's central claim: AUROC falls as register alignment rises, monotonically, across 15 quintile points. The cross-encoder control reproduces that decline with a different scoring family, reaching Spearman −1.00 in four of the six dataset/direction pairs, which is what rules out an artefact of one embedding panel.</p>
+<div class="admonition danger">
+<p class="admonition-title">These are pooled, uncontrolled numbers. Read them with the scope rules.</p>
+<ul>
+<li><strong>0.897 on TruthfulQA is a DGI number.</strong> The SGI TruthfulQA result is AUC 0.478 (arXiv:2512.13771). The two are different methods on different setups and must never be quoted as if they were the same measurement.</li>
+<li>These are <strong>pooled overall AUROCs, not authorship- or length-matched</strong>. They are the input to the register-binned analysis, not a refutation of it. The controlled figures are in the tables above, and those are the ones to quote as performance.</li>
+<li>This page also reports TruthfulQA at chance under the length-matched external protocol above. That evaluation and this one use different corpora, different pairings and different controls, and <strong>the discrepancy is not yet reconciled in print</strong>. Until the notebooks are released, treat it as open rather than picking whichever number is more convenient.</li>
+<li>Register sufficiency is an assumption in that paper, not a theorem, and only partially true: after register alignment is controlled, residual surface features still carry rank correlation up to Spearman 0.37.</li>
+<li>The formal bound covers only detectors that are functions of a <strong>single frozen sentence embedding</strong> — not activations, not log-probabilities, not multi-sample methods, not retrieval.</li>
+</ul>
+</div>
 <h2 id="what-reproducible-does-and-does-not-mean">What "reproducible" does and does not mean<a class="headerlink" href="#what-reproducible-does-and-does-not-mean" title="Permanent link">&para;</a></h2>
 <p>groundlens scoring is deterministic: the same input gives the same score, forever, on any machine.</p>
 <p>Determinism guarantees you get the same number twice. <strong>It does not guarantee the number measures grounding.</strong> That is what the controls in the <a href="../overview/">evaluation protocol</a> are for, and it is the lesson of the retraction at the top of this page.</p>

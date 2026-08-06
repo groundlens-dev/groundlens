@@ -2231,6 +2231,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-outer-geometry-corpus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Outer Geometry corpus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#domain-specific-benchmarks" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2571,6 +2582,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-outer-geometry-corpus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Outer Geometry corpus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#domain-specific-benchmarks" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2715,7 +2737,7 @@
 </table>
 <div class="admonition danger">
 <p class="admonition-title">Read this scale against the ceiling of the method</p>
-<p>For embedding-similarity detectors, an <strong>authorship-controlled</strong> AUROC in the high 0.6s is at the ceiling of what the whole class can do. Nothing in this family lands in the 0.9 band on a controlled evaluation.</p>
+<p>For DGI and for logistic/MLP probes over the same embeddings, an <strong>authorship-controlled</strong> AUROC in the high 0.6s is the measured ceiling. That is a measurement on those detectors, not a proof about every embedding-similarity method: stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high register alignment. What we have not seen is anything in this family landing in the 0.9 band on an authorship- and length-controlled evaluation.</p>
 <p>So a reported 0.9+ here is not a signal of quality. It is a signal to go looking for a shortcut: authorship, length, or a generation-condition artifact. We know, because we published one. See <a href="../results/">Results</a>.</p>
 </div>
 <h3 id="why-auroc">Why AUROC?<a class="headerlink" href="#why-auroc" title="Permanent link">&para;</a></h3>
@@ -2730,6 +2752,9 @@
 <li>Context-annotated examples (for SGI evaluation)</li>
 </ul>
 <p><strong>Dataset</strong>: <code>cert-framework/human-confabulation-benchmark</code> on HuggingFace.</p>
+<h3 id="the-outer-geometry-corpus">The Outer Geometry corpus<a class="headerlink" href="#the-outer-geometry-corpus" title="Permanent link">&para;</a></h3>
+<p>The register-alignment study — <em>The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection</em> ("The Register Wall") — evaluates on <strong>6,487 pairs</strong>: GL-212 (212), TruthfulQA (2,275) and RAGTruth (4,000). Its pooled headline figures are DGI overall AUROC <strong>0.897</strong> on TruthfulQA, <strong>0.712</strong> on GL-212 and <strong>0.617</strong> on RAGTruth. Register alignment ranks against AUROC at Spearman <strong>−0.90</strong> over 15 quintile points, and a cross-encoder control reaches Spearman <strong>−1.00</strong> in 4 of 6 dataset/direction pairs. The paper also carries a Lean 4 verified core (3 lemmas, clean <code>#print axioms</code>, no <code>sorryAx</code>), available on request.</p>
+<p><strong>The notebooks and the authorship-matched split are not yet released</strong>, so none of this can be re-run from this repository. The figures are pooled and uncontrolled; the authorship- and length-controlled numbers are the ones to quote as performance, and 0.897 is a <strong>DGI</strong> result, not the SGI TruthfulQA result (AUC 0.478). See <a href="../results/">Results</a> for both and for the scope rules that govern them.</p>
 <h3 id="domain-specific-benchmarks">Domain-Specific Benchmarks<a class="headerlink" href="#domain-specific-benchmarks" title="Permanent link">&para;</a></h3>
 <p>Additional benchmark datasets for specific verticals:</p>
 <table>

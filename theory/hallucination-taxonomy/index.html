@@ -2874,7 +2874,7 @@
 <div class="arithmatex">\[
 \Gamma(q, r) = \hat{\delta}(q, r)^\top \hat{\mu} \ll \mathbb{E}[\hat{\delta}_i^\top \hat{\mu}]
 \]</div>
-<p><strong>Detection:</strong> DGI separates this <strong>while the confabulation stays out of register</strong>. As it moves into register, DGI declines toward chance like every embedding-similarity method: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the ceiling of the whole class. Escalate the in-register cases.</p>
+<p><strong>Detection:</strong> DGI separates this <strong>while the confabulation stays out of register</strong>. As it moves into register, DGI declines toward chance: with authorship held constant it reaches AUROC 0.606, and ≈ 0.68 is the measured ceiling for DGI and for logistic/MLP probes over the same embeddings. That is a measurement on those detectors, not a proof about every embedding-similarity method — stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high register alignment. Escalate the in-register cases.</p>
 <h4 id="three-confabulation-mechanisms">Three confabulation mechanisms<a class="headerlink" href="#three-confabulation-mechanisms" title="Permanent link">&para;</a></h4>
 <p>The taxonomy identifies three mechanisms of confabulation, each with a different geometric consequence. These map directly to patterns observed in clinical neuropsychology, where confabulation from incomplete memory produces different failures depending on what kind of knowledge is being recalled (Dalla Barba, 1993).</p>
 <p><strong>Register preservation</strong> (regulatory/procedural domains): The confabulation inverts factual claims while keeping the domain register intact. Example: asked about Roth IRA contribution rules, a confabulation fabricates a flat 15% withdrawal tax and invents mandatory distributions at 65 — but every term (<em>contributions, distributions, adjusted gross income</em>) stays in the financial-regulatory register. Because the wrong answer shares the same lexical distribution as the right one, the embedding displacement is small. Detection difficulty: <strong>high</strong>.</p>
@@ -2982,42 +2982,32 @@
 <hr />
 <h2 id="practical-implications">Practical implications<a class="headerlink" href="#practical-implications" title="Permanent link">&para;</a></h2>
 <h3 id="what-groundlens-can-and-cannot-detect">What groundlens can and cannot detect<a class="headerlink" href="#what-groundlens-can-and-cannot-detect" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Hallucination type</th>
-<th>Detection</th>
-<th>Typical AUROC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Context-ignoring responses (Type I)</td>
-<td><strong>Strong</strong> — SGI</td>
-<td>0.80–0.95</td>
-</tr>
-<tr>
-<td>Mechanism inversion confabulations (Type II)</td>
-<td><strong>Strong</strong> — DGI</td>
-<td>0.85–0.99</td>
-</tr>
-<tr>
-<td>Topic drift / irrelevant responses (Type II)</td>
-<td><strong>Strong</strong> — DGI</td>
-<td>0.85–0.95</td>
-</tr>
-<tr>
-<td>Template-filling confabulations (Type II/III boundary)</td>
-<td><strong>Weak</strong> — DGI</td>
-<td>0.50–0.60</td>
-</tr>
-<tr>
-<td>Within-frame factual errors (Type III)</td>
-<td><strong>None</strong></td>
-<td>~0.50</td>
-</tr>
-</tbody>
-</table>
+<p>The per-type AUROC table that used to sit here has been removed. Its figures were
+unattributed, were never reproduced under the authorship and length controls, and its DGI
+ranges overlapped the 0.90–0.99 band withdrawn in July 2026. They should not be quoted
+anywhere, and this page does not replace them with a guess.</p>
+<p>Measured numbers live in <a href="../../benchmarks/results/">Benchmark results</a>: the register-binned
+curve, the authorship-matched figures, and the length-matched external benchmarks. Read them
+under four scope rules.</p>
+<ul>
+<li><strong>SGI is not DGI.</strong> SGI scores a response against a supplied source; DGI is reference-free.
+  The authorship control was run on DGI and on supervised probes over the same embeddings,
+  <strong>not on SGI</strong>. TruthfulQA AUC 0.478 is an SGI result; TruthfulQA 0.897 is a DGI result.
+  Never state one as if it were the other.</li>
+<li><strong>The ≈ 0.68 ceiling is measured for DGI and for the logistic and MLP probes over those
+  embeddings.</strong> It is not a demonstrated ceiling for every embedding-similarity method:
+  stronger classifiers (random forest, XGBoost) retain residual signal up to 0.88 at high
+  register alignment.</li>
+<li><strong>Register sufficiency is an assumption, not a theorem, and it is only partially true.</strong>
+  After register alignment is controlled, residual surface features still carry rank
+  correlation up to Spearman 0.37.</li>
+<li><strong>The formal bound covers only detectors that are functions of a single frozen sentence
+  embedding.</strong> Not activations, not log-probabilities, not multi-sample methods, not retrieval.</li>
+</ul>
+<p>What the taxonomy still predicts is the <em>ordering</em>, not a number: Type I is the case SGI is
+built for; Type II is separable by DGI while the confabulation stays out of register, and
+stops being separable as it moves in; Type III — a within-frame factual error — leaves no
+angular signature at all and has to be escalated to the second stage.</p>
 <h3 id="deployment-guidance">Deployment guidance<a class="headerlink" href="#deployment-guidance" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
