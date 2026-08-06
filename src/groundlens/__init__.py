@@ -64,8 +64,8 @@ Quick start::
 References:
     Marin (2025). Semantic Grounding Index. arXiv:2512.13771.
     Marin (2026). A Geometric Taxonomy of Hallucinations. arXiv:2602.13224v3.
-    Marin (2026). Rotational Dynamics of Factual Constraint Processing in Large
-        Language Models. arXiv:2603.13259.
+    Marin (2026). How Transformers Reject Wrong Answers: Rotational Dynamics of
+        Factual Constraint Processing. arXiv:2603.13259.
     Marin (2026). Defendable Rules for LLM Rationale Evaluation in Banking Governance:
         A Multi-Source Provenance Framework.
 """

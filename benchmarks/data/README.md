@@ -1,5 +1,23 @@
 # Benchmark fallback data
 
+## Label convention in this file - read this before you load it
+
+> **In `confabulation_benchmark.csv`, `label=1` is the GROUNDED response and
+> `label=0` is the confabulation.** `benchmarks/confabulation_benchmark.py`
+> uses the same convention.
+>
+> **The library and the documentation use the opposite one.**
+> `groundlens.fit_thresholds()`, the README's calibration section and the pages
+> under `docs/` all take `1 = ungrounded`.
+>
+> Both conventions are internally self-consistent, so nothing raises. Feed this
+> CSV straight into `fit_thresholds()` and it silently fits inverted
+> thresholds and reports a plausible-looking number. Flip the column first.
+>
+> This is an open inconsistency in the repository, not a documentation slip.
+> Which convention becomes canonical is a decision for a human; until it is
+> made, check the polarity of every file you load by hand.
+
 `confabulation_benchmark.csv` is the **offline fallback** for
 `benchmarks/confabulation_benchmark.py`. The script prefers the HuggingFace
 dataset `cert-framework/human-confabulation-benchmark`; it falls back here when

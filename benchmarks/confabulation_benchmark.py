@@ -13,7 +13,9 @@ from 0.932 to 0.660, an MLP from 0.935 to 0.675, and the directional score
 to 0.606.
 
 The AUROC this script prints is an upper bound contaminated by authorship.
-Do not publish it. See *The Register Wall* for the controlled evaluation.
+Do not publish it. See *The Outer Geometry of Truth: Register Alignment and
+the Limits of Embedding-Based Hallucination Detection* for the controlled
+evaluation.
 
 Loads the cert-framework/human-confabulation-benchmark dataset from
 HuggingFace (212 pairs), runs both SGI and DGI scoring on all items,
@@ -31,10 +33,24 @@ Expected dataset columns:
     - question: The input query.
     - response: The LLM output.
     - context: Source text (for SGI evaluation).
-    - label: 1 = grounded (factual), 0 = confabulated.
-    NOTE: this is the OPPOSITE of the polarity groundlens.fit_thresholds()
-    expects (1 = ungrounded). Flip the column before feeding this file to
-    fit_thresholds, or you will silently fit inverted thresholds. (hallucination).
+    - label: see the label convention below.
+
+LABEL CONVENTION - THIS FILE USES THE OPPOSITE ONE FROM THE LIBRARY.
+    This script, the dataset it loads and the fallback CSV in
+    ``benchmarks/data/confabulation_benchmark.csv`` all use::
+
+        label = 1  ->  grounded response
+        label = 0  ->  confabulation
+
+    ``groundlens.fit_thresholds()``, the README calibration section and the
+    pages under ``docs/`` use the reverse: 1 is the ungrounded class.
+
+    Both conventions are internally self-consistent, so nothing here raises and
+    nothing there raises. Pass this script's labels to ``fit_thresholds()``
+    unflipped and you silently fit inverted thresholds. Flip the column first.
+
+    Which convention is canonical is an open decision for a human; do not
+    "fix" one side in isolation, it will invert a published AUROC.
 """
 
 from __future__ import annotations

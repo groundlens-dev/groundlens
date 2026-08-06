@@ -34,8 +34,12 @@ keywords:
   - retrieval-augmented-generation
   - ai-safety
   - model-risk-management
-# TODO(javier): mint a Zenodo DOI for the repository and add it here as
+# ---------------------------------------------------------------------------
+# DOI PLACEHOLDER - NOT YET MINTED. Do not cite a DOI for this software; there
+# is none. When Zenodo mints one, uncomment the next line and fill it in, and
+# drop the "no DOI yet" note from README.md's "How to cite" section.
 #   doi: "10.5281/zenodo.XXXXXXX"
+# ---------------------------------------------------------------------------
 # This needs your GitHub account: turn on the Zenodo GitHub integration for
 # groundlens-dev/groundlens, then cut a release. Zenodo mints a concept DOI
 # that always resolves to the newest version plus a version DOI per release.
@@ -69,7 +73,7 @@ references:
         description: The arXiv preprint identifier
     url: "https://arxiv.org/abs/2602.13224"
   - type: article
-    title: "Rotational Dynamics of Factual Constraint Processing in Large Language Models"
+    title: "How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing"
     authors:
       - family-names: Marin
         given-names: Javier
