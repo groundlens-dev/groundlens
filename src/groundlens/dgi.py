@@ -56,8 +56,11 @@ References:
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import math
+from importlib.resources import files
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -271,10 +274,6 @@ def _load_frozen_mu_hat(
         return None
 
     try:
-        import hashlib
-        import json
-        from importlib.resources import files
-
         data = files("groundlens.data")
         meta = json.loads((data / _FROZEN_META).read_text(encoding="utf-8"))
 
