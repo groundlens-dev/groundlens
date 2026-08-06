@@ -9,10 +9,14 @@
 [![License: Apache](https://img.shields.io/badge/license-Apache%202-green?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
+
+
+You can see our live demo here:
+
 [![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow?style=flat-square)](https://huggingface.co/spaces/groundlens/demo)
 
 
-<table><tr><td valign="top" width="25%">
+<table><tr><td valign="top" width="20%">
 
 ### What is groundlens
 
@@ -20,7 +24,7 @@
 
 [Tools](#tools)
     
-</td><td valign="top" width="25%">
+</td><td valign="top" width="20%">
 
 ### Verificaton process
 
@@ -34,7 +38,7 @@
 
 [Stage 4](#stage-4)
     
-</td><td valign="top" width="25%">
+</td><td valign="top" width="20%">
 
 ### Groundlens features
 
