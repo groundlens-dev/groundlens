@@ -12,15 +12,15 @@
 [![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow?style=flat-square)](https://huggingface.co/spaces/groundlens/demo)
 
 
-<table><tr><td valign="top" width="33%">
+<table><tr><td valign="top" width="25%">
 
-### What is grounlens
+### What is groundlens
 
 [Intro](#intro)
 
 [Tools](#tools)
     
-</td><td valign="top" width="33%">
+</td><td valign="top" width="25%">
 
 ### Verificaton process
 
@@ -32,20 +32,28 @@
     
 [Stage 3](#stage-3) 
 
-[Stage 3](#stage-4)
+[Stage 4](#stage-4)
     
-</td><td valign="top" width="33%">
+</td><td valign="top" width="25%">
 
-### How to use this repo
+### Groundlens features
 
 [Calibration](#calibration) 
 
 [Audit tools](#audit-tools)
 
-[Integration](#integration)
+[Agentic tools integration](#agentic-tools-integration)
 
-[Papers](#research-papers)
+[MCP Server](#mcp-server)
 
+
+</td><td valign="top" width="20%">
+
+### Research project
+
+[Published papers](#published-papers)
+
+[Contributing](#contributing)
 
 </td></tr></table>
 
@@ -53,7 +61,7 @@
 
 ## Intro
 
-Groundlens is a set of LLM verification methods (hallicunation detection and answer grounding) that includes:
+Groundlens is a set of LLM verification methods (hallicunation detection and answer grounding checks) that includes:
 - Geometric methods: SGI, which needs a source document, and DGI, which does not — as the cheap first stage of a verification pipeline. Deterministic, local, one sentence encoder, the same answer every time. It clears what it can clear and escalates the rest, because the table above is a statement about what the rest costs.
 - Consistency methods: does the model agree with itself?
 - Rule sets as guardrails to catch non-desired reponses.
@@ -62,13 +70,7 @@ Everything in the same pipeline. You choose what you need.
 
 ## Tools
 
-What you can find under
-
-<div align="center">
-
-```bash
-pip install groundlens
-```
+What you can find under `pip install groundlens`
 
 </div>
 
@@ -128,10 +130,6 @@ SGI is the ratio of two angles: how far the answer sits from the question, over 
 | at or above 1.20 | 0.95 to 1.20 | below 0.95 |
 |---|---|---|
 | came from the source | partly grounded | did not come from the source |
-
-The middle band is what to escalate. Geometry cannot settle it alone.
-
-**Which field is the decision?** `result.flagged` is the single hard cut at 0.95, so it is `False` for the whole middle band. For the escalate-this set, use `check()`:
 
 ```python
 from groundlens import check, compute_sgi
@@ -200,6 +198,8 @@ result = scorer.score(question=question, response=answer)
 
 ### Switch — may this answer enter state?
 
+In an agent loop, one bad answer written into state contaminates every turn after it. Switch turns a score into that decision.
+
 ```python
 from groundlens import GroundingSwitch, compute_sgi
 
@@ -210,8 +210,6 @@ print(decision.write_to_state)   # may this answer enter state?
 print(decision.action)           # what to do when it may not
 print(decision.reason)
 ```
-
-In an agent loop, one bad answer written into state contaminates every turn after it. Switch turns a score into that decision.
 
 ## Stage 3
 
@@ -247,7 +245,6 @@ Deterministic checklists for regulated settings: invented figures, missing discl
 **Rules are pattern checks, not measurements.** `checks_passed` is a weighted count of patterns that matched, not a probability of anything. Text with the right words in the right order will score well whether or not it is correct. Rules live under `groundlens.rules` rather than the top level for that reason, and the module docstring lists the four limits worth knowing before you rely on them.
 
 ## Calibration
-
 
 ```python
 from groundlens import fit_thresholds
@@ -290,11 +287,12 @@ with open_log("audit.db") as log:
     print(log.verify_chain().valid)
 ```
 
-## Integration
+## Agentic tools integration
 
 - LangChain · LangGraph · CrewAI · Semantic Kernel · AutoGen · OpenAI · Anthropic · Gemini · Hugging Face — see [integrations](https://docs.groundlens.dev/integrations/).
 
-- The same checks inside Claude Desktop, Cursor and Windsurf: [**groundlens-mcp**](https://github.com/groundlens-dev/groundlens-mcp).
+## MCP Server 
+YOu can use groundlens inside Claude Desktop, Cursor and Windsurf: [**groundlens-mcp**](https://github.com/groundlens-dev/groundlens-mcp).
 
 <div align="center">
   
@@ -306,12 +304,8 @@ with open_log("audit.db") as log:
   
 </div>
 
-```python
-from groundlens import evaluate_batch
-rows = evaluate_batch(items)
-```
 
-## Research papers
+## Published papers
 
 | # | Paper | ID |
 |---|---|---|
@@ -322,6 +316,12 @@ rows = evaluate_batch(items)
 | 5 | The Geometry of Validity: What a Reasoning Chain's Trajectory Shows That a Probe Does Not | preprint, not yet announced |
 
 **Status.** Papers 1–3 have been peer reviewed. Papers 4 and 5 are new preprints, not yet released and not yet through a review cycle.
+
+
+## Contributing
+
+We are delighted to receive your comments or ideas and become part of this project. Also, issues and pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). You can reach us directly at javier@groundlens.dev
+
 
 ---
 
@@ -346,11 +346,3 @@ Cite the software:
 }
 ```
 
-
-## Contributing
-
-Issues and pull requests welcome. If you think a number here is wrong, open an issue with the reproduction — corrections get fixed and credited in the commit. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-Apache-2.0. See [LICENSE](LICENSE).
