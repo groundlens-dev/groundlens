@@ -40,9 +40,21 @@ from groundlens.dgi import _FROZEN_META, _FROZEN_MU_HAT, _compute_reference_dire
 DATA = pathlib.Path(__file__).resolve().parents[1] / "data"
 
 
-def main() -> int:
-    """Derive the direction with the real encoder and write it to package data."""
-    csv_path = DATA / "reference_pairs.csv"
+def main(data_dir: pathlib.Path | None = None) -> int:
+    """Derive the direction with the real encoder and write it to package data.
+
+    Args:
+        data_dir: Where to write. Defaults to the installed package's ``data``
+            directory, which is what you want when running this for real. Tests
+            pass a temporary directory: this function overwrites a shipped
+            artifact, so it must be possible to exercise it without doing that.
+
+    Returns:
+        ``0`` on success, ``1`` if an input is missing or the derived vector
+        fails its sanity check.
+    """
+    data_dir = DATA if data_dir is None else data_dir
+    csv_path = data_dir / "reference_pairs.csv"
     if not csv_path.exists():
         print(f"error: {csv_path} not found", file=sys.stderr)
         return 1
@@ -76,10 +88,11 @@ def main() -> int:
         "dtype": str(mu.dtype),
     }
 
-    npy_path = DATA / _FROZEN_MU_HAT
+    data_dir.mkdir(parents=True, exist_ok=True)
+    npy_path = data_dir / _FROZEN_MU_HAT
     with npy_path.open("wb") as fh:
         np.save(fh, mu, allow_pickle=False)
-    (DATA / _FROZEN_META).write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    (data_dir / _FROZEN_META).write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
 
     print()
     print(f"wrote                {npy_path.name}  ({npy_path.stat().st_size} bytes)")

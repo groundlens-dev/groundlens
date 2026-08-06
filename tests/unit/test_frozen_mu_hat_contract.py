@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import pathlib
+import pathlib  # noqa: TC003 - used at runtime by the sandbox fixture
 from importlib.resources import files
 
 import numpy as np
@@ -122,50 +122,102 @@ def test_the_loader_refuses_a_process_global_encoder() -> None:
         groundlens.set_default_encoder(None)
 
 
-def test_a_mismatched_hash_falls_back_rather_than_raising() -> None:
-    """Degrade to the old behaviour, never to a wrong answer.
+@pytest.fixture
+def sandboxed(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Path:
+    """A copy of the shipped data that the degrade tests may corrupt freely.
 
-    No mocking: this corrupts the recorded hash on disk and restores it. The
-    loader resolves package data at call time, so a patched module attribute
-    would not be consulted and the test would pass without exercising anything.
+    An earlier version of these tests edited the real package data and restored
+    it in a ``finally``. That works until a run is killed between the two, and
+    then the installed package carries a deliberately broken artifact with no
+    trace of why.
     """
-    meta_path = pathlib.Path(str(DATA / _FROZEN_META))
-    original = meta_path.read_text(encoding="utf-8")
-    try:
-        bad = dict(_meta(), reference_pairs_sha256="0" * 64)
-        meta_path.write_text(json.dumps(bad, indent=2) + "\n", encoding="utf-8")
-        assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None, (
-            "the loader used a direction whose CSV hash did not match"
-        )
-    finally:
-        meta_path.write_text(original, encoding="utf-8")
+    import groundlens.dgi as dgi
 
-    # and it recovers once the file is right again
-    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is not None
+    d = tmp_path / "data"
+    d.mkdir()
+    for name in (_FROZEN_MU_HAT, _FROZEN_META, "reference_pairs.csv"):
+        (d / name).write_bytes((DATA / name).read_bytes())
+
+    class _Data:
+        def __truediv__(self, name: str) -> pathlib.Path:
+            return d / name
+
+    monkeypatch.setattr(dgi, "files", lambda _pkg: _Data(), raising=True)
+    return d
 
 
-def test_a_corrupt_npy_falls_back_rather_than_raising() -> None:
+def test_a_mismatched_hash_falls_back_rather_than_raising(sandboxed: pathlib.Path) -> None:
+    """Degrade to the old behaviour, never to a wrong answer."""
+    meta = json.loads((sandboxed / _FROZEN_META).read_text(encoding="utf-8"))
+    meta["reference_pairs_sha256"] = "0" * 64
+    (sandboxed / _FROZEN_META).write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None, (
+        "the loader used a direction whose CSV hash did not match"
+    )
+
+
+def test_a_corrupt_npy_falls_back_rather_than_raising(sandboxed: pathlib.Path) -> None:
     """A truncated or unreadable array must not take down `import groundlens`."""
-    npy_path = pathlib.Path(str(DATA / _FROZEN_MU_HAT))
-    original = npy_path.read_bytes()
-    try:
-        npy_path.write_bytes(b"not a numpy array")
-        assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
-    finally:
-        npy_path.write_bytes(original)
-
-    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is not None
+    (sandboxed / _FROZEN_MU_HAT).write_bytes(b"not a numpy array")
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
 
 
-def test_a_non_unit_vector_is_refused() -> None:
+def test_a_missing_artifact_falls_back_rather_than_raising(sandboxed: pathlib.Path) -> None:
+    """An older wheel, or a build that dropped package data."""
+    (sandboxed / _FROZEN_MU_HAT).unlink()
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
+
+
+def test_a_non_unit_vector_is_refused(sandboxed: pathlib.Path) -> None:
     """DGI is a cosine against this vector. Scale it and every score is wrong."""
-    npy_path = pathlib.Path(str(DATA / _FROZEN_MU_HAT))
-    original = npy_path.read_bytes()
+    with (sandboxed / _FROZEN_MU_HAT).open("rb") as fh:
+        mu = np.load(fh, allow_pickle=False)
+    with (sandboxed / _FROZEN_MU_HAT).open("wb") as fh:
+        np.save(fh, (mu * 2.0).astype(np.float32), allow_pickle=False)
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
+
+
+def test_a_wrong_shape_is_refused(sandboxed: pathlib.Path) -> None:
+    """A matrix where a vector belongs — a bank saved over the direction."""
+    with (sandboxed / _FROZEN_MU_HAT).open("wb") as fh:
+        np.save(fh, np.zeros((2, 768), dtype=np.float32), allow_pickle=False)
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
+
+
+def test_a_wrong_width_is_refused(sandboxed: pathlib.Path) -> None:
+    """384 dims from a MiniLM-era direction against a 768-dim encoder."""
+    mu = np.zeros(384, dtype=np.float32)
+    mu[0] = 1.0
+    with (sandboxed / _FROZEN_MU_HAT).open("wb") as fh:
+        np.save(fh, mu, allow_pickle=False)
+    assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
+
+
+def test_get_mu_hat_uses_the_shipped_vector_and_embeds_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The claim of this whole change, asserted rather than described.
+
+    Every other test here checks that the loader *can* return the vector. This
+    checks that ``_get_mu_hat`` actually takes it — and, more to the point,
+    that taking it means no text reaches the encoder. A wiring mistake that
+    loaded the vector and then derived anyway would pass every other test in
+    this file and cost the 7m43s it was meant to save.
+    """
+    import groundlens.dgi as dgi
+
+    mu = np.zeros(768, dtype=np.float32)
+    mu[0] = 1.0
+
+    def _never(*args: object, **kwargs: object) -> object:
+        raise AssertionError("encode_texts was called; the shipped vector was not used")
+
+    monkeypatch.setattr(dgi, "_load_frozen_mu_hat", lambda *a, **k: mu, raising=True)
+    monkeypatch.setattr(dgi, "encode_texts", _never, raising=True)
+
+    dgi.reset_calibration_cache()
     try:
-        with npy_path.open("rb") as fh:
-            mu = np.load(fh, allow_pickle=False)
-        with npy_path.open("wb") as fh:
-            np.save(fh, (mu * 2.0).astype(np.float32), allow_pickle=False)
-        assert _load_frozen_mu_hat(DEFAULT_MODEL, None, None) is None
+        got = dgi._get_mu_hat(DEFAULT_MODEL, None)
+        np.testing.assert_allclose(got, mu, atol=0)
     finally:
-        npy_path.write_bytes(original)
+        dgi.reset_calibration_cache()
