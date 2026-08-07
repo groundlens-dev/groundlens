@@ -10,17 +10,15 @@
 [![Docs](https://img.shields.io/badge/docs-docs.groundlens.dev-blue?style=flat-square)](https://docs.groundlens.dev)
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/groundlens-dev/groundlens?style=flat-square&label=OpenSSF%20Scorecard)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 
-[Live demo](https://huggingface.co/spaces/groundlens/demo) · [Docs](https://docs.groundlens.dev) · [MCP server](https://github.com/groundlens-dev/groundlens-mcp) · [Benchmarks](BENCHMARKS.md)
+[Live demo](https://huggingface.co/spaces/groundlens/demo) · [Docs](https://docs.groundlens.dev) · [Docs](https://docs.groundlens.dev) · [MCP server](https://github.com/groundlens-dev/groundlens-mcp) · [Benchmarks](BENCHMARKS.md)
 
 </div>
 
-
-
 ## What is Groundlens
 
-Groundlens is not another hallucination detector that tells you if the answer is true. Groundlens is a local verification layer that sits in front of expensive checks. It answers three practical questions without calling a second language model for scoring:
+Groundlens is not another hallucination detector that tells you if the answer is true. Groundlens is a local verification layer that sits in front of expensive checks. It answers three practical questions without calling a second LLM:
 
-- Did this answer engage the source it was given, or did it stay anchored to the question?
+- Did this answer engage the source it was given   , or did it stay aligned with the question?
 - May this answer be written into agent or RAG state, or would it contaminate later turns?
 - Does the answer break any of the explicit policy or completeness rules defined for this domain?
 
@@ -56,6 +54,18 @@ Not  included in groundlens:
 
 In practice a large fraction of answers can exit after the deterministic stages (1 to 4). The remainder is what justifies the slower checks.
 
+## Tools included in Groundlens
+
+| Tool | Stage |Use it to | Call |
+|------| ----- |----------|------|
+| **SGI** | 1 |Check an answer against the source it was given | `compute_sgi(question, context, response)` |
+| **DGI** | 1 |Check an answer when there is no source. Calibrate first | `compute_dgi(question, response)` |
+| **Check** | 1 |Turn any score into a plain-language reading | `check(score)` |
+| **Switch** | 2 |Decide whether an answer may enter agent state | `GroundingSwitch().decide(score)` |
+| **Consistency** | 3 | Ask the model again and measure agreement | `two_stage(question, answer, model=...)` |
+| **Rules** | 4 |Check an answer against a written policy, with evidence | `decision_rationale_rules(domain=...).evaluate(...)` |
+| **Calibrate** | 1 | Fit cuts and reference direction to your data | `fit_thresholds(examples)` |
+| **Audit** | 1-4 |Keep a hash-chained trail of every check | `open_log("audit.db")` |
 
 ## Evidence from realistic evaluations
 
@@ -207,7 +217,6 @@ with open_log("audit.db") as log:
     print(log.verify_chain().valid)
 ```
 
----
 
 ## Calibration and thresholds
 
@@ -229,38 +238,6 @@ scorer.calibrate(pairs=grounded_pairs)  # only the grounded ones for the referen
 
 If DGI flags everything, the reference direction is wrong for your style; lowering the threshold will not fix it. Re-estimate the direction. If agent rules pass everything, check that dialogue, entities and schema were actually passed. Full details: [calibration](https://docs.groundlens.dev/concepts/calibration/).
 
----
-
-## Tools
-
-| Tool | Use it to | Call |
-|------|-----------|------|
-| **SGI** | Check an answer against the source it was given | `compute_sgi(question, context, response)` |
-| **DGI** | Check an answer when there is no source. Calibrate first | `compute_dgi(question, response)` |
-| **Check** | Turn any score into a plain-language reading | `check(score)` |
-| **Switch** | Decide whether an answer may enter agent state | `GroundingSwitch().decide(score)` |
-| **Consistency** | Ask the model again and measure agreement | `two_stage(question, answer, model=...)` |
-| **Rules** | Check an answer against a written policy, with evidence | `decision_rationale_rules(domain=...).evaluate(...)` |
-| **Calibrate** | Fit cuts and reference direction to your data | `fit_thresholds(examples)` |
-| **Audit** | Keep a hash-chained trail of every check | `open_log("audit.db")` |
-
----
-
-## Encoder dependency
-
-The geometric stages use a sentence encoder. The default is `sentence-transformers/sentence-t5-large`, downloaded once from Hugging Face on first use (~640 MB).
-
-After that download:
-
-- Scoring is fully local. No text is sent anywhere.
-- There is no telemetry.
-- The test suite includes a socket monitor that fails if a scoring call makes an outbound connection.
-- You can pin the encoder version, vendor the weights into your own artefact store, or substitute a smaller or already-local encoder through the documented hook.
-- Pure rules and the Switch use no encoder at all.
-
-The first-run download is a normal supply-chain dependency, not a runtime data path. For air-gapped or high-assurance environments, vendor the weights or start with a local encoder. See [DATA_HANDLING.md](DATA_HANDLING.md).
-
----
 
 ## Audit tools
 
@@ -280,15 +257,13 @@ with open_log("audit.db") as log:
 
 Every entry is hashed against the one before it. The chain answers two questions: whether the record was altered, and whether the verdict can be recomputed from corpus version and detector build.
 
----
 
-## Agentic integrations
+## Agentic pipelines  integrations
 
 LangChain · LangGraph · CrewAI · Semantic Kernel · AutoGen · OpenAI · Anthropic · Gemini · Hugging Face — [integrations](https://docs.groundlens.dev/integrations/).
 
 MCP server for Claude Desktop, Cursor and Windsurf: [groundlens-mcp](https://github.com/groundlens-dev/groundlens-mcp).
 
----
 
 ## Open core and the hard production pieces
 
@@ -302,9 +277,7 @@ The pieces that usually matter for production and for regulated deployments are 
 - integration templates for LangGraph and similar agent frameworks with stage ordering and audit already wired,
 - a hosted path when you cannot or do not want to run the encoder in-process.
 
-Those are product and services concerns. The library is built so you can own them yourself, or take the managed route at [groundlens.io](https://groundlens.io).
-
----
+For these jobs, you can contact javier@groundlens.dev
 
 ## Research
 
@@ -316,9 +289,6 @@ Those are product and services concerns. The library is built so you can own the
 | 4 | The Outer Geometry of Truth | preprint |
 | 5 | The Geometry of Validity | preprint |
 
-Papers 1–3 are peer-reviewed. 4 and 5 are new preprints.
-
----
 
 ## Citation
 
@@ -334,5 +304,6 @@ Papers 1–3 are peer-reviewed. 4 and 5 are new preprints.
 ## Contributing
 
 Issues and pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).  
-javier@groundlens.dev
+
+Contact; javier@groundlens.dev
 
