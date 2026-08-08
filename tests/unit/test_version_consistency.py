@@ -23,6 +23,7 @@ the release is public.
 
 from __future__ import annotations
 
+import datetime
 import pathlib
 import re
 
@@ -34,7 +35,12 @@ VERSION_PY = REPO / "src" / "groundlens" / "_version.py"
 CITATION = REPO / "CITATION.cff"
 CHANGELOG = REPO / "CHANGELOG.md"
 
-#: CalVer, YYYY.M.D, with no zero padding on month or day.
+#: SemVer, MAJOR.MINOR.PATCH, from 2.0.0 onward. v2 has a public contract --
+#: finding codes, the audit record schema, the pack format -- and a date cannot
+#: tell a caller when that contract breaks.
+SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
+
+#: CalVer, YYYY.M.D, with no zero padding on month or day. Used up to 2026.8.5.
 CALVER = re.compile(r"^(20\d{2})\.(1[0-2]|[1-9])\.(3[01]|[12]\d|[1-9])$")
 
 
@@ -71,23 +77,36 @@ def test_citation_matches_pyproject() -> None:
     )
 
 
-def test_citation_date_matches_its_version() -> None:
-    """CalVer encodes the date, so the two fields cannot disagree."""
-    version = _citation_version()
+def test_citation_date_is_a_real_date() -> None:
+    """SemVer does not encode the date, so date-released has to stand on its own.
+
+    Under CalVer this test could derive the expected date from the version
+    string. It cannot any more, so it checks the weaker thing that still
+    matters: reference managers get a parseable ISO date, not a placeholder.
+    """
     match = re.search(r'^date-released: "?([\d-]+)"?', CITATION.read_text(encoding="utf-8"), re.M)
     assert match, "CITATION.cff has no date-released"
-    year, month, day = version.split(".")
-    expected = f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
-    assert match.group(1) == expected, (
-        f"CITATION.cff version {version} implies {expected}, but date-released "
-        f"is {match.group(1)}."
-    )
+    datetime.date.fromisoformat(match.group(1))
 
 
-def test_version_is_calver() -> None:
-    """YYYY.M.D. A zero-padded month sorts differently and installs differently."""
+def test_version_is_semver() -> None:
+    """MAJOR.MINOR.PATCH from 2.0.0 on. `groundlens>=2,<3` has to mean something."""
     version = _pyproject_version()
-    assert CALVER.match(version), f"{version} is not CalVer YYYY.M.D (no zero padding)"
+    assert SEMVER.match(version), f"{version} is not SemVer MAJOR.MINOR.PATCH"
+
+
+def test_version_did_not_regress_to_calver() -> None:
+    """A CalVer string sorts above 2.0.0 and would shadow every future release.
+
+    `2026.8.5` > `2.0.0` under PEP 440, so one CalVer version published after
+    the switch permanently outranks the SemVer line on PyPI and pip would never
+    resolve a 2.x release again.
+    """
+    version = _pyproject_version()
+    assert not CALVER.match(version), (
+        f"{version} is CalVer. groundlens moved to SemVer at 2.0.0 and cannot move back: "
+        "a CalVer release would sort above every 2.x and 3.x version forever."
+    )
 
 
 def test_installed_version_matches_source() -> None:

@@ -3,7 +3,113 @@
 All notable changes to groundlens are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-groundlens uses [Calendar Versioning](https://calver.org/) with the format `YYYY.M.D`.
+From 2.0.0 groundlens uses [Semantic Versioning](https://semver.org/).
+Releases up to and including `2026.8.5` used Calendar Versioning (`YYYY.M.D`).
+
+## 2.0.0 -- The control path
+
+groundlens v2 does a different job from v1. v1 scored how well an answer sat in
+an embedding space and gave you a number. v2 checks an answer against the
+evidence it was supposed to come from and against a policy pack you can read,
+and tells you whether to clear it or escalate it. No model in the decision
+path, no floating point in the audit record, no wall clock. Same inputs, same
+bytes out, on any machine.
+
+The geometry is not gone. It is an extra.
+
+### Changed (BREAKING)
+
+- **`groundlens.check` is now the control entry point, not the score
+  renderer.** This is the reason for the major version bump.
+
+  | Was | Now |
+  |---|---|
+  | `from groundlens import check` -> `check(score) -> Check` | `from groundlens.geometry.render import render_check` |
+  | -- | `from groundlens import check` -> `check(answer, evidence, *, ruleset, ...) -> Result` |
+
+  The new signature is
+  `check(answer, evidence, *, ruleset, tools_output=None, metadata=None, reference_date=None) -> Result`.
+  It returns a `Result` carrying a `Decision` (`CLEAR` or `ESCALATE`), a sorted
+  tuple of `Finding`s and an `AuditRecord`. It carries no score, no confidence
+  and no float, by design: a number between zero and one cannot be defended in
+  a regulatory file, and a finding with a character span, a rule id and a
+  content hash can.
+
+  Callers who want the old presentation object keep it by changing one import
+  line. The `Check` type itself is unchanged. It is no longer exported from the
+  package root.
+
+- **numpy and sentence-transformers are no longer runtime dependencies.** They
+  moved to a new `geometry` extra. `pip install groundlens` now declares
+  exactly one runtime dependency, PyYAML, because a rule pack is a YAML file.
+  Previously the base install pulled sentence-transformers, which pulls torch —
+  roughly two gigabytes of deep learning stack before the user had run
+  anything. The control path never touched it.
+
+  ```bash
+  pip install groundlens               # control path, small
+  pip install "groundlens[geometry]"   # + SGI, DGI, calibration, encoders
+  ```
+
+  `groundlens[all]` includes `geometry`, so nothing changes for anyone
+  installing the full bundle.
+
+- **The geometry surface is now resolved lazily (PEP 562).** `compute_sgi`,
+  `compute_dgi`, `SGI`, `DGI`, `evaluate`, `evaluate_batch`, `calibrate`,
+  `fit_thresholds`, `CalibrationResult`, `ThresholdFit`, `SGIResult`,
+  `DGIResult`, `GroundlensScore`, `GroundingSwitch`, `SwitchAction`,
+  `SwitchDecision`, `ProposedLabel`, `PropositionBatch`, `SeedExample`, the
+  encoder constants and `get_default_encoder` / `set_default_encoder` all still
+  import from `groundlens` and behave identically. Nothing is imported until
+  you name it, and naming one without the extra installed raises `ImportError`
+  quoting the install command.
+
+  Two consequences worth knowing. `import groundlens` no longer imports numpy,
+  sentence-transformers, torch or transformers — there is a CI test asserting
+  it, `tests/unit/test_import_isolation.py`, and it runs in a subprocess
+  because an in-process check would measure the test session instead. And the
+  lazy names are deliberately absent from `__all__`, so `from groundlens import *`
+  no longer brings the geometry surface into scope. Import the names you use.
+
+- **CalVer to SemVer.** The version goes from `2026.8.5` to `2.0.0`. v2 has a
+  public contract — finding codes, the audit record schema, the pack format —
+  and callers need a version number that tells them when that contract breaks.
+  A date cannot do that. Any pin of the form `groundlens>=2026` or
+  `groundlens~=2026.8` must be rewritten; `groundlens>=2,<3` is the intended
+  form.
+
+### Added
+
+- `groundlens.check`, the control entry point (`groundlens/control.py`).
+- Core types in `groundlens.types`: `Result`, `Finding`, `Fact`, `Match`,
+  `Evidence`, `Decision`, `Severity`, `MatchState`, `FactKind`, `Polarity`.
+  All frozen dataclasses; spans are character offsets into the NFKC-normalised
+  answer.
+- `groundlens.load_pack` and `groundlens.Pack`: YAML rule packs, content-hashed
+  over the raw file bytes. Packs ship in the wheel. A pack that declares
+  `requires_metadata` fails closed — a missing key emits
+  `pack.metadata.missing` at severity FAIL and the decision is ESCALATE. There
+  is no flag to turn that off.
+- `groundlens.AuditRecord` (`groundlens/audit_record.py`), schema
+  `groundlens.audit/2`, serialised as canonical JSON. It records the key
+  *names* of the metadata you passed, never the values, because those may carry
+  personal data.
+- `groundlens.audit` is exported from the package root. It was importable only
+  as `groundlens.audit` by full path before; the `AuditLog` hash chain and its
+  SQLite storage are unchanged.
+- `geometry` extra, and `groundlens.geometry.render.render_check`.
+
+### Fixed
+
+- Licence, for the record: Apache-2.0, everywhere. `pyproject.toml` declares
+  `license = "Apache-2.0"` with the matching trove classifier, `CITATION.cff`
+  says `Apache-2.0`, the README badge says Apache 2, and `LICENSE` is the
+  complete, unmodified Apache License 2.0 text with `Copyright 2026 Javier
+  Marín`. There is no MIT text in the repository. If the GitHub sidebar still
+  shows MIT it is reading a stale detection, not this tree.
+- `groundlens.check` can no longer be silently replaced by the `groundlens.check`
+  *module* when some other import touches it. The package reasserts the binding
+  after any lazy geometry import.
 
 ## 2026.8.5 -- Python 3.14, calibrated-by-default encoders, one-package rule sets
 
