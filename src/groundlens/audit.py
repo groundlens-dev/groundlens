@@ -53,14 +53,29 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from groundlens.audit_record import record_sha256, to_jsonable
+from groundlens.types import Decision
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from groundlens.audit_record import AuditRecord
 
 # ── Constants ───────────────────────────────────────────────────────────────
 
 
 _GENESIS_HASH: str = "0" * 64
 """The canonical predecessor hash for the first chain entry."""
+
+
+V2_METHOD: str = "control"
+"""The ``method`` value written for v2 control-path entries.
+
+The v1 values (``"sgi"``, ``"dgi"``, ``"rules"``, ``"hybrid"``) all name
+a scorer. The v2 control path produces a decision and no score, so it
+gets its own value and existing examiner queries that filter by method
+keep working untouched.
+"""
 
 
 _SCHEMA_SQL: str = """
@@ -282,6 +297,57 @@ class AuditLog:
             entry_hash=entry_hash,
         )
 
+    def record_v2(
+        self,
+        *,
+        identifier: str,
+        record: AuditRecord,
+        flagged: bool | None = None,
+        timestamp_utc: str | None = None,
+    ) -> AuditEntry:
+        """Append a v2 audit record to the hash chain.
+
+        A thin wrapper over :meth:`record`. The schema, the chain
+        algorithm and :meth:`verify_chain` are untouched: the v2 record
+        is simply what goes into the payload, which is what the v2
+        interface contract asks for.
+
+        The record's own canonical digest is stored alongside it under
+        ``metadata["record_sha256"]``. The chain proves the row was not
+        edited after the fact; that digest lets an examiner check the
+        record against a copy held elsewhere without replaying the whole
+        chain, and it is stable across hosts in a way the chain hash
+        (which mixes in a write timestamp) is not.
+
+        Args:
+            identifier: Caller-supplied opaque identifier (case_id,
+                request_id, etc.). Indexed for examiner queries.
+            record: The v2 :class:`~groundlens.audit_record.AuditRecord`.
+            flagged: Overrides the derived flag. When omitted, an entry
+                is flagged exactly when the decision is ``escalate``.
+            timestamp_utc: Override timestamp (used only for testing
+                reproducibility). Defaults to current UTC time.
+
+        Returns:
+            The :class:`AuditEntry` that was written.
+
+        Example:
+            >>> log = AuditLog()
+            >>> entry = log.record_v2(identifier="req_001", record=rec)  # doctest: +SKIP
+            >>> log.verify_chain().valid  # doctest: +SKIP
+            True
+        """
+        escalated = record.decision is Decision.ESCALATE
+        return self.record(
+            identifier=identifier,
+            method=V2_METHOD,
+            flagged=escalated if flagged is None else flagged,
+            score=None,
+            inputs=to_jsonable(record),
+            metadata={"record_sha256": record_sha256(record)},
+            timestamp_utc=timestamp_utc,
+        )
+
     def _latest_hash(self) -> str:
         """Return the latest entry's hash, or the genesis hash if empty."""
         row = self._conn.execute(
@@ -446,6 +512,7 @@ def open_log(db_path: str | Path | None = None) -> Iterator[AuditLog]:
 
 
 __all__ = [
+    "V2_METHOD",
     "AuditEntry",
     "AuditLog",
     "ChainVerification",
