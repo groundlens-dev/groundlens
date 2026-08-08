@@ -93,7 +93,7 @@ jobs:
       # key stayed empty forever, which is a loop that cannot break itself.
       - name: Restore HuggingFace cache
         id: hf-cache
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
         with:
           path: ~/.cache/huggingface
           key: hf-${{ runner.os }}-sentence-t5-large-v1
