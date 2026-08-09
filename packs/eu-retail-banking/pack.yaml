@@ -1,0 +1,233 @@
+# EU retail banking rule pack.
+#
+# Rules BNK-001, BNK-014, BNK-020 and BNK-031 are specified in the v2 interface
+# contract and are reproduced here unchanged.
+#
+# Every rule whose id begins spec. / expl. / bshift. is a port of the legacy
+# Python rule set groundlens.rules.banking_rules() ("banking_v1"). The port is
+# faithful to what each rule tested, with two deliberate differences, both
+# recorded in the pack so a reviewer sees them:
+#
+#   1. Weights are gone. v2 produces a decision, not a score, so there is
+#      nothing for a weight to weigh. The legacy flag predicate
+#      (spec < 0.3 or expl < 0.3) needed arithmetic over weights and cannot be
+#      written in this format; per-rule severity replaces it.
+#   2. The ported rules carry severity "warn". They test for the presence of
+#      words. Presence of a word is evidence about wording, not about whether
+#      the answer is supported, and escalating a human review on it would
+#      spend the reviewer's attention on the wrong thing. Only rules that test
+#      grounding, decision language, obligation strength or a required
+#      disclosure carry severity "fail".
+#
+# tags carry the legacy sub-score each rule contributed to, so the old grouping
+# survives the port. Tags have no effect on evaluation.
+
+pack: eu-retail-banking
+version: 1.2.0
+locale_profile: eu-es
+
+requires_metadata:
+  - product_type
+  - disclosure_set
+
+facts:
+  currency:
+    tolerance: "0"
+  date:
+    relative_requires_reference_date: true
+
+rules:
+  # ── Contract rules ────────────────────────────────────────────────────────
+  - id: BNK-001
+    description: Every monetary amount stated must appear in the evidence.
+    assert: all_facts_matched
+    where: { kind: currency }
+    severity: fail
+    citation: "EBA/GL/2020/06 §4.2"
+    tags: [contract, grounding]
+
+  - id: BNK-014
+    description: Recommendation language only, no decision language.
+    assert: absent_lexicon
+    lexicon: ["we have decided", "your application is approved", "we hereby grant"]
+    severity: fail
+    tags: [contract, decision-language]
+
+  - id: BNK-020
+    description: Obligation strength must not exceed the evidence.
+    assert: obligation_polarity_consistent
+    severity: fail
+    tags: [contract, obligation]
+
+  - id: BNK-031
+    description: Required disclosure block present.
+    assert: predicate
+    predicate: banking.disclosure_present
+    severity: fail
+    tags: [contract, disclosure]
+
+  # ── Ported from banking_rules(): specificity ──────────────────────────────
+  - id: spec.reg_flag
+    description: Mentions a regulatory flag relevant to the case.
+    assert: present_lexicon
+    lexicon: ["AML", "KYC", "SANCTIONS", "INSIDER", "CONCENTRATION"]
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  - id: spec.risk_ref
+    description: References a risk score or risk concept.
+    assert: present_lexicon
+    lexicon: ["risk score", "risk level", "risk indicator", "risk"]
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  # Escape hatch: presence of a numeric value is not one of the eight asserts.
+  - id: spec.numeric
+    description: Includes a numeric value.
+    assert: predicate
+    predicate: text.numeric_value_present
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  # Escape hatch: the legacy rule matched a regular expression (K<d>_<d>) as
+  # well as two words, and a lexicon cannot hold a pattern.
+  - id: spec.gate
+    description: Names a gate or threshold by identifier.
+    assert: predicate
+    predicate: banking.gate_identifier_present
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  - id: spec.info_gap
+    description: Names an information gap.
+    assert: present_lexicon
+    lexicon: ["completeness", "missing", "incomplete", "information gap", "documentation"]
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  # Escape hatch: the legacy rule also matched the values of metadata keys
+  # jurisdiction and transaction_type, so the phrases are not known until the
+  # call is made.
+  - id: spec.case_detail
+    description: Cites a case-specific contextual detail.
+    assert: predicate
+    predicate: banking.case_specific_detail
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  # Escape hatch: counting tokens is arithmetic.
+  - id: spec.length
+    description: Substantive length, more than 30 words.
+    assert: predicate
+    predicate: text.at_least_30_tokens
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  - id: spec.spec_language
+    description: Uses specificity-marking language.
+    assert: present_lexicon
+    lexicon: ["specifically", "in particular"]
+    severity: warn
+    tags: [legacy-banking-v1, spec]
+
+  # ── Ported from banking_rules(): explanatory linkage ──────────────────────
+  - id: expl.conditional
+    description: Uses conditional or causal structure.
+    assert: present_lexicon
+    lexicon: ["if ", "because", "cannot"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.pending
+    description: Names a pending action.
+    assert: present_lexicon
+    lexicon: ["pending", "awaiting"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.causal
+    description: Uses an explicit causal connective.
+    assert: present_lexicon
+    lexicon: ["due to", "consequently", "therefore"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.epistemic
+    description: States an epistemic limitation.
+    assert: present_lexicon
+    lexicon: ["cannot determine", "insufficient", "unable to"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.domain
+    description: References a domain concept.
+    assert: present_lexicon
+    lexicon: ["compliance", "regulatory", "policy", "flag"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.modal
+    description: Uses a modal verb.
+    assert: present_lexicon
+    lexicon: ["would", "should", "need"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  # Escape hatch: counting tokens is arithmetic.
+  - id: expl.length
+    description: Minimum length, more than 20 words.
+    assert: predicate
+    predicate: text.at_least_20_tokens
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  - id: expl.temporal
+    description: Includes temporal ordering.
+    assert: present_lexicon
+    lexicon: ["before", "prior to", "until"]
+    severity: warn
+    tags: [expl, legacy-banking-v1]
+
+  # ── Ported from banking_rules(): boundary shift ───────────────────────────
+  - id: bshift.cond_approval
+    description: States a conditional approval pathway.
+    assert: present_lexicon
+    lexicon: ["would approve if", "would change", "favorable resolution"]
+    severity: warn
+    tags: [bshift, legacy-banking-v1]
+
+  - id: bshift.info_request
+    description: Requests additional information.
+    assert: present_lexicon
+    lexicon: ["additional information", "further documentation", "more data"]
+    severity: warn
+    tags: [bshift, legacy-banking-v1]
+
+  - id: bshift.risk_reduction
+    description: Proposes risk-reduction language.
+    assert: present_lexicon
+    lexicon: ["risk reduction", "mitigate", "reduce risk"]
+    severity: warn
+    tags: [bshift, legacy-banking-v1]
+
+  - id: bshift.alternative
+    description: Offers an alternative framing.
+    assert: present_lexicon
+    lexicon: ["otherwise", "alternatively"]
+    severity: warn
+    tags: [bshift, legacy-banking-v1]
+
+  - id: bshift.threshold_ref
+    description: References a threshold or criterion.
+    assert: present_lexicon
+    lexicon: ["standard", "threshold", "criteria"]
+    severity: warn
+    tags: [bshift, legacy-banking-v1]
+
+  # Escape hatch: counting tokens is arithmetic.
+  - id: bshift.length
+    description: Substantive resolution-path length, more than 25 words.
+    assert: predicate
+    predicate: text.at_least_25_tokens
+    severity: warn
+    tags: [bshift, legacy-banking-v1]

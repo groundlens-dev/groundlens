@@ -1,0 +1,246 @@
+# Decision-rationale rule pack (credit / AML / KYC / sanctions).
+#
+# Port of the legacy Python rule set groundlens.rules.decision_rationale_rules()
+# (also shipped as groundlens_banking_rules, "decision_rationale_v1_finance").
+# The legacy set had 20 rules. 19 are here. Rule ids and citations are
+# unchanged so a reviewer can diff this file against the old factory.
+#
+# What changed in the port, and why:
+#
+#   1. comp.addresses_all_parts is NOT ported. It scaled a required word count
+#      by the number of question marks in the user's question. check() takes an
+#      answer and its evidence and is not given the question, so the rule has
+#      no input. It is dropped rather than approximated.
+#   2. Weights are gone: v2 produces a decision, not a score. The legacy flag
+#      predicate (groundedness < 0.5 or calibration < 0.3 or traceability < 0.4)
+#      is arithmetic over weights and cannot be written in this format.
+#      Per-rule severity replaces it. A rule carries "fail" when what it tests
+#      is grounding, citation or a control the pipeline claims to have run;
+#      it carries "warn" when it tests for the presence of words, because
+#      wording is gameable and is not worth a person's time on its own.
+#   3. Four rules read a metadata flag and, in the legacy engine, PASSED when
+#      the flag was absent. That silent pass is exactly what fail-closed
+#      removes: an absent key is now a FAIL and says so.
+#   4. trace.specific_source_span was a regular expression looking for the
+#      words "page", "section", "§". It is now citations_resolve: a citation
+#      has to resolve to a source that was actually provided. Strictly
+#      stronger, and it is the check the old regex was standing in for.
+#
+# locale_profile: this rule set is not country-specific. It inherits the
+# euro-area Spanish profile until a deployment needs another one; the profile
+# governs how numbers and dates are read, not what language the rules are in.
+#
+# tags carry the legacy sub-score each rule contributed to.
+
+pack: decision-rationale
+version: 1.0.0
+locale_profile: eu-es
+
+facts:
+  currency:
+    tolerance: "0"
+  number:
+    tolerance: "0"
+
+rules:
+  # ── Groundedness ──────────────────────────────────────────────────────────
+  # Escape hatch: a ratio of content-word overlap is arithmetic.
+  - id: grnd.claim_supported_by_context
+    description: At least two fifths of the wording in the answer also appears in the sources.
+    assert: predicate
+    predicate: text.content_overlap_with_evidence
+    severity: warn
+    citation: "RAGAs (Es et al., EACL 2024) §3; NIST AI 600-1 (2024) §2.2 Confabulation"
+    tags: [groundedness, legacy-decision-rationale-v1]
+
+  # Escape hatch: counting sentences is arithmetic.
+  - id: grnd.atomic_decomposition
+    description: The rationale separates into at least two distinct statements.
+    assert: predicate
+    predicate: text.two_or_more_sentences
+    severity: warn
+    citation: "FactScore (Min et al., EMNLP 2023) §3; RAGAs (Es et al., EACL 2024) §3"
+    tags: [groundedness, legacy-decision-rationale-v1]
+
+  # The legacy implementation compared numbers only. The description it carried
+  # is broader than that, and so is this rule: nothing the answer states may be
+  # absent from the sources.
+  - id: grnd.no_unsupported_extensions
+    description: Nothing the answer states is absent from the sources provided.
+    assert: all_facts_matched
+    severity: fail
+    citation: "HaluEval (Li et al., EMNLP 2023); Ji et al. ACM CSUR 2023; NIST AI 600-1 (2024)"
+    tags: [groundedness, legacy-decision-rationale-v1]
+
+  - id: grnd.regulatory_flag
+    description: Names a specific regulatory flag or policy clause.
+    assert: present_lexicon
+    lexicon: ["AML", "KYC", "SANCTIONS", "INSIDER", "CONCENTRATION"]
+    severity: warn
+    citation: "REV (Chen et al., ACL 2023); SR 26-2 (Fed/OCC/FDIC 2026) §VI Documentation"
+    tags: [groundedness, legacy-decision-rationale-v1]
+
+  - id: grnd.counterfactual_robust
+    description: The caller reports that the answer was screened against wrong retrievals.
+    assert: metadata_equals
+    key: context_quality_validated
+    equals: "true"
+    severity: fail
+    citation: "RGB (Chen et al., AAAI 2024); EU AI Act 2024/1689 Art. 15(4)"
+    tags: [groundedness, legacy-decision-rationale-v1]
+
+  # ── Completeness ──────────────────────────────────────────────────────────
+  # comp.addresses_all_parts is intentionally absent. See the header.
+
+  # Escape hatch: "at least two distinct" is a count, and present_lexicon
+  # answers "at least one".
+  - id: comp.governance_dimensions
+    description: The rationale covers at least two different governance topics.
+    assert: predicate
+    predicate: banking.governance_dimensions_two_or_more
+    severity: warn
+    citation: "EBA GL/2020/06 §4.3.3; SR 26-2 (Fed/OCC/FDIC 2026) §IV Model Development"
+    tags: [completeness, legacy-decision-rationale-v1]
+
+  - id: comp.information_integration
+    description: The rationale draws several sources together rather than reciting one.
+    assert: present_lexicon
+    lexicon: ["combined", "together", "across", "between", "both ", "in addition", "moreover"]
+    severity: warn
+    citation: "RGB (Chen et al., AAAI 2024); TRUE (Honovich et al., NAACL 2022)"
+    tags: [completeness, legacy-decision-rationale-v1]
+
+  # ── Calibration ───────────────────────────────────────────────────────────
+  - id: cal.abstains_when_insufficient
+    description: The rationale says so plainly when the evidence does not settle the question.
+    assert: present_lexicon
+    lexicon:
+      - "insufficient information"
+      - "cannot determine"
+      - "unable to confirm"
+      - "not enough evidence"
+      - "i don't know"
+      - "cannot be answered"
+      - "no relevant"
+      - "missing data"
+    severity: warn
+    citation: "RAGAs (Es et al., EACL 2024) §3; FinanceBench (Islam et al., 2023); SR 26-2 §V Model Validation"
+    tags: [calibration, legacy-decision-rationale-v1]
+
+  - id: cal.explicit_hedging
+    description: Uncertain claims are worded as uncertain.
+    assert: present_lexicon
+    lexicon:
+      - " may "
+      - " might "
+      - "suggests"
+      - "appears"
+      - "likely"
+      - "probably"
+      - "possibly"
+      - "seems to"
+      - "could be"
+    severity: warn
+    citation: "TruthfulQA (Lin et al., ACL 2022); Hyland (1998) hedging taxonomy; SR 26-2 §IV Model Use"
+    tags: [calibration, legacy-decision-rationale-v1]
+
+  # Escape hatch: "a percentage or a stated probability is present" is a
+  # pattern, and no assert kind tests for the presence of a fact.
+  - id: cal.confidence_score
+    description: The rationale states how confident it is, as a figure.
+    assert: predicate
+    predicate: text.percent_or_confidence_present
+    severity: warn
+    citation: "G-Eval (Liu et al., EMNLP 2023); EU AI Act Art. 13(3)(b)(ii)"
+    tags: [calibration, legacy-decision-rationale-v1]
+
+  - id: cal.self_consistency
+    description: The caller reports that the answer was screened for self-consistency.
+    assert: metadata_equals
+    key: consistency_check_passed
+    equals: "true"
+    severity: fail
+    citation: "SelfCheckGPT (Manakul et al., EMNLP 2023); Morgan Stanley + OpenAI (2024)"
+    tags: [calibration, legacy-decision-rationale-v1]
+
+  # ── Traceability ──────────────────────────────────────────────────────────
+  - id: trace.specific_source_span
+    description: Every reference the answer makes points at a source that was provided.
+    assert: citations_resolve
+    severity: fail
+    citation: "e-SNLI (Camburu et al., NeurIPS 2018); EU AI Act Art. 13(3)(b)(iv); FinanceBench (Islam et al., 2023)"
+    tags: [legacy-decision-rationale-v1, traceability]
+
+  # Escape hatch: counting words is arithmetic.
+  - id: trace.natural_language_rationale
+    description: There is a written explanation, not a bare verdict.
+    assert: predicate
+    predicate: text.at_least_30_tokens
+    severity: warn
+    citation: "e-SNLI (Camburu et al., NeurIPS 2018); EU AI Act Art. 13(3)(b)(iv); PRA SS1/23 Principle 3"
+    tags: [legacy-decision-rationale-v1, traceability]
+
+  # Escape hatch: a conjunction of two unrelated conditions, which is one rule
+  # in the legacy code and cannot be one assert here.
+  - id: trace.falsifiable_actionable
+    description: A figure in the answer is tied to a stated reason, so it can be checked.
+    assert: predicate
+    predicate: text.numeric_with_causal_connective
+    severity: warn
+    citation: "REV (Chen et al., ACL 2023); SR 26-2 §V Conceptual Soundness"
+    tags: [legacy-decision-rationale-v1, traceability]
+
+  # Escape hatch: presence of a numeric value is not one of the eight asserts.
+  - id: trace.numeric_value
+    description: The rationale includes a figure rather than describing everything in words.
+    assert: predicate
+    predicate: text.numeric_value_present
+    severity: warn
+    citation: "FinQA (Chen et al., EMNLP 2021); EU AI Act Art. 13(3)(b)(ii); SR 26-2 §V Outcomes Analysis"
+    tags: [legacy-decision-rationale-v1, traceability]
+
+  - id: trace.audit_logged
+    description: The caller reports that this rationale was written to the audit log.
+    assert: metadata_equals
+    key: audit_logged
+    equals: "true"
+    severity: fail
+    citation: "EU AI Act Art. 12 Record-Keeping; SR 26-2 §VI Documentation; ISO/IEC 42001:2023 §8.2"
+    tags: [legacy-decision-rationale-v1, traceability]
+
+  # ── Robustness ────────────────────────────────────────────────────────────
+  # Escape hatch: either the wording says so or the caller's metadata says so,
+  # and one rule cannot span two assert kinds.
+  - id: rob.independent_validation
+    description: Someone other than the author checked this, per the answer or the caller.
+    assert: predicate
+    predicate: banking.independent_validation
+    severity: warn
+    citation: "SR 26-2 §III Effective Challenge; PRA SS1/23 Principle 4; ECB Guide to Internal Models §9.3 ¶43(a)"
+    tags: [legacy-decision-rationale-v1, robustness]
+
+  - id: rob.prompt_injection_robust
+    description: The caller reports that the answer was screened for planted instructions.
+    assert: metadata_equals
+    key: injection_test_passed
+    equals: "true"
+    severity: fail
+    citation: "RGB (Chen et al., AAAI 2024); EU AI Act Art. 15; MAS MindForge (2024)"
+    tags: [legacy-decision-rationale-v1, robustness]
+
+  - id: rob.cross_source_conflict
+    description: Where the sources disagree, the rationale says so.
+    assert: present_lexicon
+    lexicon:
+      - "conflict"
+      - "conflicting"
+      - "disagrees"
+      - "disagreement"
+      - "inconsistent"
+      - "however"
+      - "but the"
+      - "discrepancy"
+      - "mismatch"
+    severity: warn
+    citation: "ConflictBank (Su et al., 2024); EU AI Act Art. 15(4); RGB (Chen et al., 2024)"
+    tags: [legacy-decision-rationale-v1, robustness]
