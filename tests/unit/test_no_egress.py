@@ -13,8 +13,9 @@ from typing import Any
 
 import numpy as np
 
-from groundlens import check, compute_dgi, compute_sgi
+from groundlens import compute_dgi, compute_sgi
 from groundlens.dgi import reset_calibration_cache
+from groundlens.geometry.render import render_check
 
 
 def _blocked(*_args: Any, **_kwargs: Any) -> None:
@@ -34,6 +35,6 @@ def test_local_scoring_opens_no_sockets(monkeypatch: Any) -> None:
     sgi = compute_sgi(question="q", context="c", response="r", encoder=_encoder)
     dgi = compute_dgi(question="q", response="r", encoder=_encoder)
 
-    assert check(sgi).level in {"ok", "review", "risk"}
-    assert check(dgi).level in {"ok", "review", "risk"}
+    assert render_check(sgi).level in {"ok", "review", "risk"}
+    assert render_check(dgi).level in {"ok", "review", "risk"}
     reset_calibration_cache()

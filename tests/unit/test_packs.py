@@ -411,7 +411,7 @@ def test_shipped_rule_ids_are_unique_and_described(name: str) -> None:
 
 def test_eu_retail_banking_matches_the_contract_example() -> None:
     pack = load_pack("eu-retail-banking")
-    assert pack.version == "1.2.0"
+    assert pack.version == "1.3.0"
     assert pack.locale_profile == "eu-es"
     assert pack.requires_metadata == ("disclosure_set", "product_type")
     assert pack.facts_config_mapping()["currency"]["tolerance"] == "0"
@@ -440,7 +440,11 @@ def test_escape_hatch_ratio_is_what_the_handoff_claims() -> None:
     """If this fails, the reported adequacy of the format is wrong."""
     banking = load_pack("eu-retail-banking")
     rationale = load_pack("decision-rationale")
-    ported_banking = [rule for rule in banking.rules if "contract" not in rule.tags]
+    # Select the ported rules by the tag that means "ported", not by the
+    # absence of the "contract" tag. The pack now also carries native v2
+    # grounding rules that are neither contract rules nor legacy ports, and
+    # counting those as ports would misreport the adequacy of the format.
+    ported_banking = [rule for rule in banking.rules if "legacy-banking-v1" in rule.tags]
     assert len(ported_banking) == 22
     assert sum(1 for rule in ported_banking if rule.assertion == "predicate") == 6
     assert len(rationale.rules) == 19

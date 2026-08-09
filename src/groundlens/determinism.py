@@ -166,12 +166,18 @@ class LocaleProfile:
         thousands_separator: The grouping character, or ``""`` when the
             profile recognises no grouping at all.
         date_order: One of ``"dmy"``, ``"mdy"``, ``"ymd"``.
+        currency: ISO 4217 code this profile resolves an ambiguous symbol to,
+            or ``""`` when it declares none. ``$`` is USD, CAD, AUD and more,
+            so a symbol alone is not a currency. The pack's profile decides,
+            never the host. A profile declaring no currency leaves the
+            ambiguity on the fact rather than guessing.
     """
 
     name: str
     decimal_separator: str
     thousands_separator: str
     date_order: str
+    currency: str = ""
 
     def __post_init__(self) -> None:
         """Reject profiles that cannot parse unambiguously."""
@@ -195,12 +201,49 @@ class LocaleProfile:
 
 
 _BUILTIN_PROFILES: Final[tuple[LocaleProfile, ...]] = (
-    LocaleProfile(name="eu-es", decimal_separator=",", thousands_separator=".", date_order="dmy"),
-    LocaleProfile(name="eu-de", decimal_separator=",", thousands_separator=".", date_order="dmy"),
-    LocaleProfile(name="eu-fr", decimal_separator=",", thousands_separator=" ", date_order="dmy"),
-    LocaleProfile(name="en-gb", decimal_separator=".", thousands_separator=",", date_order="dmy"),
-    LocaleProfile(name="en-us", decimal_separator=".", thousands_separator=",", date_order="mdy"),
-    LocaleProfile(name="iso", decimal_separator=".", thousands_separator="", date_order="ymd"),
+    LocaleProfile(
+        name="eu-es",
+        decimal_separator=",",
+        thousands_separator=".",
+        date_order="dmy",
+        currency="EUR",
+    ),
+    LocaleProfile(
+        name="eu-de",
+        decimal_separator=",",
+        thousands_separator=".",
+        date_order="dmy",
+        currency="EUR",
+    ),
+    LocaleProfile(
+        name="eu-fr",
+        decimal_separator=",",
+        thousands_separator=" ",
+        date_order="dmy",
+        currency="EUR",
+    ),
+    LocaleProfile(
+        name="en-gb",
+        decimal_separator=".",
+        thousands_separator=",",
+        date_order="dmy",
+        currency="GBP",
+    ),
+    LocaleProfile(
+        name="en-us",
+        decimal_separator=".",
+        thousands_separator=",",
+        date_order="mdy",
+        currency="USD",
+    ),
+    # "iso" is the neutral profile. It declares no currency on purpose, so a
+    # bare symbol stays ambiguous instead of being resolved by accident.
+    LocaleProfile(
+        name="iso",
+        decimal_separator=".",
+        thousands_separator="",
+        date_order="ymd",
+    ),
 )
 
 LOCALE_PROFILES: Final[Mapping[str, LocaleProfile]] = MappingProxyType(

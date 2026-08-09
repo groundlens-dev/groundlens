@@ -19,11 +19,44 @@
 #      grounding, decision language, obligation strength or a required
 #      disclosure carry severity "fail".
 #
+# Rules BNK-002 to BNK-006, BNK-021 and BNK-040 close a coverage gap found by
+# the dev canary suite: BNK-001 was the pack's only fact-grounding rule and it
+# carried where: {kind: currency}, so every other kind the extractor produces
+# (number, percent, date, duration, deadline, citation) was extracted, matched
+# against the evidence, and then acted on by nothing. Extraction recall for
+# shifted deadlines was 5/5 while recall was 3/5, which is the signature of a
+# missing rule rather than a missing capability.
+#
+# Six of the seven assert no_contradicted_facts rather than all_facts_matched,
+# and that choice is the substance of the change, not a detail:
+#
+#   CONTRADICTED means a same-kind fact sits in the evidence, in a context the
+#   matcher's gate accepted, carrying a different value. The answer says 2,5 %
+#   where the source says 12,5 %. That is a defect with high confidence.
+#
+#   UNMATCHED means only that no source discusses the value. It is weak
+#   evidence of anything, and it is the main source of false alarms. Measured
+#   on this pack's clean canaries, all_facts_matched on kind: number escalates
+#   eurb-*-clean-007 in both suites, because the "1." "2." "3." of its
+#   numbered list are extracted as numbers and no source contains them.
+#   Escalating a compliance reviewer onto a bulleted list is the failure mode
+#   that gets a checker switched off.
+#
+# BNK-040 is the exception and asserts all_facts_matched, because a citation is
+# a pointer and a pointer that resolves to no provided source is broken by
+# definition, not merely undiscussed. Measured cost: zero. Every citation in
+# every clean canary in both suites is MATCHED.
+#
+# Measured cost of the whole set on clean traffic: zero cases changed in either
+# suite. No clean canary in dev or frozen contains a CONTRADICTED fact of any
+# kind. That is a fact about 22 clean cases, not a guarantee; it is the reason
+# these rules carry severity fail rather than warn.
+#
 # tags carry the legacy sub-score each rule contributed to, so the old grouping
 # survives the port. Tags have no effect on evaluation.
 
 pack: eu-retail-banking
-version: 1.2.0
+version: 1.3.0
 locale_profile: eu-es
 
 requires_metadata:
@@ -45,6 +78,65 @@ rules:
     severity: fail
     citation: "EBA/GL/2020/06 §4.2"
     tags: [contract, grounding]
+
+  # ── Grounding of the kinds BNK-001 does not select ────────────────────────
+  - id: BNK-002
+    description: A rate or percentage stated must not disagree with the evidence.
+    assert: no_contradicted_facts
+    where: { kind: percent }
+    severity: fail
+    citation: "Directive 2008/48/EC Art. 5(1)(f)"
+    tags: [grounding, numeric]
+
+  - id: BNK-003
+    description: A bare figure stated must not disagree with the evidence.
+    assert: no_contradicted_facts
+    where: { kind: number }
+    severity: fail
+    tags: [grounding, numeric]
+
+  - id: BNK-004
+    description: A calendar date stated must not disagree with the evidence.
+    assert: no_contradicted_facts
+    where: { kind: date }
+    severity: fail
+    tags: [grounding, temporal]
+
+  - id: BNK-005
+    description: A period of time stated must not disagree with the evidence.
+    assert: no_contradicted_facts
+    where: { kind: duration }
+    severity: fail
+    citation: "Directive 2008/48/EC Art. 14(1)"
+    tags: [grounding, temporal]
+
+  - id: BNK-006
+    description: A deadline stated must not resolve to a different day from the evidence.
+    assert: no_contradicted_facts
+    where: { kind: deadline }
+    severity: fail
+    citation: "Directive 2008/48/EC Art. 14(1)"
+    tags: [grounding, temporal]
+
+  # BNK-020 reports an obligation only when the answer's wording *exceeds or
+  # inverts* the source's. The other direction is silent there and is the
+  # dangerous one for a customer: a source that says "must not" restated as
+  # "may" tells the reader they are allowed to do the forbidden thing. This
+  # rule reports a contradicted obligation whichever way it runs.
+  - id: BNK-021
+    description: An obligation stated must not disagree with the evidence in either direction.
+    assert: no_contradicted_facts
+    where: { kind: obligation }
+    severity: fail
+    tags: [grounding, obligation]
+
+  # ── Traceability ──────────────────────────────────────────────────────────
+  - id: BNK-040
+    description: Every reference the answer makes must point at a source that was provided.
+    assert: all_facts_matched
+    where: { kind: citation }
+    severity: fail
+    tags: [grounding, traceability]
 
   - id: BNK-014
     description: Recommendation language only, no decision language.

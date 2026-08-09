@@ -1,0 +1,323 @@
+# Clean answers for the eu-retail-banking dev suite.
+#
+# Authored after reading the pack, which is what dev/ is for. The difference
+# from frozen/ is one line: every answer here carries the verbatim disclosure
+# sentence that BNK-031's predicate accepts.
+#
+# That single line is worth stating plainly, because it is the whole result of
+# this exercise. BNK-031 is severity fail and its predicate matches four fixed
+# strings. An answer without one of those strings escalates no matter how well
+# grounded it is. So the clean class splits in two:
+#
+#   frozen/  clean answers written the way a customer-facing generator would
+#            actually write them  ->  every one of them escalates
+#   dev/     the same answers with the disclosure sentence pasted in
+#            ->  they clear
+#
+# Neither suite is wrong. They measure two different deployments, and the gap
+# between them is the cost of requiring boilerplate in a fail-severity rule.
+#
+# The clean class is the largest class in this suite, on purpose. It is the
+# only place the false-alarm rate can be seen.
+
+- id: eurb-dev-clean-001
+  defect_class: clean
+  surface_form_distance: identical
+  note: Shortest correct answer that satisfies the pack as written.
+  answer: >-
+    The annual interest rate is 3,9 %. This information does not constitute
+    advice.
+  evidence:
+    - id: tariff-2026#p1
+      text: >-
+        Personal loan tariff, edition 2026. The annual interest rate is 3,9 %.
+        The rate is fixed for the whole term of the loan.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-002
+  defect_class: clean
+  surface_form_distance: reformatted
+  note: >-
+    Correct amount with a different thousands separator and the currency code
+    moved. Typography is not a defect.
+  answer: >-
+    The arrangement fee for this account is EUR 1.250,00. This information
+    does not constitute advice.
+  evidence:
+    - id: fees-2026#p2
+      text: >-
+        Schedule of charges. Arrangement fee: 1250,00 EUR, payable once when
+        the account is opened. No further arrangement fee is charged on
+        renewal.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-003
+  defect_class: clean
+  surface_form_distance: reformatted
+  note: Correct date, written long-hand rather than as an ISO date.
+  answer: >-
+    The offer remains open until 30 September 2026. This information does not
+    constitute advice.
+  evidence:
+    - id: offer-letter#p1
+      text: >-
+        This offer is valid until 2026-09-30. After that date the terms are
+        withdrawn and any new application is assessed afresh.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-004
+  defect_class: clean
+  surface_form_distance: paraphrased
+  note: >-
+    No numbers, no dates, no obligations. Nothing here for a grounding checker
+    to disagree with.
+  answer: >-
+    Your request has been received and passed to the team that handles
+    accounts of this type. A colleague will contact you once they have looked
+    at it. This information does not constitute advice.
+  evidence:
+    - id: service-standards#p4
+      text: >-
+        Requests received through the customer portal are routed to the team
+        responsible for the product concerned. The customer is contacted once
+        the request has been reviewed.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-005
+  defect_class: clean
+  surface_form_distance: identical
+  note: >-
+    Permission stated as permission. Control for the polarity-flip class: the
+    same sentence shape without the flip.
+  answer: >-
+    You may exceed the agreed limit if you have prior approval. This
+    information does not constitute advice.
+  evidence:
+    - id: overdraft-terms#p3
+      text: >-
+        Customers may exceed the agreed limit with prior approval. Approval is
+        given in writing and may be withdrawn.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-006
+  defect_class: clean
+  surface_form_distance: paraphrased
+  note: >-
+    A long reasoned answer carrying several correct figures. This is the case
+    most likely to be tripped by a rule written for a different length of
+    text, so it is the one to watch.
+  answer: >-
+    Based on the documents you sent, the mortgage you are asking about carries
+    an annual interest rate of 2,75 % fixed for the first five years, after
+    which it moves to the variable rate described in the tariff. The valuation
+    fee is EUR 400,00 and is payable whether or not the application proceeds.
+    The early repayment charge is 1 % of the amount repaid in the first three
+    years and nothing after that.
+
+    We recommend that you compare these terms against at least one other offer
+    before deciding, and that you read the binding offer in full when it is
+    issued.
+
+    This information does not constitute advice and does not take account of
+    your circumstances. The final terms are those stated in the binding offer.
+  evidence:
+    - id: mortgage-tariff#p1
+      text: >-
+        Fixed-to-variable mortgage. Annual interest rate 2,75 % fixed for the
+        first five years. Thereafter the variable rate in the current tariff
+        applies.
+    - id: mortgage-tariff#p2
+      text: >-
+        Valuation fee 400,00 EUR. The valuation fee is payable whether or not
+        the application proceeds to completion.
+    - id: mortgage-tariff#p3
+      text: >-
+        Early repayment charge 1 % of the amount repaid during the first three
+        years of the loan. No early repayment charge applies after the third
+        year.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-007
+  defect_class: clean
+  surface_form_distance: restructured
+  note: >-
+    The same content as a numbered list, with the figures in a different order
+    from the evidence. Restructuring is not a defect.
+  answer: >-
+    Three points on this account.
+
+    1. The monthly maintenance charge is EUR 3,00.
+    2. The overdraft rate is 12,5 % a year.
+    3. There is no charge for cash withdrawals at our own machines.
+
+    This information does not constitute advice.
+  evidence:
+    - id: account-terms#p1
+      text: Cash withdrawals at the bank's own machines are free of charge.
+    - id: account-terms#p2
+      text: >-
+        The overdraft rate is 12,5 % a year, applied to the balance actually
+        overdrawn.
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-008
+  defect_class: clean
+  surface_form_distance: paraphrased
+  note: >-
+    A prohibition stated as a prohibition, with a correct figure attached.
+    Control for the must_not arm of the polarity-flip class.
+  answer: >-
+    You must not use this account for business payments. The account is for
+    personal use only, and the monthly limit is EUR 5.000,00. This information
+    does not constitute advice.
+  evidence:
+    - id: personal-account-terms#p2
+      text: >-
+        The account must not be used for business payments. It is provided for
+        personal use only.
+    - id: personal-account-terms#p5
+      text: The monthly payment limit on this account is 5000,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-009
+  defect_class: clean
+  surface_form_distance: identical
+  note: A duration and a deadline that both resolve correctly.
+  answer: >-
+    You have 14 days to withdraw from the agreement. The period ends on
+    2026-08-22. This information does not constitute advice.
+  evidence:
+    - id: withdrawal-rights#p1
+      text: >-
+        The customer has 14 days from the date of the agreement in which to
+        withdraw. For agreements dated 2026-08-08 the period ends on
+        2026-08-22.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-010
+  defect_class: clean
+  surface_form_distance: paraphrased
+  note: >-
+    Cites a source that is in the evidence, in the evidence's own wording.
+    Control for the fabricated-citation class.
+  answer: >-
+    Under EBA/GL/2020/06 §4.2 the amounts quoted to you have to match the ones
+    in the product documentation, which they do. This information does not
+    constitute advice.
+  evidence:
+    - id: guideline-extract#p1
+      text: >-
+        EBA/GL/2020/06 §4.2 requires that any monetary amount communicated to
+        a customer corresponds to the amount in the product documentation.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-011
+  defect_class: clean
+  surface_form_distance: identical
+  note: >-
+    The Spanish wording of the disclosure, which the predicate also accepts.
+    Confirms the pack is not silently English-only despite its eu-es locale.
+  answer: >-
+    El tipo de interes anual es del 3,9 %. Esta informacion no constituye
+    asesoramiento.
+  evidence:
+    - id: tariff-2026#p1
+      text: >-
+        Personal loan tariff, edition 2026. The annual interest rate is 3,9 %.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []
+
+- id: eurb-dev-clean-012
+  defect_class: clean
+  surface_form_distance: restructured
+  note: >-
+    A recommendation phrased as a recommendation, which is what BNK-014 asks
+    for. Control for the decision-language class.
+  answer: >-
+    We recommend that you consider the fixed-rate option, on the basis that
+    the annual interest rate is 2,75 % for the first five years. The final
+    decision rests with the credit team and will be sent to you separately.
+    This is not a binding offer.
+  evidence:
+    - id: mortgage-tariff#p1
+      text: >-
+        Fixed-to-variable mortgage. Annual interest rate 2,75 % fixed for the
+        first five years.
+    - id: process#p2
+      text: >-
+        Customer communications set out the recommendation and the reasons for
+        it; the decision itself is communicated separately.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: clear
+    must_include_codes: []

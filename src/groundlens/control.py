@@ -25,13 +25,16 @@ evidence, evaluate the pack's rules, decide, build the audit record.
 from __future__ import annotations
 
 import datetime
-import hashlib
-import inspect
-import unicodedata
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-from groundlens import audit_record as _audit_record
+from groundlens.audit_record import (
+    Counts,
+    PredicateRef,
+    RulesetRef,
+    build_record,
+)
+from groundlens.determinism import get_locale_profile, normalise_text
 from groundlens.facts import extract_facts, match_facts
 from groundlens.packs.evaluate import evaluate_pack, missing_metadata_findings
 from groundlens.packs.loader import Pack, load_pack
@@ -40,7 +43,6 @@ from groundlens.types import Decision, Evidence, Finding, MatchState, Result, Se
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
-    from groundlens.audit_record import AuditRecord
     from groundlens.packs.predicates import PredicateRegistry
     from groundlens.types import Fact, Match
 
@@ -53,12 +55,18 @@ _UNDECLARED_LOCALE = "undeclared"
 
 
 def _nfkc(text: str) -> str:
-    """Apply NFKC once. Every span in the result indexes into this output."""
-    return unicodedata.normalize("NFKC", text)
+    """Normalise once. Every span in the result indexes into this output.
 
-
-def _sha256(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    :func:`groundlens.determinism.normalise_text` is NFKC plus the fixed
+    whitespace and invisible-character policy, and it is idempotent. Using it
+    here rather than a bare ``unicodedata.normalize`` is what makes
+    ``answer_sha256`` in the audit record the digest of *exactly* the string
+    the spans point into: :func:`groundlens.audit_record.sha256_text` runs the
+    same function, so hashing an already-normalised string is a no-op.
+    A record whose hash identifies a slightly different string than the one
+    that was analysed is not an audit trail.
+    """
+    return normalise_text(text)
 
 
 def _coerce_evidence(evidence: object) -> tuple[Evidence, ...]:
@@ -195,21 +203,21 @@ def _counts(
     matches: tuple[Match, ...],
     pack: Pack,
     findings: tuple[Finding, ...],
-) -> dict[str, int]:
+) -> Counts:
     states = [match.state for match in matches]
     failed_rules = {
         finding.rule_id
         for finding in findings
         if finding.rule_id is not None and finding.code != "rule.passed"
     }
-    return {
-        "facts_extracted": len(facts),
-        "facts_matched": sum(1 for state in states if state is MatchState.MATCHED),
-        "facts_unmatched": sum(1 for state in states if state is MatchState.UNMATCHED),
-        "facts_contradicted": sum(1 for state in states if state is MatchState.CONTRADICTED),
-        "rules_evaluated": len(pack.rules),
-        "rules_failed": len(failed_rules),
-    }
+    return Counts(
+        facts_extracted=len(facts),
+        facts_matched=sum(1 for state in states if state is MatchState.MATCHED),
+        facts_unmatched=sum(1 for state in states if state is MatchState.UNMATCHED),
+        facts_contradicted=sum(1 for state in states if state is MatchState.CONTRADICTED),
+        rules_evaluated=len(pack.rules),
+        rules_failed=len(failed_rules),
+    )
 
 
 def _extractor_version() -> str:
@@ -219,35 +227,17 @@ def _extractor_version() -> str:
     return str(version)
 
 
-def _predicate_entries(pack: Pack, registry: PredicateRegistry | None) -> list[dict[str, str]]:
+def _predicate_entries(pack: Pack, registry: PredicateRegistry | None) -> tuple[PredicateRef, ...]:
     from groundlens.packs import predicates as predicates_module
 
     active = predicates_module.REGISTRY if registry is None else registry
-    entries: list[dict[str, str]] = []
-    for name in pack.predicate_names():
-        entry = active.entry(name)
-        entries.append({"name": entry.name, "source_sha256": entry.source_sha256})
-    return entries
-
-
-def _build_audit(payload: dict[str, Any]) -> AuditRecord:
-    """Hand the record fields to :mod:`groundlens.audit_record`.
-
-    That module owns the schema string, the library version and the canonical
-    JSON encoding. This adapter passes the fields it accepts and nothing else,
-    so a change in its constructor is a clean failure here rather than a
-    silently truncated record.
-    """
-    factory: Any = getattr(_audit_record, "build_audit_record", None)
-    if factory is None:
-        factory = _audit_record.AuditRecord
-    parameters = inspect.signature(factory).parameters
-    takes_var_kwargs = any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values()
+    return tuple(
+        PredicateRef(
+            name=active.entry(name).name,
+            source_sha256=active.entry(name).source_sha256,
+        )
+        for name in pack.predicate_names()
     )
-    if not takes_var_kwargs:
-        payload = {key: value for key, value in payload.items() if key in parameters}
-    return cast("AuditRecord", factory(**payload))
 
 
 # ── Entry point ─────────────────────────────────────────────────────────────
@@ -347,14 +337,14 @@ def check(
 
     facts = extract_facts(
         normalised_answer,
-        locale=pack.locale_profile,
+        locale=get_locale_profile(pack.locale_profile),
         reference_date=resolved_date,
         config=facts_config,
     )
     matches = match_facts(
         facts,
         evidence_items,
-        locale=pack.locale_profile,
+        locale=get_locale_profile(pack.locale_profile),
         config=facts_config,
     )
 
@@ -379,30 +369,31 @@ def check(
         else Decision.CLEAR
     )
 
-    audit = _build_audit(
-        {
-            "extractor_version": _extractor_version(),
-            "answer_sha256": _sha256(normalised_answer),
-            "evidence": [{"id": item.id, "sha256": _sha256(item.text)} for item in evidence_items],
-            "tools_output_sha256": (
-                None if normalised_tools is None else _sha256(normalised_tools)
-            ),
-            "metadata_keys": sorted(meta),
-            "ruleset": {
-                "name": pack.name,
-                "version": pack.version,
-                "content_sha256": pack.content_sha256,
-            },
-            "predicates": _predicate_entries(pack, registry),
-            "determinism": {
-                "unicode_form": "NFKC",
-                "locale_profile": pack.locale_profile,
-                "reference_date": (None if resolved_date is None else resolved_date.isoformat()),
-            },
-            "counts": _counts(facts, matches, pack, sorted_findings),
-            "decision": decision.value,
-            "findings": sorted_findings,
-        }
+    # The record is a wire format, so it is built from the typed constructors
+    # in audit_record and never from loose dictionaries. build_record owns the
+    # hashing, the schema string and every sort rule 5 mandates; this call
+    # site's only job is to hand it the right objects. Passing dicts here is
+    # what broke canonical_json() and, with it, record_sha256() and the whole
+    # audit trail — so a wrong type is now a TypeError at the boundary rather
+    # than an AttributeError three layers away at serialisation time.
+    audit = build_record(
+        answer=normalised_answer,
+        evidence=evidence_items,
+        ruleset=RulesetRef(
+            name=pack.name,
+            version=pack.version,
+            content_sha256=pack.content_sha256,
+        ),
+        findings=sorted_findings,
+        counts=_counts(facts, matches, pack, sorted_findings),
+        locale_profile=pack.locale_profile,
+        # Key names only. The values never leave this function.
+        metadata_keys=sorted(meta),
+        tools_output=normalised_tools,
+        reference_date=(None if resolved_date is None else resolved_date.isoformat()),
+        predicates=_predicate_entries(pack, registry),
+        decision=decision,
+        extractor_version=_extractor_version(),
     )
 
     return Result(decision=decision, findings=sorted_findings, audit=audit)
