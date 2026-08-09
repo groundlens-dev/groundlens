@@ -1,0 +1,140 @@
+name: Determinism
+
+# A hard binary gate. It passes or the change does not merge; there is no
+# threshold to tune and it is deliberately independent of the coverage
+# floor in ci.yml, because "we lost 0.4% coverage" and "this build no
+# longer reproduces the audit record" are not the same class of problem
+# and must not share a knob.
+#
+# Two things are proved here that a single-runner test cannot prove:
+#
+#   1. The determinism suite passes on every supported Python (3.10-3.14)
+#      on both Linux and macOS. That covers the dict-ordering,
+#      hash-randomisation and Unicode-table differences between them.
+#   2. The canonical bytes of the golden audit record are *identical*
+#      across all ten cells. Each cell exports the record as an artifact
+#      and the final job downloads all of them and compares digests. A
+#      suite that passes everywhere while producing ten different records
+#      would still be a broken product, and only the cross-matrix diff
+#      catches that.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: determinism-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  determinism:
+    name: Determinism (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # pytest and nothing else. The package is deliberately *not*
+      # installed: the deterministic modules are standard library only,
+      # the suite bootstraps src/ onto sys.path itself, and running this
+      # way turns "no third-party imports" from a claim in a docstring
+      # into something the job would fail on. It also keeps the gate
+      # independent of the dependency tree, so a wheel that does not
+      # exist yet for a new Python cannot turn the determinism gate red
+      # for a packaging reason.
+      - name: Install pytest only
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+
+      # --confcutdir keeps the repo-wide tests/conftest.py (which loads
+      # numpy for the geometry suite) out of this run, for the same
+      # reason.
+      #
+      # A locale the runner does not default to, plus a randomised hash
+      # seed, so the suite is exercised under exactly the conditions
+      # rules 3 and 7 exist to defend against.
+      - name: Run determinism suite
+        env:
+          LC_ALL: C
+          LANG: C
+          PYTHONHASHSEED: random
+          PYTHONUTF8: "1"
+        run: python -m pytest tests/determinism -q --confcutdir=tests/determinism
+
+      - name: Export golden record
+        run: |
+          python tests/determinism/export_golden.py \
+            "record-${{ matrix.os }}-${{ matrix.python-version }}.json"
+
+      - name: Upload golden record
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: golden-${{ matrix.os }}-${{ matrix.python-version }}
+          path: record-${{ matrix.os }}-${{ matrix.python-version }}.json
+          if-no-files-found: error
+          retention-days: 7
+
+  cross-matrix:
+    name: Determinism (identical bytes across the matrix)
+    runs-on: ubuntu-latest
+    needs: determinism
+    steps:
+      - name: Download every exported record
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: exported
+          pattern: golden-*
+          merge-multiple: false
+
+      - name: Assert every exported record is byte-identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find exported -type f -name 'record-*.json' | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::no exported records found; the matrix produced nothing to compare"
+            exit 1
+          fi
+          echo "Comparing ${#files[@]} exported records:"
+          for f in "${files[@]}"; do
+            printf '  %s  %s\n' "$(sha256sum "$f" | cut -d' ' -f1)" "$f"
+          done
+          distinct=$(sha256sum "${files[@]}" | cut -d' ' -f1 | sort -u | wc -l)
+          if [ "$distinct" -ne 1 ]; then
+            echo "::error::the matrix produced $distinct distinct audit records; they must all be identical"
+            echo "First divergence:"
+            diff <(head -c 4000 "${files[0]}") <(head -c 4000 "${files[-1]}") || true
+            exit 1
+          fi
+          echo "All ${#files[@]} exported records are byte-identical."
+
+      - name: Checkout for the committed-fixture comparison
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: repo
+
+      - name: Diff against tests/determinism/golden/record.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          exported=$(find exported -type f -name 'record-*.json' | sort | head -n 1)
+          if ! cmp -s "$exported" repo/tests/determinism/golden/record.json; then
+            echo "::error::exported record differs from the committed golden fixture"
+            cmp -l "$exported" repo/tests/determinism/golden/record.json | head -n 20 || true
+            exit 1
+          fi
+          echo "Exported record matches the committed golden fixture."
