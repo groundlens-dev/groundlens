@@ -111,7 +111,7 @@ A pack is a YAML file, never Python. A reviewer who does not write code has to b
 
 ```yaml
 pack: eu-retail-banking
-version: 1.2.0
+version: 1.3.0
 locale_profile: eu-es
 requires_metadata:
   - product_type

@@ -473,7 +473,7 @@ def test_the_record_identifies_the_pack_by_hash(banking_pack: Pack) -> None:
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=banking_pack)
     ruleset = audit_field(result.audit, "ruleset")
     assert ruleset.name == "eu-retail-banking"
-    assert ruleset.version == "1.2.0"
+    assert ruleset.version == "1.3.0"
     assert ruleset.content_sha256 == banking_pack.content_sha256
 
 

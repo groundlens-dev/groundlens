@@ -98,6 +98,17 @@ The geometry is not gone. It is an extra.
   as `groundlens.audit` by full path before; the `AuditLog` hash chain and its
   SQLite storage are unchanged.
 - `geometry` extra, and `groundlens.geometry.render.render_check`.
+- `eu-retail-banking` 1.3.0 adds seven grounding rules. BNK-001 was the pack's
+  only fact rule and it selected `kind: currency`, so numbers, percentages,
+  dates, durations, deadlines and citations were extracted and matched and then
+  acted on by nothing. BNK-002 to BNK-006 and BNK-021 assert
+  `no_contradicted_facts` per kind; BNK-040 asserts `all_facts_matched` on
+  citations. Dev canary recall: `wrong_number` 1/5 -> 3/5, `shifted_deadline`
+  3/5 -> 5/5, `polarity_flip` 4/6 -> 6/6, `fabricated_citation` 4/5 -> 5/5.
+  Escalation on clean traffic is unchanged in both suites: 1/20 dev, 16/16
+  frozen. Contradiction was chosen over unmatched deliberately — an unmatched
+  fact is weak evidence of a defect, and `all_facts_matched` on `kind: number`
+  escalates a numbered list in both clean suites.
 
 ### Fixed
 
