@@ -24,8 +24,8 @@ repository-code: "https://github.com/groundlens-dev/groundlens"
 url: "https://groundlens.dev"
 repository-artifact: "https://pypi.org/project/groundlens/"
 license: Apache-2.0
-version: 2026.8.5
-date-released: "2026-08-05"
+version: 2.0.0
+date-released: "2026-08-08"
 keywords:
   - hallucination-detection
   - llm-evaluation

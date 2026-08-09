@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Final
 
 from groundlens.facts.config import MatchConfig, as_decimal
 from groundlens.facts.extract import extract_facts
+from groundlens.facts.polarity import canonical_polarity
 from groundlens.types import Fact, FactKind, Match, MatchState
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -229,13 +230,17 @@ def _match_one(
             evidence_id=best.evidence_id,
             evidence_span=best.fact.span,
             evidence_value=(
-                _display_value(best.fact) if state is MatchState.UNCHECKABLE else None
+                _evidence_value(best.fact) if state is MatchState.UNCHECKABLE else None
             ),
         )
 
     if fact.normalised == "" or ambiguities & BLOCKING_AMBIGUITIES:
         return Match(fact=fact, state=MatchState.UNCHECKABLE)
     if attrs.get("scope_uncertain") == "true":
+        return Match(fact=fact, state=MatchState.UNCHECKABLE)
+    if fact.kind is FactKind.OBLIGATION and canonical_polarity(fact.normalised) is None:
+        # The answer's own operator is not one this library can read.  Saying
+        # nothing about its strength is the only defensible answer.
         return Match(fact=fact, state=MatchState.UNCHECKABLE)
 
     if differing:
@@ -253,14 +258,14 @@ def _match_one(
                     state=MatchState.UNCHECKABLE,
                     evidence_id=best.evidence_id,
                     evidence_span=best.fact.span,
-                    evidence_value=_display_value(best.fact),
+                    evidence_value=_evidence_value(best.fact),
                 )
             return Match(
                 fact=fact,
                 state=MatchState.CONTRADICTED,
                 evidence_id=best.evidence_id,
                 evidence_span=best.fact.span,
-                evidence_value=_display_value(best.fact),
+                evidence_value=_evidence_value(best.fact),
             )
 
     return Match(fact=fact, state=MatchState.UNMATCHED)
@@ -446,6 +451,18 @@ def _citation_parts(value: str) -> tuple[str, str]:
 
 
 def _compare_obligation(fact: Fact, candidate: Fact) -> tuple[bool, Decimal] | None:
+    """Compare two obligations on their canonical polarity.
+
+    Both sides are canonicalised first, so the decorated form the extractor
+    writes for negative recommendations (``should:negative``) is understood
+    here rather than being parsed at the comparison site.  A polarity neither
+    side can canonicalise makes the pair incomparable, which surfaces as
+    UNCHECKABLE — never as agreement and never as a contradiction.
+    """
+    left_polarity = canonical_polarity(fact.normalised)
+    right_polarity = canonical_polarity(candidate.normalised)
+    if left_polarity is None or right_polarity is None:
+        return None
     left = dict(fact.attrs)
     right = dict(candidate.attrs)
     score = _containment(
@@ -453,8 +470,10 @@ def _compare_obligation(fact: Fact, candidate: Fact) -> tuple[bool, Decimal] | N
         _token_set(right.get("predicate_key", "")),
     )
     if score == 0:
+        # The evidence has obligations, but none of them is about this act.
+        # Silence, not disagreement.
         return None
-    return (fact.normalised == candidate.normalised, score)
+    return (left_polarity == right_polarity, score)
 
 
 # ---------------------------------------------------------------------------
@@ -489,13 +508,26 @@ def _containment(left: frozenset[str], right: frozenset[str]) -> Decimal:
         return Decimal(overlap) / Decimal(min(len(left), len(right)))
 
 
-def _display_value(fact: Fact) -> str:
-    """The evidence value as a reviewer should read it."""
+def _evidence_value(fact: Fact) -> str:
+    """The evidence fact's value, as ``Match.evidence_value`` carries it.
+
+    This slot is read by machines as well as by people: the
+    ``obligation_polarity_consistent`` assertion looks the polarity up in
+    :data:`~groundlens.facts.polarity.POLARITY_STRENGTH`.  So it holds the
+    canonical value and never a rendering of it.  An obligation reports
+    ``"may"``, not ``"may (may)"``: the parenthesis said nothing the canonical
+    string did not already say, and it made the value unreadable to the one
+    consumer that had to read it.
+
+    The day-basis suffix stays, because it is not a rendering.  ``P30D`` cannot
+    express "business days", so dropping it would lose the very distinction
+    that made the two sides differ.
+    """
     attrs = dict(fact.attrs)
     basis = attrs.get("day_basis")
     if fact.kind in {FactKind.DURATION, FactKind.DEADLINE} and basis == "business":
         return f"{fact.normalised} (business days)"
     if fact.kind is FactKind.OBLIGATION:
-        operator = attrs.get("operator", "")
-        return f"{fact.normalised} ({operator})" if operator else fact.normalised
+        canonical = canonical_polarity(fact.normalised)
+        return fact.normalised if canonical is None else canonical.value
     return fact.normalised

@@ -11,6 +11,7 @@ decision rule can be tested on their own.
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
 import hashlib
 import re
@@ -471,9 +472,9 @@ def test_a_malformed_reference_date_is_refused(banking_pack: Pack) -> None:
 def test_the_record_identifies_the_pack_by_hash(banking_pack: Pack) -> None:
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=banking_pack)
     ruleset = audit_field(result.audit, "ruleset")
-    assert ruleset["name"] == "eu-retail-banking"
-    assert ruleset["version"] == "1.2.0"
-    assert ruleset["content_sha256"] == banking_pack.content_sha256
+    assert ruleset.name == "eu-retail-banking"
+    assert ruleset.version == "1.2.0"
+    assert ruleset.content_sha256 == banking_pack.content_sha256
 
 
 def test_the_record_names_the_predicates_and_their_source_hashes(
@@ -483,7 +484,7 @@ def test_the_record_names_the_predicates_and_their_source_hashes(
 
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=banking_pack)
     recorded = audit_field(result.audit, "predicates")
-    by_name = {entry["name"]: entry["source_sha256"] for entry in recorded}
+    by_name = {entry.name: entry.source_sha256 for entry in recorded}
     assert set(by_name) == set(banking_pack.predicate_names())
     assert (
         by_name["banking.disclosure_present"]
@@ -495,7 +496,7 @@ def test_the_record_stores_metadata_keys_and_never_values(banking_pack: Pack) ->
     metadata = {"product_type": "mortgage", "disclosure_set": "SECRET-VALUE-42"}
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=banking_pack, metadata=metadata)
     keys = audit_field(result.audit, "metadata_keys")
-    assert keys == ["disclosure_set", "product_type"]
+    assert list(keys) == ["disclosure_set", "product_type"]
     assert "SECRET-VALUE-42" not in repr(result.audit)
 
 
@@ -506,14 +507,14 @@ def test_the_record_hashes_evidence_by_id(banking_pack: Pack) -> None:
         ruleset=banking_pack,
     )
     evidence = audit_field(result.audit, "evidence")
-    assert [item["id"] for item in evidence] == ["a", "b"]
-    assert evidence[0]["sha256"] == hashlib.sha256(b"one").hexdigest()
+    assert [item.id for item in evidence] == ["a", "b"]
+    assert evidence[0].sha256 == hashlib.sha256(b"one").hexdigest()
 
 
 def test_the_record_counts_are_integers(banking_pack: Pack) -> None:
     answer = f"The payment is €999. {DISCLOSURE}"
     result = run(answer, [{"id": "a", "text": "nothing"}], ruleset=banking_pack)
-    counts = audit_field(result.audit, "counts")
+    counts = dataclasses.asdict(audit_field(result.audit, "counts"))
     assert set(counts) == {
         "facts_extracted",
         "facts_matched",
@@ -552,9 +553,9 @@ def test_the_record_carries_no_float_anywhere(banking_pack: Pack) -> None:
 def test_the_record_states_the_determinism_settings(banking_pack: Pack) -> None:
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=banking_pack)
     determinism = audit_field(result.audit, "determinism")
-    assert determinism["unicode_form"] == "NFKC"
-    assert determinism["locale_profile"] == "eu-es"
-    assert determinism["reference_date"] == "2026-08-08"
+    assert determinism.unicode_form == "NFKC"
+    assert determinism.locale_profile == "eu-es"
+    assert determinism.reference_date == "2026-08-08"
 
 
 # ── Pack resolution ─────────────────────────────────────────────────────────
@@ -562,14 +563,14 @@ def test_the_record_states_the_determinism_settings(banking_pack: Pack) -> None:
 
 def test_a_pack_name_resolves(banking_pack: Pack) -> None:
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset="eu-retail-banking")
-    assert audit_field(result.audit, "ruleset")["content_sha256"] == (banking_pack.content_sha256)
+    assert audit_field(result.audit, "ruleset").content_sha256 == banking_pack.content_sha256
 
 
 def test_a_pack_path_resolves(banking_pack: Pack, tmp_path: Path) -> None:
     copied = tmp_path / "pack.yaml"
     copied.write_bytes(banking_pack.source_path.read_bytes())
     result = run(DISCLOSURE, [{"id": "a", "text": "x"}], ruleset=copied)
-    assert audit_field(result.audit, "ruleset")["content_sha256"] == (banking_pack.content_sha256)
+    assert audit_field(result.audit, "ruleset").content_sha256 == banking_pack.content_sha256
 
 
 def test_a_nonsense_ruleset_is_refused() -> None:

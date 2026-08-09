@@ -13,8 +13,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from groundlens.facts.polarity import canonical_polarity, exceeds_or_inverts
 from groundlens.packs import predicates as predicates_module
-from groundlens.types import FactKind, Finding, MatchState, Polarity, Severity
+from groundlens.types import FactKind, Finding, MatchState, Severity
 
 if TYPE_CHECKING:
     import datetime
@@ -29,16 +30,12 @@ __all__ = [
     "missing_metadata_findings",
 ]
 
-# Prohibition and obligation sit at the same strength: both remove the
-# reader's discretion. Recommendation sits below them, permission and
-# exemption below that.
-_POLARITY_STRENGTH: Mapping[str, int] = {
-    Polarity.NEED_NOT.value: 0,
-    Polarity.MAY.value: 1,
-    Polarity.SHOULD.value: 2,
-    Polarity.MUST.value: 3,
-    Polarity.MUST_NOT.value: 3,
-}
+# The strength ordering used to live here, as a second definition keyed by raw
+# string. It does not any more: it is
+# groundlens.facts.polarity.POLARITY_STRENGTH, and every string that reaches a
+# comparison goes through canonical_polarity() first. Two orderings meant the
+# extractor could emit a value this module could not read, which is exactly how
+# the obligation check came to be degrading to UNCHECKABLE in silence.
 
 
 def _metadata_as_string(key: str, value: object) -> str:
@@ -277,8 +274,12 @@ def _assert_obligation_polarity_consistent(
 ) -> list[Finding]:
     findings: list[Finding] = []
     for fact in _select(facts, rule.where, kind=FactKind.OBLIGATION):
-        stated = dict(fact.attrs).get("polarity", "")
-        if stated not in _POLARITY_STRENGTH:
+        # Fact.normalised, not attrs["polarity"]: the bare attribute drops the
+        # ":negative" a negative recommendation carries, and "should" compared
+        # against "should not" as if they were the same wording is an inversion
+        # reported as agreement.
+        stated = canonical_polarity(fact.normalised)
+        if stated is None:
             findings.append(
                 _uncheckable(
                     fact,
@@ -309,8 +310,8 @@ def _assert_obligation_polarity_consistent(
             )
             continue
         if match.state is MatchState.CONTRADICTED:
-            supported = match.evidence_value or ""
-            if supported not in _POLARITY_STRENGTH:
+            supported = canonical_polarity(match.evidence_value)
+            if supported is None:
                 findings.append(
                     _uncheckable(
                         fact,
@@ -320,14 +321,15 @@ def _assert_obligation_polarity_consistent(
                     )
                 )
                 continue
-            if _POLARITY_STRENGTH[stated] > _POLARITY_STRENGTH[supported]:
+            if exceeds_or_inverts(stated, supported):
                 findings.append(
                     Finding(
-                        code="rule.failed",
+                        code=f"fact.contradicted.{fact.kind.value}",
                         severity=severity,
                         message=(
-                            f"The answer says '{fact.raw}', which is firmer than "
-                            f"the source, where it is written as '{supported}'."
+                            f"The answer tells the reader that '{fact.raw}' is "
+                            f"{stated.describe()}, but the source says it is "
+                            f"{supported.describe()}."
                         ),
                         fact=fact,
                         match=match,
