@@ -12,13 +12,13 @@
         <meta name="author" content="Javier Marin">
       
       
-        <link rel="canonical" href="https://docs.groundlens.dev/concepts/sgi/">
+        <link rel="canonical" href="https://docs.groundlens.dev/research/geometry-quickstart/">
       
       
-        <link rel="prev" href="../how-it-works/">
+        <link rel="prev" href="../../concepts/calibration/">
       
       
-        <link rel="next" href="../dgi/">
+        <link rel="next" href="../../theory/hallucination-taxonomy/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>SGI: Semantic Grounding Index - groundlens</title>
+        <title>Geometry quickstart - groundlens</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#sgi-semantic-grounding-index" class="md-skip">
+        <a href="#geometry-quickstart" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              SGI: Semantic Grounding Index
+              Geometry quickstart
             
           </span>
         </div>
@@ -287,13 +287,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../how-it-works/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../concepts/how-it-works/" class="md-tabs__link">
           
   
   
@@ -311,11 +309,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../research/geometry-quickstart/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -858,10 +858,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -879,22 +877,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -912,7 +909,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -930,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how-it-works/" class="md-nav__link">
+      <a href="../../concepts/how-it-works/" class="md-nav__link">
         
   
   
@@ -955,37 +952,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SGI: Semantic Grounding Index
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../concepts/sgi/" class="md-nav__link">
         
   
   
@@ -1001,103 +971,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#formula" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Formula
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#geometric-interpretation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Geometric Interpretation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#threshold-zones" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Threshold Zones
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Normalization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-sgi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to Use SGI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Limitations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1110,7 +983,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dgi/" class="md-nav__link">
+      <a href="../../concepts/dgi/" class="md-nav__link">
         
   
   
@@ -1138,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../switch/" class="md-nav__link">
+      <a href="../../concepts/switch/" class="md-nav__link">
         
   
   
@@ -1166,7 +1039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calibration/" class="md-nav__link">
+      <a href="../../concepts/calibration/" class="md-nav__link">
         
   
   
@@ -1198,8 +1071,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1219,21 +1094,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1251,7 +1127,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1266,10 +1142,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../research/geometry-quickstart/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry quickstart
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1285,6 +1188,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#your-first-sgi-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your First SGI Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-first-dgi-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your First DGI Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plain-language-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plain-language checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auto-select-with-evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-Select with evaluate()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reusable-scorer-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reusable Scorer Objects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Next?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2466,10 +2466,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#formula" class="md-nav__link">
+  <a href="#your-first-sgi-check" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Formula
+        Your First SGI Check
       
     </span>
   </a>
@@ -2477,10 +2477,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#geometric-interpretation" class="md-nav__link">
+  <a href="#your-first-dgi-check" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Geometric Interpretation
+        Your First DGI Check
       
     </span>
   </a>
@@ -2488,10 +2488,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#threshold-zones" class="md-nav__link">
+  <a href="#plain-language-checks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Threshold Zones
+        Plain-language checks
       
     </span>
   </a>
@@ -2499,10 +2499,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
+  <a href="#auto-select-with-evaluate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Normalization
+        Auto-Select with evaluate()
       
     </span>
   </a>
@@ -2510,10 +2510,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-sgi" class="md-nav__link">
+  <a href="#reusable-scorer-objects" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to Use SGI
+        Reusable Scorer Objects
       
     </span>
   </a>
@@ -2521,10 +2521,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
+  <a href="#batch-evaluation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations
+        Batch Evaluation
       
     </span>
   </a>
@@ -2532,10 +2532,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#what-next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        API Reference
+        What Next?
       
     </span>
   </a>
@@ -2562,195 +2562,188 @@
   
 
 
-<h1 id="sgi-semantic-grounding-index">SGI: Semantic Grounding Index<a class="headerlink" href="#sgi-semantic-grounding-index" title="Permanent link">&para;</a></h1>
-<p>The Semantic Grounding Index (SGI) measures whether an LLM response engaged with provided source context or stayed semantically anchored to the question. It is the primary scoring method for <strong>RAG verification</strong> --- any scenario where you have a question, retrieved context, and a generated response.</p>
-<p><strong>Paper</strong>: Marin (2025). <em>Semantic Grounding Index for LLM Hallucination Detection</em>. <a href="https://arxiv.org/abs/2512.13771">arXiv:2512.13771</a>.</p>
-<h2 id="formula">Formula<a class="headerlink" href="#formula" title="Permanent link">&para;</a></h2>
-<div class="arithmatex">\[
-\text{SGI} = \frac{d(\phi(r), \phi(q))}{d(\phi(r), \phi(\text{ctx}))}
-\]</div>
-<p>where:</p>
-<ul>
-<li><span class="arithmatex">\(\phi(\cdot)\)</span> is the sentence embedding function (default: <code>sentence-transformers/sentence-t5-large</code>)</li>
-<li><span class="arithmatex">\(d(\cdot, \cdot)\)</span> is Euclidean distance in <span class="arithmatex">\(\mathbb{R}^n\)</span></li>
-<li><span class="arithmatex">\(r\)</span> is the LLM response</li>
-<li><span class="arithmatex">\(q\)</span> is the input question</li>
-<li><span class="arithmatex">\(\text{ctx}\)</span> is the source context</li>
-</ul>
-<h2 id="geometric-interpretation">Geometric Interpretation<a class="headerlink" href="#geometric-interpretation" title="Permanent link">&para;</a></h2>
-<p>SGI is a <strong>relative proximity measure</strong>. It compares how far the response embedding is from the question versus how far it is from the context:</p>
-<ul>
-<li><strong>SGI &gt; 1</strong>: The response is closer to the context than to the question. This suggests the LLM engaged with the source material and incorporated its content.</li>
-<li><strong>SGI = 1</strong>: The response is equidistant from both. Ambiguous.</li>
-<li><strong>SGI &lt; 1</strong>: The response is closer to the question than to the context. This suggests the LLM may have generated an answer from its parametric memory rather than the provided context.</li>
-</ul>
-<p>Geometrically, the SGI = 1 boundary is the <strong>perpendicular bisector hyperplane</strong> between the question and context embeddings. Responses on the context side of this hyperplane score above 1; responses on the question side score below 1.</p>
-<h2 id="threshold-zones">Threshold Zones<a class="headerlink" href="#threshold-zones" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Zone</th>
-<th>SGI Range</th>
-<th>Level</th>
-<th>Interpretation</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Grounded</td>
-<td>SGI &gt;= 1.20</td>
-<td><code>ok</code></td>
-<td>Response strongly engaged with context</td>
-<td>Accept</td>
-</tr>
-<tr>
-<td>Partly</td>
-<td>0.95 &lt;= SGI &lt; 1.20</td>
-<td><code>review</code></td>
-<td>Some context influence detected</td>
-<td>Review recommended</td>
-</tr>
-<tr>
-<td>Not grounded</td>
-<td>SGI &lt; 0.95</td>
-<td><code>risk</code></td>
-<td>Weak context engagement</td>
-<td>Human review required</td>
-</tr>
-</tbody>
-</table>
-<p>These thresholds are the ones bundled for the default encoder (<code>sentence-transformers/sentence-t5-large</code>). If you change the encoder, re-fit them with <a href="../calibration/"><code>fit_thresholds</code></a>.</p>
-<div class="admonition example">
-<p class="admonition-title">Two real readings</p>
-<p>With the default encoder, a faithful answer that restates the source scored <strong>3.34</strong> and read <em>"Supported by the document"</em>. An on-topic answer that contradicts the source scored <strong>1.17</strong> and read <em>"Partly supported"</em>: it stayed in the topic's neighborhood, so geometry placed it in the review band rather than the risk band.</p>
-<p>This is the caveat that matters: SGI measures <strong>grounding, not truth</strong>. A plausible wrong fact stated in the right frame can still score above the pass threshold, because it sits close to the source in embedding space. SGI tells you whether an answer was drawn from the source, not whether it is correct.</p>
+<h1 id="geometry-quickstart">Geometry quickstart<a class="headerlink" href="#geometry-quickstart" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">This is the research side of Groundlens</p>
+<p>Geometry is optional and is not what Groundlens is for. The product entry point is
+<a href="../../getting-started/quickstart/"><code>check()</code></a>, which checks obligations, deadlines,
+amounts and citations against your sources and your rule packs. Everything on this
+page needs <code>pip install "groundlens[geometry]"</code>.</p>
 </div>
-<h2 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h2>
-<p>The raw SGI score is normalized to [0, 1] using a tanh mapping:</p>
-<div class="arithmatex">\[
-\text{SGI}_{\text{norm}} = \tanh\bigl(\max(0,\; \text{SGI} - 0.3)\bigr)
-\]</div>
-<p>Reference points:</p>
-<table>
-<thead>
-<tr>
-<th>Raw SGI</th>
-<th>Normalized</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0.30</td>
-<td>0.000</td>
-</tr>
-<tr>
-<td>0.95</td>
-<td>0.457</td>
-</tr>
-<tr>
-<td>1.20</td>
-<td>0.604</td>
-</tr>
-<tr>
-<td>2.00</td>
-<td>0.885</td>
-</tr>
-</tbody>
-</table>
-<h2 id="when-to-use-sgi">When to Use SGI<a class="headerlink" href="#when-to-use-sgi" title="Permanent link">&para;</a></h2>
-<p>SGI is the right choice when you have <strong>all three inputs</strong>:</p>
-<ul>
-<li>A question or prompt</li>
-<li>Retrieved context, source documents, or reference text</li>
-<li>The LLM's response</li>
-</ul>
-<p>Common scenarios:</p>
-<ul>
-<li><strong>RAG pipelines</strong>: Verify the LLM used the retrieved chunks</li>
-<li><strong>Document Q&amp;A</strong>: Confirm answers cite the source material</li>
-<li><strong>Summarization</strong>: Check the summary reflects the input document</li>
-<li><strong>Grounded generation</strong>: Any task where you provide context and expect the model to use it</li>
-</ul>
-<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">SGI measures engagement, not correctness</p>
-<p>SGI detects whether the response is semantically similar to the context. A response that <em>paraphrases the context incorrectly</em> might still score well on SGI if it uses similar vocabulary and concepts. SGI catches the case where the LLM <strong>ignores</strong> the context entirely --- it does not verify that the response <strong>accurately</strong> represents the context.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Context quality matters</p>
-<p>If the retrieved context is irrelevant to the question, a high SGI score means the response is close to irrelevant material. SGI assumes the context is appropriate --- retrieval quality is a separate concern.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Short text sensitivity</p>
-<p>Very short texts (1--3 words) produce embeddings with less discriminative power. SGI works best with texts of at least one full sentence.</p>
-</div>
-<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">SGI</span>
+<p>This guide walks through the three main ways to use the geometric scores: SGI (with context), DGI (without context), and the unified <code>evaluate()</code> function that auto-selects the right method.</p>
+<h2 id="your-first-sgi-check">Your First SGI Check<a class="headerlink" href="#your-first-sgi-check" title="Permanent link">&para;</a></h2>
+<p>SGI (Semantic Grounding Index) evaluates whether an LLM response engaged with provided source context. Use it when you have retrieval context available --- the typical RAG verification scenario.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Function API</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France is in Western Europe. Its capital is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">,</span>  <span class="c1"># optional</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Class API (reusable)</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">result</span> <span class="o">=</span> <span class="n">sgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France is in Western Europe. Its capital is Paris.&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SGI Score:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normalized:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">normalized</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flagged:      </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Explanation:  </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q distance:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">q_dist</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ctx distance: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">ctx_dist</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>The <code>SGIResult</code> contains:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>value</code></td>
-<td><code>float</code></td>
-<td>Raw SGI score</td>
-</tr>
-<tr>
-<td><code>normalized</code></td>
-<td><code>float</code></td>
-<td>Score in [0, 1]</td>
-</tr>
-<tr>
-<td><code>flagged</code></td>
-<td><code>bool</code></td>
-<td>True if below review threshold</td>
-</tr>
-<tr>
-<td><code>q_dist</code></td>
-<td><code>float</code></td>
-<td>Euclidean distance to question embedding</td>
-</tr>
-<tr>
-<td><code>ctx_dist</code></td>
-<td><code>float</code></td>
-<td>Euclidean distance to context embedding</td>
-</tr>
-<tr>
-<td><code>method</code></td>
-<td><code>str</code></td>
-<td>Always <code>"sgi"</code></td>
-</tr>
-<tr>
-<td><code>explanation</code></td>
-<td><code>str</code></td>
-<td>Human-readable interpretation</td>
-</tr>
-</tbody>
-</table>
+<div class="admonition success">
+<p class="admonition-title">Interpreting SGI scores</p>
+<ul>
+<li><strong>SGI &gt; 1.20</strong>: Strong context engagement --- the response is significantly closer to the context than to the question. Green zone.</li>
+<li><strong>0.95 &lt; SGI &lt; 1.20</strong>: Partial engagement --- some context influence detected but not definitive. Review recommended.</li>
+<li><strong>SGI &lt; 0.95</strong>: Weak context engagement --- the response may be ignoring the retrieved context. Flagged for human review.</li>
+</ul>
+</div>
+<h2 id="your-first-dgi-check">Your First DGI Check<a class="headerlink" href="#your-first-dgi-check" title="Permanent link">&para;</a></h2>
+<p>DGI (Directional Grounding Index) evaluates grounding without any context. Use it when you only have a question and a response --- chat/dialogue verification, agent self-checks, or batch evaluation.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DGI Score:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># direction: alignment with grounded reference</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Magnitude:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">magnitude</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># how far the response moved from the question</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normalized:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">normalized</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flagged:      </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Explanation:  </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition success">
+<p class="admonition-title">Interpreting DGI scores</p>
+<p>DGI is a <strong>single binary cut</strong>, not a set of bands. <code>compute_dgi</code> computes
+<code>flagged = value &lt; DGI_PASS</code> and nothing else.</p>
+<ul>
+<li><strong>DGI &gt;= 0.525</strong> (<code>DGI_PASS</code>): the displacement aligns with grounded
+  response patterns. Pass.</li>
+<li><strong>DGI &lt; 0.525</strong>: the displacement diverges from grounded patterns. Flagged.</li>
+</ul>
+<p>0.525 is the Youden's-J operating point for the default encoder
+(<code>sentence-transformers/sentence-t5-large</code>) on the bundled 212-pair
+reference set. It is encoder- and domain-specific: recalibrate with
+<a href="../../api/"><code>fit_thresholds</code></a> on your own data. Read the value from
+the code rather than copying it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens._internal.thresholds</span><span class="w"> </span><span class="kn">import</span> <span class="n">DGI_PASS</span>   <span class="c1"># 0.525</span>
+</span></code></pre></div>
+</div>
+<h2 id="plain-language-checks">Plain-language checks<a class="headerlink" href="#plain-language-checks" title="Permanent link">&para;</a></h2>
+<p>The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to <code>render_check()</code>. In 1.x this function was called <code>check()</code>; that name now belongs to the product entry point, so the renderer moved to <code>groundlens.geometry.render</code>. It is the single source of truth for wording — the README and the <a href="https://github.com/groundlens-dev/groundlens-mcp">MCP servers</a> render from the same function.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.geometry.render</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_check</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the Bizum daily limit?&quot;</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;The daily Bizum transfer limit is 1,000 EUR per transaction.&quot;</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The Bizum daily limit is 500 EUR. Premium clients have 10,000 EUR.&quot;</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">render_check</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># CHECK: Not supported by the document (Semantic Grounding Index - SGI=0.83)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1"># The answer stays closer to the question than to the source, so it may not</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># come from the document. Check it before trusting it.</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="p">)</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="nb">print</span><span class="p">(</span><span class="n">render_check</span><span class="p">(</span><span class="n">dgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># CHECK: Not grounded (Directional Grounding Index - DGI=0.41)</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="c1"># The answer does not move the way grounded answers do. Check it before trusting it.</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="c1">#</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="c1"># 0.41 is below DGI_PASS (0.525), so it reads as not grounded even though the</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="c1"># answer is correct. That is the DGI limitation, not a bug: the bundled</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="c1"># reference direction was fitted on 212 answers written in one style, and text</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="c1"># written any other way scores low however faithful it is. Calibrate on your</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="c1"># own corpus before relying on DGI, or use SGI where you have a source.</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="c1"># No source given — judged by the shape of the answer.</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">What the check is (and isn't)</p>
+<p>The check <strong>level</strong> (<code>ok</code> / <code>review</code> / <code>risk</code>, on <code>render_check(...).level</code>) comes only from the calibrated thresholds. The <strong>label</strong> and <strong>message</strong> are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (<code>q_dist</code> / <code>ctx_dist</code> for SGI, the displacement <code>magnitude</code> for DGI) are on <code>render_check(...).detail</code>. A check is a statement about whether the answer is <em>drawn from the source</em>, not about whether it is <em>factually correct</em>.</p>
+</div>
+<h2 id="auto-select-with-evaluate">Auto-Select with evaluate()<a class="headerlink" href="#auto-select-with-evaluate" title="Permanent link">&para;</a></h2>
+<p>The <code>evaluate()</code> function automatically selects SGI or DGI based on whether context is provided:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># With context -&gt; SGI</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is photosynthesis?&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Photosynthesis converts light energy into chemical energy.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;Plants use photosynthesis to convert sunlight into glucose.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># &#39;sgi&#39;</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># Without context -&gt; DGI</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is photosynthesis?&quot;</span><span class="p">,</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Photosynthesis converts light energy into chemical energy.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">)</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># &#39;dgi&#39;</span>
+</span></code></pre></div>
+<p>The <code>GroundlensScore</code> returned by <code>evaluate()</code> is a unified container:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">score</span><span class="o">.</span><span class="n">value</span>        <span class="c1"># Raw score (SGI ratio or DGI cosine similarity)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">score</span><span class="o">.</span><span class="n">normalized</span>   <span class="c1"># Mapped to [0, 1]</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">score</span><span class="o">.</span><span class="n">flagged</span>      <span class="c1"># the hard cut only; False across the whole review band</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">render_check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">escalate</span>  <span class="c1"># True for the review band too -- branch on this</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">score</span><span class="o">.</span><span class="n">method</span>       <span class="c1"># &#39;sgi&#39; or &#39;dgi&#39;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">score</span><span class="o">.</span><span class="n">explanation</span>  <span class="c1"># Human-readable interpretation</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">score</span><span class="o">.</span><span class="n">detail</span>       <span class="c1"># Full SGIResult or DGIResult</span>
+</span></code></pre></div>
+<p><code>render_check()</code> accepts a <code>GroundlensScore</code> directly, so the same plain-language reading works after <code>evaluate()</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.geometry.render</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_check</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">render_check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</span></code></pre></div>
+<h2 id="reusable-scorer-objects">Reusable Scorer Objects<a class="headerlink" href="#reusable-scorer-objects" title="Permanent link">&para;</a></h2>
+<p>For repeated evaluations, use the class-based API to avoid passing <code>model</code> every time:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGI</span><span class="p">,</span> <span class="n">DGI</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># SGI scorer</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">)</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">sgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;X is defined as Y in the specification.&quot;</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># DGI scorer with custom calibration</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">DGI</span><span class="p">(</span><span class="n">reference_csv</span><span class="o">=</span><span class="s2">&quot;my_domain_pairs.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="n">result</span> <span class="o">=</span> <span class="n">dgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="batch-evaluation">Batch Evaluation<a class="headerlink" href="#batch-evaluation" title="Permanent link">&para;</a></h2>
+<p>Evaluate multiple items at once:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_batch</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="p">{</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;Paris is the capital of France.&quot;</span><span class="p">,</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="p">},</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="p">{</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What causes tides?&quot;</span><span class="p">,</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;Tides are caused by the Moon&#39;s gravity.&quot;</span><span class="p">,</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="p">},</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">]</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, flagged=</span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="what-next">What Next?<a class="headerlink" href="#what-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../getting-started/cli/">CLI Reference</a> --- run groundlens from the command line</li>
+<li><a href="../../concepts/how-it-works/">How It Works</a> --- understand the geometry behind the scores</li>
+<li><a href="../../guides/domain-calibration/">Domain Calibration</a> --- what calibration does, and what it does not fix</li>
+<li><a href="../../guides/rag-verification/">RAG Verification</a> --- integrate SGI into your RAG pipeline</li>
+</ul>
 
 
 

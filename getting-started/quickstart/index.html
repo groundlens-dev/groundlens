@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.">
+        <meta name="description" content="Groundlens checks what an answer tells people they have to do. Obligations, deadlines, amounts and citations, checked against your sources and your rule packs, offline, with no model in the path.">
       
       
         <meta name="author" content="Javier Marin">
@@ -315,13 +315,13 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../theory/hallucination-taxonomy/" class="md-tabs__link">
+        <a href="../../research/geometry-quickstart/" class="md-tabs__link">
           
   
   
     
   
-  Theory
+  Research
 
         </a>
       </li>
@@ -861,10 +861,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#your-first-sgi-check" class="md-nav__link">
+  <a href="#your-first-check" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First SGI Check
+        Your first check
       
     </span>
   </a>
@@ -872,10 +872,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-dgi-check" class="md-nav__link">
+  <a href="#every-source-needs-an-id" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First DGI Check
+        Every source needs an id
       
     </span>
   </a>
@@ -883,10 +883,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#plain-language-checks" class="md-nav__link">
+  <a href="#declare-your-context-or-the-check-fails" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Plain-language checks
+        Declare your context, or the check fails
       
     </span>
   </a>
@@ -894,10 +894,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#auto-select-with-evaluate" class="md-nav__link">
+  <a href="#dates-come-from-you-not-from-the-clock" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Select with evaluate()
+        Dates come from you, not from the clock
       
     </span>
   </a>
@@ -905,10 +905,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reusable-scorer-objects" class="md-nav__link">
+  <a href="#write-your-own-pack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reusable Scorer Objects
+        Write your own pack
       
     </span>
   </a>
@@ -916,10 +916,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#batch-evaluation" class="md-nav__link">
+  <a href="#read-the-findings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Batch Evaluation
+        Read the findings
       
     </span>
   </a>
@@ -927,10 +927,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-next" class="md-nav__link">
+  <a href="#keep-the-record" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What Next?
+        Keep the record
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
       
     </span>
   </a>
@@ -1213,6 +1224,8 @@
       
         
       
+        
+      
     
     
     
@@ -1238,7 +1251,7 @@
   <span class="md-ellipsis">
     
   
-    Theory
+    Research
   
 
     
@@ -1254,11 +1267,39 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Theory
+    Research
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../research/geometry-quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2436,10 +2477,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#your-first-sgi-check" class="md-nav__link">
+  <a href="#your-first-check" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First SGI Check
+        Your first check
       
     </span>
   </a>
@@ -2447,10 +2488,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-dgi-check" class="md-nav__link">
+  <a href="#every-source-needs-an-id" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First DGI Check
+        Every source needs an id
       
     </span>
   </a>
@@ -2458,10 +2499,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#plain-language-checks" class="md-nav__link">
+  <a href="#declare-your-context-or-the-check-fails" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Plain-language checks
+        Declare your context, or the check fails
       
     </span>
   </a>
@@ -2469,10 +2510,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#auto-select-with-evaluate" class="md-nav__link">
+  <a href="#dates-come-from-you-not-from-the-clock" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Select with evaluate()
+        Dates come from you, not from the clock
       
     </span>
   </a>
@@ -2480,10 +2521,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reusable-scorer-objects" class="md-nav__link">
+  <a href="#write-your-own-pack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reusable Scorer Objects
+        Write your own pack
       
     </span>
   </a>
@@ -2491,10 +2532,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#batch-evaluation" class="md-nav__link">
+  <a href="#read-the-findings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Batch Evaluation
+        Read the findings
       
     </span>
   </a>
@@ -2502,10 +2543,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-next" class="md-nav__link">
+  <a href="#keep-the-record" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What Next?
+        Keep the record
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
       
     </span>
   </a>
@@ -2533,177 +2585,145 @@
 
 
 <h1 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h1>
-<p>This guide walks through the three main ways to use groundlens: SGI (with context), DGI (without context), and the unified <code>evaluate()</code> function that auto-selects the right method.</p>
-<h2 id="your-first-sgi-check">Your First SGI Check<a class="headerlink" href="#your-first-sgi-check" title="Permanent link">&para;</a></h2>
-<p>SGI (Semantic Grounding Index) evaluates whether an LLM response engaged with provided source context. Use it when you have retrieval context available --- the typical RAG verification scenario.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;France is in Western Europe. Its capital is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SGI Score:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normalized:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">normalized</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flagged:      </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Explanation:  </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q distance:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">q_dist</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ctx distance: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">ctx_dist</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<p>One call, one decision, one record. This page takes you from <code>pip install</code> to a rule pack of your own.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>groundlens
 </span></code></pre></div>
-<div class="admonition success">
-<p class="admonition-title">Interpreting SGI scores</p>
-<ul>
-<li><strong>SGI &gt; 1.20</strong>: Strong context engagement --- the response is significantly closer to the context than to the question. Green zone.</li>
-<li><strong>0.95 &lt; SGI &lt; 1.20</strong>: Partial engagement --- some context influence detected but not definitive. Review recommended.</li>
-<li><strong>SGI &lt; 0.95</strong>: Weak context engagement --- the response may be ignoring the retrieved context. Flagged for human review.</li>
-</ul>
-</div>
-<h2 id="your-first-dgi-check">Your First DGI Check<a class="headerlink" href="#your-first-dgi-check" title="Permanent link">&para;</a></h2>
-<p>DGI (Directional Grounding Index) evaluates grounding without any context. Use it when you only have a question and a response --- chat/dialogue verification, agent self-checks, or batch evaluation.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_dgi</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DGI Score:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># direction: alignment with grounded reference</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Magnitude:    </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">magnitude</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># how far the response moved from the question</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normalized:   </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">normalized</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Flagged:      </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Explanation:  </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">explanation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<h2 id="your-first-check">Your first check<a class="headerlink" href="#your-first-check" title="Permanent link">&para;</a></h2>
+<p><code>check()</code> takes the answer, the sources it was supposed to use, and a rule pack.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="s2">&quot;You must call us before you travel abroad. The annual fee is 45,00 EUR.&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;terms.pdf#p2&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;The customer may repay the balance early. The annual fee is 30,00 EUR.&quot;</span><span class="p">}],</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">ruleset</span><span class="o">=</span><span class="s2">&quot;eu-retail-banking&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;product_type&quot;</span><span class="p">:</span> <span class="s2">&quot;credit-card&quot;</span><span class="p">,</span> <span class="s2">&quot;disclosure_set&quot;</span><span class="p">:</span> <span class="s2">&quot;es-2026&quot;</span><span class="p">},</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">reference_date</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="k">for</span> <span class="n">finding</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">findings</span><span class="p">:</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="k">if</span> <span class="n">finding</span><span class="o">.</span><span class="n">severity</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">finding</span><span class="o">.</span><span class="n">rule_id</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 </span></code></pre></div>
-<div class="admonition success">
-<p class="admonition-title">Interpreting DGI scores</p>
-<p>DGI is a <strong>single binary cut</strong>, not a set of bands. <code>compute_dgi</code> computes
-<code>flagged = value &lt; DGI_PASS</code> and nothing else.</p>
-<ul>
-<li><strong>DGI &gt;= 0.525</strong> (<code>DGI_PASS</code>): the displacement aligns with grounded
-  response patterns. Pass.</li>
-<li><strong>DGI &lt; 0.525</strong>: the displacement diverges from grounded patterns. Flagged.</li>
-</ul>
-<p>0.525 is the Youden's-J operating point for the default encoder
-(<code>sentence-transformers/sentence-t5-large</code>) on the bundled 212-pair
-reference set. It is encoder- and domain-specific: recalibrate with
-<a href="../../api/"><code>fit_thresholds</code></a> on your own data. Read the value from
-the code rather than copying it:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens._internal.thresholds</span><span class="w"> </span><span class="kn">import</span> <span class="n">DGI_PASS</span>   <span class="c1"># 0.525</span>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>escalate
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>BNK-001 The answer says &#39;45,00 EUR&#39; but the source says &#39;EUR 30&#39;.
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>BNK-031 Required disclosure block present.
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>BNK-020 The answer tells the reader &#39;You must call us before you travel abroad&#39;, and no source says that.
 </span></code></pre></div>
-</div>
-<h2 id="plain-language-checks">Plain-language checks<a class="headerlink" href="#plain-language-checks" title="Permanent link">&para;</a></h2>
-<p>The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to <code>check()</code>. It is the single source of truth for wording — the README and the <a href="https://github.com/groundlens-dev/groundlens-mcp">MCP servers</a> render from the same function.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_sgi</span><span class="p">,</span> <span class="n">compute_dgi</span><span class="p">,</span> <span class="n">check</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">compute_sgi</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is the Bizum daily limit?&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;The daily Bizum transfer limit is 1,000 EUR per transaction.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;The Bizum daily limit is 500 EUR. Premium clients have 10,000 EUR.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">sgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># CHECK: Not supported by the document (Semantic Grounding Index - SGI=0.83)</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># The answer stays closer to the question than to the source, so it may not</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1"># come from the document. Check it before trusting it.</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">compute_dgi</span><span class="p">(</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What causes seasons on Earth?&quot;</span><span class="p">,</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Seasons are caused by Earth&#39;s 23.5-degree axial tilt.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">)</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">dgi</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="c1"># CHECK: Not grounded (Directional Grounding Index - DGI=0.41)</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># The answer does not move the way grounded answers do. Check it before trusting it.</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="c1">#</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="c1"># 0.41 is below DGI_PASS (0.525), so it reads as not grounded even though the</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="c1"># answer is correct. That is the DGI limitation, not a bug: the bundled</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="c1"># reference direction was fitted on 212 answers written in one style, and text</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="c1"># written any other way scores low however faithful it is. Calibrate on your</span>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="c1"># own corpus before relying on DGI, or use SGI where you have a source.</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="c1"># No source given — judged by the shape of the answer.</span>
+<p>Three things happened. The amount in the answer disagrees with the amount in the source. The answer created an obligation for the reader that nothing in the sources supports. And a disclosure the pack requires is not there.</p>
+<p><code>result.decision</code> is <code>Decision.CLEAR</code> or <code>Decision.ESCALATE</code>. There is nothing in between.</p>
+<h2 id="every-source-needs-an-id">Every source needs an id<a class="headerlink" href="#every-source-needs-an-id" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;terms.pdf#p2&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">}]</span>
 </span></code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">What the check is (and isn't)</p>
-<p>The check <strong>level</strong> (<code>ok</code> / <code>review</code> / <code>risk</code>, on <code>check(...).level</code>) comes only from the calibrated thresholds. The <strong>label</strong> and <strong>message</strong> are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (<code>q_dist</code> / <code>ctx_dist</code> for SGI, the displacement <code>magnitude</code> for DGI) are on <code>check(...).detail</code>. A check is a statement about whether the answer is <em>drawn from the source</em>, not about whether it is <em>factually correct</em>.</p>
-</div>
-<h2 id="auto-select-with-evaluate">Auto-Select with evaluate()<a class="headerlink" href="#auto-select-with-evaluate" title="Permanent link">&para;</a></h2>
-<p>The <code>evaluate()</code> function automatically selects SGI or DGI based on whether context is provided:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
+<p>A bare string is rejected. Ids are yours to choose and they should be stable, because a finding points at one, and the person who reviews the case has to open it.</p>
+<h2 id="declare-your-context-or-the-check-fails">Declare your context, or the check fails<a class="headerlink" href="#declare-your-context-or-the-check-fails" title="Permanent link">&para;</a></h2>
+<p>A pack can require the caller to supply named context. If it is missing, the decision is <code>ESCALATE</code> and the reason says so. There is no flag to turn this off.</p>
+<p>The <code>mypack.yaml</code> used here and below is the one written out under <a href="#write-your-own-pack">Write your own pack</a>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># With context -&gt; SGI</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is photosynthesis?&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Photosynthesis converts light energy into chemical energy.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;Plants use photosynthesis to convert sunlight into glucose.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># &#39;sgi&#39;</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># Without context -&gt; DGI</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is photosynthesis?&quot;</span><span class="p">,</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;Photosynthesis converts light energy into chemical energy.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">)</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># &#39;dgi&#39;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="s2">&quot;The fee is 30,00 EUR.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;s1&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;The fee is 30,00 EUR.&quot;</span><span class="p">}],</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">ruleset</span><span class="o">=</span><span class="s2">&quot;mypack.yaml&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="k">for</span> <span class="n">finding</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">findings</span><span class="p">:</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">finding</span><span class="o">.</span><span class="n">severity</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 </span></code></pre></div>
-<p>The <code>GroundlensScore</code> returned by <code>evaluate()</code> is a unified container:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">score</span><span class="o">.</span><span class="n">value</span>        <span class="c1"># Raw score (SGI ratio or DGI cosine similarity)</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">score</span><span class="o">.</span><span class="n">normalized</span>   <span class="c1"># Mapped to [0, 1]</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">score</span><span class="o">.</span><span class="n">flagged</span>      <span class="c1"># the hard cut only; False across the whole review band</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">escalate</span>  <span class="c1"># True for the review band too -- branch on this</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">score</span><span class="o">.</span><span class="n">method</span>       <span class="c1"># &#39;sgi&#39; or &#39;dgi&#39;</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">score</span><span class="o">.</span><span class="n">explanation</span>  <span class="c1"># Human-readable interpretation</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">score</span><span class="o">.</span><span class="n">detail</span>       <span class="c1"># Full SGIResult or DGIResult</span>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>escalate
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>fail pack.metadata.missing The rule pack &#39;house-style&#39; needs the caller to supply &#39;case_id&#39;, and it was not supplied. Nothing was checked against it, so this answer has to be reviewed by a person.
 </span></code></pre></div>
-<p><code>check()</code> accepts a <code>GroundlensScore</code> directly, so the same plain-language reading works after <code>evaluate()</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">check</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+<p>Supply it and the same answer clears.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="s2">&quot;The fee is 30,00 EUR.&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;s1&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;The fee is 30,00 EUR.&quot;</span><span class="p">}],</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">ruleset</span><span class="o">=</span><span class="s2">&quot;mypack.yaml&quot;</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;case_id&quot;</span><span class="p">:</span> <span class="s2">&quot;4471&quot;</span><span class="p">},</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">findings</span><span class="p">))</span>
 </span></code></pre></div>
-<h2 id="reusable-scorer-objects">Reusable Scorer Objects<a class="headerlink" href="#reusable-scorer-objects" title="Permanent link">&para;</a></h2>
-<p>For repeated evaluations, use the class-based API to avoid passing <code>model</code> every time:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGI</span><span class="p">,</span> <span class="n">DGI</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># SGI scorer</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">sgi</span> <span class="o">=</span> <span class="n">SGI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;sentence-transformers/sentence-t5-large&quot;</span><span class="p">)</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">sgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;X is defined as Y in the specification.&quot;</span><span class="p">,</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">)</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># DGI scorer with custom calibration</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">dgi</span> <span class="o">=</span> <span class="n">DGI</span><span class="p">(</span><span class="n">reference_csv</span><span class="o">=</span><span class="s2">&quot;my_domain_pairs.csv&quot;</span><span class="p">)</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="n">result</span> <span class="o">=</span> <span class="n">dgi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;What is X?&quot;</span><span class="p">,</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">&quot;X is Y.&quot;</span><span class="p">,</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="p">)</span>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>clear 0
 </span></code></pre></div>
-<h2 id="batch-evaluation">Batch Evaluation<a class="headerlink" href="#batch-evaluation" title="Permanent link">&para;</a></h2>
-<p>Evaluate multiple items at once:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_batch</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="p">{</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;The capital of France is Paris.&quot;</span><span class="p">,</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;Paris is the capital of France.&quot;</span><span class="p">,</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="p">},</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="p">{</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What causes tides?&quot;</span><span class="p">,</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;Tides are caused by the Moon&#39;s gravity.&quot;</span><span class="p">,</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="p">},</span>
-</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">]</span>
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="n">results</span> <span class="o">=</span> <span class="n">evaluate_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, flagged=</span><span class="si">{</span><span class="n">score</span><span class="o">.</span><span class="n">flagged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<h2 id="dates-come-from-you-not-from-the-clock">Dates come from you, not from the clock<a class="headerlink" href="#dates-come-from-you-not-from-the-clock" title="Permanent link">&para;</a></h2>
+<p>If a pack reads relative dates, pass <code>reference_date</code> as a <code>date</code> or an ISO string. <code>date.today()</code> is not called anywhere in this path, so a case checked today gives the same answer when it is re-checked next year.</p>
+<h2 id="write-your-own-pack">Write your own pack<a class="headerlink" href="#write-your-own-pack" title="Permanent link">&para;</a></h2>
+<p>A pack is a YAML file. Save this as <code>mypack.yaml</code> and point <code>ruleset=</code> at the path.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">pack</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">house-style</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1.0</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nt">locale_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eu-es</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nt">requires_metadata</span><span class="p">:</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">case_id</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nt">rules</span><span class="p">:</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HS-001</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Every monetary amount stated must appear in the evidence.</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">assert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all_facts_matched</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">where</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> kind</span><span class="p">:</span><span class="w"> </span><span class="nv">currency</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fail</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HS-002</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Obligation strength must not exceed the evidence.</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="nt">assert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">obligation_polarity_consistent</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">    </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fail</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HS-003</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">No decision language.</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">    </span><span class="nt">assert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent_lexicon</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">    </span><span class="nt">lexicon</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;we</span><span class="nv"> </span><span class="s">have</span><span class="nv"> </span><span class="s">decided&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;your</span><span class="nv"> </span><span class="s">application</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">approved&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">    </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fail</span>
 </span></code></pre></div>
-<h2 id="what-next">What Next?<a class="headerlink" href="#what-next" title="Permanent link">&para;</a></h2>
+<p><code>locale_profile</code> decides how numbers and dates are read. Under <code>eu-es</code>, <code>1.000,50</code> is one thousand and a half, whatever the machine's own locale says.</p>
+<p>Eight assertions are available and no others: <code>all_facts_matched</code>, <code>no_contradicted_facts</code>, <code>absent_lexicon</code>, <code>present_lexicon</code>, <code>obligation_polarity_consistent</code>, <code>citations_resolve</code>, <code>metadata_equals</code> and <code>predicate</code>.</p>
+<h2 id="read-the-findings">Read the findings<a class="headerlink" href="#read-the-findings" title="Permanent link">&para;</a></h2>
+<p>Each finding carries a stable code, a severity, a message written for a person, and, where there is one, the character span in the answer it came from.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="s2">&quot;The fee is 45,00 EUR.&quot;</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="p">[],</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">ruleset</span><span class="o">=</span><span class="s2">&quot;mypack.yaml&quot;</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;case_id&quot;</span><span class="p">:</span> <span class="s2">&quot;4471&quot;</span><span class="p">},</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">)</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="k">for</span> <span class="n">finding</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">findings</span><span class="p">:</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="n">span</span> <span class="o">=</span> <span class="n">finding</span><span class="o">.</span><span class="n">fact</span><span class="o">.</span><span class="n">span</span> <span class="k">if</span> <span class="n">finding</span><span class="o">.</span><span class="n">fact</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">finding</span><span class="o">.</span><span class="n">severity</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>warn evidence.empty None No sources were provided, so nothing in this answer could be compared against anything.
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>fail fact.unmatched.currency (11, 20) The answer states &#39;45,00 EUR&#39;, which does not appear in any of the sources provided.
+</span></code></pre></div>
+<p>Spans index into the NFKC-normalised answer, not into the raw string you passed.</p>
+<p><code>FAIL</code> escalates. <code>WARN</code> and <code>INFO</code> are recorded and do not escalate on their own.</p>
+<h2 id="keep-the-record">Keep the record<a class="headerlink" href="#keep-the-record" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">a</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">audit</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">answer_sha256</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ruleset</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">a</span><span class="o">.</span><span class="n">ruleset</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">],</span> <span class="n">a</span><span class="o">.</span><span class="n">ruleset</span><span class="p">[</span><span class="s2">&quot;content_sha256&quot;</span><span class="p">][:</span><span class="mi">12</span><span class="p">])</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">counts</span><span class="p">)</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">determinism</span><span class="p">)</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">metadata_keys</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>4e948e46f26b98a9
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>house-style 0.1.0 8ef7b57bf7b0
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>{&#39;facts_extracted&#39;: 1, &#39;facts_matched&#39;: 0, &#39;facts_unmatched&#39;: 1, &#39;facts_contradicted&#39;: 0, &#39;rules_evaluated&#39;: 3, &#39;rules_failed&#39;: 1}
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>{&#39;unicode_form&#39;: &#39;NFKC&#39;, &#39;locale_profile&#39;: &#39;eu-es&#39;, &#39;reference_date&#39;: None}
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>[&#39;case_id&#39;]
+</span></code></pre></div>
+<p><code>metadata_keys</code> holds the key names. The values are never written, because they may carry personal data.</p>
+<p>To keep a running trail, use the hash-chained log.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">groundlens.audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_log</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">with</span> <span class="n">open_log</span><span class="p">(</span><span class="s2">&quot;audit.db&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">log</span><span class="p">:</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">log</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>        <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;case-4471&quot;</span><span class="p">,</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;check&quot;</span><span class="p">,</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="n">flagged</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;escalate&quot;</span><span class="p">,</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ruleset&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">audit</span><span class="o">.</span><span class="n">ruleset</span><span class="p">,</span> <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">audit</span><span class="o">.</span><span class="n">counts</span><span class="p">},</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="p">)</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">verify_chain</span><span class="p">()</span><span class="o">.</span><span class="n">valid</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../cli/">CLI Reference</a> --- run groundlens from the command line</li>
-<li><a href="../../concepts/how-it-works/">How It Works</a> --- understand the geometry behind the scores</li>
-<li><a href="../../guides/domain-calibration/">Domain Calibration</a> --- what calibration does, and what it does not fix</li>
-<li><a href="../../guides/rag-verification/">RAG Verification</a> --- integrate SGI into your RAG pipeline</li>
+<li><a href="../../guides/custom-rule-sets/">Custom rule sets</a> for the full pack format.</li>
+<li><a href="../../guides/banking-deployment/">Banking deployment</a> for a worked domain.</li>
+<li><a href="../../research/geometry-quickstart/">Geometry quickstart</a> for the optional SGI and DGI work.</li>
 </ul>
 
 
