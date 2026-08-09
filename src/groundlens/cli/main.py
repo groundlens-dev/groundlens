@@ -471,6 +471,13 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     bench_parser.add_argument("--model", default=DEFAULT_MODEL, help="Sentence transformer model.")
 
+    # ── canaries ───────────────────────────────────────────────────────────
+    # Registered from its own module so that running canaries never pulls in
+    # the geometry extra. The control path ships with pyyaml and nothing else.
+    from groundlens.cli.canaries import add_parser as add_canaries_parser
+
+    add_canaries_parser(subparsers)
+
     return parser
 
 
@@ -483,12 +490,15 @@ def main() -> None:
         parser.print_help()
         sys.exit(0)
 
+    from groundlens.cli.canaries import run as _cmd_canaries
+
     handlers = {
         "check": _cmd_check,
         "evaluate": _cmd_evaluate,
         "calibrate": _cmd_calibrate,
         "benchmark": _cmd_benchmark,
         "doctor": _cmd_doctor,
+        "canaries": _cmd_canaries,
     }
 
     handler = handlers.get(args.command)

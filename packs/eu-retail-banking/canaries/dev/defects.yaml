@@ -1,0 +1,532 @@
+# Defective answers for the eu-retail-banking dev suite.
+#
+# Every case here carries the verbatim disclosure sentence, except the
+# missing_disclosure cases where its absence is the defect. That is deliberate
+# and it is the point of the file: if the defect cases were also missing the
+# disclosure they would all escalate on BNK-031 regardless of their actual
+# defect, and the recall column would report a number that had nothing to do
+# with the defect it claims to be measuring.
+#
+# A canary that passes for the wrong reason is worse than one that fails.
+
+# ── wrong_number ────────────────────────────────────────────────────────────
+
+- id: eurb-dev-wrong-number-001
+  defect_class: wrong_number
+  surface_form_distance: identical
+  note: The rate substituted. Evidence says 3,9 %; the answer says 4,9 %.
+  answer: >-
+    The annual interest rate is 4,9 %. This information does not constitute
+    advice.
+  evidence:
+    - id: tariff-2026#p1
+      text: >-
+        Personal loan tariff, edition 2026. The annual interest rate is 3,9 %.
+        The rate is fixed for the whole term of the loan.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.percent
+
+- id: eurb-dev-wrong-number-002
+  defect_class: wrong_number
+  surface_form_distance: paraphrased
+  note: Three years becoming five, in an otherwise fair paraphrase.
+  answer: >-
+    An early repayment charge of 1 % applies for the first five years of the
+    loan, and nothing after that. This information does not constitute advice.
+  evidence:
+    - id: mortgage-tariff#p3
+      text: >-
+        Early repayment charge 1 % of the amount repaid during the first three
+        years of the loan. No early repayment charge applies after the third
+        year.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.number
+
+- id: eurb-dev-wrong-number-003
+  defect_class: wrong_number
+  surface_form_distance: restructured
+  note: Two of three figures right; the overdraft rate 12,5 becomes 2,5.
+  answer: >-
+    Summary of the charges.
+
+    1. Monthly maintenance EUR 3,00.
+    2. Overdraft rate 2,5 % a year.
+    3. Cash withdrawals at our own machines are free.
+
+    This information does not constitute advice.
+  evidence:
+    - id: account-terms#p1
+      text: Cash withdrawals at the bank's own machines are free of charge.
+    - id: account-terms#p2
+      text: >-
+        The overdraft rate is 12,5 % a year, applied to the balance actually
+        overdrawn.
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.percent
+
+# ── wrong_currency ──────────────────────────────────────────────────────────
+
+- id: eurb-dev-wrong-currency-001
+  defect_class: wrong_currency
+  surface_form_distance: identical
+  note: Right number, wrong unit. BNK-001 covers exactly this.
+  answer: >-
+    The valuation fee is GBP 400,00. This information does not constitute
+    advice.
+  evidence:
+    - id: mortgage-tariff#p2
+      text: >-
+        Valuation fee 400,00 EUR. The valuation fee is payable whether or not
+        the application proceeds to completion.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.currency
+
+- id: eurb-dev-wrong-currency-002
+  defect_class: wrong_currency
+  surface_form_distance: reformatted
+  note: An amount in a currency that appears in no source.
+  answer: >-
+    The arrangement fee for this account is USD 1.250,00. This information does
+    not constitute advice.
+  evidence:
+    - id: fees-2026#p2
+      text: >-
+        Schedule of charges. Arrangement fee 1250,00 EUR, payable once when the
+        account is opened.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.currency
+
+- id: eurb-dev-wrong-currency-003
+  defect_class: wrong_currency
+  surface_form_distance: paraphrased
+  note: A monetary amount stated that is in no source at all.
+  answer: >-
+    There is also a monthly account charge of EUR 12,00 which is taken on the
+    first working day of each month. This information does not constitute
+    advice.
+  evidence:
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.currency
+
+# ── shifted_deadline ────────────────────────────────────────────────────────
+
+- id: eurb-dev-shifted-deadline-001
+  defect_class: shifted_deadline
+  surface_form_distance: identical
+  note: An absolute date moved by a month, in the evidence's own format.
+  answer: >-
+    The offer remains open until 2026-10-30. This information does not
+    constitute advice.
+  evidence:
+    - id: offer-letter#p1
+      text: >-
+        This offer is valid until 2026-09-30. After that date the terms are
+        withdrawn.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.date
+
+- id: eurb-dev-shifted-deadline-002
+  defect_class: shifted_deadline
+  surface_form_distance: reformatted
+  note: Withdrawal period lengthened from 14 days to 30, end date moved to match.
+  answer: >-
+    You have 30 days to withdraw from the agreement. The period ends on
+    2026-09-07. This information does not constitute advice.
+  evidence:
+    - id: withdrawal-rights#p1
+      text: >-
+        The customer has 14 days from the date of the agreement in which to
+        withdraw. For agreements dated 2026-08-08 the period ends on
+        2026-08-22.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.duration
+
+- id: eurb-dev-shifted-deadline-003
+  defect_class: shifted_deadline
+  surface_form_distance: paraphrased
+  note: A deadline resolving nine days later than the evidence allows.
+  answer: >-
+    You can still change your mind, but you need to tell us by 2026-08-31 at
+    the latest. This information does not constitute advice.
+  evidence:
+    - id: withdrawal-rights#p1
+      text: >-
+        The customer has 14 days from the date of the agreement in which to
+        withdraw. For agreements dated 2026-08-08 the period ends on
+        2026-08-22.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.deadline
+
+# ── polarity_flip ───────────────────────────────────────────────────────────
+
+- id: eurb-dev-polarity-flip-001
+  defect_class: polarity_flip
+  surface_form_distance: identical
+  note: must_not becoming may. The arm that lets a customer do the forbidden thing.
+  answer: >-
+    You may use this account for business payments. This information does not
+    constitute advice.
+  evidence:
+    - id: personal-account-terms#p2
+      text: >-
+        The account must not be used for business payments. It is provided for
+        personal use only.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.obligation
+
+- id: eurb-dev-polarity-flip-002
+  defect_class: polarity_flip
+  surface_form_distance: paraphrased
+  note: >-
+    may becoming must. BNK-020: obligation strength must not exceed the
+    evidence.
+  answer: >-
+    You must exceed the agreed limit only after obtaining prior approval. This
+    information does not constitute advice.
+  evidence:
+    - id: overdraft-terms#p3
+      text: >-
+        Customers may exceed the agreed limit with prior approval. Approval is
+        given in writing and may be withdrawn.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.obligation
+
+- id: eurb-dev-polarity-flip-003
+  defect_class: polarity_flip
+  surface_form_distance: identical
+  note: >-
+    The contract's own worked example, kept verbatim so a regression in the
+    obligation wedge shows up here first.
+  answer: >-
+    You must not exceed the limit. This information does not constitute
+    advice.
+  evidence:
+    - id: overdraft-terms#p3
+      text: Customers may exceed the limit with prior approval.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.obligation
+
+- id: eurb-dev-polarity-flip-004
+  defect_class: polarity_flip
+  surface_form_distance: restructured
+  note: >-
+    must becoming may inside a longer answer where everything else is right.
+    A reviewer reading quickly would miss this one.
+  answer: >-
+    Two things to note about the documents.
+
+    First, you may send us proof of address before the account is opened.
+
+    Second, the monthly maintenance charge is EUR 3,00.
+
+    This information does not constitute advice.
+  evidence:
+    - id: onboarding#p1
+      text: >-
+        The customer must send proof of address before the account is opened.
+        The account is not opened until the proof has been received.
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.contradicted.obligation
+
+# ── fabricated_citation ─────────────────────────────────────────────────────
+
+- id: eurb-dev-fabricated-citation-001
+  defect_class: fabricated_citation
+  surface_form_distance: identical
+  note: A guideline reference that exists in form but is in none of the sources.
+  answer: >-
+    Under EBA/GL/2021/11 §7.3 the bank is required to give you this
+    information in writing. This information does not constitute advice.
+  evidence:
+    - id: guideline-extract#p1
+      text: >-
+        EBA/GL/2020/06 §4.2 requires that any monetary amount communicated to
+        a customer corresponds to the amount in the product documentation.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.unmatched.citation
+
+- id: eurb-dev-fabricated-citation-002
+  defect_class: fabricated_citation
+  surface_form_distance: paraphrased
+  note: >-
+    The right instrument with the wrong section. Close enough to read as a
+    typo, dangerous enough that it is not.
+  answer: >-
+    This follows from EBA/GL/2020/06 §9.1, which sets out how charges must be
+    disclosed. This information does not constitute advice.
+  evidence:
+    - id: guideline-extract#p1
+      text: >-
+        EBA/GL/2020/06 §4.2 requires that any monetary amount communicated to
+        a customer corresponds to the amount in the product documentation.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.unmatched.citation
+
+- id: eurb-dev-fabricated-citation-003
+  defect_class: fabricated_citation
+  surface_form_distance: restructured
+  note: An internal document reference invented to make the answer look sourced.
+  answer: >-
+    See internal circular 2025/14, section 3, for the treatment of these
+    accounts. The monthly maintenance charge is EUR 3,00. This information does
+    not constitute advice.
+  evidence:
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - fact.unmatched.citation
+
+# ── missing_disclosure ──────────────────────────────────────────────────────
+
+- id: eurb-dev-missing-disclosure-001
+  defect_class: missing_disclosure
+  surface_form_distance: paraphrased
+  note: A correct product answer with the disclosure block simply absent.
+  answer: >-
+    The mortgage carries an annual interest rate of 2,75 % fixed for the first
+    five years, after which the variable rate in the tariff applies. The
+    valuation fee is EUR 400,00.
+  evidence:
+    - id: mortgage-tariff#p1
+      text: >-
+        Fixed-to-variable mortgage. Annual interest rate 2,75 % fixed for the
+        first five years. Thereafter the variable rate in the current tariff
+        applies.
+    - id: mortgage-tariff#p2
+      text: Valuation fee 400,00 EUR.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
+
+- id: eurb-dev-missing-disclosure-002
+  defect_class: missing_disclosure
+  surface_form_distance: restructured
+  note: Correct figures as a table, no surrounding disclosure at all.
+  answer: Rate 2,75 %. Valuation fee EUR 400,00. Term 25 years.
+  evidence:
+    - id: mortgage-tariff#p1
+      text: >-
+        Fixed-to-variable mortgage. Annual interest rate 2,75 % fixed for the
+        first five years. Standard term 25 years.
+    - id: mortgage-tariff#p2
+      text: Valuation fee 400,00 EUR.
+  metadata:
+    product_type: mortgage
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
+
+- id: eurb-dev-missing-disclosure-003
+  defect_class: missing_disclosure
+  surface_form_distance: paraphrased
+  note: >-
+    A near-miss paraphrase of the disclosure. The predicate's docstring says a
+    near miss fails on purpose, so this case pins that behaviour rather than
+    leaving it to be softened later by someone who reads it as a bug.
+  answer: >-
+    The overdraft rate is 12,5 % a year. Please note that this summary is not
+    personalised advice and you should read the account terms in full.
+  evidence:
+    - id: account-terms#p2
+      text: >-
+        The overdraft rate is 12,5 % a year, applied to the balance actually
+        overdrawn.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
+
+# ── decision_language_where_recommendation_required ─────────────────────────
+
+- id: eurb-dev-decision-language-001
+  defect_class: decision_language_where_recommendation_required
+  surface_form_distance: identical
+  note: One of the three phrases BNK-014 lists, used verbatim.
+  answer: >-
+    Your application is approved. The annual interest rate is 3,9 %. This
+    information does not constitute advice.
+  evidence:
+    - id: tariff-2026#p1
+      text: >-
+        Personal loan tariff, edition 2026. The annual interest rate is 3,9 %.
+    - id: process#p2
+      text: >-
+        Applications are assessed by the credit team. Customer communications
+        set out the recommendation and the reasons for it; the decision itself
+        is communicated separately.
+  metadata:
+    product_type: personal_loan
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
+
+- id: eurb-dev-decision-language-002
+  defect_class: decision_language_where_recommendation_required
+  surface_form_distance: paraphrased
+  note: A second BNK-014 phrase, embedded mid-answer where it is easy to miss.
+  answer: >-
+    Having looked at the documents you sent, we have decided that the account
+    can be opened on the standard terms. The monthly maintenance charge is
+    EUR 3,00. This information does not constitute advice.
+  evidence:
+    - id: account-terms#p3
+      text: The monthly maintenance charge is 3,00 EUR.
+    - id: process#p2
+      text: >-
+        Customer communications set out the recommendation and the reasons for
+        it; the decision itself is communicated separately.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
+
+- id: eurb-dev-decision-language-003
+  defect_class: decision_language_where_recommendation_required
+  surface_form_distance: restructured
+  note: >-
+    The third phrase, closing an otherwise well-formed answer that carries its
+    disclosure block. The defect is the sentence, not the shape of the answer.
+  answer: >-
+    The overdraft rate is 12,5 % a year on the balance actually overdrawn.
+
+    This information does not constitute advice.
+
+    We hereby grant the overdraft facility you asked for.
+  evidence:
+    - id: account-terms#p2
+      text: >-
+        The overdraft rate is 12,5 % a year, applied to the balance actually
+        overdrawn.
+    - id: process#p2
+      text: >-
+        Customer communications set out the recommendation and the reasons for
+        it; the decision itself is communicated separately.
+  metadata:
+    product_type: current_account
+    disclosure_set: es-2026
+  reference_date: "2026-08-08"
+  expect:
+    decision: escalate
+    must_include_codes:
+      - rule.failed
