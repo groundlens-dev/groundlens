@@ -1,36 +1,83 @@
 # Groundlens
 
-**Check whether an LLM's answer actually came from its source. Fast, deterministic, no second LLM.**
+**Groundlens checks what an answer tells people they have to do.**
 
-An LLM answers confidently whether or not it used the document you gave it. Sometimes it draws on the source; sometimes it answers from memory, or drifts to the topic of the question. You cannot tell which by reading the answer, and re-reading every answer by hand, or paying a second LLM to judge each one, does not scale.
+An answer written from your own documents can still turn a "may" into a "must", move a deadline, restate an amount that no source contains, or cite a section that does not exist. Those sentences are the ones that create an obligation for a customer, a claimant or a patient, and they are the ones a reviewer has to catch.
 
-Groundlens measures the *geometry* of an answer, where it sits relative to its source and to the question, and turns that into a plain reading: **did this answer come from the source, or not?** It runs in milliseconds, returns the same result every time, and uses no second language model. Its job is to let the clearly grounded answers through and flag the ones worth a closer look, so the slow and expensive checks run only where they are needed.
+Groundlens pulls those statements out of the answer, compares each one against the sources you supplied and the rules you wrote, and returns one of two decisions: clear, or send this to a person. It runs on your machine. It calls no model. The same inputs give the same decision tomorrow.
+
+## A first check
+
+```python
+from datetime import date
+from groundlens import check
+
+result = check(
+    "You must call us before you travel abroad. The annual fee is 45,00 EUR.",
+    [{"id": "terms.pdf#p2", "text": "The customer may repay the balance early. The annual fee is 30,00 EUR."}],
+    ruleset="eu-retail-banking",
+    metadata={"product_type": "credit-card", "disclosure_set": "es-2026"},
+    reference_date=date(2026, 8, 8),
+)
+print(result.decision.value)
+for finding in result.findings:
+    if finding.severity.value == "fail":
+        print(finding.rule_id, finding.message)
+```
+
+```text
+escalate
+BNK-001 The answer says '45,00 EUR' but the source says 'EUR 30'.
+BNK-031 Required disclosure block present.
+BNK-020 The answer tells the reader 'You must call us before you travel abroad', and no source says that.
+```
+
+There is no score, no confidence and no threshold. A number between zero and one invites somebody to move the line later, and a control whose line moves is not a control.
+
+## What it checks
+
+Eight kinds of statement, each returned with the exact character span it came from.
+
+| Kind | What it picks up |
+|---|---|
+| Obligation | must, must not, may, need not, should |
+| Deadline | within 14 days, by 31 March, before closing |
+| Date | absolute and relative dates |
+| Duration | 30 days, six months, business days |
+| Currency | amounts with a unit |
+| Number | bare quantities |
+| Percent | rates and percentage points |
+| Citation | article, section and clause references |
+
+Obligation polarity is the part no other tool ships. "The customer must notify us" and "the customer may notify us" are two different instructions, and the difference is invisible to a similarity score. Groundlens treats it as a typed, checkable statement, ranks the five strengths, and reports an answer that is firmer than the evidence behind it.
+
+A rule pack adds the rest: required wording, forbidden wording, a required disclosure block, a citation that has to resolve to a source you actually passed, and context the caller has to declare. A missing declaration is a failure, not a silent pass.
+
+## What it does not do
 
 !!! warning "Groundlens does not measure truth"
-    It measures grounding: whether an answer came from its source (SGI) or moves like a well grounded answer (DGI). A statement that is factually wrong but well grounded in the source can pass, and a true statement that ignores the source can be flagged. For truth you need a source of truth: a lookup, a knowledge base, a rule, or a person. Groundlens tells you which answers to send there.
+    If a claim is wrong and every source agrees with it, Groundlens clears it. Truth needs a
+    source of truth: a lookup, a register, a knowledge base or a person.
 
-## The pipeline
+- It does not read prose for meaning. A defect stated in words it does not extract will pass.
+- It does not cover the input side. Prompt injection, harmful content and jailbreaks are somebody else's job.
+- It does not rank or grade. The output is clear or escalate, per rule, with a span.
+- It only catches what a pack asks for. An empty pack clears everything.
 
-Checking an LLM's output is a pipeline, cheapest step first. Groundlens is the front of it and decides what reaches the expensive back.
+## What this is not
 
-| # | Step | The question it answers | In Groundlens |
-|---|---|---|---|
-| 1 | **Geometry** (SGI / DGI) | Did the answer come from its source, or drift off it? | Yes |
-| 2 | **Switch** | May this answer be written into agent/RAG state? | Yes |
-| 3 | **Consistency** | With no source to compare against, does the model agree with itself? | Yes |
-| 4 | **Rules** | Did the answer break a policy, invent a number, skip a disclosure? | Yes |
-| 5 | **LLM as judge** | The hard cases that need real reasoning over the evidence. | No |
-| 6 | **Human review** | The last step of the pipeline. | No |
+Groundlens is narrow on purpose. If your problem is one of these, use the tool that was built for it. Every one of them is good.
 
-Groundlens covers steps 1 to 4 and needs no second LLM for geometry, the Switch, or rules. Steps 5 and 6 run only on what the earlier steps flag.
+| You need | Use | Why it is better at this |
+|---|---|---|
+| Which words in this answer are not supported by the retrieved text | [LettuceDetect](https://github.com/KRLabsOrg/LettuceDetect) | MIT, `pip install lettucedetect`, runs offline with no LLM, returns token level spans over the whole answer. This is the general groundedness job and it does it well. |
+| A single number for how well a summary sticks to its source | [Vectara HHEM](https://huggingface.co/vectara/hallucination_evaluation_model) | An open model built and tuned for exactly that score. |
+| Metrics over a test set while you tune a RAG pipeline | [RAGAS](https://github.com/explodinggradients/ragas), [DeepEval](https://github.com/confident-ai/deepeval) | Faithfulness, answer relevancy, context precision, dataset runners, CI reporting. |
+| A managed service inside your cloud | [Azure AI Content Safety groundedness detection](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) | Hosted, supported, no weights to ship, covers input safety too. |
+| Formal proof that a claim follows from an encoded policy | [AWS Bedrock Automated Reasoning checks](https://docs.aws.amazon.com/bedrock/latest/userguide/automated-reasoning.html) | Real logical verification against a policy model, with immutable numbered policy versions. |
+| To measure how often a model hallucinates | [HalluLens](https://github.com/facebookresearch/HalluLens) | A benchmark, which is a different thing from a control in a live pipeline. |
 
-## The five checks
-
-- **[SGI](concepts/sgi.md)**, did the answer come from its source? Use it when you have the retrieved document (a RAG pipeline).
-- **[DGI](concepts/dgi.md)**, check an answer when there is no source. It works from the question and the answer alone, comparing the direction the answer takes with how grounded answers usually move.
-- **[Switch](concepts/switch.md)**, may this answer enter agent or RAG state? Turns the geometric score into a control action so contaminated context does not propagate.
-- **[Consistency](guides/second-stage.md)**, does the model agree with itself? The stage you escalate to when geometry cannot settle a case.
-- **[Rules](adr/0001-rule-set-architecture.md)**, did the answer break a specific policy? Named checks that catch invented figures, missing disclosures, and out-of-remit claims.
+Groundlens is not a hallucination detector and does not produce a factual consistency score.
 
 ## Install
 
@@ -38,46 +85,52 @@ Groundlens covers steps 1 to 4 and needs no second LLM for geometry, the Switch,
 pip install groundlens
 ```
 
-The default encoder is `sentence-transformers/sentence-t5-large` (768-dimensional). `import groundlens` stays lightweight and never loads a second language model; the optional model-based second stage is installed separately with `pip install "groundlens[verify]"`.
+The only runtime dependency is `pyyaml`. `import groundlens` does not import `torch`, `numpy`, `transformers` or `sentence_transformers`, and CI fails if it ever does.
 
-## A first reading
+The optional geometry work needs its own extra:
 
-```python
-from groundlens import compute_sgi, check
-
-question = "What is the daily transfer limit?"
-context  = "The daily transfer limit is 1,000 EUR per day."
-response = "The daily limit is 500 EUR per transaction."   # not in the source
-
-print(check(compute_sgi(question=question, context=context, response=response)).render())
-# CHECK: ... (Semantic Grounding Index - SGI=...)
+```bash
+pip install "groundlens[geometry]"
 ```
 
-Read the **level** (`"ok"`, `"review"`, `"risk"`), not the raw decimal. The number depends on the encoder, so treat it as a relative signal and set the operating point by [calibrating on your own data](concepts/calibration.md).
+## Rule packs
+
+A pack is a YAML file, never Python. A reviewer who does not write code has to be able to read it, diff two versions of it, and sign the diff. Two ship with the library, `eu-retail-banking` and `decision-rationale`.
+
+The identity of a pack is the SHA-256 of its bytes, taken before parsing. A version label is a string somebody typed. The hash is what binds to behaviour, and the hash is what the record stores.
+
+Packs read numbers and dates through `locale_profile`, never through the environment.
+
+## Audit
+
+Every call returns a record next to the decision: hashes of the answer and of each source, the pack name, version and content hash, the counts, and every finding with its span. Metadata values never reach the record. Only the key names do, because the values may carry personal data.
+
+Reruns of the same inputs under the same pack hash produce the same record, byte for byte. There is no floating point, no wall clock, no environment locale and no randomness in the path. Each row of `groundlens.audit.open_log` is hashed against the row before it, so a later edit to the trail is visible.
+
+This is a property of the tool. It is not a claim about what any regulation requires of you.
 
 ## Where to go next
 
 - New here: [Installation](getting-started/installation.md) and [Quickstart](getting-started/quickstart.md).
-- Understand the method: [How it works](concepts/how-it-works.md), [SGI](concepts/sgi.md), [DGI](concepts/dgi.md), [Switch](concepts/switch.md), [Calibration](concepts/calibration.md).
-- Escalate the hard cases: [Second stage](guides/second-stage.md) and the provider adapters for [OpenAI](providers/openai.md), [Anthropic](providers/anthropic.md), [Google](providers/google.md).
-- Privacy: [Data handling](guides/data-handling.md).
-- Compliance: [EU AI Act](guides/eu-ai-act.md), [SR 11-7](guides/sr-11-7.md), [NIST AI RMF](guides/nist-ai-rmf.md).
-- Editor / chat integration: the [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp).
+- Write your own rules: [Custom rule sets](guides/custom-rule-sets.md).
+- Deploy it: [Banking deployment](guides/banking-deployment.md), [Data handling](guides/data-handling.md).
+- Frameworks: [LangGraph](integrations/langgraph.md), [LangChain](integrations/langchain.md), [CrewAI](integrations/crewai.md), [Semantic Kernel](integrations/semantic-kernel.md), [AutoGen](integrations/autogen.md).
+- Editor and chat: the [Groundlens MCP server](https://github.com/groundlens-dev/groundlens-mcp).
 
 ## Research
 
-The methods are documented in three preprints:
+Geometry (SGI and DGI) is where Groundlens started. It measures where an answer sits relative to its question and its source, and it is a useful ranking signal when an answer ignores the document it was given. It is optional, it is not the product, and it sits behind `pip install "groundlens[geometry]"`.
+
+It has a known limit, established in our own work: detectability tracks how closely a wrong answer matches the register of a right one. A wrong value written in exactly the right style is close to invisible to a single frozen sentence embedding. That result is the reason the product moved to typed statements and written rules.
+
+Start at the [geometry quickstart](research/geometry-quickstart.md), then [SGI](concepts/sgi.md), [DGI](concepts/dgi.md), [Switch](concepts/switch.md) and [Calibration](concepts/calibration.md).
+
+Five arXiv preprints. Each has been revised in response to reviews. None is a peer-reviewed publication.
 
 - *Semantic Grounding Index: Geometric Bounds on Context Engagement in RAG Systems* (2025), [arXiv:2512.13771](https://arxiv.org/abs/2512.13771)
 - *A Geometric Taxonomy of Hallucination in LLMs* (2026), [arXiv:2602.13224](https://arxiv.org/abs/2602.13224)
-- *How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259) — the seven-model mechanistic study, **not** the Register Wall paper
+- *How Transformers Reject Wrong Answers: Rotational Dynamics of Factual Constraint Processing* (2026), [arXiv:2603.13259](https://arxiv.org/abs/2603.13259)
+- *The Outer Geometry of Truth: Register Alignment and the Limits of Embedding-Based Hallucination Detection*, preprint
+- *The Geometry of Validity*, preprint
 
-arXiv preprints. Each has been through peer review at COLM, NeurIPS or ACL, three reviewers per
-paper, and each current version was revised to address every point raised. None is accepted at a
-venue yet.
-
-The corrected benchmark numbers on this site come from a fourth, newer preprint: the
-register-alignment result ("The Register Wall"), *The Outer Geometry of Truth: Register Alignment
-and the Limits of Embedding-Based Hallucination Detection*. It is on arXiv but not yet announced,
-and it has not been through the review cycle above. Its notebooks are not yet released. See
-[Benchmark results](benchmarks/results.md).
+The register-alignment result is the fourth of these. Its notebooks are not released yet. See [Benchmark results](benchmarks/results.md).

@@ -1,201 +1,193 @@
 # Quickstart
 
-This guide walks through the three main ways to use groundlens: SGI (with context), DGI (without context), and the unified `evaluate()` function that auto-selects the right method.
+One call, one decision, one record. This page takes you from `pip install` to a rule pack of your own.
 
-## Your First SGI Check
-
-SGI (Semantic Grounding Index) evaluates whether an LLM response engaged with provided source context. Use it when you have retrieval context available --- the typical RAG verification scenario.
-
-```python
-from groundlens import compute_sgi
-
-result = compute_sgi(
-    question="What is the capital of France?",
-    context="France is in Western Europe. Its capital is Paris.",
-    response="The capital of France is Paris.",
-)
-
-print(f"SGI Score:    {result.value:.4f}")
-print(f"Normalized:   {result.normalized:.4f}")
-print(f"Flagged:      {result.flagged}")
-print(f"Explanation:  {result.explanation}")
-print(f"Q distance:   {result.q_dist:.4f}")
-print(f"Ctx distance: {result.ctx_dist:.4f}")
+```bash
+pip install groundlens
 ```
 
-!!! success "Interpreting SGI scores"
-    - **SGI > 1.20**: Strong context engagement --- the response is significantly closer to the context than to the question. Green zone.
-    - **0.95 < SGI < 1.20**: Partial engagement --- some context influence detected but not definitive. Review recommended.
-    - **SGI < 0.95**: Weak context engagement --- the response may be ignoring the retrieved context. Flagged for human review.
+## Your first check
 
-## Your First DGI Check
-
-DGI (Directional Grounding Index) evaluates grounding without any context. Use it when you only have a question and a response --- chat/dialogue verification, agent self-checks, or batch evaluation.
+`check()` takes the answer, the sources it was supposed to use, and a rule pack.
 
 ```python
-from groundlens import compute_dgi
+from datetime import date
+from groundlens import check
 
-result = compute_dgi(
-    question="What causes seasons on Earth?",
-    response="Seasons are caused by Earth's 23.5-degree axial tilt.",
+result = check(
+    "You must call us before you travel abroad. The annual fee is 45,00 EUR.",
+    [{"id": "terms.pdf#p2", "text": "The customer may repay the balance early. The annual fee is 30,00 EUR."}],
+    ruleset="eu-retail-banking",
+    metadata={"product_type": "credit-card", "disclosure_set": "es-2026"},
+    reference_date=date(2026, 8, 8),
 )
-
-print(f"DGI Score:    {result.value:.4f}")   # direction: alignment with grounded reference
-print(f"Magnitude:    {result.magnitude:.4f}") # how far the response moved from the question
-print(f"Normalized:   {result.normalized:.4f}")
-print(f"Flagged:      {result.flagged}")
-print(f"Explanation:  {result.explanation}")
+print(result.decision.value)
+for finding in result.findings:
+    if finding.severity.value == "fail":
+        print(finding.rule_id, finding.message)
 ```
 
-!!! success "Interpreting DGI scores"
-    DGI is a **single binary cut**, not a set of bands. `compute_dgi` computes
-    `flagged = value < DGI_PASS` and nothing else.
+```text
+escalate
+BNK-001 The answer says '45,00 EUR' but the source says 'EUR 30'.
+BNK-031 Required disclosure block present.
+BNK-020 The answer tells the reader 'You must call us before you travel abroad', and no source says that.
+```
 
-    - **DGI >= 0.525** (`DGI_PASS`): the displacement aligns with grounded
-      response patterns. Pass.
-    - **DGI < 0.525**: the displacement diverges from grounded patterns. Flagged.
+Three things happened. The amount in the answer disagrees with the amount in the source. The answer created an obligation for the reader that nothing in the sources supports. And a disclosure the pack requires is not there.
 
-    0.525 is the Youden's-J operating point for the default encoder
-    (`sentence-transformers/sentence-t5-large`) on the bundled 212-pair
-    reference set. It is encoder- and domain-specific: recalibrate with
-    [`fit_thresholds`](../api/index.md) on your own data. Read the value from
-    the code rather than copying it:
+`result.decision` is `Decision.CLEAR` or `Decision.ESCALATE`. There is nothing in between.
 
-    ```python
-    from groundlens._internal.thresholds import DGI_PASS   # 0.525
-    ```
-
-## Plain-language checks
-
-The raw score and flag above are built for pipelines. For a reading a person can act on, pass any result to `check()`. It is the single source of truth for wording — the README and the [MCP servers](https://github.com/groundlens-dev/groundlens-mcp) render from the same function.
+## Every source needs an id
 
 ```python
-from groundlens import compute_sgi, compute_dgi, check
-
-sgi = compute_sgi(
-    question="What is the Bizum daily limit?",
-    context="The daily Bizum transfer limit is 1,000 EUR per transaction.",
-    response="The Bizum daily limit is 500 EUR. Premium clients have 10,000 EUR.",
-)
-print(check(sgi).render())
-# CHECK: Not supported by the document (Semantic Grounding Index - SGI=0.83)
-# The answer stays closer to the question than to the source, so it may not
-# come from the document. Check it before trusting it.
-
-dgi = compute_dgi(
-    question="What causes seasons on Earth?",
-    response="Seasons are caused by Earth's 23.5-degree axial tilt.",
-)
-print(check(dgi).render())
-# CHECK: Not grounded (Directional Grounding Index - DGI=0.41)
-# The answer does not move the way grounded answers do. Check it before trusting it.
-#
-# 0.41 is below DGI_PASS (0.525), so it reads as not grounded even though the
-# answer is correct. That is the DGI limitation, not a bug: the bundled
-# reference direction was fitted on 212 answers written in one style, and text
-# written any other way scores low however faithful it is. Calibrate on your
-# own corpus before relying on DGI, or use SGI where you have a source.
-# No source given — judged by the shape of the answer.
+[{"id": "terms.pdf#p2", "text": "..."}]
 ```
 
-!!! note "What the check is (and isn't)"
-    The check **level** (`ok` / `review` / `risk`, on `check(...).level`) comes only from the calibrated thresholds. The **label** and **message** are jargon-free: "grounding" and "hallucination" never appear in what a user reads. The raw components (`q_dist` / `ctx_dist` for SGI, the displacement `magnitude` for DGI) are on `check(...).detail`. A check is a statement about whether the answer is *drawn from the source*, not about whether it is *factually correct*.
+A bare string is rejected. Ids are yours to choose and they should be stable, because a finding points at one, and the person who reviews the case has to open it.
 
-## Auto-Select with evaluate()
+## Declare your context, or the check fails
 
-The `evaluate()` function automatically selects SGI or DGI based on whether context is provided:
+A pack can require the caller to supply named context. If it is missing, the decision is `ESCALATE` and the reason says so. There is no flag to turn this off.
+
+The `mypack.yaml` used here and below is the one written out under [Write your own pack](#write-your-own-pack).
 
 ```python
-from groundlens import evaluate
+from groundlens import check
 
-# With context -> SGI
-score = evaluate(
-    question="What is photosynthesis?",
-    response="Photosynthesis converts light energy into chemical energy.",
-    context="Plants use photosynthesis to convert sunlight into glucose.",
+result = check(
+    "The fee is 30,00 EUR.",
+    [{"id": "s1", "text": "The fee is 30,00 EUR."}],
+    ruleset="mypack.yaml",
 )
-print(f"Method: {score.method}")  # 'sgi'
-
-# Without context -> DGI
-score = evaluate(
-    question="What is photosynthesis?",
-    response="Photosynthesis converts light energy into chemical energy.",
-)
-print(f"Method: {score.method}")  # 'dgi'
+print(result.decision.value)
+for finding in result.findings:
+    print(finding.severity.value, finding.code, finding.message)
 ```
 
-The `GroundlensScore` returned by `evaluate()` is a unified container:
+```text
+escalate
+fail pack.metadata.missing The rule pack 'house-style' needs the caller to supply 'case_id', and it was not supplied. Nothing was checked against it, so this answer has to be reviewed by a person.
+```
+
+Supply it and the same answer clears.
 
 ```python
-score.value        # Raw score (SGI ratio or DGI cosine similarity)
-score.normalized   # Mapped to [0, 1]
-score.flagged      # the hard cut only; False across the whole review band
-check(score).escalate  # True for the review band too -- branch on this
-score.method       # 'sgi' or 'dgi'
-score.explanation  # Human-readable interpretation
-score.detail       # Full SGIResult or DGIResult
-```
-
-`check()` accepts a `GroundlensScore` directly, so the same plain-language reading works after `evaluate()`:
-
-```python
-from groundlens import evaluate, check
-
-score = evaluate(question="...", response="...", context="...")
-print(check(score).render())
-```
-
-## Reusable Scorer Objects
-
-For repeated evaluations, use the class-based API to avoid passing `model` every time:
-
-```python
-from groundlens import SGI, DGI
-
-# SGI scorer
-sgi = SGI(model="sentence-transformers/sentence-t5-large")
-result = sgi.score(
-    question="What is X?",
-    context="X is defined as Y in the specification.",
-    response="X is Y.",
+result = check(
+    "The fee is 30,00 EUR.",
+    [{"id": "s1", "text": "The fee is 30,00 EUR."}],
+    ruleset="mypack.yaml",
+    metadata={"case_id": "4471"},
 )
-
-# DGI scorer with custom calibration
-dgi = DGI(reference_csv="my_domain_pairs.csv")
-result = dgi.score(
-    question="What is X?",
-    response="X is Y.",
-)
+print(result.decision.value, len(result.findings))
 ```
 
-## Batch Evaluation
+```text
+clear 0
+```
 
-Evaluate multiple items at once:
+## Dates come from you, not from the clock
+
+If a pack reads relative dates, pass `reference_date` as a `date` or an ISO string. `date.today()` is not called anywhere in this path, so a case checked today gives the same answer when it is re-checked next year.
+
+## Write your own pack
+
+A pack is a YAML file. Save this as `mypack.yaml` and point `ruleset=` at the path.
+
+```yaml
+pack: house-style
+version: 0.1.0
+locale_profile: eu-es
+requires_metadata:
+  - case_id
+rules:
+  - id: HS-001
+    description: Every monetary amount stated must appear in the evidence.
+    assert: all_facts_matched
+    where: { kind: currency }
+    severity: fail
+
+  - id: HS-002
+    description: Obligation strength must not exceed the evidence.
+    assert: obligation_polarity_consistent
+    severity: fail
+
+  - id: HS-003
+    description: No decision language.
+    assert: absent_lexicon
+    lexicon: ["we have decided", "your application is approved"]
+    severity: fail
+```
+
+`locale_profile` decides how numbers and dates are read. Under `eu-es`, `1.000,50` is one thousand and a half, whatever the machine's own locale says.
+
+Eight assertions are available and no others: `all_facts_matched`, `no_contradicted_facts`, `absent_lexicon`, `present_lexicon`, `obligation_polarity_consistent`, `citations_resolve`, `metadata_equals` and `predicate`.
+
+## Read the findings
+
+Each finding carries a stable code, a severity, a message written for a person, and, where there is one, the character span in the answer it came from.
 
 ```python
-from groundlens import evaluate_batch
+from groundlens import check
 
-items = [
-    {
-        "question": "What is the capital of France?",
-        "response": "The capital of France is Paris.",
-        "context": "Paris is the capital of France.",
-    },
-    {
-        "question": "What causes tides?",
-        "response": "Tides are caused by the Moon's gravity.",
-    },
-]
-
-results = evaluate_batch(items)
-
-for i, score in enumerate(results):
-    print(f"Item {i}: {score.method} = {score.value:.3f}, flagged={score.flagged}")
+result = check(
+    "The fee is 45,00 EUR.",
+    [],
+    ruleset="mypack.yaml",
+    metadata={"case_id": "4471"},
+)
+for finding in result.findings:
+    span = finding.fact.span if finding.fact else None
+    print(finding.severity.value, finding.code, span, finding.message)
 ```
 
-## What Next?
+```text
+warn evidence.empty None No sources were provided, so nothing in this answer could be compared against anything.
+fail fact.unmatched.currency (11, 20) The answer states '45,00 EUR', which does not appear in any of the sources provided.
+```
 
-- [CLI Reference](cli.md) --- run groundlens from the command line
-- [How It Works](../concepts/how-it-works.md) --- understand the geometry behind the scores
-- [Domain Calibration](../guides/domain-calibration.md) --- what calibration does, and what it does not fix
-- [RAG Verification](../guides/rag-verification.md) --- integrate SGI into your RAG pipeline
+Spans index into the NFKC-normalised answer, not into the raw string you passed.
+
+`FAIL` escalates. `WARN` and `INFO` are recorded and do not escalate on their own.
+
+## Keep the record
+
+```python
+a = result.audit
+print(a.answer_sha256[:16])
+print(a.ruleset["name"], a.ruleset["version"], a.ruleset["content_sha256"][:12])
+print(a.counts)
+print(a.determinism)
+print(a.metadata_keys)
+```
+
+```text
+4e948e46f26b98a9
+house-style 0.1.0 8ef7b57bf7b0
+{'facts_extracted': 1, 'facts_matched': 0, 'facts_unmatched': 1, 'facts_contradicted': 0, 'rules_evaluated': 3, 'rules_failed': 1}
+{'unicode_form': 'NFKC', 'locale_profile': 'eu-es', 'reference_date': None}
+['case_id']
+```
+
+`metadata_keys` holds the key names. The values are never written, because they may carry personal data.
+
+To keep a running trail, use the hash-chained log.
+
+```python
+from groundlens.audit import open_log
+
+with open_log("audit.db") as log:
+    log.record(
+        identifier="case-4471",
+        method="check",
+        flagged=result.decision.value == "escalate",
+        metadata={"ruleset": result.audit.ruleset, "counts": result.audit.counts},
+    )
+    print(log.verify_chain().valid)
+```
+
+## Next
+
+- [Custom rule sets](../guides/custom-rule-sets.md) for the full pack format.
+- [Banking deployment](../guides/banking-deployment.md) for a worked domain.
+- [Geometry quickstart](../research/geometry-quickstart.md) for the optional SGI and DGI work.

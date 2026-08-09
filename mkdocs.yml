@@ -1,6 +1,6 @@
 strict: true
 site_name: groundlens
-site_description: Deterministic first-stage hallucination triage. It decides what your expensive check has to look at. Single-pass, auditable.
+site_description: Groundlens checks what an answer tells people they have to do. Obligations, deadlines, amounts and citations, checked against your sources and your rule packs, offline, with no model in the path.
 site_author: Javier Marin
 site_url: https://docs.groundlens.dev/
 repo_url: https://github.com/groundlens-dev/groundlens
@@ -81,7 +81,8 @@ nav:
     - "DGI: Directional Grounding Index": concepts/dgi.md
     - "Switch: context protection": concepts/switch.md
     - Calibration: concepts/calibration.md
-  - Theory:
+  - Research:
+    - Geometry quickstart: research/geometry-quickstart.md
     - Hallucination Taxonomy: theory/hallucination-taxonomy.md
     - Embedding Geometry: theory/embedding-geometry.md
     - SGI Mathematics: theory/sgi-mathematics.md
