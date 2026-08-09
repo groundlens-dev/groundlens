@@ -106,7 +106,7 @@ def extract_facts(
     text: str,
     *,
     locale: LocaleProfile,
-    reference_date: date,
+    reference_date: date | None,
     config: ExtractConfig | Mapping[str, object] | None = None,
 ) -> tuple[Fact, ...]:
     """Extract checkable facts from already NFKC-normalised text.
@@ -117,7 +117,9 @@ def extract_facts(
         locale: Locale profile deciding decimal separator, group separator and
             date order.  The process environment is never consulted.
         reference_date: Anchor for relative deadlines ("within 30 days").
-            Required, never defaulted from the system clock.
+            Never defaulted from the system clock.  Pass ``None`` when the
+            caller has no anchor: relative deadlines are then reported as plain
+            durations rather than resolved against a date nobody supplied.
         config: An :class:`~groundlens.facts.config.ExtractConfig` or the
             mapping a rule pack carries under ``facts:``.
 
@@ -455,12 +457,17 @@ _PERIOD_KEY: Final[dict[str, str]] = {
 _NEXT_WORDS: Final[frozenset[str]] = frozenset({"next", "following", "próximo", "proximo"})
 
 
-def _deadlines(text: str, locale: LocaleProfile, reference_date: date) -> list[_Candidate]:
+def _deadlines(text: str, locale: LocaleProfile, reference_date: date | None) -> list[_Candidate]:
     out: list[_Candidate] = []
     for form, pattern in _DEADLINE_PATTERNS:
         for match in pattern.finditer(text):
             groups = match.groupdict()
             if groups.get("dur"):
+                # Without an anchor a relative deadline has no due date. We do not
+                # read the clock to invent one, so the expression falls through to
+                # the duration extractor and is reported as a duration instead.
+                if reference_date is None:
+                    continue
                 normalisation = _deadline_from_duration(
                     groups["dur"], groups.get("anchor"), locale, reference_date
                 )
@@ -474,6 +481,8 @@ def _deadlines(text: str, locale: LocaleProfile, reference_date: date) -> list[_
                     anchor="explicit_date", due_date=normalisation.value
                 )
             elif groups.get("period"):
+                if reference_date is None:
+                    continue
                 normalisation = _deadline_from_period(
                     groups["period"], groups.get("rel"), reference_date
                 )
@@ -484,8 +493,13 @@ def _deadlines(text: str, locale: LocaleProfile, reference_date: date) -> list[_
             # Every deadline records the anchor it was resolved against, even
             # an absolute one: it is what makes the resolution auditable, and
             # it is how the matcher recovers the anchor without a clock.
+            # An absolute date needs no anchor, so when the caller supplied
+            # none the record says so rather than naming a date we never used.
             normalisation = normalisation.with_attrs(
-                deadline_form=form, reference_date=reference_date.isoformat()
+                deadline_form=form,
+                reference_date=(
+                    "unanchored" if reference_date is None else reference_date.isoformat()
+                ),
             )
             out.append(_Candidate(match.start(), match.end(), FactKind.DEADLINE, normalisation))
     return out

@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Any
 import yaml
 
 from groundlens.control import check
-from groundlens.determinism import normalise_text
+from groundlens.determinism import get_locale_profile, normalise_text
 from groundlens.facts import extract_facts
 from groundlens.packs.loader import load_pack
 from groundlens.types import Decision, FactKind, Severity
@@ -447,7 +447,7 @@ def run_case(case: CanaryCase, ruleset: str | Path) -> CanaryOutcome:
 
     facts = extract_facts(
         normalise_text(case.answer),
-        locale=pack.locale_profile,
+        locale=get_locale_profile(pack.locale_profile),
         reference_date=(
             None
             if case.reference_date is None

@@ -34,7 +34,7 @@ from groundlens.audit_record import (
     RulesetRef,
     build_record,
 )
-from groundlens.determinism import normalise_text
+from groundlens.determinism import get_locale_profile, normalise_text
 from groundlens.facts import extract_facts, match_facts
 from groundlens.packs.evaluate import evaluate_pack, missing_metadata_findings
 from groundlens.packs.loader import Pack, load_pack
@@ -337,14 +337,14 @@ def check(
 
     facts = extract_facts(
         normalised_answer,
-        locale=pack.locale_profile,
+        locale=get_locale_profile(pack.locale_profile),
         reference_date=resolved_date,
         config=facts_config,
     )
     matches = match_facts(
         facts,
         evidence_items,
-        locale=pack.locale_profile,
+        locale=get_locale_profile(pack.locale_profile),
         config=facts_config,
     )
 
