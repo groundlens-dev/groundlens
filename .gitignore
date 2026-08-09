@@ -47,3 +47,9 @@ Thumbs.db
 .env.local
 gl/
 benchmarks/results/
+
+# Audit logs written by running the README and docs examples.
+# open_log("audit.db") creates these wherever the snippet is run from.
+audit.db
+*.sqlite
+*.sqlite3
