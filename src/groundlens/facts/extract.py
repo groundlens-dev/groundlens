@@ -35,6 +35,8 @@ from typing import TYPE_CHECKING, Final
 from groundlens.facts.config import ExtractConfig
 from groundlens.facts.lexicon import (
     AMBIGUOUS_MARKERS,
+    CARDINAL_BLOCKING_NEIGHBOURS,
+    CARDINAL_WORDS,
     CONDITIONAL_MARKERS,
     CURRENCY_CODES,
     CURRENCY_SYMBOLS,
@@ -70,7 +72,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = ["EXTRACTOR_VERSION", "extract_facts"]
 
-EXTRACTOR_VERSION: Final[str] = "1"
+EXTRACTOR_VERSION: Final[str] = "2"
 """Recorded in the audit record.  Bump on any change that moves a span."""
 
 _MAX_CLAUSE_CHARS: Final[int] = 400
@@ -139,6 +141,7 @@ def extract_facts(
     candidates.extend(_dates(text, locale))
     candidates.extend(_durations(text, locale))
     candidates.extend(_numbers(text, locale))
+    candidates.extend(_cardinal_words(text, locale))
 
     accepted = _resolve_overlaps(candidates)
     facts = [_to_fact(text, c) for c in accepted if cfg.wants(c.kind.value)]
@@ -276,6 +279,118 @@ def _numbers(text: str, locale: LocaleProfile) -> list[_Candidate]:
 
 
 # ---------------------------------------------------------------------------
+# NUMBER written as a word
+# ---------------------------------------------------------------------------
+#
+# "three" and "3" must land on the same canonical string or a wrong spelled-out
+# count produces no fact and no rule can act on it.  The table is in
+# lexicon.CARDINAL_WORDS and the note there records which constructions were
+# left out.  Everything below is a *refusal*: each guard drops a match rather
+# than reading it, because on this corpus a false NUMBER on clean traffic costs
+# more than a missed one on a defect.
+#
+# A cardinal word is only ever a NUMBER, never a DURATION, CURRENCY or PERCENT.
+# Those three kinds are built on the digit pattern, and reaching into them from
+# here would change what "3 %" and "30 days" already extract as.  Where the
+# word form would land in a different kind from the digit form the word form is
+# dropped instead (see _CARDINAL_UNIT_TAIL_RE); the one exception is a duration
+# unit, because "the first three years" is the count this library is asked to
+# compare against "the first five years".
+
+_CARDINAL_RE: Final[re.Pattern[str]] = re.compile(
+    r"\b(?:" + "|".join(sorted(CARDINAL_WORDS, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+_ALPHA_TOKEN_RE: Final[re.Pattern[str]] = re.compile(r"[^\W\d_]+", re.UNICODE)
+_DASHES: Final[str] = "-\u2010\u2011\u2012\u2013\u2014"
+"""Hyphen-minus plus the Unicode hyphens and dashes NFKC leaves alone."""
+_CARDINAL_COORDINATORS: Final[frozenset[str]] = frozenset({"and", "y"})
+_CARDINAL_NEIGHBOUR_CHARS: Final[int] = 24
+
+_CARDINAL_UNIT_TAIL_RE: Final[re.Pattern[str]] = re.compile(
+    r"\s{0,2}(?:%|percentage\s+points?|puntos?\s+porcentuales?|per\s?cent(?:age)?|"
+    rf"percent|pct|por\s+ciento|{_SYMBOL_ALT}|(?:{_CODE_ALT})\b|(?:{_WORD_ALT})\b)",
+    re.IGNORECASE,
+)
+"""A unit that would have made the digit form a PERCENT or a CURRENCY.
+
+``3 %`` is a PERCENT and ``3 EUR`` is a CURRENCY, so emitting a bare NUMBER for
+``three %`` would leave the two spellings of the same claim in different kinds
+and unable to match.  The word form is dropped instead."""
+
+_CARDINAL_HEAD_RE: Final[re.Pattern[str]] = re.compile(
+    rf"(?:{_SYMBOL_ALT}|\b(?:{_CODE_ALT}))\s{{0,2}}$"
+)
+"""Same, for a currency marker sitting in front of the word ("EUR three")."""
+
+
+def _cardinal_words(text: str, locale: LocaleProfile) -> list[_Candidate]:
+    out: list[_Candidate] = []
+    for match in _CARDINAL_RE.finditer(text):
+        raw = match.group(0)
+        if len(raw) > 1 and raw.isupper():
+            # "DOS" and "SEIS" in an upper-cased identifier are not counts.
+            continue
+        start, end = match.start(), match.end()
+        # A hyphen either side means a compound, not this word:
+        # "twenty-three", "two-thirds".  Written out rather than as a slice
+        # test because an empty slice is a substring of every string.
+        if start > 0 and text[start - 1] in _DASHES:
+            continue
+        if end < len(text) and text[end] in _DASHES:
+            continue
+        if _cardinal_neighbour_blocks(text, start, end):
+            continue
+        if _CARDINAL_UNIT_TAIL_RE.match(text, end) is not None:
+            continue
+        head = text[max(0, start - _CARDINAL_NEIGHBOUR_CHARS) : start]
+        if _CARDINAL_HEAD_RE.search(head) is not None:
+            continue
+        normalisation = normalise_number(str(CARDINAL_WORDS[raw.lower()]), locale)
+        if not normalisation.ok:  # pragma: no cover - table holds plain integers
+            continue
+        out.append(
+            _Candidate(start, end, FactKind.NUMBER, normalisation.with_attrs(numeral="word"))
+        )
+    return out
+
+
+def _cardinal_neighbour_blocks(text: str, start: int, end: int) -> bool:
+    """Whether the words either side of a cardinal make it unreadable alone.
+
+    Two cardinals in a row, or a cardinal joined to one by "and"/"y", is a
+    compound this extractor does not build ("twenty three", "treinta y dos").
+    A scale word or a fraction/ordinal tail changes the value outright
+    ("three hundred", "two thirds").  Both cases are dropped.
+
+    Scale words and tails are only checked *after* the cardinal, which is the
+    only side they attach on.  An ordinal *before* it is ordinary English:
+    "the first three years" is the count three.
+    """
+    before = _ALPHA_TOKEN_RE.findall(text[max(0, start - _CARDINAL_NEIGHBOUR_CHARS) : start])
+    after = _ALPHA_TOKEN_RE.findall(text[end : end + _CARDINAL_NEIGHBOUR_CHARS])
+    previous = [token.lower() for token in before[-2:]]
+    following = [token.lower() for token in after[:2]]
+    if previous and previous[-1] in CARDINAL_WORDS:
+        return True
+    if following and (
+        following[0] in CARDINAL_WORDS or following[0] in CARDINAL_BLOCKING_NEIGHBOURS
+    ):
+        return True
+    if (
+        len(previous) == 2
+        and previous[-1] in _CARDINAL_COORDINATORS
+        and previous[0] in CARDINAL_WORDS
+    ):
+        return True
+    return (
+        len(following) == 2
+        and following[0] in _CARDINAL_COORDINATORS
+        and following[1] in CARDINAL_WORDS
+    )
+
+
+# ---------------------------------------------------------------------------
 # DATE
 # ---------------------------------------------------------------------------
 
@@ -406,6 +521,26 @@ _DEADLINE_PATTERNS: Final[tuple[tuple[str, re.Pattern[str]], ...]] = (
         re.compile(
             r"\b(?:by|before|prior\s+to|on\s+or\s+before|not\s+after|at\s+the\s+latest\s+on)"
             rf"\s+(?:the\s+)?(?P<date>{DATE_PATTERN})",
+            re.IGNORECASE,
+        ),
+    ),
+    # A source states the end of a period rather than an instruction to act by
+    # it: "the period ends on 2026-08-22". That is the same measurement as the
+    # answer's "by 2026-08-22" and it has to be extracted as one, or the two
+    # end up in different kinds and the wrong evidence span gets reported.
+    (
+        "terminal_date",
+        re.compile(
+            r"\b(?:ends?|ending|expires?|expiring|lapses?|(?:is|are)\s+due)"
+            rf"\s+(?:on\s+)?(?:the\s+)?(?P<date>{DATE_PATTERN})",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "es_terminal_date",
+        re.compile(
+            r"\b(?:finaliza|finalizar[áa]|termina|terminar[áa]|vence|vencer[áa]|"
+            rf"expira|expirar[áa])\s+(?:el\s+)?(?P<date>{DATE_PATTERN})",
             re.IGNORECASE,
         ),
     ),

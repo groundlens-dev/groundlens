@@ -93,13 +93,26 @@ class _Candidate:
     fact: Fact
     score: Decimal
     equal: bool
+    crossed: bool = False
 
     @property
-    def sort_key(self) -> tuple[int, str, str, int, int]:
-        # Higher score first (negated via the sign of the scaled integer),
-        # then a stable lexical tie-break.  No float, no set ordering.
+    def sort_key(self) -> tuple[int, int, str, str, int, int]:
+        # Higher score first (negated via the sign of the scaled integer), then
+        # a same-kind witness ahead of a crossed-kind one, then a stable lexical
+        # tie-break.  No float, no set ordering.
+        #
+        # The crossing exists so a deadline can be decided at all; it is not a
+        # better witness than the evidence's own deadline.  A source that says
+        # "the period ends on 2026-08-22" and also mentions the agreement date
+        # must be quoted on the end date, not on the agreement date.
         scaled = int((self.score * 1_000_000).to_integral_value())
-        return (-scaled, self.evidence_id, self.fact.normalised, *self.fact.span)
+        return (
+            -scaled,
+            int(self.crossed),
+            self.evidence_id,
+            self.fact.normalised,
+            *self.fact.span,
+        )
 
 
 def match_facts(
@@ -212,13 +225,15 @@ def _match_one(
     differing: list[_Candidate] = []
     for evidence_id, evidence_facts in index:
         for candidate in evidence_facts:
-            if candidate.kind is not fact.kind:
+            if not _comparable_kinds(fact.kind, candidate.kind):
                 continue
             verdict = _compare(fact, candidate, cfg)
             if verdict is None:
                 continue
             is_equal, score = verdict
-            entry = _Candidate(evidence_id, candidate, score, is_equal)
+            entry = _Candidate(
+                evidence_id, candidate, score, is_equal, candidate.kind is not fact.kind
+            )
             (equal if is_equal else differing).append(entry)
 
     if equal:
@@ -244,8 +259,7 @@ def _match_one(
         return Match(fact=fact, state=MatchState.UNCHECKABLE)
 
     if differing:
-        threshold = _threshold(fact, cfg)
-        viable = [c for c in differing if c.score >= threshold]
+        viable = [c for c in differing if c.score >= _threshold(fact, c.fact, cfg)]
         if viable:
             best = min(viable, key=lambda c: c.sort_key)
             candidate_ambiguities = frozenset(
@@ -268,13 +282,77 @@ def _match_one(
                 evidence_value=_evidence_value(best.fact),
             )
 
+    if fact.kind is FactKind.DEADLINE and _unresolved_deadline(fact):
+        # The answer states a relative deadline that never resolved to a day —
+        # no reference date was supplied, or the count is in business days and
+        # this library has no holiday calendar.  "No source says this" would be
+        # a claim about the evidence; the truth is that we could not check.
+        return Match(fact=fact, state=MatchState.UNCHECKABLE)
     return Match(fact=fact, state=MatchState.UNMATCHED)
 
 
-def _threshold(fact: Fact, cfg: MatchConfig) -> Decimal:
+def _comparable_kinds(fact_kind: FactKind, candidate_kind: FactKind) -> bool:
+    """Whether a fact of one kind may be decided against a candidate of another.
+
+    Same kind against same kind, plus one deliberate crossing: a DEADLINE may
+    be decided against a DATE.  A source almost never repeats the answer's
+    deadline wording — it writes "the period ends on 2026-08-22" where the
+    answer writes "by 2026-08-31" — so a same-kind-only matcher leaves every
+    such deadline UNMATCHED and ``fact.contradicted.deadline`` unreachable.
+    What the two share is a resolved due date, and that is what is compared.
+    """
+    if fact_kind is candidate_kind:
+        return True
+    return fact_kind is FactKind.DEADLINE and candidate_kind is FactKind.DATE
+
+
+def _resolved_due_date(fact: Fact) -> str:
+    """The full ISO day this fact resolves to, or ``""`` when it does not.
+
+    A DEADLINE carries it in ``attrs["due_date"]``, written by the extractor
+    when it resolved the expression against the reference date or read an
+    explicit date.  A DATE *is* one.  Partial values ("--08-31", "2026-08")
+    return ``""``: a day that is only partly known cannot contradict a day that
+    is fully known, and comparing the two as strings would say it could.
+    """
+    value = fact.normalised if fact.kind is FactKind.DATE else dict(fact.attrs).get("due_date", "")
+    return value if len(value) == 10 and value[4] == "-" and value[7] == "-" else ""
+
+
+def _unresolved_deadline(fact: Fact) -> bool:
+    """A relative deadline the extractor could not turn into a day.
+
+    An event-anchored deadline ("within 30 days of receipt") is excluded: it is
+    unresolved as a date but perfectly comparable as a duration, and that
+    comparison is the one the matcher makes for it.
+    """
+    attrs = dict(fact.attrs)
+    if attrs.get("anchor") == "event":
+        return False
+    return bool(attrs.get("duration")) and not _resolved_due_date(fact)
+
+
+def _threshold(fact: Fact, candidate: Fact, cfg: MatchConfig) -> Decimal:
+    """Context score a differing candidate must reach to count as a contradiction.
+
+    The gate exists because documents are full of same-kind values and a bare
+    clash between two of them says nothing.  Two resolved due dates are the one
+    case where that is not true: a due date is only produced from an explicit
+    deadline frame ("by X", "no later than X", "within N days of Y"), and that
+    frame is itself the context.  Requiring the surrounding words to overlap as
+    well would gate out precisely the paraphrase this crossing exists for —
+    "tell us by 2026-08-31" against "the period ends on 2026-08-22" share a
+    claim and not one content word.
+    """
     if fact.kind is FactKind.OBLIGATION:
         return as_decimal(cfg.obligation_similarity_min, default="0.5")
     if not cfg.contradiction_requires_context:
+        return Decimal(0)
+    if (
+        fact.kind is FactKind.DEADLINE
+        and _resolved_due_date(fact)
+        and _resolved_due_date(candidate)
+    ):
         return Decimal(0)
     return as_decimal(cfg.context_similarity_min, default="0.34")
 
@@ -410,6 +488,16 @@ def _compare_duration(fact: Fact, candidate: Fact, score: Decimal) -> tuple[bool
 
 
 def _compare_deadline(fact: Fact, candidate: Fact, score: Decimal) -> tuple[bool, Decimal] | None:
+    if candidate.kind is FactKind.DATE:
+        # Cross-kind: only the resolved day is comparable, never the surface
+        # text.  When the answer's deadline did not resolve there is nothing to
+        # compare and the pair is refused rather than guessed at — an
+        # unresolved deadline is never reported as contradicting a date.
+        left_due, right_due = _resolved_due_date(fact), _resolved_due_date(candidate)
+        if not left_due or not right_due:
+            return None
+        return (left_due == right_due, score)
+
     left = dict(fact.attrs)
     right = dict(candidate.attrs)
     left_duration, right_duration = left.get("duration", ""), right.get("duration", "")
@@ -420,7 +508,7 @@ def _compare_deadline(fact: Fact, candidate: Fact, score: Decimal) -> tuple[bool
         if _basis_conflict(fact, candidate):
             return (False, score)
         return (left_duration == right_duration, score)
-    left_due, right_due = left.get("due_date", ""), right.get("due_date", "")
+    left_due, right_due = _resolved_due_date(fact), _resolved_due_date(candidate)
     if left_due and right_due:
         return (left_due == right_due, score)
     if fact.normalised == candidate.normalised:

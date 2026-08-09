@@ -110,6 +110,29 @@ DEONTIC_CUES: Final[tuple[tuple[str, str, str, bool], ...]] = (
     (r"\b(?:is|are)\s+discouraged\s+from\b", "should", "discouraged", False),
     (r"\bno\s+(?:deber[íi]a|deber[íi]an)\b", "should", "es_no_deberia", False),
     (r"\bno\s+se\s+recomienda\b", "should", "es_no_se_recomienda", False),
+    # -- exemption, source-framed ------------------------------------------
+    #
+    # These sit *above* their positive counterparts on purpose.  "does not
+    # require that" contains "require that": if the positive form were reached
+    # first the extractor would report a duty where the source states an
+    # exemption.  Leftmost-longest already prefers the negation (it starts
+    # earlier), and this ordering makes the intent explicit rather than
+    # incidental.
+    (
+        r"\b(?:does|do|did)\s+not\s+require\s+that\b",
+        "need_not",
+        "does_not_require_that",
+        False,
+    ),
+    (
+        r"\b(?:does|do|did)\s+not\s+(?:oblige|obligate|mandate)\b",
+        "need_not",
+        "does_not_oblige",
+        False,
+    ),
+    (r"\bno\s+(?:exige|exigen)\s+que\b", "need_not", "es_no_exige_que", False),
+    (r"\bno\s+(?:requiere|requieren)\s+que\b", "need_not", "es_no_requiere_que", False),
+    (r"\bno\s+(?:obliga|obligan)\s+a\b", "need_not", "es_no_obliga_a", False),
     # -- obligation --------------------------------------------------------
     (r"\b(?:is|are)\s+required\s+to\b", "must", "required_to", False),
     (r"\b(?:is|are)\s+obliged\s+to\b", "must", "obliged_to", False),
@@ -117,11 +140,36 @@ DEONTIC_CUES: Final[tuple[tuple[str, str, str, bool], ...]] = (
     (r"\b(?:is|are)\s+under\s+an?\s+obligation\s+to\b", "must", "under_obligation", False),
     (r"\bha(?:s|ve)\s+to\b", "must", "has_to", False),
     (r"\bit\s+is\s+mandatory\s+(?:to|that|for)\b", "must", "mandatory", False),
+    # Source-framed obligations: the duty is attributed to an instrument
+    # ("the policy requires that you notify us") rather than carried by a
+    # modal.  Evidence is written this way far more often than answers are,
+    # and without these the answer's faithful restatement ("you have to
+    # notify us") has nothing in the evidence to match against and reads
+    # UNMATCHED — a false alarm on a correct answer.
+    #
+    # Only the complementiser frame ("requires that") and verbs with no
+    # non-deontic reading ("oblige", "mandate") are taken bare.  "requires"
+    # plus a to-infinitive is restricted to a determiner-headed object,
+    # because "the process requires two days to complete" is a measurement,
+    # not a duty, and it has exactly the shape of "requires X to Y".
+    (r"\b(?:requires|require|required)\s+that\b", "must", "requires_that", False),
+    (r"\b(?:mandates|mandate|mandated)\s+that\b", "must", "mandates_that", False),
+    (
+        r"\brequires?\s+(?:the|a|an|all|any|each|every|both|its|their|his|her|our|your|"
+        r"you|us|them|him|it)\b[^.;\n]{0,40}?\sto\b",
+        "must",
+        "requires_x_to",
+        False,
+    ),
+    (r"\b(?:obliges|oblige|obliged)\s+[^.;\n]{1,40}?\sto\b", "must", "obliges_x_to", False),
     (r"\b(?:must|shall)\b", "must", "modal", False),
     (r"\best[áa]n?\s+obligad[oa]s?\s+a\b", "must", "es_obligado", False),
     (r"\bes\s+obligatorio\b", "must", "es_obligatorio", False),
     (r"\btiene\s+que\b", "must", "es_tiene_que", False),
     (r"\btienen\s+que\b", "must", "es_tienen_que", False),
+    (r"\b(?:exige|exigen)\s+que\b", "must", "es_exige_que", False),
+    (r"\b(?:requiere|requieren)\s+que\b", "must", "es_requiere_que", False),
+    (r"\b(?:obliga|obligan)\s+a\b", "must", "es_obliga_a", False),
     (r"\bha\s+de\b", "must", "es_ha_de", False),
     (r"\bhan\s+de\b", "must", "es_han_de", False),
     (
@@ -378,6 +426,163 @@ POSTFIX_DAY_QUALIFIERS: Final[tuple[str, ...]] = (
 Kept separate from the English ones on purpose: allowing any qualifier to
 trail would make "10 days working on the project" a business-day duration.
 """
+
+# ---------------------------------------------------------------------------
+# Cardinals written as words
+# ---------------------------------------------------------------------------
+#
+# WHERE THE LINE IS DRAWN, AND WHY.
+#
+# Covered: English and Spanish zero..twenty plus the round tens, which is the
+# range a compliance answer actually spells out ("three years", "no more than
+# twenty days").  Compounds ("twenty-three", "treinta y dos") are *not*
+# covered, and the extractor refuses rather than reading the first element:
+# emitting 20 for "twenty-three" is worse than emitting nothing.
+#
+# Deliberately absent, each because the false positive costs more than the
+# missed defect:
+#
+# * English "one".  It is a pronoun ("the one that"), an impersonal subject
+#   ("one must file"), a discourse quantifier ("one of the reasons") and half
+#   of several fixed phrases ("one another", "one or two") far more often than
+#   it is a count.  Telling those apart needs syntax this library does not
+#   have, so "one" is never a NUMBER.
+# * Spanish "un", "una", "uno".  "un"/"una" are the indefinite article and are
+#   segmentally identical to the numeral; "uno" is a pronoun.  Same reasoning.
+# * Spanish "once" (11).  It is a homograph of the English adverb "once", and
+#   both lexicons are always live because language is not detected.  Reading
+#   "once a year" as "11 a year" is the exact false positive this table must
+#   not produce.
+# * Approximate quantifiers ("a couple", "a few", "several", "unos", "una
+#   docena").  They name a vague quantity; a checker that pins one to an
+#   integer invents precision the source did not state.
+# * Ordinals ("third", "tercero") and multiplicatives ("twice", "doble").
+#   They are not counts and are simply not in the table.
+CARDINAL_WORDS: Final[dict[str, int]] = {
+    # English
+    "zero": 0,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "seventy": 70,
+    "eighty": 80,
+    "ninety": 90,
+    # Spanish
+    "cero": 0,
+    "dos": 2,
+    "tres": 3,
+    "cuatro": 4,
+    "cinco": 5,
+    "seis": 6,
+    "siete": 7,
+    "ocho": 8,
+    "nueve": 9,
+    "diez": 10,
+    "doce": 12,
+    "trece": 13,
+    "catorce": 14,
+    "quince": 15,
+    "dieciséis": 16,
+    "dieciseis": 16,
+    "diecisiete": 17,
+    "dieciocho": 18,
+    "diecinueve": 19,
+    "veinte": 20,
+    "treinta": 30,
+    "cuarenta": 40,
+    "cincuenta": 50,
+    "sesenta": 60,
+    "setenta": 70,
+    "ochenta": 80,
+    "noventa": 90,
+}
+"""Cardinal words that normalise to the same canonical string as their digits.
+
+``three`` and ``3`` both become ``"3"``, so an answer that spells a count out
+compares against evidence that does not, and the other way round."""
+
+CARDINAL_BLOCKING_NEIGHBOURS: Final[frozenset[str]] = frozenset(
+    {
+        # Scale words.  A cardinal immediately before one of these is naming a
+        # different number: "three hundred" is 300, not 3.
+        "hundred",
+        "hundreds",
+        "thousand",
+        "thousands",
+        "million",
+        "millions",
+        "billion",
+        "billions",
+        "trillion",
+        "trillions",
+        "cien",
+        "ciento",
+        "cientos",
+        "mil",
+        "miles",
+        "millon",
+        "millón",
+        "millones",
+        # Fraction and ordinal tails.  "two thirds" is a proportion and
+        # "twenty first" is an ordinal; neither is the count 2 or 20.
+        "half",
+        "halves",
+        "third",
+        "thirds",
+        "quarter",
+        "quarters",
+        "fifth",
+        "fifths",
+        "sixth",
+        "sixths",
+        "seventh",
+        "sevenths",
+        "eighth",
+        "eighths",
+        "ninth",
+        "ninths",
+        "tenth",
+        "tenths",
+        "twelfth",
+        "twelfths",
+        "first",
+        "medio",
+        "medios",
+        "tercio",
+        "tercios",
+        "cuarto",
+        "cuartos",
+        "quinto",
+        "quintos",
+        "primer",
+        "primero",
+        "primera",
+    }
+)
+"""Words that, adjacent to a cardinal, change what the cardinal denotes.
+
+A cardinal touching one of these is dropped rather than read, because reading
+it produces a confidently wrong value rather than no value."""
 
 # ---------------------------------------------------------------------------
 # Currency
