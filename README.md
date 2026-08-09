@@ -153,12 +153,7 @@ Every call returns a record alongside the decision. It carries hashes of the ans
 from groundlens.audit import open_log
 
 with open_log("audit.db") as log:
-    log.record(
-        identifier="case-4471",
-        method="check",
-        flagged=result.decision.value == "escalate",
-        metadata={"ruleset": result.audit.ruleset, "counts": result.audit.counts},
-    )
+    log.record_v2(identifier="case-4471", record=result.audit)
     print(log.verify_chain().valid)
 ```
 
