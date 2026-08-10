@@ -1,9 +1,11 @@
 name: numerals-stdlib
 
 # The numeral path is the whole product: a number is equal or it is wrong.
-# It must depend on nothing but the standard library. This job installs pytest
-# and NOTHING ELSE, so "stdlib only" is a build that fails rather than a
-# sentence in a docstring that nobody re-checks.
+# It must depend on nothing but the standard library, and the answer must not
+# change with the shell that launched the process.
+#
+# Both are asserted here as builds that fail, not as sentences in a docstring
+# that nobody rechecks.
 
 on:
   push:
@@ -15,13 +17,13 @@ permissions:
   contents: read
 
 jobs:
-  stdlib-only:
+  hostile-locales:
     strategy:
       fail-fast: false
       matrix:
         # tr_TR is the casefolding trap: Turkish dotless i breaks naive
-        # lower()-based stopword matching. de_DE and en_US disagree about what
-        # a comma means in a number, which is the whole ambiguity problem.
+        # lower()-based stopword matching. de_DE and en_US disagree about what a
+        # comma in a number means, which is the entire ambiguity problem.
         locale: ["C", "tr_TR.UTF-8", "de_DE.UTF-8", "en_US.UTF-8"]
     runs-on: ubuntu-latest
     env:
@@ -34,21 +36,46 @@ jobs:
         with:
           python-version: "3.12"
       - name: generate locales
-        run: |
-          sudo locale-gen tr_TR.UTF-8 de_DE.UTF-8 en_US.UTF-8 || true
-          sudo update-locale || true
-      - name: install pytest and nothing else
-        run: |
-          pip install --no-deps pytest pluggy iniconfig packaging
-          pip install --no-deps -e .
-      - run: pytest tests/test_numerals.py tests/test_words.py -q
-      - name: the answer must not depend on the shell that launched us
+        run: sudo locale-gen tr_TR.UTF-8 de_DE.UTF-8 en_US.UTF-8 && sudo update-locale
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/test_numerals.py tests/test_words.py tests/test_determinism.py
+      - name: the answer must come from the argument, not the environment
         run: |
           python - <<'PY'
           from decimal import Decimal
           from groundlens._numerals import find_numerals, locale
-          # Under LC_ALL=de_DE a locale-aware parser would read this as 1234.
           assert find_numerals("1,234", locale("en"))[0].readings == (Decimal("1234"),)
           assert find_numerals("1,234", locale("es"))[0].readings == (Decimal("1.234"),)
-          print("ok: locale comes from the argument, not the environment")
+          print("ok: locale comes from the argument")
+          PY
+
+  stdlib-only:
+    # Not "install pytest and nothing else" -- pytest has its own dependencies
+    # and starving it just breaks pytest. Instead: import the numeral path in a
+    # clean interpreter and assert nothing outside the standard library was
+    # loaded to do it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: no third-party import reachable from the deterministic path
+        run: |
+          python -S - <<'PY'
+          import sys
+          before = set(sys.modules)
+          import groundlens
+          from groundlens import _align, _hash, _numerals, _text, _types, _words  # noqa: F401
+          from groundlens import calibrate, score  # noqa: F401
+
+          stdlib = set(getattr(sys, "stdlib_module_names", ()))
+          leaked = sorted(
+              name for name in set(sys.modules) - before
+              if not name.startswith(("groundlens", "_")) and "." not in name
+              and name not in stdlib
+          )
+          assert not leaked, f"deterministic path pulled third-party modules: {leaked}"
+          print("ok: stdlib only —", groundlens.__version__)
           PY

@@ -34,6 +34,10 @@ too very just only there here what while during per via upon within without
 )
 
 _WORD = re.compile(r"[^\W\d_](?:[\w'’\-]*[^\W_])?|[^\W\d_]", re.UNICODE)
+#: Above this share of CJK/Thai codepoints, whitespace segmentation is not a
+#: defensible way to read the text and we say so instead of scoring it anyway.
+UNSEGMENTED_LIMIT = 0.30
+
 _UNSEGMENTED = re.compile(r"[　-鿿฀-๿가-힯]")
 
 
@@ -66,8 +70,8 @@ def segment(text: str, profile: LocaleProfile) -> list[Unit]:
         start, end = numeral.span
         units.append(
             Unit(
-                text=text[start:end].strip(),
-                span=(start + (len(text[start:end]) - len(text[start:end].lstrip())), end),
+                text=text[start:end],
+                span=(start, end),
                 kind="numeral",
                 numeral=numeral,
                 notes=numeral.notes,
@@ -100,7 +104,7 @@ def segmentation_warnings(text: str) -> tuple[str, ...]:
     if not text:
         return ()
     unsegmented = len(_UNSEGMENTED.findall(text))
-    if unsegmented / len(text) > 0.30:
+    if unsegmented / len(text) > UNSEGMENTED_LIMIT:
         return (
             "answer is largely in an unsegmented script (CJK/Thai); whitespace "
             "segmentation does not apply and this score should not be relied on",

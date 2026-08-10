@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: groundlens
+message: >-
+  If you use this software, please cite it. Note that performance figures
+  published by this project before v3.0.0 have been withdrawn; see
+  RETRACTIONS.md before citing any number from an earlier version.
+type: software
+authors:
+  - family-names: Marin
+    given-names: Javier
+repository-code: https://github.com/groundlens-dev/groundlens
+url: https://groundlens.dev
+abstract: >-
+  groundlens reports which words in a generated answer its retrieved sources
+  least support, pairing each with the closest matching span in the source.
+  Numerals are verified by exact value comparison after format normalisation
+  rather than by embedding similarity; other words are scored by maximum cosine
+  similarity against the source. The answer-level score is the mean of the k
+  weakest anchors rather than the mean of all of them. The library reports no
+  verdict and ships no threshold.
+license: Apache-2.0
+version: 3.0.0
+date-released: '2026-08-10'
