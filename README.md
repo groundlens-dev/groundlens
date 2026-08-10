@@ -92,9 +92,7 @@ groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 
 ## How it works
 
-<div align="center">
-<img src="docs/assets/Groundlens1.png" alt="Forecasting 60% of battery life from the first 40%: the physics model keeps falling, the Gaussian process reverts to its mean" width="100%">
-</div>
+There are two kinds of content in an answer, and they need two different tests.
 
 **Words are anchored by meaning.** A word's support is the highest cosine
 similarity it reaches against any word of the sources, using a frozen
@@ -136,9 +134,13 @@ We measured nine detectors across five public benchmarks — two published encod
 models, an NLI cross-encoder, an LLM judge, and this one — at the operating point
 production actually runs at: **false-positive rate at 95% hallucination recall.**
 
-<div align="center">
-<img src="docs/assets/Groundlens2.png" alt="Forecasting 60% of battery life from the first 40%: the physics model keeps falling, the Gaussian process reverts to its mean" width="100%">
-</div>
+| | best AUROC | FPR @ 95% recall |
+|---|---:|---:|
+| Trained span detector | 0.817 | 0.99 |
+| Small trained fact-checker | 0.865 | 0.78 |
+| LLM judge | 0.737 | 1.00 |
+| NLI cross-encoder | 0.681 | 0.68 |
+| **groundlens** | **0.857** | **0.70** |
 
 Forty-five cells across the full grid. The best is **0.65**. A random detector
 sits at 0.95. One method ranks best of all by AUROC and flags **99% of correct
