@@ -37,6 +37,33 @@ def _resolve_revision(model: str, revision: str | None) -> str:
     return str(sha) if sha else "unresolved"
 
 
+def _to_host_array(vectors: Any) -> Any:
+    """Bring whatever the model returned onto the host as a numpy array.
+
+    ``SentenceTransformer.encode`` honours ``convert_to_numpy`` for sentence
+    embeddings but not always for ``output_value="token_embeddings"`` -- several
+    versions return a live torch tensor regardless. On CPU that is harmless
+    because numpy can read it; on MPS or CUDA the memory is not on the host and
+    ``np.asarray`` raises. Moving it explicitly is the only thing that works
+    across accelerators, and it costs nothing when the input is already an array.
+
+    Duck-typed on purpose: torch is not imported here, and any array-like that
+    can reach the host is accepted.
+    """
+    import numpy as np
+
+    detach = getattr(vectors, "detach", None)
+    if callable(detach):
+        vectors = detach()
+    to_cpu = getattr(vectors, "cpu", None)
+    if callable(to_cpu):
+        vectors = to_cpu()
+    to_numpy = getattr(vectors, "numpy", None)
+    if callable(to_numpy):
+        vectors = to_numpy()
+    return np.asarray(vectors, dtype=np.float32)
+
+
 class SentenceTransformerEncoder:
     """A frozen off-the-shelf sentence encoder, used one window at a time.
 
@@ -91,31 +118,29 @@ class SentenceTransformerEncoder:
         encoded = self._tokenizer(text, add_special_tokens=True, return_offsets_mapping=True)
         offsets = encoded["offset_mapping"]
         word_ids = encoded.word_ids()
-        vectors = self._model.encode(
-            text,
-            output_value="token_embeddings",
-            convert_to_numpy=True,
-            show_progress_bar=False,
+        # Moved to the host BEFORE any indexing: on MPS and CUDA the returned
+        # tensor cannot be read by numpy where it lives.
+        vectors = _to_host_array(
+            self._model.encode(text, output_value="token_embeddings", show_progress_bar=False)
         )
 
+        keep: list[int] = []
         keep_spans: list[Span] = []
         keep_words: list[int | None] = []
-        rows: list[Any] = []
         for index, (a, b) in enumerate(offsets):
             if index >= len(vectors) or int(b) <= int(a):
                 # Special tokens carry no characters and must not become anchors.
                 continue
+            keep.append(index)
             keep_spans.append((int(a), int(b)))
             keep_words.append(word_ids[index] if word_ids else None)
-            rows.append(vectors[index])
 
         import numpy as np
 
-        if rows:
-            matrix = np.asarray(rows, dtype=np.float32)
+        if keep:
+            matrix = vectors[keep]
             norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-            matrix = matrix / np.maximum(norms, 1e-12)
-            values = matrix.tolist()
+            values = (matrix / np.maximum(norms, 1e-12)).tolist()
         else:
             values = []
 

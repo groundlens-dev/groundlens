@@ -63,7 +63,7 @@ jobs:
       - run: pip install -e .
       - name: no third-party import reachable from the deterministic path
         run: |
-          python -S - <<'PY'
+          python - <<'PY'
           import sys
           before = set(sys.modules)
           import groundlens
