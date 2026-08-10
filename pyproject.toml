@@ -28,9 +28,9 @@ dependencies = []
 
 [project.optional-dependencies]
 # The reference encoder. Only needed to actually read text.
-encoder = ["sentence-transformers>=3.0", "numpy>=1.24"]
-mcp = ["mcp>=1.0"]
-dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11"]
+encoder = ["sentence-transformers>=5.7.0", "numpy>=2.2.6"]
+mcp = ["mcp>=2.0.0"]
+dev = ["pytest>=9.1.1", "ruff>=0.16.2", "mypy>=2.3.0"]
 
 [project.scripts]
 groundlens = "groundlens.cli:main"
