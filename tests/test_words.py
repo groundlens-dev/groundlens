@@ -68,5 +68,7 @@ def test_content_word_count_is_stable_under_normalisation() -> None:
 
 def test_unsegmented_script_is_warned_about_not_silently_scored() -> None:
     assert segmentation_warnings("the total is 10,000 dollars") == ()
-    warnings = segmentation_warnings("請求書の合計金額は10,000ドルです。支払期限は納品後30日以内です。")
+    warnings = segmentation_warnings(
+        "請求書の合計金額は10,000ドルです。支払期限は納品後30日以内です。"
+    )
     assert warnings and "unsegmented" in warnings[0]

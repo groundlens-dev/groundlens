@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [main, "v3*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff mypy
+      - run: ruff check src tests scripts
+      - run: ruff format --check src tests scripts
+      - run: pip install -e .
+      - run: mypy src
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+
+  # The core package must install with no dependencies at all. If someone adds
+  # numpy to `dependencies`, this job goes red -- which is the point. `pip
+  # install groundlens` pulling two gigabytes of deep learning stack is how the
+  # last version of this library lost people at the first command they typed.
+  no-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install .
+      - name: assert nothing else was pulled in
+        run: |
+          python - <<'PY'
+          import importlib.metadata as md
+          deps = md.requires("groundlens") or []
+          hard = [d for d in deps if "extra ==" not in d]
+          assert not hard, f"groundlens must have zero runtime dependencies, found: {hard}"
+          print("ok: zero runtime dependencies")
+          PY
+      - name: assert the deterministic path imports without numpy or torch
+        run: |
+          python - <<'PY'
+          import sys
+          import groundlens
+          from groundlens import _numerals, _text, _words  # noqa: F401
+          banned = {"numpy", "torch", "transformers", "sentence_transformers", "scipy"}
+          loaded = banned & set(sys.modules)
+          assert not loaded, f"deterministic path imported: {loaded}"
+          print("ok:", groundlens.__version__)
+          PY

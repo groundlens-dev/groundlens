@@ -1,0 +1,72 @@
+name: determinism
+
+# CI job zero. The structural path -- segmentation, numeral readings, spans,
+# notes -- must be byte-for-byte identical on every OS and every Python we
+# support, and identical to the golden file committed in the repo.
+#
+# This job exists before the scoring code does, on purpose. Determinism is a
+# constraint you design under, not a property you test for afterwards.
+
+on:
+  push:
+    branches: [main, "v3*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dump:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e .
+      - name: dump under a hostile environment
+        # PYTHONHASHSEED=random catches anything leaking set or dict iteration
+        # order into output. LC_ALL/LANG are set to a locale whose number format
+        # and casefolding rules differ from ours: if either one changes a single
+        # byte, the library is reading the environment and that is a bug.
+        env:
+          PYTHONHASHSEED: random
+          LC_ALL: tr_TR.UTF-8
+          LANG: tr_TR.UTF-8
+          TZ: Pacific/Kiritimati
+        run: python scripts/dump_fixture.py > structural-${{ matrix.os }}-${{ matrix.python }}.json
+      - name: diff against the committed golden file
+        run: diff -u tests/golden_structural.json structural-${{ matrix.os }}-${{ matrix.python }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: structural-${{ matrix.os }}-${{ matrix.python }}
+          path: structural-${{ matrix.os }}-${{ matrix.python }}.json
+
+  cross-matrix-diff:
+    needs: dump
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dumps
+      - name: every cell must agree with every other cell
+        run: |
+          shopt -s globstar
+          files=(dumps/**/*.json)
+          echo "comparing ${#files[@]} matrix cells"
+          first="${files[0]}"
+          status=0
+          for f in "${files[@]}"; do
+            if ! diff -q "$first" "$f" > /dev/null; then
+              echo "::error::$f differs from $first"
+              diff -u "$first" "$f" | head -40
+              status=1
+            fi
+          done
+          exit $status

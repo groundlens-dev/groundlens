@@ -26,6 +26,15 @@ from decimal import Context, Decimal, InvalidOperation
 #: Fixed arithmetic context. Not the thread-local one -- see module docstring.
 CTX = Context(prec=34)
 
+#: Three digits is the only tail length compatible with a grouping separator:
+#: "1.234" could be 1234 or 1.234, but "1.23" can only be a decimal.
+GROUP_SIZE = 3
+#: Two digits is the minimum for a numeral to be treated as a fact. A bare
+#: single digit is overwhelmingly a list enumerator or a section number.
+MIN_DIGITS = 2
+#: An ambiguous numeral has exactly two valid readings: grouped and fractional.
+BOTH_READINGS = 2
+
 AMBIGUITY_CODES = frozenset({"grouping_vs_decimal", "separator_repeated", "grouping_malformed"})
 
 _GROUP_SPACE = "    "
@@ -141,7 +150,7 @@ def _readings(body: str, profile: LocaleProfile) -> tuple[tuple[Decimal, ...], t
         return ((value,) if value is not None else (), ())
 
     distinct = set(seps)
-    if len(distinct) == 2:
+    if len(distinct) == MIN_DIGITS:  # both separators present
         # Both separators present: the last one is the decimal point.
         dec = body[max(body.rfind("."), body.rfind(","))]
         grp = "." if dec == "," else ","
@@ -154,7 +163,7 @@ def _readings(body: str, profile: LocaleProfile) -> tuple[tuple[Decimal, ...], t
         # 1.234.567 -- repeated separator can only be grouping.
         value = _to_decimal(body.replace(sep, ""))
         return ((value,) if value is not None else (), ("separator_repeated",))
-    if len(tail) != 3:
+    if len(tail) != GROUP_SIZE:
         # 1.5 or 1.23456 -- three digits is the only grouping-compatible length.
         value = _to_decimal(body.replace(sep, "."))
         return ((value,) if value is not None else (), ())
@@ -162,7 +171,7 @@ def _readings(body: str, profile: LocaleProfile) -> tuple[tuple[Decimal, ...], t
     grouped = _to_decimal(body.replace(sep, ""))
     fractional = _to_decimal(body.replace(sep, "."))
     values = tuple(v for v in (grouped, fractional) if v is not None)
-    if len(values) < 2:
+    if len(values) < BOTH_READINGS:
         return (values, ("grouping_malformed",))
     return (values, ("grouping_vs_decimal",))
 
@@ -177,7 +186,7 @@ def find_numerals(text: str, profile: LocaleProfile) -> list[Numeral]:
     found: list[Numeral] = []
     for match in NUMBER_PATTERN.finditer(text):
         body = match.group("body")
-        if len(re.sub(r"\D", "", body)) < 2:
+        if len(re.sub(r"\D", "", body)) < MIN_DIGITS:
             continue
         readings, notes = _readings(body, profile)
         if not readings:
@@ -187,10 +196,18 @@ def find_numerals(text: str, profile: LocaleProfile) -> list[Numeral]:
         )
         if negative:
             readings = tuple(-r for r in readings)
+        # The pattern tolerates a space after the sign and after a currency
+        # symbol, so the raw match can carry whitespace at either end. A span
+        # that includes it would make every reported source slice wrong by a
+        # character, so trim it here rather than at each call site.
+        raw = match.group(0)
+        start, end = match.span()
+        lead = len(raw) - len(raw.lstrip())
+        trail = len(raw) - len(raw.rstrip())
         found.append(
             Numeral(
-                text=match.group(0).strip(),
-                span=match.span(),
+                text=raw.strip(),
+                span=(start + lead, end - trail),
                 readings=readings,
                 notes=notes,
             )

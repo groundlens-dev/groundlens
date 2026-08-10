@@ -64,8 +64,7 @@ class Anchor:
             return f"{self.text}\tsupport {self.support:.2f}\tno anchor found"
         where = self.evidence_id or "source"
         return (
-            f"{self.text}\tsupport {self.support:.2f}"
-            f"\tnearest in {where}: {self.evidence_text!r}"
+            f"{self.text}\tsupport {self.support:.2f}\tnearest in {where}: {self.evidence_text!r}"
         )
 
 
@@ -164,5 +163,14 @@ class Encoder(Protocol):
     def max_tokens(self) -> int:
         """Hard token limit per window, excluding special tokens."""
 
+    def token_spans(self, text: str) -> tuple[Span, ...]:
+        """Character spans of every token in ``text``, without embedding it.
+
+        Windowing needs to know where the token boundaries are before it decides
+        where to cut. Doing that by embedding and counting would be quadratic;
+        doing it by guessing a characters-per-token ratio is how text silently
+        falls off the end of a window and stops being scored at all.
+        """
+
     def encode_window(self, text: str) -> WindowEncoding:
-        """Embed one window. Text is guaranteed to fit within ``max_tokens``."""
+        """Embed one window. The caller guarantees it fits within ``max_tokens``."""

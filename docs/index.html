@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>groundlens — which words your sources don't support</title>
+<meta name="description" content="Shows you which words in an answer your sources don't support, and what each one lost to. Numbers checked by arithmetic, not by meaning. No training, no API call, no threshold.">
+<meta property="og:title" content="groundlens">
+<meta property="og:description" content="Which words in an answer your sources don't support — and what each one lost to.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --ink:#14161a; --muted:#5b6270; --line:#e4e6eb; --bg:#fbfbfc;
+    --code:#f4f5f7; --alarm:#b4232a; --ok:#2c7a4b; --link:#1a4fd6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8eaee; --muted:#9aa2b1; --line:#282c34; --bg:#101216;
+           --code:#181b21; --alarm:#ff7a80; --ok:#5fd18b; --link:#7fa8ff; }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  main{max-width:46rem; margin:0 auto; padding:5rem 1.5rem 6rem}
+  h1{font-size:1.35rem; letter-spacing:-.01em; margin:0 0 .35rem; font-weight:650}
+  h2{font-size:1rem; letter-spacing:.02em; text-transform:uppercase; color:var(--muted);
+     font-weight:600; margin:3.5rem 0 1rem}
+  .lede{font-size:1.5rem; line-height:1.35; letter-spacing:-.02em; margin:0 0 2rem; font-weight:600}
+  p{margin:0 0 1.1rem}
+  .muted{color:var(--muted)}
+  a{color:var(--link)}
+  pre{
+    background:var(--code); border:1px solid var(--line); border-radius:8px;
+    padding:1rem 1.1rem; overflow-x:auto; margin:0 0 1.5rem;
+    font:13.5px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em}
+  p code{background:var(--code); padding:.1em .35em; border-radius:4px}
+  .alarm{color:var(--alarm)} .ok{color:var(--ok)}
+  table{border-collapse:collapse; width:100%; margin:0 0 1.5rem; font-size:.9rem}
+  th,td{text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--line)}
+  th{color:var(--muted); font-weight:600; font-size:.8rem; text-transform:uppercase; letter-spacing:.03em}
+  td.n{font-variant-numeric:tabular-nums; text-align:right}
+  .note{border-left:2px solid var(--line); padding-left:1rem; color:var(--muted); font-size:.94rem}
+  footer{margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
+         color:var(--muted); font-size:.88rem}
+</style>
+</head>
+<body>
+<main>
+
+  <h1>groundlens</h1>
+  <p class="lede">Which words in an answer your sources don&rsquo;t support &mdash; and what each one lost to.</p>
+
+<pre><code>4.75%   support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '3.90%'
+45      support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '30'</code></pre>
+
+  <p>That is the output. Not a score to interpret, not a verdict to trust &mdash;
+  the two or three words a reviewer should look at, each printed next to the
+  closest thing in the source. Thirty seconds instead of five minutes.</p>
+
+<pre><code>pip install "groundlens[encoder]"</code></pre>
+
+<pre><code><b>from</b> groundlens <b>import</b> score, SentenceTransformerEncoder
+
+profile = score(answer, [("policy.pdf#p3", passage)],
+                encoder=SentenceTransformerEncoder())
+<b>print</b>(profile.report())</code></pre>
+
+  <h2>Ten is not a hundred</h2>
+
+  <p>A retrieved document says the total due is <b>10,000 dollars</b>. The answer
+  says <b>1,000 dollars</b>. A human catches that instantly, without a finance degree.</p>
+
+  <p>Embedding similarity does not. Cosine between the correct answer and the
+  wrong one is about 0.99 &mdash; the error dissolves into the vector the way a
+  drop of ink dissolves in a pool. An LLM judge does not either: it reads for
+  plausibility, and &ldquo;the total is 1,000 dollars&rdquo; is a perfectly
+  plausible sentence about an invoice. Sentence encoders organise text by
+  vocabulary, topic and structure. Never by truth.</p>
+
+  <p>So groundlens uses two tests for two kinds of content.
+  <b>Words are anchored by meaning</b> &mdash; the best cosine similarity a word
+  reaches against any word of the sources.
+  <b>Numbers are anchored by arithmetic</b> &mdash; parsed to a value with
+  formatting normalised, so <code>10,000</code> and <code>10000</code> and
+  <code>$10,000</code> and <code>10.000</code> are one number, then checked for
+  presence. Support is exactly <span class="ok">1.0</span> or exactly
+  <span class="alarm">0.0</span>. Similarity is not allowed to vote.</p>
+
+  <p>And the score is the <b>floor, not the average</b>. Every token-similarity
+  metric aggregates by the mean, and the mean is where single-token errors go to
+  die. On the invoice above the mean support of the wrong answer is 0.79, which
+  looks fine. The weakest anchor is 0.00, which is an alarm.</p>
+
+  <h2>There is no threshold</h2>
+
+  <p>We measured nine detectors across five public benchmarks &mdash; two
+  published encoder models, an NLI cross-encoder, an LLM judge, and this metric
+  &mdash; at the operating point production actually runs at: false-positive
+  rate at 95&nbsp;% hallucination recall.</p>
+
+  <table>
+    <thead><tr><th>Method</th><th class="n">Best AUROC</th><th class="n">FPR @ 95% recall</th></tr></thead>
+    <tbody>
+      <tr><td>Trained span detector</td><td class="n">0.817</td><td class="n">0.99</td></tr>
+      <tr><td>Small trained fact-checker</td><td class="n">0.865</td><td class="n">0.78</td></tr>
+      <tr><td>LLM judge</td><td class="n">0.737</td><td class="n">1.00</td></tr>
+      <tr><td>NLI cross-encoder</td><td class="n">0.681</td><td class="n">0.68</td></tr>
+      <tr><td>groundlens</td><td class="n">0.857</td><td class="n">0.70</td></tr>
+    </tbody>
+  </table>
+
+  <p>Forty-five cells across the full grid. The best is <b>0.65</b>. A random
+  detector scores 0.95. One method ranks best of all by AUROC and flags 99&nbsp;%
+  of correct answers at the operating point. Nobody is in the usable corner,
+  <b>including us</b>.</p>
+
+  <p>So the library ships no default cut and the result carries no
+  <code>decision</code> field. Fit a threshold on your own labelled traffic with
+  <code>calibrate()</code>, which hands back the measured false-positive rate
+  next to it and refuses to run on fewer than 200 examples.</p>
+
+  <h2>What reproduces</h2>
+
+  <p>The numeral channel is exact: Decimal comparison, fixed arithmetic context,
+  locale from an argument and never from the environment. Byte-for-byte identical
+  everywhere, proven in CI across ten OS&nbsp;&times;&nbsp;Python combinations
+  under a randomised hash seed and a Turkish locale.</p>
+
+  <p>The lexical channel is a float32 cosine from a pinned encoder <i>revision</i>
+  &mdash; not a model name, because a silent re-upload would change every number
+  you ever published. Reproducible to 1e-6 across platforms, with stable
+  ordering. Not bit-identical between x86 and Apple Silicon, and we don&rsquo;t
+  claim it is.</p>
+
+  <h2>Scope</h2>
+
+  <p>It verifies stated values against a retrieved source. Like a human reviewer,
+  it can only check the document in front of it. It cannot verify computed values
+  &mdash; &ldquo;revenue tripled&rdquo; against a source saying &ldquo;5M to
+  15M&rdquo;. It cannot check reasoning. It inherits your retrieval. No training,
+  no labels, no API call, no network, and zero runtime dependencies.</p>
+
+  <p class="note">v3 is a rewrite. Performance figures published before it could
+  not be regenerated from committed code and have been withdrawn.
+  <a href="https://github.com/groundlens-dev/groundlens/blob/main/RETRACTIONS.md">RETRACTIONS.md</a>
+  says exactly what was wrong. Read it before citing anything from this project.</p>
+
+  <footer>
+    <a href="https://github.com/groundlens-dev/groundlens">GitHub</a> &nbsp;&middot;&nbsp;
+    <a href="https://pypi.org/project/groundlens/">PyPI</a> &nbsp;&middot;&nbsp;
+    <a href="https://github.com/groundlens-dev/groundlens/blob/main/RETRACTIONS.md">Retractions</a>
+    &nbsp;&middot;&nbsp; Apache-2.0
+  </footer>
+
+</main>
+</body>
+</html>

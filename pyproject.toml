@@ -18,6 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
 ]
 
@@ -49,15 +50,35 @@ target-version = "py310"
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF", "ANN", "PL"]
 # RUF001/002/003: this library exists to handle U+00A0, U+202F, U+2212 and friends
 # as first-class data. Flagging them as "ambiguous" is exactly backwards here.
-ignore = ["ANN401", "PLR0913", "RUF001", "RUF002", "RUF003", "PLR2004", "SIM905", "PLR0911"]
+ignore = ["ANN401", "PLR0913", "RUF001", "RUF002", "RUF003", "SIM905", "PLR0911"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN001", "PLC0415", "E501", "S101"]
+"tests/*" = ["ANN001", "PLC0415", "E501", "S101", "PLR2004", "RUF100", "SIM115", "PTH123"]
+"scripts/*" = ["T201", "PLC0415", "PLR2004"]
+# Lazy imports are load-bearing here, not laziness: `import groundlens` and
+# `groundlens --help` must not pull torch, and the MCP extra must stay optional.
+"src/groundlens/cli.py" = ["PLC0415"]
+"src/groundlens/mcp.py" = ["PLC0415"]
+"src/groundlens/__init__.py" = ["PLC0415"]
+"src/groundlens/_align.py" = ["PLC0415"]
+"src/groundlens/_encode.py" = ["PLC0415"]
 
 [tool.mypy]
 python_version = "3.10"
 strict = true
 warn_unreachable = true
 
+# The optional dependencies are, by design, absent from the environment that
+# type-checks the core. Their absence is the point of the [encoder]/[mcp] split.
+[[tool.mypy.overrides]]
+module = ["sentence_transformers.*", "huggingface_hub.*", "numpy.*", "mcp.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["groundlens.mcp"]
+disallow_untyped_decorators = false
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
