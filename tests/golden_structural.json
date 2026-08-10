@@ -1,0 +1,1177 @@
+[
+  {
+    "locale": "und",
+    "text": "According to the invoice, the total amount due is 10,000 dollars.",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          9
+        ],
+        "text": "According"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          10,
+          12
+        ],
+        "text": "to"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          13,
+          16
+        ],
+        "text": "the"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          17,
+          24
+        ],
+        "text": "invoice"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          26,
+          29
+        ],
+        "text": "the"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          30,
+          35
+        ],
+        "text": "total"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          36,
+          42
+        ],
+        "text": "amount"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          43,
+          46
+        ],
+        "text": "due"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          47,
+          49
+        ],
+        "text": "is"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          50,
+          56
+        ],
+        "text": "10,000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          57,
+          64
+        ],
+        "text": "dollars"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "The invoice states a total of 1,000 dollars due within 30 days.",
+    "units": [
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          0,
+          3
+        ],
+        "text": "The"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          4,
+          11
+        ],
+        "text": "invoice"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          12,
+          18
+        ],
+        "text": "states"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          19,
+          20
+        ],
+        "text": "a"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          21,
+          26
+        ],
+        "text": "total"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          27,
+          29
+        ],
+        "text": "of"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "1000",
+          "1"
+        ],
+        "span": [
+          30,
+          35
+        ],
+        "text": "1,000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          36,
+          43
+        ],
+        "text": "dollars"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          44,
+          47
+        ],
+        "text": "due"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          48,
+          54
+        ],
+        "text": "within"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "30"
+        ],
+        "span": [
+          55,
+          57
+        ],
+        "text": "30"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          58,
+          62
+        ],
+        "text": "days"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "10000 and 10,000 and $10,000 and 10 000 and 10 000",
+    "units": [
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "10000"
+        ],
+        "span": [
+          0,
+          5
+        ],
+        "text": "10000"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          6,
+          9
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          10,
+          16
+        ],
+        "text": "10,000"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          17,
+          20
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          21,
+          28
+        ],
+        "text": "$10,000"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          29,
+          32
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "10000"
+        ],
+        "span": [
+          33,
+          39
+        ],
+        "text": "10 000"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          40,
+          43
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "10000"
+        ],
+        "span": [
+          44,
+          50
+        ],
+        "text": "10 000"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "1.234 is ambiguous; 1.234.567 is not; 1.000,50 is one thousand.",
+    "units": [
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "1234",
+          "1.234"
+        ],
+        "span": [
+          0,
+          5
+        ],
+        "text": "1.234"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          6,
+          8
+        ],
+        "text": "is"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          9,
+          18
+        ],
+        "text": "ambiguous"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "separator_repeated"
+        ],
+        "readings": [
+          "1234567"
+        ],
+        "span": [
+          20,
+          29
+        ],
+        "text": "1.234.567"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          30,
+          32
+        ],
+        "text": "is"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          33,
+          36
+        ],
+        "text": "not"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "1000.5"
+        ],
+        "span": [
+          38,
+          46
+        ],
+        "text": "1.000,50"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          47,
+          49
+        ],
+        "text": "is"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          50,
+          53
+        ],
+        "text": "one"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          54,
+          62
+        ],
+        "text": "thousand"
+      }
+    ]
+  },
+  {
+    "locale": "es",
+    "text": "El importe total asciende a 1.250,50 EUR con vencimiento en 30 dias.",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          2
+        ],
+        "text": "El"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          3,
+          10
+        ],
+        "text": "importe"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          11,
+          16
+        ],
+        "text": "total"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          17,
+          25
+        ],
+        "text": "asciende"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          26,
+          27
+        ],
+        "text": "a"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "1250.5"
+        ],
+        "span": [
+          28,
+          36
+        ],
+        "text": "1.250,50"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          37,
+          40
+        ],
+        "text": "EUR"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          41,
+          44
+        ],
+        "text": "con"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          45,
+          56
+        ],
+        "text": "vencimiento"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          57,
+          59
+        ],
+        "text": "en"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "30"
+        ],
+        "span": [
+          60,
+          62
+        ],
+        "text": "30"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          63,
+          67
+        ],
+        "text": "dias"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "text": "Revenue of (1,500) against a forecast of 3.5% and 1'000 units.",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          7
+        ],
+        "text": "Revenue"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          8,
+          10
+        ],
+        "text": "of"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "-1500"
+        ],
+        "span": [
+          11,
+          18
+        ],
+        "text": "(1,500)"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          19,
+          26
+        ],
+        "text": "against"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          27,
+          28
+        ],
+        "text": "a"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          29,
+          37
+        ],
+        "text": "forecast"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          38,
+          40
+        ],
+        "text": "of"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "3.5"
+        ],
+        "span": [
+          41,
+          45
+        ],
+        "text": "3.5%"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          46,
+          49
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "1000"
+        ],
+        "span": [
+          50,
+          55
+        ],
+        "text": "1'000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          56,
+          61
+        ],
+        "text": "units"
+      }
+    ]
+  },
+  {
+    "locale": "de",
+    "text": "Der Betrag betragt 1.000,50 EUR.",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          3
+        ],
+        "text": "Der"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          4,
+          10
+        ],
+        "text": "Betrag"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          11,
+          18
+        ],
+        "text": "betragt"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "1000.5"
+        ],
+        "span": [
+          19,
+          27
+        ],
+        "text": "1.000,50"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          28,
+          31
+        ],
+        "text": "EUR"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "Step 1 then step 2 then step 10 of 12.",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          4
+        ],
+        "text": "Step"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          7,
+          11
+        ],
+        "text": "then"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          12,
+          16
+        ],
+        "text": "step"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          19,
+          23
+        ],
+        "text": "then"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          24,
+          28
+        ],
+        "text": "step"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "10"
+        ],
+        "span": [
+          29,
+          31
+        ],
+        "text": "10"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          32,
+          34
+        ],
+        "text": "of"
+      },
+      {
+        "kind": "numeral",
+        "notes": [],
+        "readings": [
+          "12"
+        ],
+        "span": [
+          35,
+          37
+        ],
+        "text": "12"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "10,000 full-width and 10,000 invisible.",
+    "units": [
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          0,
+          6
+        ],
+        "text": "10,000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          7,
+          17
+        ],
+        "text": "full-width"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          18,
+          21
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          22,
+          28
+        ],
+        "text": "10,000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          29,
+          38
+        ],
+        "text": "invisible"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "non-binding client's offer, not a recommendation",
+    "units": [
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          0,
+          11
+        ],
+        "text": "non-binding"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          12,
+          20
+        ],
+        "text": "client's"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          21,
+          26
+        ],
+        "text": "offer"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          28,
+          31
+        ],
+        "text": "not"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          32,
+          33
+        ],
+        "text": "a"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          34,
+          48
+        ],
+        "text": "recommendation"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "-1,500 and −1,500 and +1,500",
+    "units": [
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "-1500",
+          "-1.5"
+        ],
+        "span": [
+          0,
+          6
+        ],
+        "text": "-1,500"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          7,
+          10
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "-1500",
+          "-1.5"
+        ],
+        "span": [
+          11,
+          17
+        ],
+        "text": "−1,500"
+      },
+      {
+        "kind": "skipped",
+        "notes": [
+          "stopword"
+        ],
+        "readings": null,
+        "span": [
+          18,
+          21
+        ],
+        "text": "and"
+      },
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "1500",
+          "1.5"
+        ],
+        "span": [
+          22,
+          28
+        ],
+        "text": "+1,500"
+      }
+    ]
+  },
+  {
+    "locale": "und",
+    "text": "請求書の合計金額は10,000ドルです。",
+    "units": [
+      {
+        "kind": "numeral",
+        "notes": [
+          "grouping_vs_decimal"
+        ],
+        "readings": [
+          "10000",
+          "10"
+        ],
+        "span": [
+          9,
+          15
+        ],
+        "text": "10,000"
+      },
+      {
+        "kind": "lexical",
+        "notes": [],
+        "readings": null,
+        "span": [
+          15,
+          19
+        ],
+        "text": "ドルです"
+      }
+    ]
+  }
+]

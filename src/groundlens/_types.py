@@ -64,8 +64,7 @@ class Anchor:
             return f"{self.text}\tsupport {self.support:.2f}\tno anchor found"
         where = self.evidence_id or "source"
         return (
-            f"{self.text}\tsupport {self.support:.2f}"
-            f"\tnearest in {where}: {self.evidence_text!r}"
+            f"{self.text}\tsupport {self.support:.2f}\tnearest in {where}: {self.evidence_text!r}"
         )
 
 
