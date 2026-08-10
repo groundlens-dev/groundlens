@@ -1,8 +1,8 @@
 """Windowing invariants.
 
 These tests exist because of a specific bug in the code this library replaces:
-a hard token cap silently dropped words past the limit, and because the score
-is a floor, dropping words could only push it up. Long answers were scored as
+a hard token cap silently dropped words past the limit, and because the floor
+is a floor, dropping words could only push it up. Long answers then read as
 better grounded than they were. Every assertion here is aimed at that.
 """
 
@@ -16,7 +16,7 @@ from conftest import FakeEncoder
 from groundlens._align import STRIDE_RATIO, embed, plan_windows, tokens_overlapping
 from groundlens._numerals import locale
 from groundlens._words import segment
-from groundlens.score import score
+from groundlens.proofread import proofread
 
 UND = locale("und")
 
@@ -74,23 +74,23 @@ def test_no_scoring_word_is_ever_dropped(max_tokens: int) -> None:
     encoder = FakeEncoder(max_tokens=max_tokens)
     answer = " ".join(f"alpha{i} 1{i:03d}" for i in range(120))
     context = answer
-    profile = score(answer, context, encoder=encoder, k=1)
+    profile = proofread(answer, context, encoder=encoder, k=1)
     expected = len([u for u in segment(answer, UND) if u.kind != "skipped"])
-    assert profile.n_scored == expected
+    assert profile.n_marked == expected
 
 
-def test_a_long_answer_does_not_score_higher_than_the_same_answer_short() -> None:
-    """The exact shape of the old bug: truncation inflates a floor-based score.
+def test_a_long_answer_does_not_floor_higher_than_the_same_answer_short() -> None:
+    """The exact shape of the old bug: truncation inflates a floor.
 
-    A wrong number buried 400 words into an answer must score the same as the
+    A wrong number buried 400 words into an answer must land the same as the
     same wrong number in the first sentence.
     """
     encoder = FakeEncoder(max_tokens=8)
     context = "the total amount due is 10,000 dollars"
     filler = " ".join(["the total amount due"] * 100)
-    early = score("total 1,000 due " + filler, context, encoder=encoder, k=1)
-    late = score(filler + " total 1,000 due", context, encoder=encoder, k=1)
-    assert early.score == late.score == 0.0
+    early = proofread("total 1,000 due " + filler, context, encoder=encoder, k=1)
+    late = proofread(filler + " total 1,000 due", context, encoder=encoder, k=1)
+    assert early.floor == late.floor == 0.0
     assert early.weakest[0].text == late.weakest[0].text == "1,000"
 
 
@@ -98,13 +98,13 @@ def test_word_on_a_window_boundary_still_finds_its_anchor() -> None:
     encoder = FakeEncoder(max_tokens=6)
     context = "the settlement amount is 12,500 euros payable immediately"
     answer = " ".join(["padding"] * 20) + " settlement 12,500 euros"
-    profile = score(answer, context, encoder=encoder, k=1)
+    profile = proofread(answer, context, encoder=encoder, k=1)
     numerals = [a for a in profile.anchors if a.kind == "numeral"]
     assert [a.support for a in numerals] == [1.0]
 
 
 def test_empty_context_is_a_warning_not_a_crash() -> None:
     encoder = FakeEncoder()
-    profile = score("the total is 10,000 dollars", "", encoder=encoder, k=1)
+    profile = proofread("the total is 10,000 dollars", "", encoder=encoder, k=1)
     assert profile.warnings
     assert "no context" in profile.warnings[0]

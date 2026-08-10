@@ -17,7 +17,7 @@ def test_the_exported_surface_is_small_and_stable() -> None:
         "NOTE_CODES",
         "Anchor",
         "AnchorKind",
-        "AnchorProfile",
+        "Proofread",
         "Encoder",
         "Evidence",
         "OperatingPoint",
@@ -27,14 +27,14 @@ def test_the_exported_surface_is_small_and_stable() -> None:
         "__version__",
         "adaptive_k",
         "calibrate",
-        "score",
+        "proofread",
     }
 
 
 def test_importing_groundlens_does_not_cost_you_a_deep_learning_stack() -> None:
     """`import groundlens` must not pull torch. A fresh interpreter proves it."""
     code = (
-        "import sys, groundlens, groundlens.score, groundlens.calibrate;"
+        "import sys, groundlens, groundlens.proofread, groundlens.calibrate;"
         "banned={'torch','transformers','sentence_transformers','numpy','scipy'};"
         "loaded=banned & set(sys.modules);"
         "assert not loaded, loaded;"
@@ -54,11 +54,11 @@ def test_the_encoder_protocol_has_three_members() -> None:
 
 
 def test_a_custom_encoder_works_end_to_end() -> None:
-    profile = groundlens.score(
+    profile = groundlens.proofread(
         INVOICE_GROUNDED, INVOICE_CONTEXT, encoder=FakeEncoder(max_tokens=512)
     )
     assert profile.encoder_id == "fake-trigram-64@v1"
-    assert profile.score > 0.99
+    assert profile.floor > 0.99
 
 
 def test_the_reference_encoder_is_lazy_and_explains_itself() -> None:
@@ -96,7 +96,7 @@ def test_the_cli_help_works_without_the_encoder_extra() -> None:
 
 
 def test_report_is_readable_and_names_the_source() -> None:
-    profile = groundlens.score(
+    profile = groundlens.proofread(
         "the invoice total is 1,000 dollars",
         [("invoice.pdf#p1", INVOICE_CONTEXT)],
         encoder=FakeEncoder(max_tokens=512),

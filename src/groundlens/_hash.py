@@ -1,6 +1,6 @@
-"""Canonical serialisation and the profile hash.
+"""Canonical serialisation and the content hash.
 
-``profile_sha256`` is what makes a published finding citable: quote the hash
+``sha256`` is what makes a published finding citable: quote the hash
 and anyone can recompute it and see whether they got your result.
 
 It covers the structural fields and the numeral supports exactly, and rounds
@@ -58,7 +58,7 @@ def anchor_payload(anchor: Anchor) -> dict[str, Any]:
     }
 
 
-def profile_hash(
+def content_hash(
     *,
     anchors: tuple[Anchor, ...],
     k: int,

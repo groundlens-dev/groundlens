@@ -1,4 +1,4 @@
-"""One command. ``groundlens score``."""
+"""One command. ``groundlens read``."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from groundlens._hash import anchor_payload
-from groundlens._types import AnchorProfile
+from groundlens._types import Proofread
 
 
 def _read(value: str) -> str:
@@ -22,18 +22,18 @@ def _read(value: str) -> str:
     return value
 
 
-def _as_json(profile: AnchorProfile) -> str:
+def _as_json(marks: Proofread) -> str:
     return json.dumps(
         {
-            "score": profile.score,
-            "k": profile.k,
-            "n_scored": profile.n_scored,
-            "n_numeral": profile.n_numeral,
-            "encoder_id": profile.encoder_id,
-            "profile_sha256": profile.profile_sha256,
-            "warnings": list(profile.warnings),
-            "weakest": [anchor_payload(a) for a in profile.weakest],
-            "anchors": [anchor_payload(a) for a in profile.anchors],
+            "floor": marks.floor,
+            "k": marks.k,
+            "n_marked": marks.n_marked,
+            "n_numeral": marks.n_numeral,
+            "encoder_id": marks.encoder_id,
+            "sha256": marks.sha256,
+            "warnings": list(marks.warnings),
+            "weakest": [anchor_payload(a) for a in marks.weakest],
+            "anchors": [anchor_payload(a) for a in marks.anchors],
         },
         indent=2,
         ensure_ascii=False,
@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    run = sub.add_parser("score", help="score one answer against its sources")
+    run = sub.add_parser("read", help="proofread one answer against its sources")
     run.add_argument("--answer", required=True, help="the answer text, or a path to it")
     run.add_argument(
         "--context",
@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Imported here, not at module scope: `groundlens --help` must not need torch.
     from groundlens._encode import DEFAULT_MODEL, SentenceTransformerEncoder
-    from groundlens.score import score
+    from groundlens.proofread import proofread
 
     sources: list[tuple[str, str]] = []
     for index, raw in enumerate(args.context):
@@ -75,22 +75,22 @@ def main(argv: list[str] | None = None) -> int:
             sources.append((f"ctx-{index}", _read(raw)))
 
     encoder = SentenceTransformerEncoder(args.model or DEFAULT_MODEL)
-    profile = score(_read(args.answer), sources, encoder=encoder, k=args.k, locale=args.locale)
+    marks = proofread(_read(args.answer), sources, encoder=encoder, k=args.k, locale=args.locale)
 
     if args.json:
-        print(_as_json(profile))
+        print(_as_json(marks))
         return 0
 
-    for warning in profile.warnings:
+    for warning in marks.warnings:
         print(f"warning: {warning}", file=sys.stderr)
-    print(profile.report())
+    print(marks.report())
     print()
     print(
-        f"score {profile.score:.3f} (mean of the {profile.k} weakest of "
-        f"{profile.n_scored} anchors, {profile.n_numeral} of them numerals)"
+        f"floor {marks.floor:.3f} (mean of the {marks.k} weakest of "
+        f"{marks.n_marked} anchors, {marks.n_numeral} of them numerals)"
     )
-    print(f"encoder {profile.encoder_id}")
-    print(f"sha256  {profile.profile_sha256}")
+    print(f"encoder {marks.encoder_id}")
+    print(f"sha256  {marks.sha256}")
     print()
     print("This is not a verdict. groundlens ships no threshold; see README.")
     return 0

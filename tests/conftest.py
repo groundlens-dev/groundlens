@@ -9,7 +9,7 @@ pure-Python, dependency-free, fully deterministic :class:`~groundlens.Encoder`:
 * it splits long words into <=4-character subwords, so multi-token words are
   exercised;
 * it embeds char trigrams into a fixed-dimension vector, so identical strings
-  score 1.0, related strings score in between, and unrelated strings score low.
+  reach 1.0, related strings land in between, and unrelated strings sit low.
 
 That is enough to test every decision the library makes. It is not enough to
 reproduce a published number -- for that, see ``scripts/verify_encoder.py``.
@@ -104,7 +104,7 @@ INVOICE_CONTEXT = (
 )
 
 # Every content word of these answers also appears in INVOICE_CONTEXT, on
-# purpose. FakeEncoder has no semantics -- it scores identical strings at 1.0
+# purpose. FakeEncoder has no semantics -- it puts identical strings at 1.0
 # and everything else near 0.0 -- so a fixture containing paraphrase would put
 # innocent words on the floor and mask the numeral. Keeping the vocabulary
 # covered isolates exactly one variable: the number.

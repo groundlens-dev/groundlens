@@ -5,9 +5,9 @@ wrong in the notebook this code replaces.
 
 The notebook chunked text at a hard 384-token cap and its own run log contains
 a warning that a 401-token sequence exceeded it. Tokens past the cap get no
-embedding, so the words they belong to get no support. Because the score is a
+embedding, so the words they belong to get no support. Because the floor is a
 *floor* over the weakest anchors, silently dropping words can only push the
-score **up**. Long answers were therefore scored as better grounded than they
+it **up**. Long answers were therefore read as better grounded than they
 were -- and the benchmark those numbers came from was a long-answer set.
 
 Two rules follow, and both are enforced by tests rather than by review:
@@ -15,7 +15,7 @@ Two rules follow, and both are enforced by tests rather than by review:
 1. Every scoring unit gets a support value. None is dropped, ever. If a word
    cannot be aligned to a token, that is a hard error, not a shrug.
 2. Windows overlap by a stride, and a word's support is the maximum over every
-   window it appears in -- so a word sitting on a window boundary is scored
+   window it appears in -- so a word sitting on a window boundary is measured
    against the context, not against an accident of where the cut landed.
 
 Alignment is by **character-span overlap**, not by the encoder's ``word_ids``.
@@ -170,7 +170,7 @@ def best_anchor(
     """Support for the word at ``span``, and which context token gave it.
 
     Returns ``None`` only when the word maps to no token at all -- which the
-    caller must treat as an error, because a word that reaches the scorer and
+    caller must treat as an error, because a word that reaches the metric and
     produces no support is exactly the silent drop this module exists to stop.
     """
     rows = tokens_overlapping(span, answer)

@@ -8,8 +8,8 @@ strictest thing in it:
   an unrelated library cannot change our answers by touching the global one;
 * the reading of an ambiguous numeral is never guessed. ``1.234`` is 1234 in
   Spain and 1.234 in the US. When the locale is unknown, *both* readings are
-  returned and the caller scores against the best of them -- abstaining would
-  silently drop a word from the floor and inflate the score, which is worse;
+  returned and the caller matches against the best of them -- abstaining would
+  silently drop a word from the floor and inflate it, which is worse;
 * the locale comes from an argument. Never from ``LC_ALL``. A library whose
   answers depend on the shell that launched it is not reproducible.
 
