@@ -27,7 +27,7 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-# The reference encoder. Only needed to actually score text.
+# The reference encoder. Only needed to actually read text.
 encoder = ["sentence-transformers>=3.0", "numpy>=1.24"]
 mcp = ["mcp>=1.0"]
 dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11"]

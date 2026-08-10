@@ -1,0 +1,27 @@
+# Scorecard's Dependency-Update-Tool check, and the reason pinning actions to a
+# SHA is safe: without something opening the update PRs, a pinned SHA is just a
+# stale dependency with better paperwork.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    # The core package has no runtime dependencies. Everything here is an extra
+    # or a dev tool; if this ever opens a PR against `dependencies`, something
+    # went wrong.
+    groups:
+      dev:
+        patterns: ["*"]

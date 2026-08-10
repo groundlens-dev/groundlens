@@ -39,6 +39,28 @@ chore — it is what catches a parser silently reading `3.14159` as `3.141` and 
 `scripts/dump_fixture.py` has a corpus at the top. Every line in it exists
 because it broke something. Add lines; never remove them.
 
+## GitHub Actions must be pinned to a SHA
+
+Every `uses:` in `.github/workflows/` is pinned to a full 40-character commit
+SHA with the version as a trailing comment:
+
+```yaml
+- uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.1
+```
+
+A tag is a moving pointer. `@v4` today and `@v4` next month can be different
+code, and that code runs with a token in your CI. Dependabot is configured to
+bump these weekly, so pinning costs nothing ongoing.
+
+To re-pin after editing a workflow:
+
+```bash
+npx pin-github-action .github/workflows/*.yml
+```
+
+CI will not enforce this — OpenSSF Scorecard will, and the badge is on the
+README.
+
 ## What will be declined
 
 Framework integrations, agent helpers, rule engines, compliance decorators, a

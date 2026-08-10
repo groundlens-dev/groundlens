@@ -88,17 +88,7 @@ From the shell:
 groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 ```
 
-Every mark carries its receipt:
-
-```python
-for anchor in profile.weakest:
-    anchor.text            # '4.75%'          the word in the answer
-    anchor.span            # (21, 26)         where it sits
-    anchor.kind            # 'numeral'        checked by arithmetic, not meaning
-    anchor.support         # 0.0              absent from the sources
-    anchor.evidence_id     # 'policy.pdf#p3'  which document to open
-    anchor.evidence_text   # '3.90%'          what it should have matched
-```
+---
 
 ## How it works
 
@@ -121,9 +111,8 @@ aggregates by the mean, and the mean is where single-token errors go to die.
 
 ### Ten is not a hundred
 
-```bash
-groundlens score --answer answer.txt --context policy.pdf#p3=policy.txt
-```
+A retrieved document says the total due is **10,000 dollars**. The answer says
+**1,000 dollars**. A human catches that instantly, without a finance degree.
 
 Embedding similarity does not. Cosine between the right answer and the wrong one
 is about 0.99 — the error dissolves into the vector the way a drop of ink
@@ -132,7 +121,9 @@ dissolves in a pool. An LLM judge does not either: it reads for plausibility, an
 A trained span detector does not, because single-digit substitutions are rare in
 its training labels.
 
-## How it works
+Sentence encoders organise text by vocabulary, topic and structure. Never by
+truth. A wrong number inside a correct sentence is, to a paraphrase-collapsing
+encoder, very nearly a paraphrase.
 
 On that invoice, the **mean** support of the wrong answer is 0.79 — which looks
 fine. The **weakest anchor** is 0.00 — which is a mark in the margin.

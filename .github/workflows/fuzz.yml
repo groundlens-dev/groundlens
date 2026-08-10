@@ -1,0 +1,46 @@
+name: fuzz
+
+# ClusterFuzzLite. Ten minutes of fuzzing on every pull request against the
+# numeral parser, which is a regex reading untrusted text. The ReDoS bound in
+# NUMBER_PATTERN is a claim; this is what tests it.
+
+on:
+  pull_request:
+    paths:
+      - "src/groundlens/_numerals.py"
+      - "src/groundlens/_text.py"
+      - "src/groundlens/_words.py"
+      - "fuzz/**"
+      - ".clusterfuzzlite/**"
+      - ".github/workflows/fuzz.yml"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: build fuzzers
+        uses: google/clusterfuzzlite/actions/build_fuzzers@v1
+        with:
+          language: python
+          sanitizer: address
+
+  run:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: build fuzzers
+        uses: google/clusterfuzzlite/actions/build_fuzzers@v1
+        with:
+          language: python
+          sanitizer: address
+      - name: run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 600
+          mode: "code-change"
+          sanitizer: address
+          output-sarif: true
