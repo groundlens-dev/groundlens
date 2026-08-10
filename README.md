@@ -1,11 +1,7 @@
-<!--
-  BANNER GOES HERE.
-  Drop the hero image in as the first line of this div, e.g.
-      <img src="docs/assets/banner.png" alt="groundlens" width="820">
-  Suggested subject: a proofread answer — most of the text untouched, two or
-  three words underlined in red, a thin line from each to the span in the source
-  it should have matched.
--->
+<div align="center">
+<img src="docs/assets/Groundlens_01.png" width="30%">
+</div>
+
 
 <div align="center">
 
