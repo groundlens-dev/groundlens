@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="groundlens">
+  <title>groundlens</title>
+  <!-- The lens: what the answer is read through. -->
+  <circle cx="48" cy="40" r="26" fill="none" stroke="currentColor" stroke-width="4" opacity="0.9"/>
+  <!-- Five anchors across the answer. Four hold. -->
+  <circle cx="30" cy="34" r="3.2" fill="currentColor" opacity="0.35"/>
+  <circle cx="41" cy="30" r="3.2" fill="currentColor" opacity="0.35"/>
+  <circle cx="55" cy="33" r="3.2" fill="currentColor" opacity="0.35"/>
+  <circle cx="65" cy="39" r="3.2" fill="currentColor" opacity="0.35"/>
+  <!-- One does not. It is the floor, and it is the whole product. -->
+  <circle cx="47" cy="52" r="5" fill="#d1343c"/>
+  <line x1="47" y1="52" x2="47" y2="82" stroke="#d1343c" stroke-width="3" stroke-linecap="round"/>
+  <line x1="36" y1="82" x2="58" y2="82" stroke="#d1343c" stroke-width="3" stroke-linecap="round"/>
+</svg>

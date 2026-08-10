@@ -65,6 +65,11 @@ jobs:
         run: |
           python - <<'PY'
           import sys
+          # No -S here. Disabling site processing takes site-packages off the
+          # path, so an editable install becomes invisible and the check fails
+          # for the wrong reason. Snapshotting sys.modules before the import is
+          # what makes this meaningful: anything the interpreter loaded at
+          # startup is already in `before` and cannot be mistaken for a leak.
           before = set(sys.modules)
           import groundlens
           from groundlens import _align, _hash, _numerals, _text, _types, _words  # noqa: F401
