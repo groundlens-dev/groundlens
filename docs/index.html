@@ -51,15 +51,18 @@
 <body>
 <main>
 
-  <h1>groundlens</h1>
-  <p class="lede">A proofreader for what your model writes. It marks the words your sources don&rsquo;t back &mdash; and shows you what each one should have said.</p>
+  <h1>Groundlens: a proofreader for RAG answers</h1>
+  <p class="lede">It marks the words your sources don&rsquo;t back &mdash; and shows you what each one should have said.</p>
 
-<pre><code>4.75%   support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '3.90%'
-45      support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '30'</code></pre>
+<pre><code>QUESTION    What is the invoice total?
+SOURCE      ...the total amount due is 10,000 dollars, payable within 30 days...
+ANSWER      The invoice total is <span class="alarm">1,000</span> dollars, due in 30 days.
 
-  <p>That is the output. Not a number to interpret, not a verdict to trust &mdash;
-  the two or three words a reviewer should look at, each printed next to the
-  closest thing in the source. Thirty seconds instead of five minutes.</p>
+GROUNDLENS  <span class="alarm">1,000</span>   nothing supports this.   Closest in invoice.pdf#p1: '10,000'</code></pre>
+
+  <p>It never tells you the answer is wrong. It tells you which word to look at,
+  and which document to open. Thirty seconds of human attention instead of five
+  minutes.</p>
 
 <pre><code>pip install "groundlens[encoder]"</code></pre>
 

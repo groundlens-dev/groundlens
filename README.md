@@ -86,6 +86,7 @@ groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 
 ## How it works
 
+
 <div align="center">
 <img src="docs/assets/Groundlens1.png" width="70%">
 </div>
