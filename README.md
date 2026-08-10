@@ -23,8 +23,6 @@
 
 </div>
 
----
-
 Groundlens is a proofreader for what your model writes. It marks the words your
 sources don't back — and shows you what each one should have said.
 
@@ -39,8 +37,6 @@ GROUNDLENS  1,000   nothing supports this.   Closest in invoice.pdf#p1: '10,000'
 It never tells you the answer is wrong. It tells you which word to look at, and
 which document to open. Thirty seconds of human attention instead of five minutes.
 
----
-
 ## Install
 
 ```bash
@@ -53,7 +49,6 @@ The core install pulls **nothing**, and a CI job fails the build if that ever
 changes. The previous version installed roughly two gigabytes of deep learning
 stack before you had done anything.
 
----
 
 ## Quick start
 
@@ -88,11 +83,13 @@ From the shell:
 groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 ```
 
----
 
 ## How it works
 
-There are two kinds of content in an answer, and they need two different tests.
+<div align="center">
+<img src="docs/assets/Groundlens1.png" width="70%">
+</div>
+
 
 **Words are anchored by meaning.** A word's support is the highest cosine
 similarity it reaches against any word of the sources, using a frozen
@@ -126,7 +123,6 @@ encoder, very nearly a paraphrase.
 On that invoice, the **mean** support of the wrong answer is 0.79 — which looks
 fine. The **weakest anchor** is 0.00 — which is a mark in the margin.
 
----
 
 ## Why there is no threshold
 
@@ -134,13 +130,9 @@ We measured nine detectors across five public benchmarks — two published encod
 models, an NLI cross-encoder, an LLM judge, and this one — at the operating point
 production actually runs at: **false-positive rate at 95% hallucination recall.**
 
-| | best AUROC | FPR @ 95% recall |
-|---|---:|---:|
-| Trained span detector | 0.817 | 0.99 |
-| Small trained fact-checker | 0.865 | 0.78 |
-| LLM judge | 0.737 | 1.00 |
-| NLI cross-encoder | 0.681 | 0.68 |
-| **groundlens** | **0.857** | **0.70** |
+<div align="center">
+<img src="docs/assets/Groundlens2.png" width="70%">
+</div>
 
 Forty-five cells across the full grid. The best is **0.65**. A random detector
 sits at 0.95. One method ranks best of all by AUROC and flags **99% of correct
