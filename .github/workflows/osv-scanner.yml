@@ -1,0 +1,26 @@
+name: osv-scanner
+
+# Dependency vulnerability scanning. The core package has zero runtime
+# dependencies, so this should stay quiet -- and a scanner that stays quiet for
+# a real reason is worth more than one that is absent.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "24 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  scan:
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.2"
+    with:
+      scan-args: |-
+        --recursive
+        ./
