@@ -1,0 +1,116 @@
+name: release
+
+# Cutting a release produces four things, and Scorecard's Signed-Releases check
+# wants the last three of them:
+#
+#   1. sdist + wheel, built once and reused everywhere downstream
+#   2. Sigstore bundles (.sigstore.json) proving who built them
+#   3. SLSA level 3 provenance (multiple.intoto.jsonl) proving how
+#   4. a PyPI upload with attestations, via Trusted Publishing — no API token
+#
+# Everything after the build consumes the *same* artifact. Rebuilding between
+# signing and publishing would sign one file and ship another, which is the
+# failure this whole apparatus exists to prevent.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: the tag must match the version in the package
+        run: |
+          python - <<'PY'
+          import os, pathlib, re, sys
+          ref = os.environ["GITHUB_REF_NAME"]
+          init = pathlib.Path("src/groundlens/__init__.py").read_text(encoding="utf-8")
+          version = re.search(r'__version__ = "([^"]+)"', init).group(1)
+          if ref.lstrip("v") != version:
+              sys.exit(f"tag {ref} does not match __version__ {version}")
+          print(f"ok: {ref} == {version}")
+          PY
+
+      - run: pip install build
+      - run: python -m build
+
+      - name: the wheel must import with no dependencies
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install --no-deps dist/*.whl
+          /tmp/clean/bin/python -c "import groundlens; print(groundlens.__version__)"
+
+      - name: base64 subjects for the provenance generator
+        id: hash
+        run: echo "hashes=$(sha256sum dist/* | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  # SLSA 3 provenance. This is the reusable workflow that produced the
+  # multiple.intoto.jsonl on the earlier releases; it must be called by tag,
+  # not by SHA, or the generator refuses to run.
+  provenance:
+    needs: build
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: ${{ needs.build.outputs.hashes }}
+      upload-assets: true
+
+  sign:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist/
+      - name: sign with Sigstore
+        uses: sigstore/gh-action-sigstore-python@f514d46b907ebcd5bedc05145c03b69c1edd8b46 # v3.0.0
+        with:
+          inputs: ./dist/*.tar.gz ./dist/*.whl
+          upload-signing-artifacts: true
+      - name: attach artifacts and signatures to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+
+  pypi:
+    needs: [build, sign]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist/
+      - name: remove signature files before upload
+        run: rm -f dist/*.sigstore dist/*.sigstore.json dist/*.crt dist/*.sig
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          attestations: true

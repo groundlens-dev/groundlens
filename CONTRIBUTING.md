@@ -61,6 +61,25 @@ npx pin-github-action .github/workflows/*.yml
 CI will not enforce this — OpenSSF Scorecard will, and the badge is on the
 README.
 
+## Cutting a release
+
+Releases are never made by hand. Tag and push; `.github/workflows/release.yml`
+does the rest:
+
+```bash
+# bump __version__ in src/groundlens/__init__.py first — CI checks the tag matches
+git tag v3.0.1 && git push origin v3.0.1
+```
+
+It builds the sdist and wheel **once**, then signs that exact artifact with
+Sigstore, generates SLSA 3 provenance for it, attaches both to the GitHub
+release, and publishes to PyPI with attestations via Trusted Publishing. Nothing
+downstream rebuilds — rebuilding between signing and publishing would sign one
+file and ship another.
+
+A release uploaded through the web UI, or built locally and dragged in, is
+unsigned and has no provenance. Don't.
+
 ## What will be declined
 
 Framework integrations, agent helpers, rule engines, compliance decorators, a
