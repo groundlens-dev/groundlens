@@ -10,7 +10,7 @@ finds a strong anchor somewhere; a word with nothing behind it does not.
 number. It is equal or it is wrong. Support is exactly 1.0 or exactly 0.0, and
 similarity is not allowed to vote.
 
-**The score is the floor, not the average.** Every token-similarity metric in
+**We report the floor, not the average.** Every token-similarity metric in
 the literature aggregates by the mean, and the mean is precisely where a
 single-token error goes to die: a sixty-word answer with one wrong digit has a
 mean support of about 0.79, which looks fine, and a weakest anchor of 0.00,
@@ -27,11 +27,11 @@ from collections.abc import Sequence
 from decimal import Decimal
 
 from groundlens._align import TokenVectors, best_anchor, embed, tokens_overlapping
-from groundlens._hash import profile_hash
+from groundlens._hash import content_hash
 from groundlens._numerals import Numeral, find_numerals
 from groundlens._numerals import locale as locale_profile
 from groundlens._text import normalised
-from groundlens._types import Anchor, AnchorProfile, Encoder, Evidence
+from groundlens._types import Anchor, Encoder, Evidence, Proofread
 from groundlens._words import Unit, segment, segmentation_warnings
 
 
@@ -143,19 +143,19 @@ def _lexical_anchor(
     context_tokens: Sequence[tuple[Evidence, TokenVectors]],
 ) -> Anchor:
     # Rule 1 of _align: no word is ever silently dropped. A word that reaches
-    # the scorer and produces no support is the failure this library exists to
-    # prevent -- because the score is a floor, a missing word can only push it
+    # the metric and produces no support is the failure this library exists to
+    # prevent -- because we report the floor, a missing word can only push it
     # up, and a truncated long answer then looks better grounded than it is.
     #
     # Note what is checked: whether the word aligned to a token of the *answer*.
     # An answer word with no answer token means the encoder adapter is broken,
     # and that is an error. Having no context at all is a different thing --
-    # support 0.0 is then the correct and honest answer, and score() has already
+    # support 0.0 is then the correct and honest answer, and proofread() has already
     # attached a warning saying so.
     if not tokens_overlapping(unit.span, answer_tokens):
         msg = (
             f"word {unit.text!r} at {unit.span} aligned to no encoder token. "
-            "This would silently raise the score; refusing to continue."
+            "This would silently raise the floor; refusing to continue."
         )
         raise RuntimeError(msg)
 
@@ -187,7 +187,7 @@ def _lexical_anchor(
     )
 
 
-def score(
+def proofread(
     answer: str,
     context: ContextArg,
     *,
@@ -195,8 +195,8 @@ def score(
     k: int = 1,
     locale: str = "und",
     max_anchors: int = 2048,
-) -> AnchorProfile:
-    """Score ``answer`` against ``context`` and return where to look.
+) -> Proofread:
+    """Proofread ``answer`` against its ``sources`` and return where to look.
 
     Args:
         answer: the model output to check.
@@ -204,7 +204,7 @@ def score(
             can name which source backed each word.
         encoder: any :class:`~groundlens.Encoder`. Use
             :class:`~groundlens.SentenceTransformerEncoder` for the reference one.
-        k: how many of the weakest anchors the score averages. ``1`` is the
+        k: how many of the weakest anchors the floor averages. ``1`` is the
             default and the recommended setting. ``0`` selects
             :func:`adaptive_k`, which is what the published benchmark used.
         locale: how this corpus writes numbers -- ``"es"``, ``"en"``, ``"de"``...
@@ -213,7 +213,7 @@ def score(
             than quietly taking a very long time.
 
     Returns:
-        An :class:`~groundlens.AnchorProfile`. There is no verdict in it.
+        An :class:`~groundlens.Proofread`. There is no verdict in it.
     """
     profile = locale_profile(locale)
     answer_text = normalised(answer)
@@ -223,14 +223,14 @@ def score(
 
     warnings = list(segmentation_warnings(answer_text))
     if not evidences or not any(e.text for e in evidences):
-        warnings.append("no context supplied; every word will score as unsupported")
+        warnings.append("no context supplied; every word will read as unsupported")
 
     units = segment(answer_text, profile)
     scoring = [u for u in units if u.kind != "skipped"]
     if len(scoring) > max_anchors:
         msg = (
             f"answer has {len(scoring)} scoring words, above max_anchors={max_anchors}. "
-            "Raise max_anchors deliberately, or score the answer in sections."
+            "Raise max_anchors deliberately, or proofread the answer in sections."
         )
         raise ValueError(msg)
 
@@ -265,32 +265,32 @@ def score(
         else:
             anchors.append(_lexical_anchor(unit, answer_tokens, context_tokens))
 
-    scored = [a for a in anchors if a.kind != "skipped"]
-    resolved_k = adaptive_k(len(scored)) if k == 0 else max(1, k)
-    resolved_k = min(resolved_k, len(scored)) if scored else 0
+    marked = [a for a in anchors if a.kind != "skipped"]
+    resolved_k = adaptive_k(len(marked)) if k == 0 else max(1, k)
+    resolved_k = min(resolved_k, len(marked)) if marked else 0
 
     # A numeral at 0.0 and a word at 0.0 are not the same kind of zero, and
     # ranking them equally buries the finding that matters. A numeral at 0.0 is
     # a *proven* mismatch: arithmetic says this value is not in the sources. A
     # word at 0.0 only means it found no lexical anchor, which is ordinary for
-    # honest paraphrase -- "commercial" and "consistent" score low in a
+    # honest paraphrase -- "commercial" and "consistent" sit low in a
     # perfectly grounded answer. So numerals win ties, and position breaks the
     # rest, because sort stability must not vary between interpreters.
     def rank(anchor: Anchor) -> tuple[float, int, tuple[int, int]]:
         return (anchor.support, 0 if anchor.kind == "numeral" else 1, anchor.span)
 
-    weakest = tuple(sorted(scored, key=rank)[:resolved_k])
+    weakest = tuple(sorted(marked, key=rank)[:resolved_k])
     value = sum(a.support for a in weakest) / resolved_k if resolved_k else 1.0
 
-    return AnchorProfile(
-        score=value,
+    return Proofread(
+        floor=value,
         k=resolved_k,
         weakest=weakest,
         anchors=tuple(anchors),
-        n_scored=len(scored),
-        n_numeral=sum(1 for a in scored if a.kind == "numeral"),
+        n_marked=len(marked),
+        n_numeral=sum(1 for a in marked if a.kind == "numeral"),
         encoder_id=encoder.id,
-        profile_sha256=profile_hash(
+        sha256=content_hash(
             anchors=tuple(anchors),
             k=resolved_k,
             encoder_id=encoder.id,

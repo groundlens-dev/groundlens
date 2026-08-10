@@ -1,4 +1,4 @@
-"""Turning scores into a threshold -- on your data, with the cost shown.
+"""Turning a floor into a threshold -- on your data, with the cost shown.
 
 This library ships no threshold. This function is how you get one, and it is
 deliberately awkward to use without seeing what it costs.
@@ -19,7 +19,7 @@ from __future__ import annotations
 import random
 from collections.abc import Sequence
 
-from groundlens._types import AnchorProfile, OperatingPoint
+from groundlens._types import OperatingPoint, Proofread
 
 #: Below this many labelled examples a 95%-recall threshold is estimated from a
 #: handful of points and means nothing. Refusing is more useful than obliging.
@@ -29,10 +29,10 @@ BOOTSTRAP_ROUNDS = 1000
 
 
 def _threshold_at_recall(positives: list[float], target_recall: float) -> float:
-    """Highest score that still catches ``target_recall`` of the defects.
+    """Highest floor that still catches ``target_recall`` of the defects.
 
-    Scores run 0 (nothing supports this) to 1 (fully anchored), so a defect is
-    flagged when its score is **at or below** the threshold.
+    Floors run 0 (nothing supports this) to 1 (fully anchored), so a defect is
+    flagged when its floor is **at or below** the threshold.
     """
     ordered = sorted(positives)
     index = min(len(ordered) - 1, max(0, round(target_recall * len(ordered)) - 1))
@@ -46,7 +46,7 @@ def _fpr(negatives: list[float], threshold: float) -> float:
 
 
 def calibrate(
-    labelled: Sequence[tuple[AnchorProfile | float, bool]],
+    labelled: Sequence[tuple[Proofread | float, bool]],
     *,
     target_recall: float = 0.95,
     seed: int = 0,
@@ -55,7 +55,7 @@ def calibrate(
     """Find the threshold that catches ``target_recall`` of defects, and its cost.
 
     Args:
-        labelled: ``(profile_or_score, is_defect)`` pairs from **your** traffic.
+        labelled: ``(Proofread_or_float, is_defect)`` pairs from **your** traffic.
             A threshold fitted on someone else's distribution does not transfer;
             the grounded floor moves with answer length, style and domain.
         target_recall: the fraction of defects you require the cut to catch.
@@ -73,19 +73,19 @@ def calibrate(
         msg = f"target_recall must be in (0, 1]; got {target_recall}"
         raise ValueError(msg)
 
-    scores = [p.score if isinstance(p, AnchorProfile) else float(p) for p, _ in labelled]
+    floors = [p.floor if isinstance(p, Proofread) else float(p) for p, _ in labelled]
     labels = [bool(flag) for _, flag in labelled]
 
-    if len(scores) < min_labelled:
+    if len(floors) < min_labelled:
         msg = (
-            f"calibrate needs at least {min_labelled} labelled examples; got {len(scores)}. "
+            f"calibrate needs at least {min_labelled} labelled examples; got {len(floors)}. "
             "Below that, a 95%-recall threshold is estimated from a handful of points "
             "and the interval it produces is not worth reporting."
         )
         raise ValueError(msg)
 
-    positives = [s for s, flag in zip(scores, labels, strict=True) if flag]
-    negatives = [s for s, flag in zip(scores, labels, strict=True) if not flag]
+    positives = [f for f, flag in zip(floors, labels, strict=True) if flag]
+    negatives = [f for f, flag in zip(floors, labels, strict=True) if not flag]
     if not positives or not negatives:
         msg = "calibrate needs both defect and clean examples"
         raise ValueError(msg)
@@ -110,6 +110,6 @@ def calibrate(
         achieved_recall=achieved,
         fpr=fpr,
         fpr_ci95=(low, high),
-        n=len(scores),
+        n=len(floors),
         n_positive=len(positives),
     )

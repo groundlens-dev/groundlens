@@ -18,7 +18,7 @@ AnchorKind = Literal["lexical", "numeral", "skipped"]
 #: Reason codes attachable to an anchor. Kept closed so they can be asserted on.
 NOTE_CODES = frozenset(
     {
-        "numeral_ambiguous",  # numeral had >1 valid reading; scored on the best of them
+        "numeral_ambiguous",  # numeral had >1 valid reading; matched on the best of them
         "numeral_unparsed",  # looked numeric, could not be parsed; fell back to lexical
         "window_boundary",  # word straddles a window edge; support is the max over windows
         "stopword",  # excluded from scoring
@@ -69,7 +69,7 @@ class Anchor:
 
 
 @dataclass(frozen=True, slots=True)
-class AnchorProfile:
+class Proofread:
     """The result of scoring one answer against its sources.
 
     There is deliberately no ``decision`` field and no default threshold. At 95%
@@ -80,18 +80,18 @@ class AnchorProfile:
     read the false-positive rate it hands back before you deploy it.
     """
 
-    score: float
+    floor: float
     k: int
     weakest: tuple[Anchor, ...]
-    """The k anchors that produced ``score``, weakest first."""
+    """The k anchors that produced ``floor``, weakest first."""
 
     anchors: tuple[Anchor, ...]
     """Every word of the answer, in answer order, including skipped ones."""
 
-    n_scored: int
+    n_marked: int
     n_numeral: int
     encoder_id: str
-    profile_sha256: str
+    sha256: str
     warnings: tuple[str, ...] = ()
 
     def report(self, limit: int | None = None) -> str:
@@ -156,7 +156,7 @@ class Encoder(Protocol):
         ``"all-mpnet-base-v2@bd44305fd6a1b43c16baf96765e2ecb20bca8e1d"``.
 
         A bare model name is not enough: a silent re-upload would change every
-        number you ever published. This string goes into ``profile_sha256``.
+        number you ever published. This string goes into ``sha256``.
         """
 
     @property
@@ -169,7 +169,7 @@ class Encoder(Protocol):
         Windowing needs to know where the token boundaries are before it decides
         where to cut. Doing that by embedding and counting would be quadratic;
         doing it by guessing a characters-per-token ratio is how text silently
-        falls off the end of a window and stops being scored at all.
+        falls off the end of a window and stops being marked at all.
         """
 
     def encode_window(self, text: str) -> WindowEncoding:

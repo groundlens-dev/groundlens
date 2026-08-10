@@ -15,9 +15,8 @@ abstract: >-
   least support, pairing each with the closest matching span in the source.
   Numerals are verified by exact value comparison after format normalisation
   rather than by embedding similarity; other words are scored by maximum cosine
-  similarity against the source. The answer-level score is the mean of the k
-  weakest anchors rather than the mean of all of them. The library reports no
-  verdict and ships no threshold.
+  similarity against the source. The answer-level figure is the floor: the mean of the k
+  weakest anchors rather than the mean of all of them. It reports no verdict and ships no threshold.
 license: Apache-2.0
 version: 3.0.0
 date-released: '2026-08-10'

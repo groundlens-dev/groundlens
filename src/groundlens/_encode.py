@@ -7,7 +7,7 @@ The one thing to notice: the model is pinned by **revision sha**, not by name.
 A silent re-upload of a checkpoint on the Hub would otherwise change every
 number anyone ever published with this library, with no diff and no warning.
 The resolved sha goes into ``Encoder.id`` and from there into
-``profile_sha256``.
+``sha256``.
 """
 
 from __future__ import annotations

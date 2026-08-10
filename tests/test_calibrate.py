@@ -11,7 +11,7 @@ from groundlens.calibrate import MIN_LABELLED
 
 
 def synthetic(n: int = 400, separation: float = 0.4, seed: int = 7) -> list[tuple[float, bool]]:
-    """Defects score low, clean answers score high, with heavy overlap.
+    """Defects floor low, clean answers floor high, with heavy overlap.
 
     Overlap is the realistic case, not a pessimistic one: on five public
     benchmarks no method separates these two populations well enough to pick a
@@ -80,14 +80,14 @@ def test_the_interval_is_reproducible() -> None:
     assert calibrate(rows).fpr_ci95 == calibrate(rows).fpr_ci95
 
 
-def test_it_accepts_profiles_as_well_as_bare_scores() -> None:
+def test_it_accepts_proofreads_as_well_as_bare_floats() -> None:
     from conftest import INVOICE_CONTEXT, INVOICE_GROUNDED, INVOICE_PERTURBED, FakeEncoder
 
-    from groundlens import score
+    from groundlens import proofread
 
     encoder = FakeEncoder(max_tokens=512)
-    good = score(INVOICE_GROUNDED, INVOICE_CONTEXT, encoder=encoder)
-    bad = score(INVOICE_PERTURBED, INVOICE_CONTEXT, encoder=encoder)
+    good = proofread(INVOICE_GROUNDED, INVOICE_CONTEXT, encoder=encoder)
+    bad = proofread(INVOICE_PERTURBED, INVOICE_CONTEXT, encoder=encoder)
     rows = [(good, False), (bad, True)] * (MIN_LABELLED // 2)
     point = calibrate(rows, target_recall=0.95)
     assert point.fpr == 0.0

@@ -24,7 +24,7 @@ not, and formatting is normalised first, so 10,000 and 10000 and $10,000 are one
 number. Words are checked by embedding similarity.
 
 Returns evidence for a human to judge. It does NOT return a verdict on whether \
-the answer is hallucinated, and there is no threshold to compare the score to. \
+the answer is hallucinated, and there is no threshold to compare the floor to. \
 Report the weakest anchors and let the reader decide."""
 
 
@@ -37,7 +37,7 @@ def build_server() -> Any:
         raise ImportError(msg) from exc
 
     from groundlens._encode import SentenceTransformerEncoder
-    from groundlens.score import score
+    from groundlens.proofread import proofread
 
     server = FastMCP("groundlens")
     encoder: list[SentenceTransformerEncoder] = []
@@ -64,7 +64,7 @@ def build_server() -> Any:
                 1234, ``en`` reads it as 1.234. ``und`` keeps both readings.
         """
         evidence = [(s.get("id") or f"ctx-{i}", s.get("text", "")) for i, s in enumerate(sources)]
-        profile = score(answer, evidence, encoder=_encoder(), k=k, locale=locale)
+        marks = proofread(answer, evidence, encoder=_encoder(), k=k, locale=locale)
         return {
             "weakest_anchors": [
                 {
@@ -75,13 +75,13 @@ def build_server() -> Any:
                     "source_id": a.evidence_id,
                     "notes": list(a.notes),
                 }
-                for a in profile.weakest
+                for a in marks.weakest
             ],
-            "score": round(profile.score, 4),
-            "n_scored": profile.n_scored,
-            "encoder_id": profile.encoder_id,
-            "profile_sha256": profile.profile_sha256,
-            "warnings": list(profile.warnings),
+            "floor": round(marks.floor, 4),
+            "n_marked": marks.n_marked,
+            "encoder_id": marks.encoder_id,
+            "sha256": marks.sha256,
+            "warnings": list(marks.warnings),
             "how_to_read_this": (
                 "Not a verdict. support 0.00 on a number means that value is absent "
                 "from the sources; on a word it means no lexical anchor was found, "

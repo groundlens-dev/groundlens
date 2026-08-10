@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>groundlens — which words your sources don't support</title>
-<meta name="description" content="Shows you which words in an answer your sources don't support, and what each one lost to. Numbers checked by arithmetic, not by meaning. No training, no API call, no threshold.">
+<title>Groundlens — a proofreader for RAG answers</title>
+<meta name="description" content="A proofreader for what your model writes. It marks the words your sources don't back, and shows you what each one should have said.">
 <meta property="og:title" content="groundlens">
-<meta property="og:description" content="Which words in an answer your sources don't support — and what each one lost to.">
+<meta property="og:description" content="A proofreader for what your model writes.">
 <meta property="og:type" content="website">
 <style>
   :root{
@@ -52,22 +52,22 @@
 <main>
 
   <h1>groundlens</h1>
-  <p class="lede">Which words in an answer your sources don&rsquo;t support &mdash; and what each one lost to.</p>
+  <p class="lede">A proofreader for what your model writes. It marks the words your sources don&rsquo;t back &mdash; and shows you what each one should have said.</p>
 
 <pre><code>4.75%   support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '3.90%'
 45      support <span class="alarm">0.00</span>    nearest in policy.pdf#p3: '30'</code></pre>
 
-  <p>That is the output. Not a score to interpret, not a verdict to trust &mdash;
+  <p>That is the output. Not a number to interpret, not a verdict to trust &mdash;
   the two or three words a reviewer should look at, each printed next to the
   closest thing in the source. Thirty seconds instead of five minutes.</p>
 
 <pre><code>pip install "groundlens[encoder]"</code></pre>
 
-<pre><code><b>from</b> groundlens <b>import</b> score, SentenceTransformerEncoder
+<pre><code><b>from</b> groundlens <b>import</b> proofread, SentenceTransformerEncoder
 
-profile = score(answer, [("policy.pdf#p3", passage)],
-                encoder=SentenceTransformerEncoder())
-<b>print</b>(profile.report())</code></pre>
+marks = proofread(answer, [("policy.pdf#p3", passage)],
+                  encoder=SentenceTransformerEncoder())
+<b>print</b>(marks.report())</code></pre>
 
   <h2>Ten is not a hundred</h2>
 
@@ -90,7 +90,7 @@ profile = score(answer, [("policy.pdf#p3", passage)],
   presence. Support is exactly <span class="ok">1.0</span> or exactly
   <span class="alarm">0.0</span>. Similarity is not allowed to vote.</p>
 
-  <p>And the score is the <b>floor, not the average</b>. Every token-similarity
+  <p>And we report the <b>floor, not the average</b>. Every token-similarity
   metric aggregates by the mean, and the mean is where single-token errors go to
   die. On the invoice above the mean support of the wrong answer is 0.79, which
   looks fine. The weakest anchor is 0.00, which is an alarm.</p>
@@ -114,7 +114,7 @@ profile = score(answer, [("policy.pdf#p3", passage)],
   </table>
 
   <p>Forty-five cells across the full grid. The best is <b>0.65</b>. A random
-  detector scores 0.95. One method ranks best of all by AUROC and flags 99&nbsp;%
+  detector sits at 0.95. One method ranks best of all by AUROC and flags 99&nbsp;%
   of correct answers at the operating point. Nobody is in the usable corner,
   <b>including us</b>.</p>
 
@@ -123,7 +123,7 @@ profile = score(answer, [("policy.pdf#p3", passage)],
   <code>calibrate()</code>, which hands back the measured false-positive rate
   next to it and refuses to run on fewer than 200 examples.</p>
 
-  <h2>What reproduces</h2>
+  <h2>Reproducibility</h2>
 
   <p>The numeral channel is exact: Decimal comparison, fixed arithmetic context,
   locale from an argument and never from the environment. Byte-for-byte identical

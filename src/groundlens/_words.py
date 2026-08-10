@@ -8,7 +8,7 @@ character-span overlap, in ``_align``.
 
 Scope, stated rather than assumed: space-delimited scripts. If a large fraction
 of the answer is CJK or Thai, ``str``-level segmentation produces one enormous
-"word" and the score is meaningless. We emit a warning and say so, which is more
+"word" and the result is meaningless. We emit a warning and say so, which is more
 honest than a half-working ICU dependency.
 """
 
@@ -43,7 +43,7 @@ _UNSEGMENTED = re.compile(r"[　-鿿฀-๿가-힯]")
 
 @dataclass(frozen=True, slots=True)
 class Unit:
-    """One segment of the answer, before it has been scored."""
+    """One segment of the answer, before it has been marked."""
 
     text: str
     span: tuple[int, int]
@@ -95,7 +95,7 @@ def segment(text: str, profile: LocaleProfile) -> list[Unit]:
     return units
 
 
-def scoring_units(units: list[Unit]) -> list[Unit]:
+def markable_units(units: list[Unit]) -> list[Unit]:
     return [u for u in units if u.kind != "skipped"]
 
 
@@ -107,14 +107,14 @@ def segmentation_warnings(text: str) -> tuple[str, ...]:
     if unsegmented / len(text) > UNSEGMENTED_LIMIT:
         return (
             "answer is largely in an unsegmented script (CJK/Thai); whitespace "
-            "segmentation does not apply and this score should not be relied on",
+            "segmentation does not apply and these marks should not be relied on",
         )
     return ()
 
 
 def content_word_count(text: str, profile: LocaleProfile) -> int:
     """Independent count, used by tests to assert no word is silently dropped."""
-    return len(scoring_units(segment(text, profile)))
+    return len(markable_units(segment(text, profile)))
 
 
 def strip_accents(text: str) -> str:

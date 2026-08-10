@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import sys
 
-from groundlens import score
+from groundlens import proofread
 from groundlens._numerals import locale
 from groundlens._words import segment
 
@@ -56,7 +56,7 @@ def main() -> int:
 
     print("\ninvoice fixture")
     profiles = {
-        name: score(text, [("invoice.pdf#p1", CONTEXT)], encoder=encoder, k=1)
+        name: proofread(text, [("invoice.pdf#p1", CONTEXT)], encoder=encoder, k=1)
         for name, text in (
             ("grounded", GROUNDED),
             ("perturbed", PERTURBED),
@@ -64,12 +64,12 @@ def main() -> int:
         )
     }
     for name, profile in profiles.items():
-        print(f"  {name:12s} score={profile.score:.3f}  {profile.report()}")
+        print(f"  {name:12s} floor={profile.floor:.3f}  {profile.report()}")
 
     check(
-        "a wrong number collapses the score",
-        profiles["perturbed"].score < profiles["grounded"].score,
-        f"{profiles['perturbed'].score:.3f} < {profiles['grounded'].score:.3f}",
+        "a wrong number collapses the floor",
+        profiles["perturbed"].floor < profiles["grounded"].floor,
+        f"{profiles['perturbed'].floor:.3f} < {profiles['grounded'].floor:.3f}",
     )
     check(
         "the weakest anchor IS the wrong number",
@@ -83,12 +83,12 @@ def main() -> int:
     )
     check(
         "reformatting is not a defect",
-        abs(profiles["reformatted"].score - profiles["grounded"].score) < 1e-6,
+        abs(profiles["reformatted"].floor - profiles["grounded"].floor) < 1e-6,
     )
 
     print("\nthe geometry channel cannot see the digit (this is the point)")
     geo = {
-        name: score(text, [("c", CONTEXT)], encoder=encoder, k=4)
+        name: proofread(text, [("c", CONTEXT)], encoder=encoder, k=4)
         for name, text in (("grounded", GROUNDED), ("perturbed", PERTURBED))
     }
     lexical = {
@@ -101,21 +101,21 @@ def main() -> int:
 
     print("\nwindowing on a long answer")
     long_answer = " ".join([GROUNDED] * 12)
-    profile = score(long_answer, [("c", CONTEXT)], encoder=encoder, k=1, max_anchors=8192)
+    profile = proofread(long_answer, [("c", CONTEXT)], encoder=encoder, k=1, max_anchors=8192)
     expected = len([u for u in segment(long_answer, locale("und")) if u.kind != "skipped"])
     token_count = len(encoder.token_spans(long_answer))
     print(f"  {token_count} tokens across windows of {encoder.max_tokens}")
     check(
         "no scoring word dropped past the token cap",
-        profile.n_scored == expected,
-        f"{profile.n_scored} == {expected}",
+        profile.n_marked == expected,
+        f"{profile.n_marked} == {expected}",
     )
     check("the long answer actually exceeded one window", token_count > encoder.max_tokens)
 
     print("\ndeterminism of the real path")
-    a = score(GROUNDED, [("c", CONTEXT)], encoder=encoder, k=1)
-    b = score(GROUNDED, [("c", CONTEXT)], encoder=encoder, k=1)
-    check("same input, same hash", a.profile_sha256 == b.profile_sha256)
+    a = proofread(GROUNDED, [("c", CONTEXT)], encoder=encoder, k=1)
+    b = proofread(GROUNDED, [("c", CONTEXT)], encoder=encoder, k=1)
+    check("same input, same hash", a.sha256 == b.sha256)
 
     print()
     if failures:
