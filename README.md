@@ -2,7 +2,7 @@
     
 # Groundlens: a proofreader for RAG answers
 
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/v3.0.1/docs/assets/Groundlens_01.png" width="30%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_01.png" width="30%">
 </div>
 
 
@@ -85,7 +85,7 @@ groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/v3.0.1/docs/assets/Groundlens1.png" width="85%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png" width="85%">
 </div>
 
 
@@ -129,7 +129,7 @@ models, an NLI cross-encoder, an LLM judge, and this one — at the operating po
 production actually runs at: **false-positive rate at 95% hallucination recall.**
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/v3.0.1/docs/assets/Groundlens2.png" width="85%">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png" width="85%">
 </div>
 
 Forty-five cells across the full grid. The best is **0.65**. A random detector
