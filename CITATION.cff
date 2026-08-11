@@ -18,5 +18,5 @@ abstract: >-
   similarity against the source. The answer-level figure is the floor: the mean of the k
   weakest anchors rather than the mean of all of them. It reports no verdict and ships no threshold.
 license: Apache-2.0
-version: 3.0.0
+version: 3.0.1
 date-released: '2026-08-10'
