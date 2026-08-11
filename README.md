@@ -1,12 +1,13 @@
 <div align="center">
+    
+# Groundlens: a proofreader for RAG answers
+
 <img src="docs/assets/Groundlens_01.png" width="30%">
 </div>
 
 
 <div align="center">
-
-# Groundlens: a proofreader for RAG answers
-
+    
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![Python](https://img.shields.io/pypi/pyversions/groundlens)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -15,7 +16,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-2c7a4b)](#install)
 
-[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Why no threshold](#why-there-is-no-threshold) · [Scope](#scope) · [groundlens.dev](https://groundlens.dev)
+[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Why no threshold](#why-there-is-no-threshold) · [Limitations](#limitations) · [groundlens.dev](https://groundlens.dev)
 
 </div>
 
@@ -84,7 +85,7 @@ groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 
 
 <div align="center">
-<img src="docs/assets/Groundlens1.png" width="70%">
+<img src="docs/assets/Groundlens1.png" width="85%">
 </div>
 
 
@@ -128,7 +129,7 @@ models, an NLI cross-encoder, an LLM judge, and this one — at the operating po
 production actually runs at: **false-positive rate at 95% hallucination recall.**
 
 <div align="center">
-<img src="docs/assets/Groundlens2.png" width="70%">
+<img src="docs/assets/Groundlens2.png" width="85%">
 </div>
 
 Forty-five cells across the full grid. The best is **0.65**. A random detector
@@ -153,51 +154,30 @@ print(point.threshold, point.fpr, point.fpr_ci95)   # read the fpr first
 It refuses to run on fewer than 200 labelled examples, because below that a
 95%-recall threshold is estimated from a handful of points.
 
----
 
-## Reproducibility
-
-**The numeral channel is exact.** Decimal comparison, fixed arithmetic context,
-locale from an argument and never from `LC_ALL`. Byte-for-byte identical on any
-machine — CI proves it on ten OS × Python combinations under
-`PYTHONHASHSEED=random` and a Turkish locale.
-
-**The lexical channel is a float32 cosine** from a pinned encoder *revision* —
-not a model name, because a silent re-upload would change every number you ever
-published. It reproduces to 1e-6 across platforms and the ordering of the weakest
-anchors is stable. It is not bit-identical between x86 and Apple Silicon, and we
-make no claim that it is.
-
-`marks.sha256` covers the structure and the numeral supports exactly, and rounds
-lexical supports to six decimals. Reproducing the hash reproduces the finding,
-not the last bits of the arithmetic.
-
----
-
-## Scope
-
-It verifies **stated** values against a **retrieved** source. Like a human
-proofreader, it can only check the document in front of it.
+## Limitations
 
 - It cannot verify computed values — "revenue tripled" against a source saying "revenue went from 5M to 15M".
 - It cannot check reasoning. That belongs to entailment models.
 - It inherits your retrieval. If the passage is wrong, so is the answer's grounding.
 - Segmentation assumes space-delimited scripts, and warns rather than pretending when the text is largely CJK or Thai.
 
----
+### Reproducibility
 
-## Documentation
+- **The numeral channel is exact.** Decimal comparison, fixed arithmetic context,
+locale from an argument and never from `LC_ALL`. Byte-for-byte identical on any
+machine — CI proves it on ten OS × Python combinations under
+`PYTHONHASHSEED=random` and a Turkish locale.
 
-| If you want to | Go to |
-|---|---|
-| Understand the method | [How it works](#how-it-works) |
-| Know why there's no pass/fail | [Why there is no threshold](#why-there-is-no-threshold) |
-| Use your own encoder | Implement the `Encoder` protocol — it has three members |
-| Wire it into an agent | `pip install "groundlens[encoder,mcp]"`, then `python -m groundlens.mcp`. One tool: `find_unsupported_words` |
-| Check it against a real model | `python scripts/verify_encoder.py` |
-| Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Report a vulnerability | [SECURITY.md](SECURITY.md) |
-| See which pre-v3 figures were withdrawn | [RETRACTIONS.md](RETRACTIONS.md) |
+- **The lexical channel is a float32 cosine** from a pinned encoder *revision* —
+not a model name, because a silent re-upload would change every number you ever
+published. It reproduces to 1e-6 across platforms and the ordering of the weakest
+anchors is stable. It is not bit-identical between x86 and Apple Silicon, and we
+make no claim that it is.
+
+- `marks.sha256` covers the structure and the numeral supports exactly, and rounds
+lexical supports to six decimals. Reproducing the hash reproduces the finding,
+not the last bits of the arithmetic.
 
 ---
 
