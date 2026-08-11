@@ -63,11 +63,29 @@ jobs:
           path: dist/
           if-no-files-found: error
 
+  # `gh release upload` and the SLSA generator both write assets INTO a
+  # release. A tag push does not create one. This job does, once, before
+  # either of them runs.
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: create the release for this tag if it does not exist yet
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 \
+            || gh release create "${GITHUB_REF_NAME}" \
+                 --title "${GITHUB_REF_NAME}" --generate-notes
+
   # SLSA 3 provenance. This is the reusable workflow that produced the
   # multiple.intoto.jsonl on the earlier releases; it must be called by tag,
   # not by SHA, or the generator refuses to run.
   provenance:
-    needs: build
+    needs: [build, create-release]
     permissions:
       actions: read
       id-token: write
@@ -78,7 +96,7 @@ jobs:
       upload-assets: true
 
   sign:
-    needs: build
+    needs: [build, create-release]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -96,6 +114,7 @@ jobs:
       - name: attach artifacts and signatures to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
 
   pypi:
