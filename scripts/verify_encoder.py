@@ -81,10 +81,22 @@ def main() -> int:
         profiles["perturbed"].weakest[0].evidence_text == "10,000",
         repr(profiles["perturbed"].weakest[0].evidence_text),
     )
+    # Reformatting 10,000 as 10000 must not change what the numeral channel
+    # concludes: same support, same source span. It DOES move the lexical floor
+    # a little, because deleting a comma changes the characters around the
+    # neighbouring words and therefore their embeddings. Only the arithmetic
+    # channel is exact, and that is the claim worth checking.
+    numerals = {
+        name: [(a.support, a.evidence_text) for a in profile.anchors if a.kind == "numeral"]
+        for name, profile in profiles.items()
+    }
     check(
-        "reformatting is not a defect",
-        abs(profiles["reformatted"].floor - profiles["grounded"].floor) < 1e-6,
+        "the numeral channel reads value, not spelling",
+        numerals["grounded"] == numerals["reformatted"],
+        f"{numerals['reformatted']}",
     )
+    drift = abs(profiles["reformatted"].floor - profiles["grounded"].floor)
+    print(f"  note: the lexical floor moves by {drift:.4f} between the two spellings")
 
     print("\nthe geometry channel cannot see the digit (this is the point)")
     geo = {
