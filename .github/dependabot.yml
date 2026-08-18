@@ -25,3 +25,8 @@ updates:
     groups:
       dev:
         patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: /.clusterfuzzlite
+    schedule:
+      interval: daily
