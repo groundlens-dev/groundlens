@@ -16,9 +16,18 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-2c7a4b)](#install)
 
-[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Why no threshold](#why-there-is-no-threshold) · [Limitations](#limitations) · [groundlens.dev](https://groundlens.dev)
+<br>
+
+:globe_with_meridians: [groundlens.dev](https://groundlens.dev)
+
+<br>
+
+[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Operational threshold](#operational-threshold) · [Limitations](#limitations) · [Reproducibility](#reproducibility)
 
 </div>
+
+<br>
+<br>
 
 Groundlens is a proofreader for what your model writes. It marks the words your
 sources don't back — and shows you what each one should have said.
@@ -34,17 +43,21 @@ GROUNDLENS  1,000   nothing supports this.   Closest in invoice.pdf#p1: '10,000'
 It never tells you the answer is wrong. It tells you which word to look at, and
 which document to open. Thirty seconds of human attention instead of five minutes.
 
+<br>
+
 ## Install
 
-```bash
+```python
 pip install groundlens              # zero runtime dependencies. Not numpy, not torch
 pip install "groundlens[encoder]"   # + the reference sentence encoder
 pip install "groundlens[mcp]"       # + the MCP connector
 ```
 
-The core install pulls **nothing**, and a CI job fails the build if that ever
+The core install pullsany package, and a CI job fails the build if that ever
 changes. The previous version installed roughly two gigabytes of deep learning
 stack before you had done anything.
+
+<br>
 
 
 ## Quick start
@@ -79,30 +92,29 @@ From the shell:
 ```bash
 groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 ```
-
+<br>
 
 ## How it works
 
+<br>
 
 <div align="center">
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png" width="85%">
 </div>
 
+<br>
 
-**Words are anchored by meaning.** A word's support is the highest cosine
-similarity it reaches against any word of the sources, using a frozen
-off-the-shelf encoder — the same kind your retrieval already uses.
+Groundlens approaches words and numbers comparison in two different ways:
 
-**Numbers are anchored by arithmetic.** The numeral is parsed to a value with
-formatting normalised — `10,000`, `10000`, `$10,000`, `10 000` and (under a
-declared locale) `10.000` are one number — then checked against every value in
-the sources. Support is exactly `1.0` or exactly `0.0`. Similarity is not allowed
-to vote.
+| Words | Numbers |
+|---|---|
+|Words are anchored by meaning. A word's support is the highest cosine similarity it reaches against any word of the sources, using a frozen off-the-shelf encoder — the same kind your retrieval already uses.| Numbers are anchored by arithmetic. The numeral is parsed to a value with formatting normalised — `10,000`, `10000`, `$10,000`, `10 000` and (under a declared locale) `10.000` are one number — then checked against every value in the sources. Support is exactly `1.0` or exactly `0.0`. Similarity is not allowed to vote.|
 
-**And we report the floor, not the average.** Every token-similarity metric
-aggregates by the mean, and the mean is where single-token errors go to die.
+Groundlens provide the lowest score as output, not the average. Every token-similarity metric aggregates by the mean, and the mean is where single-token errors go to die.
 
-### Ten is not a hundred
+<br>
+
+### A practical example: ten is not a hundred
 
 A retrieved document says the total due is **10,000 dollars**. The answer says
 **1,000 dollars**. A human catches that instantly, without a finance degree.
@@ -121,28 +133,32 @@ encoder, very nearly a paraphrase.
 On that invoice, the **mean** support of the wrong answer is 0.79 — which looks
 fine. The **weakest anchor** is 0.00 — which is a mark in the margin.
 
+<br>
 
-## Why there is no threshold
+## Operational threshold
 
-We measured nine detectors across five public benchmarks — two published encoder
-models, an NLI cross-encoder, an LLM judge, and this one — at the operating point
-production actually runs at: **false-positive rate at 95% hallucination recall.**
+This library has no default threshold. A threshold is a property of a deployment, not of a method. It depends on the
+encoder, on your data, and on what a false positive costs you compared to a false negative. None of that is known here.
+
+There is a measurement behind the rule. Across the operating-point grid we ran, the best false positive rate at 95 percent recall was 0.65, for every single-pass detector we tested, including this one. At the recall a regulated review actually needs, no fixed cut in that grid is usable. Shipping one would mean shipping a number we already know does not hold.
+
+<br>
 
 <div align="center">
 <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png" width="85%">
 </div>
+<br>
 
-Forty-five cells across the full grid. The best is **0.65**. A random detector
-sits at 0.95. One method ranks best of all by AUROC and flags **99% of correct
-answers** at the operating point. Nobody is in the usable corner — **including us**.
 
-So `proofread()` returns no verdict and the library ships no default cut. If it
-did, someone would deploy it and be escalating two thirds of their clean traffic
-within a week. That is not a limitation of this library; it is the finding, and
-marks-not-verdicts is what you build once you take it seriously.
+What groundlens provide is:
 
-If you need a threshold, fit it on your own labelled traffic and read what it
-costs you:
+- A support score per word, where lower means less supported by the sources.
+- Marks with receipts: the word, its span, its support, and the nearest
+  evidence sentence, so a reviewer can check any call in seconds.
+- A function `calibrate()`, which fits a cut on your own labelled data. It refuses to run
+  on fewer than 200 labelled examples, because below that the cut is noise.
+
+If you need a threshold in your pipeline, run `calibrate()` on your labelled data: 
 
 ```python
 from groundlens import calibrate
@@ -151,18 +167,26 @@ point = calibrate(labelled, target_recall=0.95)
 print(point.threshold, point.fpr, point.fpr_ci95)   # read the fpr first
 ```
 
-It refuses to run on fewer than 200 labelled examples, because below that a
-95%-recall threshold is estimated from a handful of points.
+> `calibrate()` needs at least 200 labelled examples, because below that a 95%-recall threshold is estimated from a handful of points.
+
+<br>
 
 
 ## Limitations
 
 - It cannot verify computed values — "revenue tripled" against a source saying "revenue went from 5M to 15M".
+- The word channel checks whether a word is
+  supported by the sources. It does not check that it is attached to the right
+  thing. If an answer says "payable in 30 days" about invoice A and the 30 days
+  belong to invoice B elsewhere in the same context, the word is supported and
+  no mark appears. 
 - It cannot check reasoning. That belongs to entailment models.
 - It inherits your retrieval. If the passage is wrong, so is the answer's grounding.
 - Segmentation assumes space-delimited scripts, and warns rather than pretending when the text is largely CJK or Thai.
 
-### Reproducibility
+<br>
+
+## Reproducibility
 
 - **The numeral channel is exact.** Decimal comparison, fixed arithmetic context,
 locale from an argument and never from `LC_ALL`. Byte-for-byte identical on any
@@ -179,10 +203,12 @@ make no claim that it is.
 lexical supports to six decimals. Reproducing the hash reproduces the finding,
 not the last bits of the arithmetic.
 
----
+<br>
 
 <div align="center">
 
 [groundlens.dev](https://groundlens.dev) · [PyPI](https://pypi.org/project/groundlens/) · [Retractions](RETRACTIONS.md) · [Contributing](CONTRIBUTING.md) · Apache-2.0
 
+<br>
+Libary developed by Javier Marín, June 2026 (javier@jmarin.info)
 </div>
