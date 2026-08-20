@@ -259,12 +259,26 @@ def test_receipt_explains_exact_string_only_when_support_is_low() -> None:
     # near-1 matches so reports do not fill with explanations.
     from groundlens import Anchor
 
-    low = Anchor(text="dollars", span=(0, 7), kind="lexical", support=0.44,
-                 evidence_id="doc#s3", evidence_text="dollars",
-                 evidence_span=(0, 7), notes=("exact_string_in_span",))
-    high = Anchor(text="dollars", span=(0, 7), kind="lexical", support=0.98,
-                  evidence_id="doc#s3", evidence_text="dollars",
-                  evidence_span=(0, 7), notes=("exact_string_in_span",))
+    low = Anchor(
+        text="dollars",
+        span=(0, 7),
+        kind="lexical",
+        support=0.44,
+        evidence_id="doc#s3",
+        evidence_text="dollars",
+        evidence_span=(0, 7),
+        notes=("exact_string_in_span",),
+    )
+    high = Anchor(
+        text="dollars",
+        span=(0, 7),
+        kind="lexical",
+        support=0.98,
+        evidence_id="doc#s3",
+        evidence_text="dollars",
+        evidence_span=(0, 7),
+        notes=("exact_string_in_span",),
+    )
     assert "in the span" in low.receipt()
     assert "in the span" not in high.receipt()
 
