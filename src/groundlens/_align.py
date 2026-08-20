@@ -129,13 +129,15 @@ def _max_similarity_pure(
     rows: list[int],
     answer: TokenVectors,
     context: TokenVectors,
+    cols: list[int],
 ) -> tuple[float, int]:
     """Best (similarity, context token index) over answer tokens ``rows``."""
     best = -1.0
     best_j = -1
     for i in rows:
         a = answer.vectors[i]
-        for j, c in enumerate(context.vectors):
+        for j in cols:
+            c = context.vectors[j]
             dot = 0.0
             for x, y in zip(a, c, strict=True):
                 dot += x * y
@@ -149,6 +151,7 @@ def _max_similarity_numpy(
     rows: list[int],
     answer: TokenVectors,
     context: TokenVectors,
+    cols: list[int],
 ) -> tuple[float, int] | None:
     """Same result, vectorised. Returns None when numpy is unavailable."""
     try:
@@ -156,16 +159,32 @@ def _max_similarity_numpy(
     except ImportError:  # pragma: no cover - exercised by the no-dependencies CI job
         return None
     a = np.asarray([answer.vectors[i] for i in rows], dtype=np.float32)
-    c = np.asarray(context.vectors, dtype=np.float32)
+    c = np.asarray([context.vectors[j] for j in cols], dtype=np.float32)
     sims = a @ c.T
     flat = int(sims.argmax())
-    return float(sims.flat[flat]), int(flat % sims.shape[1])
+    return float(sims.flat[flat]), cols[int(flat % sims.shape[1])]
+
+
+def scorable_columns(text: str, tokens: TokenVectors) -> tuple[int, ...]:
+    """Context tokens worth anchoring to: at least one alphanumeric character.
+
+    A period or a stray quote also gets a contextual vector, and on a short
+    span it can win the max by accident. A support built on one is noise, and
+    a receipt saying the nearest thing to your weakest word is a full stop
+    helps nobody. Punctuation-only tokens are therefore excluded from the
+    search. If a source contains nothing else, callers fall back to the full
+    set, because support 0.0-by-filtering would be a lie of a different kind.
+    """
+    return tuple(
+        j for j, (a, b) in enumerate(tokens.spans) if any(ch.isalnum() for ch in text[a:b])
+    )
 
 
 def best_anchor(
     span: Span,
     answer: TokenVectors,
     context: TokenVectors,
+    candidate_cols: tuple[int, ...] | None = None,
 ) -> tuple[float, int] | None:
     """Support for the word at ``span``, and which context token gave it.
 
@@ -176,9 +195,10 @@ def best_anchor(
     rows = tokens_overlapping(span, answer)
     if not rows or len(context) == 0:
         return None
-    vectorised = _max_similarity_numpy(rows, answer, context)
+    cols = list(candidate_cols) if candidate_cols else list(range(len(context)))
+    vectorised = _max_similarity_numpy(rows, answer, context, cols)
     similarity, index = (
-        vectorised if vectorised is not None else _max_similarity_pure(rows, answer, context)
+        vectorised if vectorised is not None else _max_similarity_pure(rows, answer, context, cols)
     )
     # Cosine of L2-normalised vectors lives in [-1, 1]; support is reported in
     # [0, 1] because a negative similarity and a zero one mean the same thing
