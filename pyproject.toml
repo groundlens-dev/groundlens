@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "groundlens"
-version = "3.0.1"
+version = "3.0.2"
 description = "Shows you which words in an answer your sources don't support, and what each one lost to."
 readme = "README.md"
 license = "Apache-2.0"
@@ -28,7 +28,7 @@ dependencies = []
 
 [project.optional-dependencies]
 # The reference encoder. Only needed to actually read text.
-encoder = ["sentence-transformers>=5.7.0", "numpy>=2.2.6"]
+encoder = ["sentence-transformers>=5.7.0", "numpy>=1.26"]
 mcp = ["mcp>=2.0.0"]
 dev = ["pytest>=9.1.1", "ruff>=0.16.2", "mypy>=2.3.0"]
 
