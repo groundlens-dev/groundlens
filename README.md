@@ -22,7 +22,7 @@
 
 <br>
 
-[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Operational threshold](#operational-threshold) · [Limitations](#limitations) · [Reproducibility](#reproducibility)
+[Install](#install) · [Quick start](#quick-start) · [MCP server](#mcp-server) · [How it works](#how-it-works) · [Operational threshold](#operational-threshold) · [Limitations](#limitations) · [Reproducibility](#reproducibility)
 
 </div>
 
@@ -50,11 +50,11 @@ which document to open. Thirty seconds of human attention instead of five minute
 ```python
 pip install groundlens              # zero runtime dependencies. Not numpy, not torch
 pip install "groundlens[encoder]"   # + the reference sentence encoder
-pip install "groundlens[mcp]"       # + the MCP connector
+pip install "groundlens[encoder,mcp]"   # + the MCP server, for Claude Desktop and friends
 ```
 
-The core install pullsany package, and a CI job fails the build if that ever
-changes. The previous version installed roughly two gigabytes of deep learning
+The core install pulls in no package at all, and a CI job fails the build if
+that ever changes. The previous version installed roughly two gigabytes of deep learning
 stack before you had done anything.
 
 <br>
@@ -92,6 +92,81 @@ From the shell:
 ```bash
 groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
 ```
+<br>
+
+## MCP server
+
+The same proofreader, inside your assistant. Groundlens ships an MCP server, so
+Claude Desktop, Claude Code, Cursor, VS Code or any other MCP client can check an
+answer against its sources without leaving the conversation. It runs locally over
+stdio. No text goes anywhere.
+
+```bash
+pip install "groundlens[encoder,mcp]"
+python -m groundlens.mcp
+```
+
+Then point your client at it. In `claude_desktop_config.json` — or the equivalent
+`mcp.json` in Cursor and VS Code:
+
+```json
+{
+  "mcpServers": {
+    "groundlens": {
+      "command": "python",
+      "args": ["-m", "groundlens.mcp"]
+    }
+  }
+}
+```
+
+Use the absolute path to the Python that has Groundlens installed if it is not
+the one on your PATH: `/path/to/venv/bin/python`.
+
+### The one tool
+
+`find_unsupported_words(answer, sources, k=4, locale="und")`
+
+| | |
+|---|---|
+| `answer` | the model output to check |
+| `sources` | `[{"id": "policy.pdf#p3", "text": "..."}]`. The id comes back in the findings, so the reader knows which document to open |
+| `k` | how many of the weakest anchors to return |
+| `locale` | how these documents write numbers. `es` reads 1.234 as 1234, `en` reads it as 1.234, `und` keeps both readings |
+
+It returns the weakest anchors with their receipts, the floor, the encoder id and
+a `sha256` of the finding:
+
+```json
+{
+  "weakest_anchors": [
+    {
+      "word": "4.75%",
+      "support": 0.0,
+      "checked_by": "arithmetic",
+      "closest_in_sources": "3.90%",
+      "source_id": "policy.pdf#p3",
+      "notes": []
+    }
+  ],
+  "floor": 0.0,
+  "n_marked": 12,
+  "encoder_id": "all-mpnet-base-v2@<revision-sha>",
+  "sha256": "..."
+}
+```
+
+One tool, on purpose. The previous server advertised three, and that is how one
+product turns into three stories before anyone has installed it.
+
+There is no verdict and no threshold, here as everywhere else in this library. A
+`support` of 0.00 on a number means that value is absent from the sources. On a
+word it means no lexical anchor was found, which is ordinary in a faithful
+paraphrase. The server reports the marks; the reader decides.
+
+The encoder loads on the first call, not at startup, and the model downloads once
+(about 420 MB) the first time it is used.
+
 <br>
 
 ## How it works

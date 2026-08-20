@@ -77,6 +77,21 @@ def test_the_mcp_connector_exposes_exactly_one_tool() -> None:
     assert text.count("@server.tool(") == 1
 
 
+def test_the_mcp_server_actually_builds_against_the_installed_sdk() -> None:
+    """The two file-text assertions above pass even when the server cannot start.
+
+    ``mcp`` 2.0 moved ``FastMCP`` to ``mcp.server.mcpserver.MCPServer``. Nothing in
+    this suite noticed, because no job installed the extra. This one does.
+    """
+    import asyncio
+
+    pytest.importorskip("mcp", reason="the [mcp] extra is not installed")
+    from groundlens.mcp import build_server
+
+    tools = asyncio.run(build_server().list_tools())
+    assert [t.name for t in tools] == ["find_unsupported_words"]
+
+
 def test_the_mcp_response_refuses_to_imply_a_verdict() -> None:
     from groundlens import mcp
 
