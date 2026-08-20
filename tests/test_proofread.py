@@ -236,3 +236,44 @@ def test_receipt_line_is_readable() -> None:
     assert "\t" not in line
     assert "support 0.00" in line
     assert "nearest in" in line
+
+
+# --- exact string in span, low support: the note explains the gap ---------
+
+
+def test_exact_string_in_span_note_is_set() -> None:
+    # "dollars" occurs verbatim in the evidence. The note records that fact at
+    # every support level, so downstream readers can tell "absent" from
+    # "present but used differently".
+    profile = run(
+        "Willowbark Labs has dividend 0.45 dollars per share",
+        [("doc#s3", "Its subsidiary recorded a net loss of 2.1 million dollars")],
+    )
+    dollars = next(a for a in profile.anchors if a.text == "dollars")
+    assert "exact_string_in_span" in dollars.notes
+
+
+def test_receipt_explains_exact_string_only_when_support_is_low() -> None:
+    # The suffix renders when the gap between "string present" and a low
+    # contextual score would read as a defect, and stays quiet on clean
+    # near-1 matches so reports do not fill with explanations.
+    from groundlens import Anchor
+
+    low = Anchor(text="dollars", span=(0, 7), kind="lexical", support=0.44,
+                 evidence_id="doc#s3", evidence_text="dollars",
+                 evidence_span=(0, 7), notes=("exact_string_in_span",))
+    high = Anchor(text="dollars", span=(0, 7), kind="lexical", support=0.98,
+                  evidence_id="doc#s3", evidence_text="dollars",
+                  evidence_span=(0, 7), notes=("exact_string_in_span",))
+    assert "in the span" in low.receipt()
+    assert "in the span" not in high.receipt()
+
+
+def test_absent_word_gets_no_exact_string_note() -> None:
+    profile = run(
+        "Foxglove announced a dividend",
+        [("doc#s1", "Its subsidiary recorded a net loss of 2.1 million dollars")],
+    )
+    dividend = next(a for a in profile.anchors if a.text == "dividend")
+    assert "exact_string_in_span" not in dividend.notes
+    assert "in the span" not in dividend.receipt()

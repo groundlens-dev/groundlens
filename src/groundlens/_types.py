@@ -13,6 +13,11 @@ from typing import Literal, Protocol, runtime_checkable
 
 Span = tuple[int, int]
 
+#: Below this support, an exact string match in the span is surprising enough
+#: that the receipt explains the gap. Presentation only: no score, decision or
+#: hash depends on it, and the note itself is recorded at every support level.
+_EXPLAIN_EXACT_BELOW = 0.75
+
 AnchorKind = Literal["lexical", "numeral", "skipped"]
 
 #: Reason codes attachable to an anchor. Kept closed so they can be asserted on.
@@ -24,6 +29,9 @@ NOTE_CODES = frozenset(
         "stopword",  # excluded from scoring
         "no_alpha",  # punctuation-only token, excluded from scoring
         "single_digit",  # bare 1-digit numeral, treated lexically (enumerators)
+        "exact_string_in_span",  # the word occurs verbatim in the winning evidence;
+        # support is a contextual score, so the two can disagree, and that
+        # disagreement is the signature of the same word used differently
     }
 )
 
@@ -64,7 +72,14 @@ class Anchor:
         if self.evidence_text is None:
             return f"{head}   no anchor found"
         where = self.evidence_id or "source"
-        return f"{head}   nearest in {where}: {self.evidence_text!r}"
+        line = f"{head}   nearest in {where}: {self.evidence_text!r}"
+        if "exact_string_in_span" in self.notes and self.support < _EXPLAIN_EXACT_BELOW:
+            # Same string, different use: contextual token vectors score the
+            # word as used, not the word as spelled, so an exact string match
+            # in the span does not pin support near 1. When the gap is wide
+            # enough to surprise, the line says so instead of looking broken.
+            line += "   (word is in the span; support scores its use in context)"
+        return line
 
 
 @dataclass(frozen=True, slots=True)
