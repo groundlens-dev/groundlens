@@ -2,8 +2,8 @@ cff-version: 1.2.0
 title: groundlens
 message: >-
   If you use this software, please cite it. Note that performance figures
-  published by this project before v3.0.0 have been withdrawn; see
-  RETRACTIONS.md before citing any number from an earlier version.
+  published by this project before v3.0.0 have been withdrawn and should not
+  be cited.
 type: software
 authors:
   - family-names: Marin

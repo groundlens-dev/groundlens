@@ -7,7 +7,7 @@ of this project reached 47,000 lines and almost none of it was load-bearing.
 
 **1. No number is published unless committed code regenerates it.**
 Script, seed and pinned source revision, or it does not go in the README. This
-is why v3 exists; see `RETRACTIONS.md`.
+is why v3 exists.
 
 **2. No threshold, no `decision` field, no verdict.**
 At 95% hallucination recall, no published method — including this one — reaches

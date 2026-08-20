@@ -5,7 +5,7 @@
 | Version | Supported |
 |---|---|
 | 3.x | yes |
-| 2.x and earlier | no — see [RETRACTIONS.md](RETRACTIONS.md) |
+| 2.x and earlier | no — unsupported, and its published figures were withdrawn |
 
 ## Reporting a vulnerability
 
