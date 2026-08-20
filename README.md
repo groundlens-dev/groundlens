@@ -2,7 +2,7 @@
     
 # Groundlens: a proofreader for RAG answers
 
-![Groundlens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_01.png)
+![Groundlens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_02.png)
 </div>
 
 
@@ -50,6 +50,7 @@ which document to open. Thirty seconds of human attention instead of five minute
 <br>
 
 <div align="center">
+    
 ![How Groundlens checks words and numbers](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png)
 </div>
 
@@ -96,7 +97,9 @@ There is a measurement behind the rule. Across the operating-point grid we ran, 
 <br>
 
 <div align="center">
+    
 ![Support scores and the weakest anchor](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png)
+
 </div>
 <br>
 
