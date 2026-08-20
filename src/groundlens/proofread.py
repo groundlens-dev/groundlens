@@ -23,6 +23,7 @@ printed next to the source word it lost to.
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Sequence
 from decimal import Decimal
 
@@ -146,6 +147,11 @@ def _numeral_anchor(
 _EDGE_TRIM = frozenset("\"'\u2018\u2019\u201c\u201d()[]{}.,;:!?\u00ab\u00bb")
 
 
+def _word_in(word: str, text: str) -> bool:
+    """Whether ``word`` occurs in ``text`` as a whole word, case-insensitively."""
+    return re.search(rf"(?<!\w){re.escape(word)}(?!\w)", text, re.IGNORECASE) is not None
+
+
 def _expand_to_word(text: str, span: tuple[int, int]) -> tuple[str, tuple[int, int]]:
     """Grow a token span to the whitespace-delimited word around it, trimmed.
 
@@ -195,6 +201,7 @@ def _lexical_anchor(
     best_id: str | None = None
     best_text: str | None = None
     best_span: tuple[int, int] | None = None
+    best_source: str | None = None
 
     for evidence, tokens, cols in context_tokens:
         found = best_anchor(unit.span, answer_tokens, tokens, cols)
@@ -204,7 +211,17 @@ def _lexical_anchor(
         if best_id is None or support > best_support:
             best_support = support
             best_id = evidence.id
+            best_source = evidence.text
             best_text, best_span = _expand_to_word(evidence.text, tokens.spans[token_index])
+
+    notes = unit.notes
+    if best_source is not None and _word_in(unit.text, best_source):
+        # The exact string is present in the evidence the anchor came from.
+        # Support can still be low, because the score is a contextual cosine:
+        # the same word used differently is scored as different. The note puts
+        # that fact on the record so the receipt can explain the gap instead of
+        # looking broken. It changes no score and makes no decision.
+        notes = (*notes, "exact_string_in_span")
 
     return Anchor(
         text=unit.text,
@@ -214,7 +231,7 @@ def _lexical_anchor(
         evidence_id=best_id,
         evidence_text=best_text,
         evidence_span=best_span,
-        notes=unit.notes,
+        notes=notes,
     )
 
 

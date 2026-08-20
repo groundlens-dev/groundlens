@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "groundlens"
-version = "3.0.3"
+version = "3.0.4"
 description = "Shows you which words in an answer your sources don't support, and what each one lost to."
 readme = "README.md"
 license = "Apache-2.0"
