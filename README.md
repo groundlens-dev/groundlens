@@ -290,7 +290,7 @@ not the last bits of the arithmetic.
 
 <div align="center">
 
-[groundlens.dev](https://groundlens.dev) · [PyPI](https://pypi.org/project/groundlens/) · [Retractions](RETRACTIONS.md) · [Contributing](CONTRIBUTING.md) · Apache-2.0
+[groundlens.dev](https://groundlens.dev) · [Docs](https://docs.groundlens.dev) · [PyPI](https://pypi.org/project/groundlens/) · [Contributing](CONTRIBUTING.md) · Apache-2.0
 
 <br>
 Libary developed by Javier Marín, June 2026 (javier@jmarin.info)

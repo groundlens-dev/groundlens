@@ -1,164 +1,774 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Groundlens — a proofreader for RAG answers</title>
-<meta name="description" content="A proofreader for what your model writes. It marks the words your sources don't back, and shows you what each one should have said.">
-<meta property="og:title" content="groundlens">
-<meta property="og:description" content="A proofreader for what your model writes.">
+<title>Groundlens API reference — proofread, calibrate, Anchor, Encoder</title>
+<meta name="description" content="API reference for the groundlens Python package: proofread(), calibrate(), adaptive_k(), the Proofread, Anchor, OperatingPoint, Evidence and WindowEncoding dataclasses, the Encoder protocol, SentenceTransformerEncoder, the command line interface and the MCP server.">
+<link rel="canonical" href="https://docs.groundlens.dev/">
 <meta property="og:type" content="website">
+<meta property="og:title" content="Groundlens API reference">
+<meta property="og:description" content="Every public function, class and parameter in the groundlens Python package, with types, defaults and recommended values.">
+<link rel="icon" href="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#14161a; --muted:#5b6270; --line:#e4e6eb; --bg:#fbfbfc;
-    --code:#f4f5f7; --alarm:#b4232a; --ok:#2c7a4b; --link:#1a4fd6;
+  :root {
+    --bg: #0a0c0e; --panel: #0d1014; --panel2: #0f1318;
+    --text: #e8ebef; --body: #c2c9d1; --dim: #9aa4b0; --dimmer: #6b7684;
+    --line: #171c22; --line2: #1e242b; --line3: #262d35;
+    --accent: #fc7604; --link: #ff8c2e;
   }
-  @media (prefers-color-scheme: dark){
-    :root{ --ink:#e8eaee; --muted:#9aa2b1; --line:#282c34; --bg:#101216;
-           --code:#181b21; --alarm:#ff7a80; --ok:#5fd18b; --link:#7fa8ff; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.6; font-size: 16px;
   }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: #ffa457; }
+  code, pre { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  code { font-size: 0.92em; }
+  :target { scroll-margin-top: 84px; }
+
+  nav.top {
+    position: sticky; top: 0; z-index: 50; display: flex; align-items: center;
+    justify-content: space-between; padding: 14px 32px;
+    background: rgba(10,12,14,0.82); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
   }
-  main{max-width:46rem; margin:0 auto; padding:5rem 1.5rem 6rem}
-  h1{font-size:1.35rem; letter-spacing:-.01em; margin:0 0 .35rem; font-weight:650}
-  h2{font-size:1rem; letter-spacing:.02em; text-transform:uppercase; color:var(--muted);
-     font-weight:600; margin:3.5rem 0 1rem}
-  .lede{font-size:1.5rem; line-height:1.35; letter-spacing:-.02em; margin:0 0 2rem; font-weight:600}
-  p{margin:0 0 1.1rem}
-  .muted{color:var(--muted)}
-  a{color:var(--link)}
-  pre{
-    background:var(--code); border:1px solid var(--line); border-radius:8px;
-    padding:1rem 1.1rem; overflow-x:auto; margin:0 0 1.5rem;
-    font:13.5px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  nav.top .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 600; }
+  nav.top .links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; }
+  nav.top .links a { color: var(--dim); }
+
+  .breadcrumb {
+    max-width: 1180px; margin: 0 auto; padding: 18px 32px 0;
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--dimmer);
   }
-  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em}
-  p code{background:var(--code); padding:.1em .35em; border-radius:4px}
-  .alarm{color:var(--alarm)} .ok{color:var(--ok)}
-  table{border-collapse:collapse; width:100%; margin:0 0 1.5rem; font-size:.9rem}
-  th,td{text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--line)}
-  th{color:var(--muted); font-weight:600; font-size:.8rem; text-transform:uppercase; letter-spacing:.03em}
-  td.n{font-variant-numeric:tabular-nums; text-align:right}
-  .note{border-left:2px solid var(--line); padding-left:1rem; color:var(--muted); font-size:.94rem}
-  footer{margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
-         color:var(--muted); font-size:.88rem}
+  .breadcrumb a { color: var(--dim); }
+  .breadcrumb span { margin: 0 8px; }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 32px 40px; display: grid; grid-template-columns: 250px minmax(0,1fr); gap: 48px; }
+  aside { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; padding: 24px 0 40px; }
+  aside h2 { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dimmer); margin: 22px 0 8px; font-weight: 600; }
+  aside h2:first-child { margin-top: 0; }
+  aside ul { list-style: none; margin: 0; padding: 0; }
+  aside li { margin: 0; }
+  aside a { display: block; padding: 4px 0 4px 10px; font-size: 13.5px; color: var(--dim); border-left: 2px solid transparent; }
+  aside a:hover { color: var(--text); border-left-color: var(--accent); }
+  aside a code { font-size: 12.5px; }
+
+  main { padding: 24px 0 0; min-width: 0; }
+  h1 { font-size: clamp(1.9rem, 3.4vw, 2.5rem); line-height: 1.12; letter-spacing: -0.025em; font-weight: 600; margin: 0 0 14px; }
+  h2.sec { font-size: 1.55rem; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 64px 0 8px; padding-top: 28px; border-top: 1px solid var(--line); }
+  h3.api { font-family: "IBM Plex Mono", monospace; font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 40px 0 6px; }
+  h3.api .kind { font-family: "IBM Plex Sans", sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border: 1px solid #3a2a16; background: rgba(252,118,4,0.09); border-radius: 4px; padding: 2px 7px; margin-right: 10px; vertical-align: middle; }
+  h4 { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dimmer); font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 14px; color: var(--body); max-width: 76ch; }
+  ul.plain { color: var(--body); max-width: 76ch; padding-left: 20px; }
+  ul.plain li { margin-bottom: 6px; }
+
+  pre { background: var(--panel); border: 1px solid var(--line2); border-radius: 10px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.7; color: var(--body); margin: 0 0 18px; }
+  pre .c { color: var(--dimmer); }
+  p code, td code, li code { background: #12171d; border: 1px solid var(--line2); border-radius: 4px; padding: 1px 5px; color: #d8dee6; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 14px; }
+  th { text-align: left; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--dimmer); font-weight: 600; padding: 0 14px 8px 0; border-bottom: 1px solid var(--line2); }
+  td { padding: 11px 14px 11px 0; border-bottom: 1px solid var(--line); color: var(--body); vertical-align: top; }
+  td:first-child { white-space: nowrap; }
+  td .pname { font-family: "IBM Plex Mono", monospace; color: var(--text); font-weight: 500; }
+  td .ptype { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--dim); }
+  td .pdef { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: #8fbf7f; }
+  .rec { display: block; margin-top: 6px; font-size: 13px; color: var(--dim); }
+  .rec b { color: #ffb46b; font-weight: 500; }
+
+  .note { border-left: 2px solid var(--accent); background: rgba(252,118,4,0.045); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 20px; }
+  .note p { margin: 0; color: var(--body); }
+  .note .lbl { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 5px; }
+
+  footer.site { border-top: 1px solid var(--line); margin-top: 72px; padding: 30px 32px 60px; }
+  footer.site .inner { max-width: 1180px; margin: 0 auto; font-size: 13px; color: var(--dimmer); line-height: 1.7; }
+  footer.site a { color: var(--dim); }
+
+  @media (max-width: 940px) {
+    .shell { grid-template-columns: 1fr; gap: 0; padding: 0 20px 40px; }
+    aside { position: static; max-height: none; border-bottom: 1px solid var(--line); }
+    nav.top { padding: 14px 20px; }
+    .breadcrumb { padding: 16px 20px 0; }
+  }
 </style>
 </head>
 <body>
-<main>
 
-  <h1>Groundlens: a proofreader for RAG answers</h1>
-  <p class="lede">It marks the words your sources don&rsquo;t back &mdash; and shows you what each one should have said.</p>
+<nav class="top">
+  <a class="brand" href="https://groundlens.dev/">
+    <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/logo.svg" alt="" style="height:24px;width:auto;display:block;">
+    <span>Groundlens</span>
+  </a>
+  <div class="links">
+    <a href="https://groundlens.dev/">Home</a>
+    <a href="https://github.com/groundlens-dev/groundlens">GitHub</a>
+    <a href="https://pypi.org/project/groundlens/">PyPI</a>
+  </div>
+</nav>
 
-<pre><code>QUESTION    What is the invoice total?
-SOURCE      ...the total amount due is 10,000 dollars, payable within 30 days...
-ANSWER      The invoice total is <span class="alarm">1,000</span> dollars, due in 30 days.
+<div class="breadcrumb">
+  <a href="https://groundlens.dev/">&larr; groundlens.dev</a><span>/</span>Documentation
+</div>
 
-GROUNDLENS  <span class="alarm">1,000</span>   nothing supports this.   Closest in invoice.pdf#p1: '10,000'</code></pre>
+<div class="shell">
 
-  <p>It never tells you the answer is wrong. It tells you which word to look at,
-  and which document to open. Thirty seconds of human attention instead of five
-  minutes.</p>
+  <aside>
+    <h2>Getting started</h2>
+    <ul>
+      <li><a href="#install">Installation</a></li>
+      <li><a href="#quickstart">Quickstart</a></li>
+      <li><a href="#concepts">Concepts</a></li>
+    </ul>
 
-<pre><code>pip install "groundlens[encoder]"</code></pre>
+    <h2>Functions</h2>
+    <ul>
+      <li><a href="#proofread-fn"><code>proofread()</code></a></li>
+      <li><a href="#adaptive-k"><code>adaptive_k()</code></a></li>
+      <li><a href="#calibrate"><code>calibrate()</code></a></li>
+    </ul>
 
-<pre><code><b>from</b> groundlens <b>import</b> proofread, SentenceTransformerEncoder
+    <h2>Result classes</h2>
+    <ul>
+      <li><a href="#proofread-class"><code>Proofread</code></a></li>
+      <li><a href="#anchor"><code>Anchor</code></a></li>
+      <li><a href="#operatingpoint"><code>OperatingPoint</code></a></li>
+    </ul>
 
-marks = proofread(answer, [("policy.pdf#p3", passage)],
-                  encoder=SentenceTransformerEncoder())
-<b>print</b>(marks.report())</code></pre>
+    <h2>Input classes</h2>
+    <ul>
+      <li><a href="#evidence"><code>Evidence</code></a></li>
+    </ul>
 
-  <h2>Ten is not a hundred</h2>
+    <h2>Encoders</h2>
+    <ul>
+      <li><a href="#encoder"><code>Encoder</code></a></li>
+      <li><a href="#windowencoding"><code>WindowEncoding</code></a></li>
+      <li><a href="#ste"><code>SentenceTransformerEncoder</code></a></li>
+    </ul>
 
-  <p>A retrieved document says the total due is <b>10,000 dollars</b>. The answer
-  says <b>1,000 dollars</b>. A human catches that instantly, without a finance degree.</p>
+    <h2>Types and constants</h2>
+    <ul>
+      <li><a href="#types">Type aliases</a></li>
+      <li><a href="#notes">Note codes</a></li>
+      <li><a href="#locales">Locales</a></li>
+      <li><a href="#constants">Constants</a></li>
+    </ul>
 
-  <p>Embedding similarity does not. Cosine between the correct answer and the
-  wrong one is about 0.99 &mdash; the error dissolves into the vector the way a
-  drop of ink dissolves in a pool. An LLM judge does not either: it reads for
-  plausibility, and &ldquo;the total is 1,000 dollars&rdquo; is a perfectly
-  plausible sentence about an invoice. Sentence encoders organise text by
-  vocabulary, topic and structure. Never by truth.</p>
+    <h2>Interfaces</h2>
+    <ul>
+      <li><a href="#cli">Command line</a></li>
+      <li><a href="#mcp">MCP server</a></li>
+    </ul>
 
-  <p>So groundlens uses two tests for two kinds of content.
-  <b>Words are anchored by meaning</b> &mdash; the best cosine similarity a word
-  reaches against any word of the sources.
-  <b>Numbers are anchored by arithmetic</b> &mdash; parsed to a value with
-  formatting normalised, so <code>10,000</code> and <code>10000</code> and
-  <code>$10,000</code> and <code>10.000</code> are one number, then checked for
-  presence. Support is exactly <span class="ok">1.0</span> or exactly
-  <span class="alarm">0.0</span>. Similarity is not allowed to vote.</p>
+    <h2>Reference</h2>
+    <ul>
+      <li><a href="#exceptions">Exceptions</a></li>
+      <li><a href="#limits">Limitations</a></li>
+    </ul>
+  </aside>
 
-  <p>And we report the <b>floor, not the average</b>. Every token-similarity
-  metric aggregates by the mean, and the mean is where single-token errors go to
-  die. On the invoice above the mean support of the wrong answer is 0.79, which
-  looks fine. The weakest anchor is 0.00, which is an alarm.</p>
+  <main>
+    <h1>API reference</h1>
+    <p style="font-size:17px;">
+      Every public name in the <code>groundlens</code> package, with its parameters,
+      their types, their defaults and the value to use when you are not sure.
+      Version 3.0.1.
+    </p>
 
-  <h2>There is no threshold</h2>
+    <h2 class="sec" id="install">Installation</h2>
+    <p>
+      The core package has no runtime dependencies. Not numpy, not torch. A CI job
+      fails the build if that ever changes, so <code>pip install groundlens</code> can
+      never grow into a deep learning install by accident.
+    </p>
+    <pre><code>pip install groundlens                    <span class="c"># core only, no dependencies</span>
+pip install "groundlens[encoder]"         <span class="c"># + the reference sentence encoder</span>
+pip install "groundlens[encoder,mcp]"     <span class="c"># + the MCP server</span>
+pip install "groundlens[dev]"             <span class="c"># + pytest, ruff, mypy</span></code></pre>
 
-  <p>We measured nine detectors across five public benchmarks &mdash; two
-  published encoder models, an NLI cross-encoder, an LLM judge, and this metric
-  &mdash; at the operating point production actually runs at: false-positive
-  rate at 95&nbsp;% hallucination recall.</p>
+    <table>
+      <thead><tr><th>Extra</th><th>Pulls in</th><th>Needed for</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">&mdash;</span></td><td><span class="ptype">nothing</span></td><td>The numeral channel, the dataclasses, <code>calibrate()</code>, and any encoder you write yourself.</td></tr>
+        <tr><td><span class="pname">encoder</span></td><td><span class="ptype">sentence-transformers&gt;=5.7.0<br>numpy&gt;=2.2.6</span></td><td><a href="#ste"><code>SentenceTransformerEncoder</code></a>, which is what scores words. Required for any real use of <code>proofread()</code>.</td></tr>
+        <tr><td><span class="pname">mcp</span></td><td><span class="ptype">mcp&gt;=2.0.0</span></td><td>The <a href="#mcp">MCP server</a>. Combine with <code>encoder</code>; the server needs both.</td></tr>
+        <tr><td><span class="pname">dev</span></td><td><span class="ptype">pytest, ruff, mypy</span></td><td>Running the test suite and the linters.</td></tr>
+      </tbody>
+    </table>
+    <p>Python 3.10 through 3.14. Linux, macOS and Windows.</p>
 
-  <table>
-    <thead><tr><th>Method</th><th class="n">Best AUROC</th><th class="n">FPR @ 95% recall</th></tr></thead>
-    <tbody>
-      <tr><td>Trained span detector</td><td class="n">0.817</td><td class="n">0.99</td></tr>
-      <tr><td>Small trained fact-checker</td><td class="n">0.865</td><td class="n">0.78</td></tr>
-      <tr><td>LLM judge</td><td class="n">0.737</td><td class="n">1.00</td></tr>
-      <tr><td>NLI cross-encoder</td><td class="n">0.681</td><td class="n">0.68</td></tr>
-      <tr><td>groundlens</td><td class="n">0.857</td><td class="n">0.70</td></tr>
-    </tbody>
-  </table>
+    <h2 class="sec" id="quickstart">Quickstart</h2>
+    <pre><code>from groundlens import proofread, SentenceTransformerEncoder
 
-  <p>Forty-five cells across the full grid. The best is <b>0.65</b>. A random
-  detector sits at 0.95. One method ranks best of all by AUROC and flags 99&nbsp;%
-  of correct answers at the operating point. Nobody is in the usable corner,
-  <b>including us</b>.</p>
+answer  = "The rate is 4.75% payable within 45 days."
+sources = [("policy.pdf#p3", "The rate stated is 3.90% and the term is 30 days.")]
 
-  <p>So the library ships no default cut and the result carries no
-  <code>decision</code> field. Fit a threshold on your own labelled traffic with
-  <code>calibrate()</code>, which hands back the measured false-positive rate
-  next to it and refuses to run on fewer than 200 examples.</p>
+marks = proofread(answer, sources, encoder=SentenceTransformerEncoder(), k=2)
 
-  <h2>Reproducibility</h2>
+print(marks.report())
+<span class="c">#  4.75%   support 0.00    nearest in policy.pdf#p3: '3.90%'
+#  45      support 0.00    nearest in policy.pdf#p3: '30'</span></code></pre>
+    <p>
+      Constructing <code>SentenceTransformerEncoder()</code> downloads the model on
+      first use, roughly 420 MB, and caches it. Build it once and reuse it: it is the
+      expensive object in the library.
+    </p>
 
-  <p>The numeral channel is exact: Decimal comparison, fixed arithmetic context,
-  locale from an argument and never from the environment. Byte-for-byte identical
-  everywhere, proven in CI across ten OS&nbsp;&times;&nbsp;Python combinations
-  under a randomised hash seed and a Turkish locale.</p>
+    <h2 class="sec" id="concepts">Concepts</h2>
+    <p>Four terms recur through this reference and are worth fixing before the signatures.</p>
+    <table>
+      <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">anchor</span></td><td>One word of the answer, paired with the best support it found anywhere in the sources, and with the source word that supplied it.</td></tr>
+        <tr><td><span class="pname">support</span></td><td>A number from 0.0 to 1.0. For words it is a cosine similarity. For numerals it is exactly 1.0 or exactly 0.0, because a number is equal or it is wrong.</td></tr>
+        <tr><td><span class="pname">floor</span></td><td>The mean support of the <code>k</code> weakest anchors, not the mean over all of them. A sixty-word answer with one wrong digit has a mean of about 0.79 and a floor of 0.00.</td></tr>
+        <tr><td><span class="pname">receipt</span></td><td>The evidence attached to a mark: which word, where it sits, how it was checked, and the nearest thing in the sources. It is what lets a reviewer settle the call without rereading the document.</td></tr>
+      </tbody>
+    </table>
 
-  <p>The lexical channel is a float32 cosine from a pinned encoder <i>revision</i>
-  &mdash; not a model name, because a silent re-upload would change every number
-  you ever published. Reproducible to 1e-6 across platforms, with stable
-  ordering. Not bit-identical between x86 and Apple Silicon, and we don&rsquo;t
-  claim it is.</p>
+    <h2 class="sec" id="functions">Functions</h2>
 
-  <h2>Scope</h2>
+    <h3 class="api" id="proofread-fn"><span class="kind">function</span>groundlens.proofread(&hellip;)</h3>
+    <pre><code>proofread(
+    answer: str,
+    context: str | Sequence[str] | Sequence[tuple[str, str]] | Sequence[Evidence],
+    *,
+    encoder: Encoder,
+    k: int = 1,
+    locale: str = "und",
+    max_anchors: int = 2048,
+) -&gt; Proofread</code></pre>
+    <p>
+      Score one answer against its sources and return where to look. This is the
+      function the rest of the library exists to serve.
+    </p>
 
-  <p>It verifies stated values against a retrieved source. Like a human reviewer,
-  it can only check the document in front of it. It cannot verify computed values
-  &mdash; &ldquo;revenue tripled&rdquo; against a source saying &ldquo;5M to
-  15M&rdquo;. It cannot check reasoning. It inherits your retrieval. No training,
-  no labels, no API call, no network, and zero runtime dependencies.</p>
+    <h4>Parameters</h4>
+    <table>
+      <thead><tr><th>Name</th><th>Type / default</th><th>Meaning and recommended value</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pname">answer</span></td>
+          <td><span class="ptype">str</span><br><span class="pdef">required</span></td>
+          <td>The model output to check. Normalised to NFKC internally, so every character offset in the result refers to the normalised string rather than the one you passed in.</td>
+        </tr>
+        <tr>
+          <td><span class="pname">context</span></td>
+          <td><span class="ptype">str<br>Sequence[str]<br>Sequence[tuple[str, str]]<br>Sequence[Evidence]</span><br><span class="pdef">required</span></td>
+          <td>
+            The retrieved sources. Four shapes are accepted: a single string, a list of
+            strings, a list of <code>(id, text)</code> pairs, or a list of
+            <a href="#evidence"><code>Evidence</code></a>.
+            <span class="rec"><b>Use (id, text) pairs.</b> Without an id a finding cannot say which source backed a word, and that is the question a reviewer actually asks. Bare strings are auto-assigned <code>ctx-0</code>, <code>ctx-1</code> and so on, which tells the reader nothing.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">encoder</span></td>
+          <td><span class="ptype">Encoder</span><br><span class="pdef">required, keyword-only</span></td>
+          <td>
+            Any object satisfying the <a href="#encoder"><code>Encoder</code></a> protocol.
+            <span class="rec"><b>Use <code>SentenceTransformerEncoder()</code></b> unless you already run your own retrieval encoder, in which case passing that one makes the check agree with your retrieval. Construct it once and reuse it.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">k</span></td>
+          <td><span class="ptype">int</span><br><span class="pdef">= 1</span></td>
+          <td>
+            How many of the weakest anchors the floor averages, and how many marks come
+            back in <code>weakest</code>. <code>k=0</code> selects
+            <a href="#adaptive-k"><code>adaptive_k()</code></a>.
+            <span class="rec"><b>Leave it at 1</b> for review workflows: one word is the only output a person can act on without a second explanation. Use <b>2 to 4</b> when you want a short list to skim. Use <b>0</b> to reproduce the published benchmark.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">locale</span></td>
+          <td><span class="ptype">str</span><br><span class="pdef">= "und"</span></td>
+          <td>
+            How this corpus writes numbers. See <a href="#locales">locales</a>.
+            <span class="rec"><b>Set it when you know the corpus.</b> Under <code>"und"</code> an ambiguous numeral such as <code>1.234</code> keeps every valid reading, so it matches either 1234 or 1.234 and a real mismatch can slip through. Declaring <code>"es"</code> or <code>"en"</code> removes that slack.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">max_anchors</span></td>
+          <td><span class="ptype">int</span><br><span class="pdef">= 2048</span></td>
+          <td>
+            Refuse answers with more scoring words than this, rather than quietly taking
+            a very long time.
+            <span class="rec"><b>Leave it alone.</b> If you hit the limit, proofread the answer in sections rather than raising it: a floor computed over thousands of words stops pointing anywhere useful.</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-  <p class="note">v3 is a rewrite. Performance figures published before it could
-  not be regenerated from committed code and have been withdrawn.
-  <a href="https://github.com/groundlens-dev/groundlens/blob/main/RETRACTIONS.md">RETRACTIONS.md</a>
-  says exactly what was wrong. Read it before citing anything from this project.</p>
+    <h4>Returns</h4>
+    <p>A <a href="#proofread-class"><code>Proofread</code></a>. There is no verdict in it and no threshold on it.</p>
 
-  <footer>
-    <a href="https://github.com/groundlens-dev/groundlens">GitHub</a> &nbsp;&middot;&nbsp;
-    <a href="https://pypi.org/project/groundlens/">PyPI</a> &nbsp;&middot;&nbsp;
-    <a href="https://github.com/groundlens-dev/groundlens/blob/main/RETRACTIONS.md">Retractions</a>
-    &nbsp;&middot;&nbsp; Apache-2.0
-  </footer>
+    <h4>Raises</h4>
+    <ul class="plain">
+      <li><code>TypeError</code> if a <code>context</code> item is not a string, an <code>(id, text)</code> pair or an <code>Evidence</code>.</li>
+      <li><code>ValueError</code> if the answer exceeds <code>max_anchors</code> scoring words, or if <code>locale</code> is not a known name.</li>
+      <li><code>RuntimeError</code> if a word aligns to no encoder token, which means the encoder adapter is broken. It refuses rather than continues, because a silently dropped word can only push the floor up and make a truncated answer look better grounded than it is.</li>
+    </ul>
 
-</main>
+    <h4>Notes</h4>
+    <p>
+      Passing no context at all is not an error. Every word then reads as unsupported,
+      which is the correct result, and a warning saying so is attached to
+      <code>Proofread.warnings</code>.
+    </p>
+
+    <h3 class="api" id="adaptive-k"><span class="kind">function</span>groundlens.adaptive_k(n)</h3>
+    <pre><code>adaptive_k(n: int) -&gt; int
+<span class="c"># max(1, min(4, ceil(0.15 * n)))</span></code></pre>
+    <p>
+      How many weakest anchors to use for an answer of <code>n</code> scoring words: one
+      weak word decides a short answer, up to four decide a long one. Selected by
+      passing <code>k=0</code> to <code>proofread()</code>. Call it directly only if you
+      want the number before you score.
+    </p>
+    <table>
+      <thead><tr><th>Name</th><th>Type / default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">n</span></td><td><span class="ptype">int</span><br><span class="pdef">required</span></td><td>Number of scoring words, that is, words not skipped as stopwords or punctuation.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="api" id="calibrate"><span class="kind">function</span>groundlens.calibrate(&hellip;)</h3>
+    <pre><code>calibrate(
+    labelled: Sequence[tuple[Proofread | float, bool]],
+    *,
+    target_recall: float = 0.95,
+    seed: int = 0,
+    min_labelled: int = 200,
+) -&gt; OperatingPoint</code></pre>
+    <p>
+      Fit a threshold on your own labelled data and hand back what it costs. This
+      library ships no threshold, and this function is the only supported way to get
+      one.
+    </p>
+
+    <h4>Parameters</h4>
+    <table>
+      <thead><tr><th>Name</th><th>Type / default</th><th>Meaning and recommended value</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pname">labelled</span></td>
+          <td><span class="ptype">Sequence[tuple[<br>&nbsp;&nbsp;Proofread | float, bool]]</span><br><span class="pdef">required</span></td>
+          <td>
+            <code>(result_or_floor, is_defect)</code> pairs. You may pass the
+            <code>Proofread</code> objects directly or just their <code>floor</code> values.
+            <span class="rec"><b>Label your own traffic.</b> A threshold fitted on someone else's distribution does not transfer, because the grounded floor moves with answer length, style and domain.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">target_recall</span></td>
+          <td><span class="ptype">float</span><br><span class="pdef">= 0.95</span></td>
+          <td>
+            The fraction of defects the cut must catch. Must be in <code>(0, 1]</code>.
+            <span class="rec"><b>0.95 for a regulated review</b>, where a missed defect is the expensive error. Lower it toward <b>0.8</b> only if you have measured that the false-positive rate at 0.95 makes the queue unworkable, and record that you did.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">seed</span></td>
+          <td><span class="ptype">int</span><br><span class="pdef">= 0</span></td>
+          <td>
+            Seed for the 1000-round bootstrap that produces the confidence interval.
+            <span class="rec"><b>Leave it at 0</b> so the interval is reproducible and two people fitting on the same data get the same numbers.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="pname">min_labelled</span></td>
+          <td><span class="ptype">int</span><br><span class="pdef">= 200</span></td>
+          <td>
+            The refusal floor. Below this many examples the function raises rather than
+            returning a threshold.
+            <span class="rec"><b>Do not lower it to deploy.</b> Lower it only while exploring. Below 200 examples a 95%-recall threshold is estimated from a handful of points, and the interval it produces is not worth reporting.</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Returns</h4>
+    <p>
+      An <a href="#operatingpoint"><code>OperatingPoint</code></a> carrying the threshold
+      <em>and</em> the measured false-positive rate with a bootstrap 95% interval.
+    </p>
+
+    <h4>Raises</h4>
+    <ul class="plain">
+      <li><code>ValueError</code> if <code>target_recall</code> is outside <code>(0, 1]</code>.</li>
+      <li><code>ValueError</code> if fewer than <code>min_labelled</code> examples are supplied.</li>
+      <li><code>ValueError</code> if the data contains no defects, or no clean examples.</li>
+    </ul>
+
+    <h4>Example</h4>
+    <pre><code>from groundlens import calibrate
+
+point = calibrate(labelled, target_recall=0.95)
+print(point.threshold, point.fpr, point.fpr_ci95)   <span class="c"># read the fpr first</span></code></pre>
+
+    <div class="note">
+      <span class="lbl">Read the false-positive rate before deploying</span>
+      <p>
+        Across five public RAG grounding benchmarks and nine detectors, including two
+        published encoder models, an NLI cross-encoder, an LLM judge and this metric,
+        not one reached a false-positive rate below 0.65 at 95% hallucination recall.
+        Several sat at 1.00 on benchmarks where they rank well by AUROC. A threshold
+        with an unusable cost is worse than no threshold, which is why this function
+        hands you the bill along with the cut.
+      </p>
+    </div>
+
+    <h2 class="sec" id="result-classes">Result classes</h2>
+    <p>All of these are frozen dataclasses with <code>slots</code>. They are values, not handles: nothing mutates after <code>proofread()</code> returns.</p>
+
+    <h3 class="api" id="proofread-class"><span class="kind">class</span>groundlens.Proofread</h3>
+    <p>The result of scoring one answer against its sources.</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">floor</span></td><td><span class="ptype">float</span></td><td>Mean support of the <code>k</code> weakest anchors. The headline number, and the one <code>calibrate()</code> fits on.</td></tr>
+        <tr><td><span class="pname">k</span></td><td><span class="ptype">int</span></td><td>The <code>k</code> actually used, after <code>adaptive_k()</code> and after clamping to the number of marked words.</td></tr>
+        <tr><td><span class="pname">weakest</span></td><td><span class="ptype">tuple[Anchor, ...]</span></td><td>The <code>k</code> anchors that produced the floor, weakest first. Numerals win ties against words at the same support, because a numeral at 0.0 is a proven mismatch while a word at 0.0 is ordinary in faithful paraphrase.</td></tr>
+        <tr><td><span class="pname">anchors</span></td><td><span class="ptype">tuple[Anchor, ...]</span></td><td>Every word of the answer in answer order, including skipped ones. Use this to highlight a whole answer rather than only its worst words.</td></tr>
+        <tr><td><span class="pname">n_marked</span></td><td><span class="ptype">int</span></td><td>How many words were scored, excluding skipped ones.</td></tr>
+        <tr><td><span class="pname">n_numeral</span></td><td><span class="ptype">int</span></td><td>How many of those were numerals, decided by arithmetic.</td></tr>
+        <tr><td><span class="pname">encoder_id</span></td><td><span class="ptype">str</span></td><td>Model name and resolved revision sha, for example <code>all-mpnet-base-v2@bd44305&hellip;</code>. Record it with any number you publish.</td></tr>
+        <tr><td><span class="pname">sha256</span></td><td><span class="ptype">str</span></td><td>Content hash of the finding. Covers the structure and the numeral supports exactly, and rounds lexical supports to six decimals. Reproducing the hash reproduces the finding.</td></tr>
+        <tr><td><span class="pname">warnings</span></td><td><span class="ptype">tuple[str, ...]</span></td><td>Segmentation and input warnings, for example a largely CJK answer, or no context supplied. Empty when there is nothing to say.</td></tr>
+      </tbody>
+    </table>
+    <h4>Methods</h4>
+    <table>
+      <thead><tr><th>Method</th><th>Signature</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">report</span></td><td><span class="ptype">report(limit: int | None = None) -&gt; str</span></td><td>The weakest anchors as receipt lines, newline separated. <code>limit</code> truncates to the first <em>n</em>; <code>None</code> prints all <code>k</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="api" id="anchor"><span class="kind">class</span>groundlens.Anchor</h3>
+    <p>One word of the answer and the best support it found in the sources.</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">text</span></td><td><span class="ptype">str</span></td><td>The word, verbatim from the NFKC-normalised answer.</td></tr>
+        <tr><td><span class="pname">span</span></td><td><span class="ptype">tuple[int, int]</span></td><td>Character offsets into the normalised answer. Use these to highlight in a UI.</td></tr>
+        <tr><td><span class="pname">kind</span></td><td><span class="ptype">"lexical" | "numeral"<br>| "skipped"</span></td><td><code>numeral</code> words were decided by arithmetic, <code>lexical</code> by meaning, <code>skipped</code> were excluded from scoring and always carry support 1.0.</td></tr>
+        <tr><td><span class="pname">support</span></td><td><span class="ptype">float</span></td><td>0.0 to 1.0. Exactly 0.0 or 1.0 for numerals.</td></tr>
+        <tr><td><span class="pname">value</span></td><td><span class="ptype">str | None</span></td><td>Canonical decimal string. Numerals only; <code>None</code> otherwise.</td></tr>
+        <tr><td><span class="pname">evidence_id</span></td><td><span class="ptype">str | None</span></td><td>Which source supplied the best support. This is the document to open.</td></tr>
+        <tr><td><span class="pname">evidence_text</span></td><td><span class="ptype">str | None</span></td><td>The source word that supplied it. This is the receipt.</td></tr>
+        <tr><td><span class="pname">evidence_span</span></td><td><span class="ptype">tuple[int, int] | None</span></td><td>Character offsets into that source.</td></tr>
+        <tr><td><span class="pname">notes</span></td><td><span class="ptype">tuple[str, ...]</span></td><td>Reason codes. See <a href="#notes">note codes</a>.</td></tr>
+      </tbody>
+    </table>
+    <h4>Methods</h4>
+    <table>
+      <thead><tr><th>Method</th><th>Signature</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">receipt</span></td><td><span class="ptype">receipt() -&gt; str</span></td><td>One tab-separated line a person can act on. Falls back to <code>no anchor found</code> when nothing in the sources matched.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="api" id="operatingpoint"><span class="kind">class</span>groundlens.OperatingPoint</h3>
+    <p>A threshold measured on your own labelled data, with its cost attached. Returned by <a href="#calibrate"><code>calibrate()</code></a>.</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">threshold</span></td><td><span class="ptype">float</span></td><td>Flag an answer when its floor is at or below this value.</td></tr>
+        <tr><td><span class="pname">target_recall</span></td><td><span class="ptype">float</span></td><td>The recall you asked for.</td></tr>
+        <tr><td><span class="pname">achieved_recall</span></td><td><span class="ptype">float</span></td><td>The recall actually reached on your data. Discreteness means it can differ from the target.</td></tr>
+        <tr><td><span class="pname">fpr</span></td><td><span class="ptype">float</span></td><td>False-positive rate at this threshold. <strong>Read this first.</strong> An fpr of 0.65 means two thirds of your correct answers get escalated.</td></tr>
+        <tr><td><span class="pname">fpr_ci95</span></td><td><span class="ptype">tuple[float, float]</span></td><td>Bootstrap 95% interval on the fpr, over 1000 rounds.</td></tr>
+        <tr><td><span class="pname">n</span></td><td><span class="ptype">int</span></td><td>Total labelled examples used.</td></tr>
+        <tr><td><span class="pname">n_positive</span></td><td><span class="ptype">int</span></td><td>How many of them were defects.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="input-classes">Input classes</h2>
+
+    <h3 class="api" id="evidence"><span class="kind">class</span>groundlens.Evidence</h3>
+    <p>One retrieved source, with an id so findings can point at it. Construct these yourself when you want explicit typing; <code>(id, text)</code> tuples are converted into them internally.</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Meaning and recommended value</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">id</span></td><td><span class="ptype">str</span></td><td>Identifier that appears in every finding drawn from this source.<span class="rec"><b>Make it something a reviewer can open</b>, such as <code>policy.pdf#p3</code> or a chunk id your retrieval already uses. An opaque hash defeats the purpose.</span></td></tr>
+        <tr><td><span class="pname">text</span></td><td><span class="ptype">str</span></td><td>The passage text as retrieved.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="encoders">Encoders</h2>
+
+    <h3 class="api" id="encoder"><span class="kind">protocol</span>groundlens.Encoder</h3>
+    <p>
+      The one thing Groundlens needs from a model. It is a runtime-checkable
+      <code>Protocol</code>, so any object with these four members satisfies it and no
+      inheritance is required. Implement it to score words with your own retrieval
+      encoder, which makes the check agree with the retrieval that produced the answer.
+    </p>
+    <table>
+      <thead><tr><th>Member</th><th>Signature</th><th>Contract</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">id</span></td><td><span class="ptype">property -&gt; str</span></td><td>Stable identity <em>including the exact revision</em>, for example <code>all-mpnet-base-v2@bd44305fd6&hellip;</code>. A bare model name is not enough: a silent re-upload would change every number you ever published. This string goes into <code>sha256</code>.</td></tr>
+        <tr><td><span class="pname">max_tokens</span></td><td><span class="ptype">property -&gt; int</span></td><td>Hard token limit per window, excluding special tokens.</td></tr>
+        <tr><td><span class="pname">token_spans</span></td><td><span class="ptype">token_spans(text: str)<br>&nbsp;&nbsp;-&gt; tuple[Span, ...]</span></td><td>Character spans of every token, <em>without embedding</em>. Windowing needs boundaries before it decides where to cut. Guessing a characters-per-token ratio is how text silently falls off the end of a window and stops being marked at all.</td></tr>
+        <tr><td><span class="pname">encode_window</span></td><td><span class="ptype">encode_window(text: str)<br>&nbsp;&nbsp;-&gt; WindowEncoding</span></td><td>Embed one window. The caller guarantees it fits within <code>max_tokens</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="api" id="windowencoding"><span class="kind">class</span>groundlens.WindowEncoding</h3>
+    <p>What an <code>Encoder</code> returns for one window of text.</p>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Contract</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">token_spans</span></td><td><span class="ptype">tuple[Span, ...]</span></td><td>Character offsets of each token, relative to the window's own text.</td></tr>
+        <tr><td><span class="pname">word_ids</span></td><td><span class="ptype">tuple[int | None, ...]</span></td><td>Which pre-tokenised word each token belongs to. <code>None</code> for special tokens.</td></tr>
+        <tr><td><span class="pname">vectors</span></td><td><span class="ptype">Sequence[Sequence[float]]</span></td><td>Shape <code>(n_tokens, dim)</code>, <strong>L2-normalised</strong>, one row per entry in <code>token_spans</code>. Normalisation is required: support is computed as a plain dot product.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="api" id="ste"><span class="kind">class</span>groundlens.SentenceTransformerEncoder</h3>
+    <pre><code>SentenceTransformerEncoder(
+    model: str = "sentence-transformers/all-mpnet-base-v2",
+    *,
+    revision: str | None = None,
+    device: str | None = None,
+    max_tokens: int | None = None,
+)</code></pre>
+    <p>
+      The reference encoder, behind the <code>[encoder]</code> extra. Importing
+      <code>groundlens</code> never imports torch; only constructing this class does.
+    </p>
+    <table>
+      <thead><tr><th>Name</th><th>Type / default</th><th>Meaning and recommended value</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pname">model</span></td>
+          <td><span class="ptype">str</span><br><span class="pdef">= "sentence-transformers/<br>&nbsp;&nbsp;all-mpnet-base-v2"</span></td>
+          <td>Any sentence-transformers model id.<span class="rec"><b>Use the default</b> unless you are matching your own retrieval encoder, which is the one good reason to change it. Numbers from different encoders are not comparable.</span></td>
+        </tr>
+        <tr>
+          <td><span class="pname">revision</span></td>
+          <td><span class="ptype">str | None</span><br><span class="pdef">= None</span></td>
+          <td>Pin the checkpoint explicitly. When omitted, the sha is resolved from the Hub once at construction; if that fails, the id records <code>"unresolved"</code> rather than pretending.<span class="rec"><b>Pin it for anything you publish or audit.</b> An unresolved id in a published hash is a visible defect, which is the point of recording it that way.</span></td>
+        </tr>
+        <tr>
+          <td><span class="pname">device</span></td>
+          <td><span class="ptype">str | None</span><br><span class="pdef">= None</span></td>
+          <td>Passed straight to sentence-transformers, for example <code>"cpu"</code>, <code>"cuda"</code>, <code>"mps"</code>.<span class="rec"><b>Leave it None</b> and let the library decide. Results are not bit-identical between x86 and Apple Silicon; they reproduce to 1e-6 with stable ordering, and no stronger claim is made.</span></td>
+        </tr>
+        <tr>
+          <td><span class="pname">max_tokens</span></td>
+          <td><span class="ptype">int | None</span><br><span class="pdef">= None</span></td>
+          <td>Overrides the model's own sequence limit. Two tokens are reserved internally for the special tokens.<span class="rec"><b>Leave it alone.</b> Raising it past what the model was trained for degrades the embeddings silently.</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <h4>Attributes</h4>
+    <table>
+      <thead><tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">id</span></td><td><span class="ptype">str</span></td><td><code>{model-basename}@{revision}</code>, for example <code>all-mpnet-base-v2@bd44305&hellip;</code>.</td></tr>
+        <tr><td><span class="pname">max_tokens</span></td><td><span class="ptype">int</span></td><td>Resolved content-token limit: the model limit minus the two special tokens.</td></tr>
+      </tbody>
+    </table>
+    <h4>Raises</h4>
+    <ul class="plain">
+      <li><code>ImportError</code> at construction if the <code>[encoder]</code> extra is not installed. The message names the install command.</li>
+    </ul>
+
+    <h2 class="sec" id="types">Type aliases</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Definition</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">Span</span></td><td><span class="ptype">tuple[int, int]</span></td><td>Half-open character offsets, <code>(start, end)</code>.</td></tr>
+        <tr><td><span class="pname">AnchorKind</span></td><td><span class="ptype">Literal["lexical",<br>&nbsp;&nbsp;"numeral", "skipped"]</span></td><td>Which channel decided a word, or that it was excluded.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="notes">Note codes</h2>
+    <p>
+      <code>groundlens.NOTE_CODES</code> is a <code>frozenset</code> of every code that
+      can appear in <code>Anchor.notes</code>. The set is closed on purpose so you can
+      assert on it.
+    </p>
+    <table>
+      <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">numeral_ambiguous</span></td><td>The numeral had more than one valid reading under the declared locale, and matched on the best of them. Declaring a <code>locale</code> removes most of these.</td></tr>
+        <tr><td><span class="pname">numeral_unparsed</span></td><td>It looked numeric but could not be parsed, so it fell back to the lexical channel.</td></tr>
+        <tr><td><span class="pname">window_boundary</span></td><td>The word straddles a window edge; its support is the maximum over the windows it appears in.</td></tr>
+        <tr><td><span class="pname">stopword</span></td><td>Excluded from scoring.</td></tr>
+        <tr><td><span class="pname">no_alpha</span></td><td>Punctuation-only token, excluded from scoring.</td></tr>
+        <tr><td><span class="pname">single_digit</span></td><td>A bare one-digit numeral, treated lexically because these are usually enumerators rather than values.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="locales">Locales</h2>
+    <p>
+      The <code>locale</code> argument tells the numeral channel how this corpus writes
+      numbers. It is read from the argument and never from <code>LC_ALL</code>, so the
+      same input gives the same result on any machine.
+    </p>
+    <table>
+      <thead><tr><th>Value</th><th>Decimal</th><th>Grouping</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">"und"</span></td><td><span class="ptype">&mdash;</span></td><td><span class="ptype">&mdash;</span></td><td>The default. Ambiguous numerals keep every valid reading, so <code>1.234</code> matches both 1234 and 1.234. Safe when the corpus is mixed, loose when it is not.</td></tr>
+        <tr><td><span class="pname">"en"</span></td><td><code>.</code></td><td><code>,</code></td><td><code>1.234</code> is one and a bit; <code>1,234</code> is a thousand.</td></tr>
+        <tr><td><span class="pname">"es"</span></td><td><code>,</code></td><td><code>.</code></td><td><code>1.234</code> is a thousand; <code>1,234</code> is one and a bit.</td></tr>
+        <tr><td><span class="pname">"de"</span></td><td><code>,</code></td><td><code>.</code></td><td>As Spanish.</td></tr>
+        <tr><td><span class="pname">"fr"</span></td><td><code>,</code></td><td>space</td><td>Thousands are separated by a space, including the narrow no-break space.</td></tr>
+        <tr><td><span class="pname">"it"</span></td><td><code>,</code></td><td><code>.</code></td><td>As Spanish.</td></tr>
+        <tr><td><span class="pname">"pt"</span></td><td><code>,</code></td><td><code>.</code></td><td>As Spanish.</td></tr>
+        <tr><td><span class="pname">"nl"</span></td><td><code>,</code></td><td><code>.</code></td><td>As Spanish.</td></tr>
+        <tr><td><span class="pname">"ch"</span></td><td><code>.</code></td><td><code>'</code></td><td>Swiss style, <code>1'234.50</code>.</td></tr>
+      </tbody>
+    </table>
+    <p>An unknown name raises <code>ValueError</code> listing the known ones.</p>
+
+    <h2 class="sec" id="constants">Constants</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">groundlens.__version__</span></td><td><span class="ptype">"3.0.1"</span></td><td>Package version.</td></tr>
+        <tr><td><span class="pname">groundlens.NOTE_CODES</span></td><td><span class="ptype">frozenset[str]</span></td><td>Every valid note code. See <a href="#notes">above</a>.</td></tr>
+        <tr><td><span class="pname">groundlens.calibrate.<wbr>MIN_LABELLED</span></td><td><span class="ptype">200</span></td><td>Default refusal floor for <code>calibrate()</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="cli">Command line</h2>
+    <p>
+      Installing the package puts a <code>groundlens</code> command on your path. It has
+      one subcommand. <code>groundlens --help</code> works without the
+      <code>[encoder]</code> extra installed, because it does not import torch.
+    </p>
+    <pre><code>groundlens read --answer ANSWER --context CONTEXT [--context CONTEXT ...]
+                [--k K] [--locale LOCALE] [--model MODEL] [--json]</code></pre>
+    <table>
+      <thead><tr><th>Option</th><th>Default</th><th>Meaning and recommended value</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">--answer</span></td><td><span class="pdef">required</span></td><td>The answer text, or a path to a file containing it. A path that exists is read; anything else is treated as the literal text.</td></tr>
+        <tr><td><span class="pname">--context</span></td><td><span class="pdef">required,<br>repeatable</span></td><td>A source. Three forms: literal text, a path, or <code>id=path</code>.<span class="rec"><b>Use <code>id=path</code></b>, for example <code>--context policy.pdf#p3=policy.txt</code>, so the output names the document. Without an id the sources become <code>ctx-0</code>, <code>ctx-1</code>.</span></td></tr>
+        <tr><td><span class="pname">--k</span></td><td><span class="pdef">1</span></td><td>How many weakest anchors. <code>0</code> selects <code>adaptive_k()</code>.</td></tr>
+        <tr><td><span class="pname">--locale</span></td><td><span class="pdef">und</span></td><td>One of the <a href="#locales">locale names</a>.</td></tr>
+        <tr><td><span class="pname">--model</span></td><td><span class="pdef">all-mpnet-base-v2</span></td><td>A sentence-transformers model id.</td></tr>
+        <tr><td><span class="pname">--json</span></td><td><span class="pdef">off</span></td><td>Machine-readable output: floor, k, counts, encoder id, sha256, warnings, and every anchor with its receipt.<span class="rec"><b>Use it for anything automated.</b> The human format is not a stable interface.</span></td></tr>
+      </tbody>
+    </table>
+    <h4>Example</h4>
+    <pre><code>groundlens read \
+  --answer answer.txt \
+  --context policy.pdf#p3=policy.txt \
+  --locale es --k 2</code></pre>
+    <p>
+      Warnings go to stderr and the report to stdout. The exit code is <code>0</code> on
+      a successful check; the command does not signal a verdict through its exit code,
+      because there is no verdict.
+    </p>
+
+    <h2 class="sec" id="mcp">MCP server</h2>
+    <p>
+      Groundlens ships an MCP server so Claude Desktop, Claude Code, Cursor, VS Code or
+      any other MCP client can run the check inside the conversation. It speaks stdio
+      and runs locally. No text leaves the machine.
+    </p>
+    <pre><code>pip install "groundlens[encoder,mcp]"
+python -m groundlens.mcp</code></pre>
+    <p>Client configuration, in <code>claude_desktop_config.json</code> or the equivalent <code>mcp.json</code>:</p>
+    <pre><code>{
+  "mcpServers": {
+    "groundlens": {
+      "command": "python",
+      "args": ["-m", "groundlens.mcp"]
+    }
+  }
+}</code></pre>
+    <p>
+      Use the absolute path to the Python that has Groundlens installed if it is not the
+      one on your <code>PATH</code>.
+    </p>
+
+    <h3 class="api" id="mcp-tool"><span class="kind">tool</span>find_unsupported_words</h3>
+    <p>One tool. If a second ever looks necessary, the product has stopped being one thing.</p>
+    <table>
+      <thead><tr><th>Parameter</th><th>Type / default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">answer</span></td><td><span class="ptype">string</span><br><span class="pdef">required</span></td><td>The model output to check.</td></tr>
+        <tr><td><span class="pname">sources</span></td><td><span class="ptype">array of {id, text}</span><br><span class="pdef">required</span></td><td>The passages the answer was drawn from. Ids appear in the findings.</td></tr>
+        <tr><td><span class="pname">k</span></td><td><span class="ptype">integer</span><br><span class="pdef">= 4</span></td><td>How many of the weakest anchors to return. Higher than the library default, because an assistant can summarise a short list.</td></tr>
+        <tr><td><span class="pname">locale</span></td><td><span class="ptype">string</span><br><span class="pdef">= "und"</span></td><td>See <a href="#locales">locales</a>.</td></tr>
+      </tbody>
+    </table>
+    <h4>Returns</h4>
+    <table>
+      <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">weakest_anchors</span></td><td>List of <code>{word, support, checked_by, closest_in_sources, source_id, notes}</code>. <code>checked_by</code> is <code>"arithmetic"</code> or <code>"meaning"</code>.</td></tr>
+        <tr><td><span class="pname">floor</span></td><td>Mean support of the weakest anchors.</td></tr>
+        <tr><td><span class="pname">n_marked</span></td><td>How many words were scored.</td></tr>
+        <tr><td><span class="pname">encoder_id</span></td><td>Model and revision.</td></tr>
+        <tr><td><span class="pname">sha256</span></td><td>Content hash of the finding.</td></tr>
+        <tr><td><span class="pname">warnings</span></td><td>Input and segmentation warnings.</td></tr>
+        <tr><td><span class="pname">how_to_read_this</span></td><td>A sentence stating that this is not a verdict, returned with every call so the model cannot omit it.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The encoder is constructed on the first call rather than at startup, so the server
+      completes the handshake and answers <code>tools/list</code> with no model on disk.
+    </p>
+
+    <h2 class="sec" id="exceptions">Exceptions</h2>
+    <p>Groundlens defines no exception classes of its own. It raises built-ins, and each one means something specific.</p>
+    <table>
+      <thead><tr><th>Exception</th><th>Raised by</th><th>Cause</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pname">TypeError</span></td><td><code>proofread()</code></td><td>A context item was not a string, an <code>(id, text)</code> pair or an <code>Evidence</code>.</td></tr>
+        <tr><td><span class="pname">ValueError</span></td><td><code>proofread()</code></td><td>Answer above <code>max_anchors</code>, or an unknown <code>locale</code>.</td></tr>
+        <tr><td><span class="pname">ValueError</span></td><td><code>calibrate()</code></td><td><code>target_recall</code> outside <code>(0, 1]</code>, fewer than <code>min_labelled</code> examples, or missing defect or clean examples.</td></tr>
+        <tr><td><span class="pname">RuntimeError</span></td><td><code>proofread()</code></td><td>A word aligned to no encoder token. The encoder adapter is broken; continuing would silently raise the floor.</td></tr>
+        <tr><td><span class="pname">ImportError</span></td><td><code>SentenceTransformerEncoder()</code></td><td>The <code>[encoder]</code> extra is not installed.</td></tr>
+        <tr><td><span class="pname">ImportError</span></td><td><code>groundlens.mcp</code></td><td>The <code>[mcp]</code> extra is not installed.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec" id="limits">Limitations</h2>
+    <ul class="plain">
+      <li><strong>Computed values.</strong> It cannot check "revenue tripled" against a source saying revenue went from 5M to 15M.</li>
+      <li><strong>Attachment.</strong> The word channel checks whether a word is supported, not whether it is attached to the right thing. If an answer says "payable in 30 days" about invoice A and the 30 days belong to invoice B elsewhere in the same context, the word is supported and no mark appears.</li>
+      <li><strong>Reasoning.</strong> It cannot check an inference. That belongs to entailment models.</li>
+      <li><strong>Retrieval.</strong> It inherits yours. If the passage is wrong, so is the answer's grounding.</li>
+      <li><strong>Segmentation.</strong> It assumes space-delimited scripts, and warns rather than pretending when the text is largely CJK or Thai.</li>
+    </ul>
+    <div class="note">
+      <span class="lbl">Reproducibility</span>
+      <p>
+        The numeral channel is exact: Decimal comparison in a fixed arithmetic context,
+        byte-for-byte identical on any machine, proven in CI on ten operating system and
+        Python combinations under a randomised hash seed and a Turkish locale. The
+        lexical channel is a float32 cosine from a pinned encoder revision; it
+        reproduces to 1e-6 across platforms with stable ordering of the weakest anchors,
+        and is not bit-identical between x86 and Apple Silicon.
+      </p>
+    </div>
+  </main>
+</div>
+
+<footer class="site">
+  <div class="inner">
+    &copy; 2026 Groundlens. Copyright &copy; Javier Marín &reg;. All rights reserved.
+    For more information, including terms of use, privacy policy, and trademark usage,
+    please see our <a href="https://github.com/groundlens-dev/groundlens">github repository</a>
+    for more details.
+  </div>
+</footer>
+
 </body>
 </html>
