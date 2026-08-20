@@ -2,7 +2,7 @@
     
 # Groundlens: a proofreader for RAG answers
 
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_01.png" width="30%">
+![Groundlens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_01.png)
 </div>
 
 
@@ -18,7 +18,7 @@
 
 <br>
 
-:globe_with_meridians: [groundlens.dev](https://groundlens.dev)
+[groundlens.dev](https://groundlens.dev)
 
 <br>
 
@@ -50,7 +50,7 @@ which document to open. Thirty seconds of human attention instead of five minute
 <br>
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png" width="85%">
+![How Groundlens checks words and numbers](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png)
 </div>
 
 <br>
@@ -96,7 +96,7 @@ There is a measurement behind the rule. Across the operating-point grid we ran, 
 <br>
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png" width="85%">
+![Support scores and the weakest anchor](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png)
 </div>
 <br>
 
