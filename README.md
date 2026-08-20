@@ -22,7 +22,7 @@
 
 <br>
 
-[Install](#install) · [Quick start](#quick-start) · [MCP server](#mcp-server) · [How it works](#how-it-works) · [Operational threshold](#operational-threshold) · [Limitations](#limitations) · [Reproducibility](#reproducibility)
+[How it works](#how-it-works) · [Install](#install) · [Quick start](#quick-start) · [MCP server](#mcp-server) · [Limitations](#limitations) · [Reproducibility](#reproducibility)
 
 </div>
 
@@ -44,6 +44,84 @@ It never tells you the answer is wrong. It tells you which word to look at, and
 which document to open. Thirty seconds of human attention instead of five minutes.
 
 <br>
+
+## How it works
+
+<br>
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png" width="85%">
+</div>
+
+<br>
+
+Groundlens approaches words and numbers comparison in two different ways:
+
+| Words | Numbers |
+|---|---|
+|Words are anchored by meaning. A word's support is the highest cosine similarity it reaches against any word of the sources, using a frozen off-the-shelf encoder — the same kind your retrieval already uses.| Numbers are anchored by arithmetic. The numeral is parsed to a value with formatting normalised — `10,000`, `10000`, `$10,000`, `10 000` and (under a declared locale) `10.000` are one number — then checked against every value in the sources. Support is exactly `1.0` or exactly `0.0`. Similarity is not allowed to vote.|
+
+Groundlens provide the lowest score as output, not the average. Every token-similarity metric aggregates by the mean, and the mean is where single-token errors go to die.
+
+<br>
+
+### A practical example: ten is not a hundred
+
+A retrieved document says the total due is **10,000 dollars**. The answer says
+**1,000 dollars**. A human catches that instantly, without a finance degree.
+
+Embedding similarity does not. Cosine between the right answer and the wrong one
+is about 0.99 — the error dissolves into the vector the way a drop of ink
+dissolves in a pool. An LLM judge does not either: it reads for plausibility, and
+"the total is 1,000 dollars" is a perfectly plausible sentence about an invoice.
+A trained span detector does not, because single-digit substitutions are rare in
+its training labels.
+
+Sentence encoders organise text by vocabulary, topic and structure. Never by
+truth. A wrong number inside a correct sentence is, to a paraphrase-collapsing
+encoder, very nearly a paraphrase.
+
+On that invoice, the **mean** support of the wrong answer is 0.79 — which looks
+fine. The **weakest anchor** is 0.00 — which is a mark in the margin.
+
+<br>
+
+### Operational threshold
+
+This library has no default threshold. A threshold is a property of a deployment, not of a method. It depends on the
+encoder, on your data, and on what a false positive costs you compared to a false negative. None of that is known here.
+
+There is a measurement behind the rule. Across the operating-point grid we ran, the best false positive rate at 95 percent recall was 0.65, for every single-pass detector we tested, including this one. At the recall a regulated review actually needs, no fixed cut in that grid is usable. Shipping one would mean shipping a number we already know does not hold.
+
+<br>
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png" width="85%">
+</div>
+<br>
+
+
+What groundlens provide is:
+
+- A support score per word, where lower means less supported by the sources.
+- Marks with receipts: the word, its span, its support, and the nearest
+  evidence sentence, so a reviewer can check any call in seconds.
+- A function `calibrate()`, which fits a cut on your own labelled data. It refuses to run
+  on fewer than 200 labelled examples, because below that the cut is noise.
+
+If you need a threshold in your pipeline, run `calibrate()` on your labelled data: 
+
+```python
+from groundlens import calibrate
+
+point = calibrate(labelled, target_recall=0.95)
+print(point.threshold, point.fpr, point.fpr_ci95)   # read the fpr first
+```
+
+> `calibrate()` needs at least 200 labelled examples, because below that a 95%-recall threshold is estimated from a handful of points.
+
+<br>
+
 
 ## Install
 
@@ -166,83 +244,6 @@ paraphrase. The server reports the marks; the reader decides.
 
 The encoder loads on the first call, not at startup, and the model downloads once
 (about 420 MB) the first time it is used.
-
-<br>
-
-## How it works
-
-<br>
-
-<div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens1.png" width="85%">
-</div>
-
-<br>
-
-Groundlens approaches words and numbers comparison in two different ways:
-
-| Words | Numbers |
-|---|---|
-|Words are anchored by meaning. A word's support is the highest cosine similarity it reaches against any word of the sources, using a frozen off-the-shelf encoder — the same kind your retrieval already uses.| Numbers are anchored by arithmetic. The numeral is parsed to a value with formatting normalised — `10,000`, `10000`, `$10,000`, `10 000` and (under a declared locale) `10.000` are one number — then checked against every value in the sources. Support is exactly `1.0` or exactly `0.0`. Similarity is not allowed to vote.|
-
-Groundlens provide the lowest score as output, not the average. Every token-similarity metric aggregates by the mean, and the mean is where single-token errors go to die.
-
-<br>
-
-### A practical example: ten is not a hundred
-
-A retrieved document says the total due is **10,000 dollars**. The answer says
-**1,000 dollars**. A human catches that instantly, without a finance degree.
-
-Embedding similarity does not. Cosine between the right answer and the wrong one
-is about 0.99 — the error dissolves into the vector the way a drop of ink
-dissolves in a pool. An LLM judge does not either: it reads for plausibility, and
-"the total is 1,000 dollars" is a perfectly plausible sentence about an invoice.
-A trained span detector does not, because single-digit substitutions are rare in
-its training labels.
-
-Sentence encoders organise text by vocabulary, topic and structure. Never by
-truth. A wrong number inside a correct sentence is, to a paraphrase-collapsing
-encoder, very nearly a paraphrase.
-
-On that invoice, the **mean** support of the wrong answer is 0.79 — which looks
-fine. The **weakest anchor** is 0.00 — which is a mark in the margin.
-
-<br>
-
-## Operational threshold
-
-This library has no default threshold. A threshold is a property of a deployment, not of a method. It depends on the
-encoder, on your data, and on what a false positive costs you compared to a false negative. None of that is known here.
-
-There is a measurement behind the rule. Across the operating-point grid we ran, the best false positive rate at 95 percent recall was 0.65, for every single-pass detector we tested, including this one. At the recall a regulated review actually needs, no fixed cut in that grid is usable. Shipping one would mean shipping a number we already know does not hold.
-
-<br>
-
-<div align="center">
-<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens2.png" width="85%">
-</div>
-<br>
-
-
-What groundlens provide is:
-
-- A support score per word, where lower means less supported by the sources.
-- Marks with receipts: the word, its span, its support, and the nearest
-  evidence sentence, so a reviewer can check any call in seconds.
-- A function `calibrate()`, which fits a cut on your own labelled data. It refuses to run
-  on fewer than 200 labelled examples, because below that the cut is noise.
-
-If you need a threshold in your pipeline, run `calibrate()` on your labelled data: 
-
-```python
-from groundlens import calibrate
-
-point = calibrate(labelled, target_recall=0.95)
-print(point.threshold, point.fpr, point.fpr_ci95)   # read the fpr first
-```
-
-> `calibrate()` needs at least 200 labelled examples, because below that a 95%-recall threshold is estimated from a handful of points.
 
 <br>
 
