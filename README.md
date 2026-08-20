@@ -12,6 +12,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/groundlens)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-2c7a4b)](#install)
+[![groundlens MCP server](https://glama.ai/mcp/servers/groundlens-dev/groundlens/badges/score.svg)](https://glama.ai/mcp/servers/groundlens-dev/groundlens)
 
 [![CI](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
@@ -33,7 +34,7 @@
 <br>
 
 Groundlens is a proofreader for what your model writes. It marks the words your
-sources don't back — and shows you what each one should have said.
+sources don't back — and shows you what each one should have said. It checks RAG answers for grounding and faithfulness against their retrieved sources, the job people reach for hallucination detection, citation checking, or RAG evaluation to do — and differs in returning marks and evidence for a reviewer rather than a verdict or a score to threshold.
 
 ```
 QUESTION    What is the invoice total?
