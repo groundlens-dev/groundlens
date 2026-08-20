@@ -11,10 +11,13 @@
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![Python](https://img.shields.io/pypi/pyversions/groundlens)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![CI](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml)
-[![Determinism](https://github.com/groundlens-dev/groundlens/actions/workflows/determinism.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/determinism.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-2c7a4b)](#install)
+
+[![CI](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
+[![Determinism](https://github.com/groundlens-dev/groundlens/actions/workflows/determinism.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/determinism.yml)
+
 
 <br>
 
