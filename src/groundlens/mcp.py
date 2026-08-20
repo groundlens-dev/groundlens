@@ -27,6 +27,21 @@ Returns evidence for a human to judge. It does NOT return a verdict on whether \
 the answer is hallucinated, and there is no threshold to compare the floor to. \
 Report the weakest anchors and let the reader decide."""
 
+INSTRUCTIONS = """\
+Groundlens proofreads an answer against the sources it was drawn from. Call it \
+before you present a retrieved answer to a person, whenever you still have the \
+passages that answer came from.
+
+What comes back is evidence, not a judgement. A support of 0.00 on a number \
+means that value is absent from the sources. On a word it means no lexical \
+anchor was found, which is ordinary in faithful paraphrase and is not by itself \
+a fault. There is no threshold: do not turn the floor into a pass or a fail, and \
+do not tell the user the answer is right or wrong on the strength of it. Report \
+the weakest anchors and the documents they point at, and let the reader judge.
+
+It cannot check computed values, cannot check reasoning, and cannot tell whether \
+a supported word is attached to the right thing."""
+
 
 def build_server() -> Any:
     """Construct the MCP server. Imports are local so the core stays dependency-free."""
@@ -43,7 +58,7 @@ def build_server() -> Any:
     from groundlens._encode import SentenceTransformerEncoder
     from groundlens.proofread import proofread
 
-    server = _Server("groundlens")
+    server = _Server("groundlens", instructions=INSTRUCTIONS)
     encoder: list[SentenceTransformerEncoder] = []
 
     def _encoder() -> SentenceTransformerEncoder:
