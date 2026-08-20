@@ -194,3 +194,45 @@ def test_locale_changes_what_a_number_means() -> None:
         "el importe es 1.250", "el importe total es 1.250 euros", encoder=BIG, locale="es"
     )
     assert [a.support for a in spanish.anchors if a.kind == "numeral"] == [1.0]
+
+
+# --- the receipt names a word, not a fragment -----------------------------
+
+
+def test_receipts_never_point_at_punctuation() -> None:
+    # The FakeEncoder splits punctuation into its own tokens, exactly like a
+    # BERT-family tokenizer. Before candidate filtering, a period or a quote
+    # could win the max on a weak word and the receipt would name it. A
+    # receipt whose evidence is punctuation helps nobody, so it is banned.
+    profile = run(
+        "Foxglove BioSciences reported strong momentum across segments.",
+        [("doc#p1", "Its subsidiary Willowbark Labs recorded a net loss.")],
+    )
+    for anchor in profile.anchors:
+        if anchor.evidence_text is not None:
+            assert any(ch.isalnum() for ch in anchor.evidence_text), anchor.receipt()
+
+
+def test_evidence_is_expanded_to_the_containing_word() -> None:
+    # The winning token can be a subword fragment ('s' out of "Foxglove's").
+    # The receipt must name the whole word a human would point at, and the
+    # expanded evidence must still be a real slice of the source.
+    source = "Foxglove's Q4 revenue was strong."
+    profile = run("Foxgloves revenue grew.", [("doc#p1", source)])
+    for anchor in profile.anchors:
+        if anchor.evidence_span is None:
+            continue
+        start, end = anchor.evidence_span
+        assert source[start:end] == anchor.evidence_text
+        assert anchor.evidence_text not in {"s", "'"}
+        assert " " not in anchor.evidence_text or anchor.evidence_text.strip()
+
+
+def test_receipt_line_is_readable() -> None:
+    # No literal tabs: the line renders the same in a terminal, a pandas cell
+    # and a log file. Word, support, evidence, in that order.
+    weakest = run(INVOICE_PERTURBED).weakest[0]
+    line = weakest.receipt()
+    assert "\t" not in line
+    assert "support 0.00" in line
+    assert "nearest in" in line

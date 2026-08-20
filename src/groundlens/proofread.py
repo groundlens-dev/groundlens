@@ -26,7 +26,13 @@ import math
 from collections.abc import Sequence
 from decimal import Decimal
 
-from groundlens._align import TokenVectors, best_anchor, embed, tokens_overlapping
+from groundlens._align import (
+    TokenVectors,
+    best_anchor,
+    embed,
+    scorable_columns,
+    tokens_overlapping,
+)
 from groundlens._hash import content_hash
 from groundlens._numerals import Numeral, find_numerals
 from groundlens._numerals import locale as locale_profile
@@ -137,10 +143,36 @@ def _numeral_anchor(
     )
 
 
+_EDGE_TRIM = frozenset("\"'\u2018\u2019\u201c\u201d()[]{}.,;:!?\u00ab\u00bb")
+
+
+def _expand_to_word(text: str, span: tuple[int, int]) -> tuple[str, tuple[int, int]]:
+    """Grow a token span to the whitespace-delimited word around it, trimmed.
+
+    The winning token can be a subword ('s' out of "Foxglove's") or a digit
+    fragment ('3' out of "394.3"). The receipt should name the word a human
+    would point at, so the span grows to the surrounding non-space run and
+    sheds sentence punctuation at its edges. Interior characters are kept,
+    which is what preserves "10,000" and "3.90%" whole.
+    """
+    a, b = span
+    while a > 0 and not text[a - 1].isspace():
+        a -= 1
+    while b < len(text) and not text[b].isspace():
+        b += 1
+    while a < b and text[a] in _EDGE_TRIM:
+        a += 1
+    while b > a and text[b - 1] in _EDGE_TRIM:
+        b -= 1
+    if a >= b:
+        return text[span[0] : span[1]], span
+    return text[a:b], (a, b)
+
+
 def _lexical_anchor(
     unit: Unit,
     answer_tokens: TokenVectors,
-    context_tokens: Sequence[tuple[Evidence, TokenVectors]],
+    context_tokens: Sequence[tuple[Evidence, TokenVectors, tuple[int, ...]]],
 ) -> Anchor:
     # Rule 1 of _align: no word is ever silently dropped. A word that reaches
     # the metric and produces no support is the failure this library exists to
@@ -164,16 +196,15 @@ def _lexical_anchor(
     best_text: str | None = None
     best_span: tuple[int, int] | None = None
 
-    for evidence, tokens in context_tokens:
-        found = best_anchor(unit.span, answer_tokens, tokens)
+    for evidence, tokens, cols in context_tokens:
+        found = best_anchor(unit.span, answer_tokens, tokens, cols)
         if found is None:
             continue
         support, token_index = found
         if best_id is None or support > best_support:
             best_support = support
             best_id = evidence.id
-            best_span = tokens.spans[token_index]
-            best_text = evidence.text[best_span[0] : best_span[1]]
+            best_text, best_span = _expand_to_word(evidence.text, tokens.spans[token_index])
 
     return Anchor(
         text=unit.text,
@@ -248,9 +279,13 @@ def proofread(
 
     needs_geometry = any(u.kind == "lexical" for u in scoring)
     answer_tokens = embed(answer_text, encoder) if needs_geometry else TokenVectors((), ())
-    context_tokens: list[tuple[Evidence, TokenVectors]] = (
-        [(e, embed(e.text, encoder)) for e in evidences if e.text] if needs_geometry else []
-    )
+    context_tokens: list[tuple[Evidence, TokenVectors, tuple[int, ...]]] = []
+    if needs_geometry:
+        for e in evidences:
+            if not e.text:
+                continue
+            tokens = embed(e.text, encoder)
+            context_tokens.append((e, tokens, scorable_columns(e.text, tokens)))
 
     anchors: list[Anchor] = []
     for unit in units:

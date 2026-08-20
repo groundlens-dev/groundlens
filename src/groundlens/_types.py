@@ -60,12 +60,11 @@ class Anchor:
 
     def receipt(self) -> str:
         """One line a human can act on."""
+        head = f"{self.text:<14}  support {self.support:.2f}"
         if self.evidence_text is None:
-            return f"{self.text}\tsupport {self.support:.2f}\tno anchor found"
+            return f"{head}   no anchor found"
         where = self.evidence_id or "source"
-        return (
-            f"{self.text}\tsupport {self.support:.2f}\tnearest in {where}: {self.evidence_text!r}"
-        )
+        return f"{head}   nearest in {where}: {self.evidence_text!r}"
 
 
 @dataclass(frozen=True, slots=True)
