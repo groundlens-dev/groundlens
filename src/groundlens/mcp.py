@@ -31,15 +31,19 @@ Report the weakest anchors and let the reader decide."""
 def build_server() -> Any:
     """Construct the MCP server. Imports are local so the core stays dependency-free."""
     try:
-        from mcp.server.fastmcp import FastMCP
-    except ImportError as exc:  # pragma: no cover - depends on install extras
-        msg = "The MCP connector needs:  pip install 'groundlens[encoder,mcp]'"
-        raise ImportError(msg) from exc
+        # mcp >= 2.0 renamed FastMCP to MCPServer and moved it.
+        from mcp.server.mcpserver import MCPServer as _Server
+    except ImportError:
+        try:
+            from mcp.server.fastmcp import FastMCP as _Server  # mcp 1.x
+        except ImportError as exc:  # pragma: no cover - depends on install extras
+            msg = "The MCP connector needs:  pip install 'groundlens[encoder,mcp]'"
+            raise ImportError(msg) from exc
 
     from groundlens._encode import SentenceTransformerEncoder
     from groundlens.proofread import proofread
 
-    server = FastMCP("groundlens")
+    server = _Server("groundlens")
     encoder: list[SentenceTransformerEncoder] = []
 
     def _encoder() -> SentenceTransformerEncoder:

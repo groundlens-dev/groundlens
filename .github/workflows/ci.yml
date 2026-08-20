@@ -42,6 +42,41 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: pytest -q
 
+  # The connector is a shipped surface, so something has to start it. Until this
+  # job existed, no CI job installed the [mcp] extra, and the server sat broken
+  # against mcp 2.0 -- which moved FastMCP to mcp.server.mcpserver.MCPServer --
+  # with every test still green, because the tests read the file as text.
+  mcp-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      # No [encoder]: the model is built on the first call, so the handshake
+      # must work without torch. If that ever stops being true, this job says so.
+      - run: pip install -e ".[mcp,dev]"
+      - run: pytest -q tests/test_api.py
+      - name: speak MCP over stdio and list the tools
+        run: |
+          python - <<'PY'
+          import asyncio
+          from mcp import ClientSession, StdioServerParameters
+          from mcp.client.stdio import stdio_client
+
+          async def main():
+              params = StdioServerParameters(command="python", args=["-m", "groundlens.mcp"])
+              async with stdio_client(params) as (read, write):
+                  async with ClientSession(read, write) as session:
+                      await session.initialize()
+                      tools = await session.list_tools()
+                      names = [t.name for t in tools.tools]
+                      assert names == ["find_unsupported_words"], names
+                      print("ok:", names)
+
+          asyncio.run(main())
+          PY
+
   # The core package must install with no dependencies at all. If someone adds
   # numpy to `dependencies`, this job goes red -- which is the point. `pip
   # install groundlens` pulling two gigabytes of deep learning stack is how the
