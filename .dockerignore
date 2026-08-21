@@ -1,7 +1,5 @@
 .git
 .github
 docs
-fuzz
 scripts
 tests
-.clusterfuzzlite
