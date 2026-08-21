@@ -48,9 +48,7 @@ NUMBER_PATTERN = re.compile(
     r"""
     (?P<open>\()?
     (?P<sign>[-−–+])?
-    \s?
-    (?P<cur>[$€£¥₹])?
-    \s?
+    (?:(?P<cur>[$€£¥₹])\s?)?
     (?P<body>
         \d{1,3}(?:[    ]\d{3}){1,8}(?!\d)(?:[.,]\d{1,9})?
       | \d{1,3}(?:['’]\d{3}){1,8}(?!\d)(?:[.,]\d{1,9})?
@@ -196,8 +194,12 @@ def find_numerals(text: str, profile: LocaleProfile) -> list[Numeral]:
         )
         if negative:
             readings = tuple(-r for r in readings)
-        # The pattern tolerates a space after the sign and after a currency
-        # symbol, so the raw match can carry whitespace at either end. A span
+        # A sign only binds when it touches a currency symbol or a digit:
+        # "-$101,755" is negative, "payment - $101,755" is a punctuation dash
+        # and stays positive, and the 7 in "pages 5 - 7" is not minus seven.
+        # The pattern still tolerates a space after a currency symbol
+        # ("$ 5,428", common in PDF extraction), so the raw match can carry
+        # whitespace at either end. A span
         # that includes it would make every reported source slice wrong by a
         # character, so trim it here rather than at each call site.
         raw = match.group(0)

@@ -158,3 +158,38 @@ def test_normalisation_is_idempotent() -> None:
 
 def test_invisibles_are_deleted() -> None:
     assert normalised("10\u200b,\u200b000") == "10,000"
+
+
+# --- a sign must touch its number --------------------------------------
+
+
+def test_spaced_hyphen_is_punctuation_not_minus() -> None:
+    # Real case from the Berkshire 2024 letter: "our sole payment - $101,755".
+    # The dash is prose punctuation. Reading it as a minus made the exact
+    # channel compare -101755 against a claimed 101755 and report a fabrication
+    # that was not there.
+    found = find_numerals("our sole payment - $101,755 or 10 cents", locale("en"))
+    amounts = [r for n in found for r in n.readings]
+    assert Decimal("101755") in amounts
+    assert Decimal("-101755") not in amounts
+
+
+def test_adjacent_sign_is_still_negative() -> None:
+    found = find_numerals("a swing of -$101,755 on the year", locale("en"))
+    assert Decimal("-101755") in [r for n in found for r in n.readings]
+    found = find_numerals("a delta of -1,234 units", locale("en"))
+    assert Decimal("-1234") in [r for n in found for r in n.readings]
+
+
+def test_ranges_do_not_negate_their_second_number() -> None:
+    found = find_numerals("see pages 45 - 78 for detail", locale("en"))
+    values = [r for n in found for r in n.readings]
+    assert Decimal("78") in values
+    assert Decimal("-78") not in values
+
+
+def test_currency_with_space_still_parses() -> None:
+    # Docling writes "$ 5,428" for table cells; the space after the currency
+    # symbol stays legal.
+    found = find_numerals("earnings were $ 5,428 for the period", locale("en"))
+    assert Decimal("5428") in [r for n in found for r in n.readings]
