@@ -38,7 +38,7 @@ from groundlens.proofread import adaptive_k, proofread
 if TYPE_CHECKING:  # pragma: no cover
     from groundlens._encode import SentenceTransformerEncoder
 
-__version__ = "3.0.1"
+__version__ = "3.0.5"
 
 
 def __getattr__(name: str) -> Any:
