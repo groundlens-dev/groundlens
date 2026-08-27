@@ -32,6 +32,11 @@ NOTE_CODES = frozenset(
         "exact_string_in_span",  # the word occurs verbatim in the winning evidence;
         # support is a contextual score, so the two can disagree, and that
         # disagreement is the signature of the same word used differently
+        "echoes_question",  # the word (or, for a numeral, the value) also appears in
+        # the question. Support is unchanged: the question is not a source. The
+        # note lets a reader tell an echo from a finding -- a weak word that was
+        # in the question is ordinary; a numeral at 0.0 that was in the question
+        # is the model repeating the user, and the sources do not confirm it.
     }
 )
 
@@ -70,7 +75,8 @@ class Anchor:
         """One line a human can act on."""
         head = f"{self.text:<14}  support {self.support:.2f}"
         if self.evidence_text is None:
-            return f"{head}   no anchor found"
+            tail = "   [also in the question]" if "echoes_question" in self.notes else ""
+            return f"{head}   no anchor found{tail}"
         where = self.evidence_id or "source"
         line = f"{head}   nearest in {where}: {self.evidence_text!r}"
         if "exact_string_in_span" in self.notes and self.support < _EXPLAIN_EXACT_BELOW:
@@ -79,6 +85,8 @@ class Anchor:
             # in the span does not pin support near 1. When the gap is wide
             # enough to surprise, the line says so instead of looking broken.
             line += "   (word is in the span; support scores its use in context)"
+        if "echoes_question" in self.notes:
+            line += "   [also in the question]"
         return line
 
 

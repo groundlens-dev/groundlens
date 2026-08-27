@@ -25,6 +25,7 @@ from __future__ import annotations
 import math
 import re
 from collections.abc import Sequence
+from dataclasses import replace
 from decimal import Decimal
 
 from groundlens._align import (
@@ -35,7 +36,7 @@ from groundlens._align import (
     tokens_overlapping,
 )
 from groundlens._hash import content_hash
-from groundlens._numerals import Numeral, find_numerals
+from groundlens._numerals import LocaleProfile, Numeral, find_numerals
 from groundlens._numerals import locale as locale_profile
 from groundlens._text import normalised
 from groundlens._types import Anchor, Encoder, Evidence, Proofread
@@ -102,6 +103,41 @@ def _nearest_numeral(
             if best is None or distance < best[2]:
                 best = (evidence_id, numeral, distance)
     return best
+
+
+def _note_question_echoes(
+    anchors: list[Anchor], question: str, profile: LocaleProfile
+) -> list[Anchor]:
+    """Attach ``echoes_question`` to anchors that also occur in the question.
+
+    Words match case-insensitively on the normalised text; numerals match on any
+    valid reading of the value, so ``10,000`` in the answer echoes ``10.000`` in a
+    Spanish question. Nothing else about the anchor changes.
+    """
+    question_text = normalised(question)
+    question_words = frozenset(
+        u.text.casefold() for u in segment(question_text, profile) if u.kind == "lexical"
+    )
+    question_values = frozenset(
+        reading for numeral in find_numerals(question_text, profile) for reading in numeral.readings
+    )
+
+    def echoed(anchor: Anchor) -> bool:
+        if anchor.kind == "lexical":
+            return anchor.text.casefold() in question_words
+        if anchor.kind == "numeral" and anchor.value is not None:
+            # ``value`` is the canonical string of every reading, joined by " | ".
+            # Any reading shared with the question counts: the same rule the
+            # sources are matched with.
+            return any(Decimal(v.strip()) in question_values for v in anchor.value.split("|"))
+        return False
+
+    return [
+        replace(a, notes=(*a.notes, "echoes_question"))
+        if echoed(a) and "echoes_question" not in a.notes
+        else a
+        for a in anchors
+    ]
 
 
 def _numeral_anchor(
@@ -243,6 +279,7 @@ def proofread(
     k: int = 1,
     locale: str = "und",
     max_anchors: int = 2048,
+    question: str | None = None,
 ) -> Proofread:
     """Proofread ``answer`` against its ``sources`` and return where to look.
 
@@ -250,6 +287,14 @@ def proofread(
         answer: the model output to check.
         context: the retrieved sources. Pass ``(id, text)`` pairs so findings
             can name which source backed each word.
+        question: what the model was asked, if you have it. **It is not a
+            source and never adds support.** Anchors whose word -- or, for a
+            numeral, whose value -- also appears in the question get the note
+            ``echoes_question``, so a reader can tell an echo from a finding: a
+            weak word that was in the question is ordinary; a numeral at 0.0
+            that was in the question is the model repeating the user, and the
+            sources do not confirm it. With ``question=None`` the result is
+            byte-identical to earlier releases.
         encoder: any :class:`~groundlens.Encoder`. Use
             :class:`~groundlens.SentenceTransformerEncoder` for the reference one.
         k: how many of the weakest anchors the floor averages. ``1`` is the
@@ -316,6 +361,9 @@ def proofread(
             anchors.append(_numeral_anchor(unit, context_values, context_numerals))
         else:
             anchors.append(_lexical_anchor(unit, answer_tokens, context_tokens))
+
+    if question is not None and question.strip():
+        anchors = _note_question_echoes(anchors, question, profile)
 
     marked = [a for a in anchors if a.kind != "skipped"]
     resolved_k = adaptive_k(len(marked)) if k == 0 else max(1, k)

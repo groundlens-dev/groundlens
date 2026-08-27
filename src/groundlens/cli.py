@@ -55,6 +55,11 @@ def main(argv: list[str] | None = None) -> int:
         action="append",
         help="a source: text, a path, or id=path. Repeat for multiple sources.",
     )
+    run.add_argument(
+        "--question",
+        default=None,
+        help="what the model was asked (text or path); not a source, only annotates echoes",
+    )
     run.add_argument("--k", type=int, default=1, help="how many weakest anchors (0 = adaptive)")
     run.add_argument("--locale", default="und", help="und, en, es, de, fr, it, pt, nl, ch")
     run.add_argument("--model", default=None, help="sentence-transformers model id")
@@ -75,7 +80,15 @@ def main(argv: list[str] | None = None) -> int:
             sources.append((f"ctx-{index}", _read(raw)))
 
     encoder = SentenceTransformerEncoder(args.model or DEFAULT_MODEL)
-    marks = proofread(_read(args.answer), sources, encoder=encoder, k=args.k, locale=args.locale)
+    question = _read(args.question) if args.question else None
+    marks = proofread(
+        _read(args.answer),
+        sources,
+        encoder=encoder,
+        k=args.k,
+        locale=args.locale,
+        question=question,
+    )
 
     if args.json:
         print(_as_json(marks))

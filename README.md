@@ -40,9 +40,21 @@ sources don't back — and shows you what each one should have said. It checks R
 QUESTION    What is the invoice total?
 SOURCE      ...the total amount due is 10,000 dollars, payable within 30 days...
 ANSWER      The invoice total is 1,000 dollars, due in 30 days.
-
-GROUNDLENS  1,000   nothing supports this.   Closest in invoice.pdf#p1: '10,000'
 ```
+
+```python
+marks = proofread(answer, [("invoice.pdf#p1", source)], encoder=encoder, question=question)
+print(marks.report())
+```
+
+```
+1,000           support 0.00   nearest in invoice.pdf#p1: '10,000'
+```
+
+The question is not a source and never adds support. Pass it anyway: a word the
+answer took from the question is marked `[also in the question]`, so a reviewer
+can tell an echo from a finding — and a number at 0.00 that echoes the question
+is the model repeating the user, unconfirmed by any document.
 
 It never tells you the answer is wrong. It tells you which word to look at, and
 which document to open. Thirty seconds of human attention instead of five minutes.
@@ -150,15 +162,20 @@ stack before you had done anything.
 ```python
 from groundlens import proofread, SentenceTransformerEncoder
 
+question = "Is the rate 4.75%, and what is the payment term?"
 answer = "The invoice total is 4.75% payable within 45 days."
 sources = [("policy.pdf#p3", "The rate stated in the policy is 3.90% and the term is 30 days.")]
 
-marks = proofread(answer, sources, encoder=SentenceTransformerEncoder(), k=2)
+marks = proofread(answer, sources, encoder=SentenceTransformerEncoder(), k=2, question=question)
 
 print(marks.report())
-#  4.75%   support 0.00    nearest in policy.pdf#p3: '3.90%'
-#  45      support 0.00    nearest in policy.pdf#p3: '30'
+#  4.75%           support 0.00   nearest in policy.pdf#p3: '3.90%'   [also in the question]
+#  45              support 0.00   nearest in policy.pdf#p3: '30'
 ```
+
+`4.75%` was in the question: the model repeated the user, and the policy says
+3.90%. `45` was in neither. Both are at 0.00; the note tells the reviewer which
+is which. Leave `question` out and the result is byte-identical to before.
 
 Every mark carries its receipt:
 
@@ -170,12 +187,13 @@ for anchor in marks.weakest:
     anchor.support         # 0.0              absent from the sources
     anchor.evidence_id     # 'policy.pdf#p3'  which document to open
     anchor.evidence_text   # '3.90%'          what it should have matched
+    anchor.notes           # ('echoes_question',)  it was in the question too
 ```
 
 From the shell:
 
 ```bash
-groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt
+groundlens read --answer answer.txt --context policy.pdf#p3=policy.txt --question question.txt
 ```
 <br>
 
@@ -210,7 +228,7 @@ the one on your PATH: `/path/to/venv/bin/python`.
 
 ### The one tool
 
-`find_unsupported_words(answer, sources, k=4, locale="und")`
+`find_unsupported_words(answer, sources, k=4, locale="und", question=None)`
 
 | | |
 |---|---|
@@ -218,6 +236,7 @@ the one on your PATH: `/path/to/venv/bin/python`.
 | `sources` | `[{"id": "policy.pdf#p3", "text": "..."}]`. The id comes back in the findings, so the reader knows which document to open |
 | `k` | how many of the weakest anchors to return |
 | `locale` | how these documents write numbers. `es` reads 1.234 as 1234, `en` reads it as 1.234, `und` keeps both readings |
+| `question` | what the model was asked, if you have it. Not a source — it never adds support. Anchors also present in the question carry the note `echoes_question` |
 
 It returns the weakest anchors with their receipts, the floor, the encoder id and
 a `sha256` of the finding:
