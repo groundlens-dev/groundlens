@@ -22,7 +22,7 @@
 
 <br>
 
-[groundlens.dev](https://groundlens.dev)
+[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-md.svg)](https://huggingface.co/spaces/AI-that-works/groundlens)
 
 <br>
 
@@ -43,7 +43,12 @@ ANSWER      The invoice total is 1,000 dollars, due in 30 days.
 ```
 
 ```python
-marks = proofread(answer, [("invoice.pdf#p1", source)], encoder=encoder, question=question)
+marks = proofread(
+    answer,
+    [("invoice.pdf#p1", source)],
+    encoder=encoder,
+    question=question
+)
 print(marks.report())
 ```
 
@@ -51,13 +56,9 @@ print(marks.report())
 1,000           support 0.00   nearest in invoice.pdf#p1: '10,000'
 ```
 
-The question is not a source and never adds support. Pass it anyway: a word the
-answer took from the question is marked `[also in the question]`, so a reviewer
-can tell an echo from a finding — and a number at 0.00 that echoes the question
-is the model repeating the user, unconfirmed by any document.
+> The question is not a source and don't adds support. Pass it anyway because a word the answer took from the question is marked `[also in the question]`, so a reviewer can tell an echo from a finding. A number at 0.00 that echoes the question is the model repeating the user, unconfirmed by any document.
 
-It never tells you the answer is wrong. It tells you which word to look at, and
-which document to open. Thirty seconds of human attention instead of five minutes.
+> `proofred` do not tells you the answer is wrong. It tells you which word to look at, and which document to open. 
 
 <br>
 
