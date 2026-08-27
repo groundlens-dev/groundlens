@@ -32,7 +32,10 @@ Groundlens proofreads an answer against the sources it was drawn from. Call it \
 before you present a retrieved answer to a person, whenever you still have the \
 passages that answer came from.
 
-What comes back is evidence, not a judgement. A support of 0.00 on a number \
+What comes back is evidence, not a judgement. Pass the question too when you \
+have it: it never adds support, but anchors that echo it are noted, and a number \
+at 0.00 that echoes the question is the model repeating the user unconfirmed. \
+A support of 0.00 on a number \
 means that value is absent from the sources. On a word it means no lexical \
 anchor was found, which is ordinary in faithful paraphrase and is not by itself \
 a fault. There is no threshold: do not turn the floor into a pass or a fail, and \
@@ -72,6 +75,7 @@ def build_server() -> Any:
         sources: list[dict[str, str]],
         k: int = 4,
         locale: str = "und",
+        question: str | None = None,
     ) -> dict[str, Any]:
         """
         Args:
@@ -81,9 +85,15 @@ def build_server() -> Any:
             k: how many of the weakest anchors to return.
             locale: how these documents write numbers -- ``es`` reads 1.234 as
                 1234, ``en`` reads it as 1.234. ``und`` keeps both readings.
+            question: what the model was asked, if you have it. Not a source;
+                it never adds support. Anchors also present in the question are
+                noted ``echoes_question`` so the reader can tell an echo from a
+                finding.
         """
         evidence = [(s.get("id") or f"ctx-{i}", s.get("text", "")) for i, s in enumerate(sources)]
-        marks = proofread(answer, evidence, encoder=_encoder(), k=k, locale=locale)
+        marks = proofread(
+            answer, evidence, encoder=_encoder(), k=k, locale=locale, question=question
+        )
         return {
             "weakest_anchors": [
                 {
