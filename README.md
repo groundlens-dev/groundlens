@@ -7,12 +7,10 @@
 **The verification and evidence layer for AI.**
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
-[![Python](https://img.shields.io/pypi/pyversions/groundlens)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-2c7a4b)](#python)
-[![Rust](https://img.shields.io/badge/core-Rust-dea584)](crates)
 
-[![CI](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/ci.yml)
+[![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
+[![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 
@@ -133,7 +131,7 @@ flip, so every threshold in a policy carries a **guard band**: a score inside
 the band is `REVIEW` on every platform, and `policy lint` refuses a band
 narrower than twice the verifier's tolerance.
 
-`crates/gl-cli/tests/golden.rs` runs the invoice example under a Turkish
+The `rust` workflow (`crates/gl-cli/tests/golden.rs`) runs the invoice example under a Turkish
 locale and a Pacific timezone on Linux x86_64, macOS arm64 and Windows, and
 compares the record's `content_hash` with the committed golden value. A
 change to that file has to explain itself in the commit.
