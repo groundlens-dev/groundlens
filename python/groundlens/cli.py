@@ -76,6 +76,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows consoles default to a legacy code page; receipts carry the
+    # source text verbatim, so the CLI always writes UTF-8.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     args = build_parser().parse_args(argv)
     try:
         return _run(args)
@@ -104,7 +111,7 @@ def _run(args: argparse.Namespace) -> int:
         return EXIT[record.decision]
     if args.cmd == "report":
         summary = write_report(args.log, args.out)
-        print(f"ok  {summary['records']} records → {args.out}/report.md, report.json, records.jsonl, README-auditor.md")
+        print(f"ok  {summary['records']} records written to {args.out}: report.md, report.json, records.jsonl, README-auditor.md")
         return 0
     if args.cmd == "record":
         n = Record.verify_chain(Record.read_log(args.log))
