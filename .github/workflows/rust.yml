@@ -1,0 +1,49 @@
+name: rust
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      # Hostile environment: nothing here may change a byte of output.
+      - run: cargo test --workspace
+        env:
+          LC_ALL: tr_TR.UTF-8
+          LANG: tr_TR.UTF-8
+          TZ: Pacific/Kiritimati
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.82
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --workspace --all-targets
+
+  no-network-in-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: the engine crates must not depend on any HTTP or TLS crate
+        run: |
+          cargo tree -p gl-core -p gl-text -p gl-numeric -p gl-verifiers -p gl-policy -p gl-record -p gl-bundle -e normal \
+            | grep -Ei 'reqwest|hyper|ureq|curl|openssl|rustls|native-tls|tokio-tungstenite' && exit 1 || echo "clean"

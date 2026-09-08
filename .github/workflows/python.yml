@@ -1,0 +1,37 @@
+name: python
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: Swatinem/rust-cache@v2
+      - run: pip install maturin pytest
+      - run: maturin build --release --out dist
+        working-directory: python
+      - run: pip install --no-index --find-links dist groundlens
+        working-directory: python
+      # From outside python/ so the installed wheel is what gets tested.
+      - run: python -m pytest -q python/tests -p no:cacheprovider
+        env:
+          LC_ALL: tr_TR.UTF-8
+          LANG: tr_TR.UTF-8
+          TZ: Pacific/Kiritimati
+      - run: python -c "import importlib.metadata as m; r=[x for x in (m.distribution('groundlens').requires or []) if 'extra' not in x]; assert not r, r"
