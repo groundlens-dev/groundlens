@@ -1,0 +1,25 @@
+[package]
+name = "gl-engine"
+description = "GLV, the GroundLens verification engine: one entry point that runs claims → verifiers → evidence → policy → decision → signed record"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+gl-numeric.workspace = true
+gl-core.workspace = true
+gl-text.workspace = true
+gl-verifiers.workspace = true
+gl-policy.workspace = true
+gl-record.workspace = true
+gl-bundle.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+chrono.workspace = true
+hex.workspace = true
+rand_core.workspace = true
+indexmap.workspace = true

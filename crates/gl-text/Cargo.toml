@@ -1,0 +1,14 @@
+[package]
+name = "gl-text"
+description = "Input normalisation and word segmentation for the Groundlens engine (port of groundlens 3.x _text/_words)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+gl-core.workspace = true
+unicode-normalization.workspace = true
+regex.workspace = true

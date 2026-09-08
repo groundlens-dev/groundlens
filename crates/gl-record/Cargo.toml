@@ -1,0 +1,18 @@
+[package]
+name = "gl-record"
+description = "Signed, append-only evidence records for the Groundlens engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+gl-core.workspace = true
+gl-policy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+ed25519-dalek.workspace = true
+rand_core.workspace = true
+hex.workspace = true

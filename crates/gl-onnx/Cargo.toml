@@ -1,0 +1,21 @@
+[package]
+name = "gl-onnx"
+description = "ONNX Runtime and tokenizer host for the ML, lexical and geometric verifiers of the Groundlens engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+default = []
+# Pulls ONNX Runtime and HF tokenizers. Off by default so the exact and
+# symbolic verifiers build in seconds with no native dependencies.
+runtime = ["dep:ort", "dep:tokenizers"]
+
+[dependencies]
+gl-core.workspace = true
+serde.workspace = true
+ort = { version = "2.0.0-rc.13", optional = true, default-features = false, features = ["ndarray", "download-binaries"] }
+tokenizers = { version = "0.23", optional = true, default-features = false, features = ["onig"] }
