@@ -1,0 +1,24 @@
+[package]
+name = "gl-python"
+description = "groundlens._engine: the GLV engine as a Python extension module"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+
+[lib]
+name = "_engine"
+crate-type = ["cdylib"]
+
+[dependencies]
+gl-engine.workspace = true
+gl-core.workspace = true
+gl-text.workspace = true
+gl-record.workspace = true
+gl-bundle.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+pyo3 = { version = "0.29", features = ["extension-module", "abi3-py310"] }

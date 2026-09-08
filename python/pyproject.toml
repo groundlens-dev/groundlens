@@ -1,0 +1,48 @@
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[project]
+name = "groundlens"
+version = "4.0.0.dev1"
+description = "GroundLens: the verification and evidence layer for AI. Powered by the GLV engine."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [{ name = "Javier Marin", email = "javier@jmarin.info" }]
+keywords = ["verification", "rag", "grounding", "evidence", "ai-act", "policy"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Rust",
+  "Typing :: Typed",
+]
+# The package has NO runtime dependencies. A CI job fails the build if that changes.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+groundlens = "groundlens.cli:main"
+glv = "groundlens.cli:main"
+
+[project.urls]
+Homepage = "https://groundlens.dev"
+Source = "https://github.com/groundlens-dev/groundlens"
+
+[tool.maturin]
+manifest-path = "../crates/gl-python/Cargo.toml"
+python-source = "."
+module-name = "groundlens._engine"
+features = ["pyo3/extension-module"]
+strip = true
+include = [{ path = "groundlens/policies/*.yaml", format = "sdist" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

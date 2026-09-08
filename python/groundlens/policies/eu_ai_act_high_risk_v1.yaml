@@ -1,0 +1,40 @@
+# Policy: what this organisation considers acceptable for a RAG assistant
+# whose outputs feed a decision listed in Annex III of Regulation (EU) 2024/1689.
+id: eu_ai_act_high_risk_v1
+version: 1.0.0
+description: >
+  Numeric claims must be exactly supported by the retrieved sources. Any
+  numeric contradiction fails the answer. Everything a deterministic verifier
+  cannot resolve goes to human review (Art. 14). No generative judge decides.
+verifiers:
+  required: [groundlens.numeric]
+  recommended: [groundlens.rules.*]
+  optional: [nli.deberta_v3_small, groundlens.lexical, sgi, dgi]
+  fallback: []
+  forbidden: [llm_judge.*]
+determinism:
+  minimum_to_decide: reproducible
+thresholds:
+  nli.deberta_v3_small: { support_min: 0.85, guard_band: 0.02 }
+  groundlens.lexical:   { support_min: 0.60, guard_band: 0.02 }
+decision:
+  any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
+  unresolved_claims: REVIEW
+  conflicts: REVIEW
+  tolerate_unresolved_kinds: [word]
+regulatory_mapping:
+  - framework: EU-AI-Act-2024/1689
+    article: "Art. 15(1)"
+    control: accuracy-of-outputs
+    requirement: "High-risk AI systems shall achieve an appropriate level of accuracy and perform consistently in those respects throughout their lifecycle."
+    triggered_by: [FAIL]
+  - framework: EU-AI-Act-2024/1689
+    article: "Art. 14(4)(a)"
+    control: human-oversight-review-queue
+    requirement: "Persons overseeing the system can properly understand its capacities and limitations and duly monitor its operation."
+    triggered_by: [REVIEW]
+  - framework: EU-AI-Act-2024/1689
+    article: "Art. 12(1)"
+    control: automatic-record-keeping
+    requirement: "Automatic recording of events (logs) over the lifetime of the system."
+    triggered_by: [PASS, REVIEW, FAIL]

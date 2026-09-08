@@ -1,0 +1,15 @@
+[package]
+name = "gl-numeric"
+description = "Exact numerals with scale, currency, percent and physical units for the Groundlens engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+gl-core.workspace = true
+rust_decimal.workspace = true
+regex.workspace = true
+serde.workspace = true

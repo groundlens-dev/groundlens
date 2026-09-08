@@ -1,0 +1,14 @@
+id: es_banking_v1
+version: 1.0.0
+rules:
+  - id: apr_must_be_percent
+    description: "Una TAE o APR se expresa como porcentaje"
+    scope: { claim_kind: numeric }
+    when: { answer_matches: "(?i)\\b(TAE|APR)\\b" }
+    unless: { attribute: { dimension: percent } }
+    emit: contradicted
+  - id: money_needs_currency
+    description: "Un importe sin moneda no es verificable"
+    scope: { claim_kind: numeric, attribute: { dimension: dimensionless } }
+    when: { answer_matches: "(?i)\\b(importe|total|precio|amount|invoice)\\b" }
+    emit: unsupported

@@ -1,0 +1,590 @@
+{
+ "source": "groundlens 3.1.0",
+ "cases": [
+  {
+   "case": {
+    "locale": "und",
+    "question": "What is the invoice total?",
+    "answer": "The invoice total is 1,000 dollars, due in 30 days.",
+    "context": [
+     [
+      "invoice.pdf#p1",
+      "...the total amount due is 10,000 dollars, payable within 30 days..."
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "1,000",
+     "span": [
+      21,
+      26
+     ],
+     "support": 0.0,
+     "value": "1000 | 1",
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "10,000",
+     "evidence_span": [
+      27,
+      33
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "30",
+     "span": [
+      43,
+      45
+     ],
+     "support": 1.0,
+     "value": "30",
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "30",
+     "evidence_span": [
+      58,
+      60
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "en",
+    "question": "Is the rate 4.75%, and what is the payment term?",
+    "answer": "The invoice total is 4.75% payable within 45 days.",
+    "context": [
+     [
+      "policy.pdf#p3",
+      "The rate stated in the policy is 3.90% and the term is 30 days."
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "4.75%",
+     "span": [
+      21,
+      26
+     ],
+     "support": 0.0,
+     "value": "4.75",
+     "evidence_id": "policy.pdf#p3",
+     "evidence_text": "3.90%",
+     "evidence_span": [
+      33,
+      38
+     ],
+     "notes": [
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "45",
+     "span": [
+      42,
+      44
+     ],
+     "support": 0.0,
+     "value": "45",
+     "evidence_id": "policy.pdf#p3",
+     "evidence_text": "30",
+     "evidence_span": [
+      55,
+      57
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "1.234 is ambiguous and 1.234.567 is not and 1.000,50 is one thousand.",
+    "context": [
+     [
+      "a",
+      "Values: 1234 and 1234567 and 1000.5"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "1.234",
+     "span": [
+      0,
+      5
+     ],
+     "support": 1.0,
+     "value": "1234 | 1.234",
+     "evidence_id": "a",
+     "evidence_text": "1234",
+     "evidence_span": [
+      8,
+      12
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "1.234.567",
+     "span": [
+      23,
+      32
+     ],
+     "support": 1.0,
+     "value": "1234567",
+     "evidence_id": "a",
+     "evidence_text": "1234567",
+     "evidence_span": [
+      17,
+      24
+     ],
+     "notes": [
+      "separator_repeated"
+     ]
+    },
+    {
+     "text": "1.000,50",
+     "span": [
+      44,
+      52
+     ],
+     "support": 1.0,
+     "value": "1000.5",
+     "evidence_id": "a",
+     "evidence_text": "1000.5",
+     "evidence_span": [
+      29,
+      35
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "es",
+    "question": null,
+    "answer": "El importe total asciende a 1.250,50 EUR con vencimiento en 30 dias.",
+    "context": [
+     [
+      "factura",
+      "Importe: 1250,50 euros. Plazo: 30 dias."
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "1.250,50",
+     "span": [
+      28,
+      36
+     ],
+     "support": 1.0,
+     "value": "1250.5",
+     "evidence_id": "factura",
+     "evidence_text": "1250,50",
+     "evidence_span": [
+      9,
+      16
+     ],
+     "notes": []
+    },
+    {
+     "text": "30",
+     "span": [
+      60,
+      62
+     ],
+     "support": 1.0,
+     "value": "30",
+     "evidence_id": "factura",
+     "evidence_text": "30",
+     "evidence_span": [
+      31,
+      33
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "en",
+    "question": null,
+    "answer": "Revenue of (1,500) against a forecast of 3.5% and 1'000 units.",
+    "context": [
+     [
+      "q",
+      "forecast 3.5 percent; units 1000; revenue -1500"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "(1,500)",
+     "span": [
+      11,
+      18
+     ],
+     "support": 1.0,
+     "value": "-1500",
+     "evidence_id": "q",
+     "evidence_text": "-1500",
+     "evidence_span": [
+      42,
+      47
+     ],
+     "notes": []
+    },
+    {
+     "text": "3.5%",
+     "span": [
+      41,
+      45
+     ],
+     "support": 1.0,
+     "value": "3.5",
+     "evidence_id": "q",
+     "evidence_text": "3.5",
+     "evidence_span": [
+      9,
+      12
+     ],
+     "notes": []
+    },
+    {
+     "text": "1'000",
+     "span": [
+      50,
+      55
+     ],
+     "support": 1.0,
+     "value": "1000",
+     "evidence_id": "q",
+     "evidence_text": "1000",
+     "evidence_span": [
+      28,
+      32
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "de",
+    "question": null,
+    "answer": "Der Betrag betragt 1.000,50 EUR.",
+    "context": [
+     [
+      "de",
+      "Betrag 1000,50"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "1.000,50",
+     "span": [
+      19,
+      27
+     ],
+     "support": 1.0,
+     "value": "1000.5",
+     "evidence_id": "de",
+     "evidence_text": "1000,50",
+     "evidence_span": [
+      7,
+      14
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "Step 1 then step 2 then step 10 of 12.",
+    "context": [
+     [
+      "s",
+      "There are 12 steps; step 10 is last."
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "10",
+     "span": [
+      29,
+      31
+     ],
+     "support": 1.0,
+     "value": "10",
+     "evidence_id": "s",
+     "evidence_text": "10",
+     "evidence_span": [
+      25,
+      27
+     ],
+     "notes": []
+    },
+    {
+     "text": "12",
+     "span": [
+      35,
+      37
+     ],
+     "support": 1.0,
+     "value": "12",
+     "evidence_id": "s",
+     "evidence_text": "12",
+     "evidence_span": [
+      10,
+      12
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "-1,500 and −1,500 and +1,500 and payment - $101,755",
+    "context": [
+     [
+      "p",
+      "loss of 1,500; payment of $101,755"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "-1,500",
+     "span": [
+      0,
+      6
+     ],
+     "support": 0.0,
+     "value": "-1500 | -1.5",
+     "evidence_id": "p",
+     "evidence_text": "1,500",
+     "evidence_span": [
+      8,
+      13
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "−1,500",
+     "span": [
+      11,
+      17
+     ],
+     "support": 0.0,
+     "value": "-1500 | -1.5",
+     "evidence_id": "p",
+     "evidence_text": "1,500",
+     "evidence_span": [
+      8,
+      13
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "+1,500",
+     "span": [
+      22,
+      28
+     ],
+     "support": 1.0,
+     "value": "1500 | 1.5",
+     "evidence_id": "p",
+     "evidence_text": "1,500",
+     "evidence_span": [
+      8,
+      13
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "$101,755",
+     "span": [
+      43,
+      51
+     ],
+     "support": 1.0,
+     "value": "101755 | 101.755",
+     "evidence_id": "p",
+     "evidence_text": "$101,755",
+     "evidence_span": [
+      26,
+      34
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": "How much is the fee, 250?",
+    "answer": "The fee is 250 and the cap is 10,000.",
+    "context": [
+     [
+      "f",
+      "cap: 10000"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "250",
+     "span": [
+      11,
+      14
+     ],
+     "support": 0.0,
+     "value": "250",
+     "evidence_id": "f",
+     "evidence_text": "10000",
+     "evidence_span": [
+      5,
+      10
+     ],
+     "notes": [
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "10,000",
+     "span": [
+      30,
+      36
+     ],
+     "support": 1.0,
+     "value": "10000 | 10",
+     "evidence_id": "f",
+     "evidence_text": "10000",
+     "evidence_span": [
+      5,
+      10
+     ],
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "Nothing numeric here at all.",
+    "context": [
+     [
+      "n",
+      "Still nothing."
+     ]
+    ]
+   },
+   "numerals": []
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "Total 10,000 dollars.",
+    "context": []
+   },
+   "numerals": [
+    {
+     "text": "10,000",
+     "span": [
+      6,
+      12
+     ],
+     "support": 0.0,
+     "value": "10000 | 10",
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "en",
+    "question": null,
+    "answer": "Docling writes $ 5,428 and 3,14 for tables.",
+    "context": [
+     [
+      "t",
+      "amount $5,428 and ratio 3.14"
+     ]
+    ]
+   },
+   "numerals": [
+    {
+     "text": "$ 5,428",
+     "span": [
+      15,
+      22
+     ],
+     "support": 1.0,
+     "value": "5428",
+     "evidence_id": "t",
+     "evidence_text": "$5,428",
+     "evidence_span": [
+      7,
+      13
+     ],
+     "notes": []
+    },
+    {
+     "text": "3,14",
+     "span": [
+      27,
+      31
+     ],
+     "support": 0.0,
+     "value": "314",
+     "evidence_id": "t",
+     "evidence_text": "$5,428",
+     "evidence_span": [
+      7,
+      13
+     ],
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

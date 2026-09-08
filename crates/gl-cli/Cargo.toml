@@ -1,0 +1,30 @@
+[package]
+name = "gl-cli"
+description = "glv: command-line front end of the Groundlens verification engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "glv"
+path = "src/main.rs"
+
+[dependencies]
+gl-core.workspace = true
+gl-engine.workspace = true
+gl-text.workspace = true
+gl-verifiers.workspace = true
+gl-policy.workspace = true
+gl-record.workspace = true
+gl-bundle.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+clap.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

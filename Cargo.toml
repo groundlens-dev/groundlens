@@ -1,0 +1,54 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/gl-core",
+    "crates/gl-text",
+    "crates/gl-numeric",
+    "crates/gl-verifiers",
+    "crates/gl-policy",
+    "crates/gl-record",
+    "crates/gl-bundle",
+    "crates/gl-onnx",
+    "crates/gl-engine",
+    "crates/gl-python",
+    "crates/gl-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+license = "Apache-2.0"
+repository = "https://github.com/groundlens-dev/groundlens"
+authors = ["Javier Marin <javier@jmarin.info>"]
+
+[workspace.dependencies]
+gl-core = { path = "crates/gl-core" }
+gl-text = { path = "crates/gl-text" }
+gl-numeric = { path = "crates/gl-numeric" }
+gl-verifiers = { path = "crates/gl-verifiers" }
+gl-policy = { path = "crates/gl-policy" }
+gl-record = { path = "crates/gl-record" }
+gl-bundle = { path = "crates/gl-bundle" }
+gl-onnx = { path = "crates/gl-onnx" }
+gl-engine = { path = "crates/gl-engine" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+serde_yaml = "0.9"
+rust_decimal = { version = "1", features = ["serde-with-str"] }
+sha2 = "0.10"
+hex = "0.4"
+ed25519-dalek = { version = "2", features = ["rand_core", "pem"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+unicode-normalization = "0.1"
+regex = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive", "env"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+indexmap = { version = "2", features = ["serde"] }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
