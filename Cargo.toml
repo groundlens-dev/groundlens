@@ -13,6 +13,8 @@ members = [
     "crates/gl-python",
     "crates/gl-cli",
 ]
+# cargo-fuzz targets need nightly; kept out of the stable workspace build.
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "4.0.0"
