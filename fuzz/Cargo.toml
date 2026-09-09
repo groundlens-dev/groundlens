@@ -1,0 +1,51 @@
+[package]
+name = "gl-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+gl-text = { path = "../crates/gl-text" }
+gl-numeric = { path = "../crates/gl-numeric" }
+gl-policy = { path = "../crates/gl-policy" }
+gl-verifiers = { path = "../crates/gl-verifiers" }
+gl-core = { path = "../crates/gl-core" }
+
+[[bin]]
+name = "numerals"
+path = "fuzz_targets/numerals.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "quantities"
+path = "fuzz_targets/quantities.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "normalise"
+path = "fuzz_targets/normalise.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "policy"
+path = "fuzz_targets/policy.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "numeric_verifier"
+path = "fuzz_targets/numeric_verifier.rs"
+test = false
+doc = false
+bench = false

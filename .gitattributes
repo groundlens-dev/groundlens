@@ -1,0 +1,6 @@
+# Bundles, goldens and tokenizers are hashed byte for byte. Never let a
+# checkout rewrite line endings.
+* text=auto eol=lf
+*.onnx binary
+*.png binary
+*.ipynb text eol=lf

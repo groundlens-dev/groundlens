@@ -1,0 +1,41 @@
+name: fuzz
+
+# cargo-fuzz over the parsers that read untrusted text: numerals,
+# quantities, normalisation, policy YAML and the exact verifier. Short runs
+# on every pull request that touches them, a longer run weekly.
+
+on:
+  pull_request:
+    paths: ["crates/gl-text/**", "crates/gl-numeric/**", "crates/gl-policy/**", "crates/gl-verifiers/**", "fuzz/**"]
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [numerals, quantities, normalise, policy, numeric_verifier]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
+        with:
+          toolchain: nightly
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: fuzz
+      - run: cargo install cargo-fuzz --locked
+      - name: run ${{ matrix.target }}
+        run: |
+          seconds=$([ "${{ github.event_name }}" = "schedule" ] && echo 600 || echo 90)
+          cargo fuzz run ${{ matrix.target }} -- -max_total_time=$seconds -max_len=4096
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: fuzz-artifacts-${{ matrix.target }}
+          path: fuzz/artifacts
