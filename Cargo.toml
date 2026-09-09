@@ -17,7 +17,7 @@ members = [
 [workspace.package]
 version = "4.0.0"
 edition = "2021"
-rust-version = "1.82"
+rust-version = "1.91"
 license = "Apache-2.0"
 repository = "https://github.com/groundlens-dev/groundlens"
 authors = ["Javier Marin <javier@jmarin.info>"]
