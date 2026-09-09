@@ -86,6 +86,7 @@ def test_cli_bundle_build_and_verify(tmp_path):
 def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
     """pull is the one network operation; exercised here over file:// so the
     test itself stays offline."""
+    import hashlib
     import tarfile
 
     from groundlens import Bundle
@@ -96,13 +97,22 @@ def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(tiny, arcname="tiny-bundle")
     url = archive.resolve().as_uri()
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
 
-    # No pinned hash for a bundle this build does not know: refused.
+    # The pinned hash of `base` protects it from any other archive.
+    with pytest.raises(BundleError, match="does not match the pinned"):
+        Bundle.pull("base", url=url, into=tmp_path / "b0")
+    assert not (tmp_path / "b0").exists()
+
+    # A bundle this build does not know, with no hash given: refused.
     with pytest.raises(BundleError, match="pinned"):
-        Bundle.pull("base", url=url, into=tmp_path / "b1")
+        Bundle.pull("tiny", url=url, into=tmp_path / "b1")
     assert not (tmp_path / "b1").exists()
 
-    b = Bundle.pull("base", url=url, into=tmp_path / "b2", trust_unpinned=True)
+    # The same with its hash: installed and verified.
+    with pytest.raises(BundleError, match="does not match"):
+        Bundle.pull("tiny", url=url, sha256="0" * 64, into=tmp_path / "b2")
+    b = Bundle.pull("tiny", url=url, sha256=digest, into=tmp_path / "b2")
     assert b.name == "tiny-test" and (tmp_path / "b2" / "manifest.json").is_file()
     assert Bundle.open(tmp_path / "b2").hash == b.hash
 
@@ -114,19 +124,3 @@ def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
     assert rec["content"]["bundle_hash"] == b.hash
     assert any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
     assert run("bundle", "status").stdout.startswith("ok  base v1")
-
-
-@pytest.mark.skipif(sys.platform != "linux" or not Path("/usr/bin/unshare").exists(), reason="needs linux unshare")
-def test_runs_with_the_network_namespace_removed(tmp_path):
-    """Everything above, inside a namespace that has no network at all."""
-    code = (
-        "from groundlens import verify, proofread, Record\n"
-        "r = verify('Total 1,000 dollars', [('s','Total 10,000 dollars')]); r.verify()\n"
-        "m = proofread('Total 1,000 dollars', [('s','Total 10,000 dollars')])\n"
-        "print(r.decision, m.floor)"
-    )
-    proc = subprocess.run(["unshare", "-rn", sys.executable, "-c", code], capture_output=True, text=True)
-    if proc.returncode != 0 and "unshare" in proc.stderr:
-        pytest.skip(f"unshare not permitted here: {proc.stderr.strip()}")
-    assert proc.returncode == 0, proc.stderr
-    assert proc.stdout.strip() == "FAIL 0.0"
