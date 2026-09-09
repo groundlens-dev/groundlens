@@ -7,8 +7,13 @@ use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
     let Ok(text) = std::str::from_utf8(data) else { return };
-    let (answer, source) = text.split_at(text.len() / 2);
-    let (answer, source) = (gl_text::normalise(answer.trim_end_matches(|c: char| !c.is_ascii())), gl_text::normalise(source));
+    // Split on a char boundary: the harness must never be the thing that panics.
+    let mut cut = text.len() / 2;
+    while !text.is_char_boundary(cut) {
+        cut += 1;
+    }
+    let (answer, source) = text.split_at(cut);
+    let (answer, source) = (gl_text::normalise(answer), gl_text::normalise(source));
     let claims = gl_verifiers::extract_claims(&answer, "und");
     let input = VerificationInput {
         question: None,

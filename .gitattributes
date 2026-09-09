@@ -2,5 +2,9 @@
 # checkout rewrite line endings.
 * text=auto eol=lf
 *.onnx binary
+# Hashed test data: never converted, never diffed.
+crates/gl-onnx/testdata/** binary
+crates/gl-cli/tests/golden/** binary
+python/tests/compat/*.json binary
 *.png binary
 *.ipynb text eol=lf
