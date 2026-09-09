@@ -78,6 +78,40 @@ fn bundle_verify(root: &str) -> PyResult<(String, String, String)> {
     Ok((b.manifest.name, b.manifest.version, b.manifest_hash))
 }
 
+/// Words of a normalised text with their spans and stopword flags, as JSON.
+/// The `proofread()` facade lists skipped words with it, as 3.x did.
+#[pyfunction]
+fn segment_json(text: &str, locale: &str) -> PyResult<String> {
+    let words: Vec<serde_json::Value> = gl_text::words(text, locale)
+        .into_iter()
+        .map(|w| serde_json::json!({"text": w.text, "start": w.span.start, "end": w.span.end, "stopword": w.stopword}))
+        .collect();
+    serde_json::to_string(&words).map_err(err)
+}
+
+/// Installed state of a named bundle, as JSON (see `gl_engine::bundle::Status`).
+#[pyfunction]
+fn bundle_status(name: &str) -> PyResult<String> {
+    serde_json::to_string(&gl_engine::bundle::status(name)).map_err(err)
+}
+
+/// Every bundle this build knows how to fetch: name, version, url, pinned
+/// archive hash, description.
+#[pyfunction]
+fn known_bundles() -> PyResult<String> {
+    let v: Vec<serde_json::Value> = gl_bundle::KNOWN_BUNDLES
+        .iter()
+        .map(|b| serde_json::json!({"name": b.name, "version": b.version, "url": b.url, "archive_sha256": b.archive_sha256, "description": b.description}))
+        .collect();
+    serde_json::to_string(&v).map_err(err)
+}
+
+/// Where a named bundle is (or would be) installed on this machine.
+#[pyfunction]
+fn bundle_locate(name: &str) -> String {
+    gl_bundle::locate(name).display().to_string()
+}
+
 /// YAML → JSON, so the Python package needs no YAML dependency for rule sets.
 #[pyfunction]
 fn yaml_to_json(text: &str) -> PyResult<String> {
@@ -98,5 +132,9 @@ fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(bundle_build, m)?)?;
     m.add_function(wrap_pyfunction!(bundle_verify, m)?)?;
     m.add_function(wrap_pyfunction!(yaml_to_json, m)?)?;
+    m.add_function(wrap_pyfunction!(segment_json, m)?)?;
+    m.add_function(wrap_pyfunction!(bundle_status, m)?)?;
+    m.add_function(wrap_pyfunction!(known_bundles, m)?)?;
+    m.add_function(wrap_pyfunction!(bundle_locate, m)?)?;
     Ok(())
 }

@@ -31,7 +31,7 @@ from groundlens.proofread import adaptive_k, as_evidence, proofread
 from groundlens.record import Record
 from groundlens.verify import verify
 
-__version__ = "4.0.0.dev1"
+__version__ = "4.0.0"
 ENGINE_VERSION = _engine_version()
 
 __all__ = [

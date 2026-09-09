@@ -9,10 +9,13 @@ use gl_verifiers::{extract_claims_with, NumericConfig, NumericVerifier, RuleSet}
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+pub use gl_bundle;
 pub use gl_core;
 pub use gl_policy;
 pub use gl_record;
 pub use gl_verifiers;
+
+pub mod bundle;
 
 /// A policy that ships inside every build: numeric contradictions fail,
 /// anything unresolved goes to review, no generative verifier decides.
@@ -58,10 +61,22 @@ pub struct VerifyRequest {
     pub signing_key_hex: Option<String>,
     #[serde(default)]
     pub previous_record_hash: Option<String>,
+    /// Recorded when no bundle is loaded (`sha256:unbundled` otherwise).
     #[serde(default)]
     pub bundle_hash: Option<String>,
+    /// A bundle directory, or the name of a known bundle (`base`). `None`
+    /// uses the installed `base` bundle when there is one.
+    #[serde(default)]
+    pub bundle: Option<String>,
+    /// Run the lexical channel when an encoder is available.
+    #[serde(default = "default_true")]
+    pub lexical: bool,
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 fn und() -> String {
@@ -81,6 +96,8 @@ impl VerifyRequest {
             signing_key_hex: None,
             previous_record_hash: None,
             bundle_hash: None,
+            bundle: None,
+            lexical: true,
             metadata: BTreeMap::new(),
         }
     }
@@ -110,7 +127,26 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
     for json in &req.rule_sets_json {
         verifiers.push(Box::new(RuleSet::from_json(json)?.compile()?));
     }
-    let infos: Vec<_> = verifiers.iter().map(|v| v.info().clone()).collect();
+    let mut bundle_hash = req.bundle_hash.clone().unwrap_or_else(|| "sha256:unbundled".into());
+    let loaded = if req.lexical { bundle::load(req.bundle.as_deref())? } else { None };
+    match &loaded {
+        Some(b) => {
+            bundle_hash = b.manifest_hash.clone();
+            #[cfg(feature = "lexical")]
+            verifiers.push(Box::new(gl_verifiers::LexicalVerifier::new(b.encoder.clone(), &b.model_hash)));
+        }
+        None => {
+            if policy.verifiers.required.iter().any(|r| r == gl_verifiers::LEXICAL_ID) {
+                return Err(gl_core::Error::InvalidInput(bundle::MISSING_BASE.into()));
+            }
+        }
+    }
+    let mut infos: Vec<_> = verifiers.iter().map(|v| v.info().clone()).collect();
+    for k in known_verifiers() {
+        if !infos.iter().any(|i| i.id == k.id) {
+            infos.push(k);
+        }
+    }
     let problems = policy.lint(&infos);
     if !problems.is_empty() {
         return Err(gl_core::Error::InvalidInput(format!("policy lint failed: {}", problems.join("; "))));
@@ -130,7 +166,7 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
     let content = RecordContent {
         schema: RECORD_SCHEMA.into(),
         engine_version: gl_core::ENGINE_VERSION.into(),
-        bundle_hash: req.bundle_hash.clone().unwrap_or_else(|| "sha256:unbundled".into()),
+        bundle_hash,
         input_hash: gl_record::input_hash(&input)?,
         locale: req.locale.clone(),
         graph,
@@ -183,8 +219,17 @@ pub fn prepare(req: &VerifyRequest) -> VerificationInput {
 
 pub fn policy_lint(yaml: &str) -> Result<(String, Vec<String>)> {
     let policy = Policy::from_yaml(yaml)?;
-    let known = [NumericVerifier::default().info().clone()];
+    let known = known_verifiers();
     Ok((policy.hash()?, policy.lint(&known)))
+}
+
+/// Declarations of every built-in verifier, model or no model.
+pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
+    #[allow(unused_mut)]
+    let mut known = vec![NumericVerifier::default().info().clone()];
+    #[cfg(feature = "lexical")]
+    known.push(gl_verifiers::LexicalVerifier::info_without_model());
+    known
 }
 
 pub fn keygen_hex() -> String {
@@ -212,5 +257,43 @@ mod tests {
 
         let again = verify(&req).unwrap();
         assert_eq!(record.content_hash, again.content_hash);
+    }
+
+    #[cfg(feature = "lexical")]
+    #[test]
+    fn lexical_channel_runs_from_a_bundle_and_is_hashed_into_the_record() {
+        let tiny = concat!(env!("CARGO_MANIFEST_DIR"), "/../gl-onnx/testdata/tiny-bundle");
+        let mut req = VerifyRequest::new(
+            "The invoice total is 1,000 dollars.",
+            vec![Source {
+                id: "s".into(),
+                text: "The total amount due is 10,000 dollars.".into(),
+                locator: None,
+            }],
+        );
+        req.bundle = Some(tiny.into());
+        let record = verify(&req).unwrap();
+        assert!(record.content.bundle_hash.starts_with("sha256:"));
+        assert_ne!(record.content.bundle_hash, "sha256:unbundled");
+        let lexical: Vec<_> =
+            record.content.graph.evidence.iter().filter(|e| e.verifier_id == "groundlens.lexical").collect();
+        assert_eq!(lexical.len(), 2, "invoice, total");
+        assert!(lexical.iter().all(|e| e.model_hash.is_some()));
+        assert_eq!(record.content.outcome.decision, Decision::Fail);
+        assert_eq!(verify(&req).unwrap().content_hash, record.content_hash);
+
+        // A policy that requires the channel refuses to run without a bundle.
+        let mut strict = req.clone();
+        strict.bundle = None;
+        strict.policy_yaml = "id: strict
+version: 1
+verifiers:
+  required: [groundlens.numeric, groundlens.lexical]
+"
+        .into();
+        if gl_bundle::open_installed("base").unwrap().is_none() {
+            let err = verify(&strict).unwrap_err().to_string();
+            assert!(err.contains("bundle pull base"), "{err}");
+        }
     }
 }

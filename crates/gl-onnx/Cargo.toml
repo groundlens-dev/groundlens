@@ -1,6 +1,6 @@
 [package]
 name = "gl-onnx"
-description = "ONNX Runtime and tokenizer host for the ML, lexical and geometric verifiers of the Groundlens engine"
+description = "Model host (tract, pure Rust ONNX inference) and tokenizers for the lexical, ML and geometric verifiers of the GroundLens engine"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,12 +10,13 @@ authors.workspace = true
 
 [features]
 default = []
-# Pulls ONNX Runtime and HF tokenizers. Off by default so the exact and
-# symbolic verifiers build in seconds with no native dependencies.
-runtime = ["dep:ort", "dep:tokenizers"]
+# Pulls tract (ONNX inference in pure Rust) and HF tokenizers with the
+# pure-Rust regex backend. No native library anywhere.
+runtime = ["dep:tract-onnx", "dep:tokenizers", "dep:gl-bundle"]
 
 [dependencies]
 gl-core.workspace = true
+gl-bundle = { workspace = true, optional = true }
 serde.workspace = true
-ort = { version = "2.0.0-rc.13", optional = true, default-features = false, features = ["ndarray", "download-binaries"] }
-tokenizers = { version = "0.23", optional = true, default-features = false, features = ["onig"] }
+tract-onnx = { version = "0.23", optional = true }
+tokenizers = { version = "0.23", optional = true, default-features = false, features = ["fancy-regex"] }

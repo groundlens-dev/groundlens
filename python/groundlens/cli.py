@@ -43,7 +43,8 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--policy", default=None, help="built-in name, path or YAML; default groundlens_default_v1")
     v.add_argument("--rules", action="append", default=[], help="rule set JSON/YAML, repeatable")
     v.add_argument("--locale", default="und")
-    v.add_argument("--bundle", help="bundle directory; its hash goes into the record")
+    v.add_argument("--bundle", help="bundle directory or name; default: the installed base bundle, if any")
+    v.add_argument("--no-lexical", action="store_true", help="skip the lexical channel even if a bundle is installed")
     v.add_argument("--log", help="append the signed record to this JSON Lines file")
     v.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
@@ -68,8 +69,12 @@ def build_parser() -> argparse.ArgumentParser:
     bb.add_argument("--bundle-version", required=True)
     bv = b.add_parser("verify", help="re-hash every artefact of a bundle")
     bv.add_argument("root")
-    bp = b.add_parser("pull", help="fetch a published bundle (not in this build)")
-    bp.add_argument("name", nargs="?", default="reference")
+    bs = b.add_parser("status", help="is a bundle installed, where, with which hash")
+    bs.add_argument("name", nargs="?", default="base")
+    bp = b.add_parser("pull", help="download and install a published bundle (the only command that uses the network)")
+    bp.add_argument("name", nargs="?", default="base")
+    bp.add_argument("--into", help="install directory (default: the per-user bundle directory)")
+    bp.add_argument("--trust-unpinned", action="store_true", help="accept a bundle this build has no pinned hash for (development)")
 
     sub.add_parser("keygen", help="print a fresh Ed25519 signing seed")
     return p
@@ -86,7 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return _run(args)
-    except (PolicyError, IntegrityError, BundleError, ValueError, FileNotFoundError, NotImplementedError) as e:
+    except (PolicyError, IntegrityError, BundleError, ValueError, FileNotFoundError, NotImplementedError, OSError) as e:
+        # OSError covers a failed download in `bundle pull` (urllib errors).
         print(f"groundlens: {e}", file=sys.stderr)
         return 2
 
@@ -102,7 +108,8 @@ def _run(args: argparse.Namespace) -> int:
             question=_read(args.question) if args.question else None,
             locale=args.locale,
             rules=args.rules,
-            bundle=Bundle.open(args.bundle) if args.bundle else None,
+            bundle=args.bundle,
+            lexical=not args.no_lexical,
             signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
             log=args.log,
             units=not args.no_units,
@@ -128,8 +135,17 @@ def _run(args: argparse.Namespace) -> int:
         elif args.sub == "verify":
             b = Bundle.open(args.root)
             print(f"ok  {b.name} v{b.version}  {b.hash}")
+        elif args.sub == "status":
+            s = Bundle.status(args.name)
+            if s["installed"]:
+                print(f"ok  {s['name']} v{s['version']}  {s['manifest_hash']}  {s['path']}")
+            else:
+                print(f"not installed  {s['name']}  (would go to {s['path']})")
+                if s["url"]:
+                    print(f"    groundlens bundle pull {s['name']}   <- {s['url']}")
         else:
-            Bundle.pull(args.name)
+            b = Bundle.pull(args.name, into=args.into, trust_unpinned=args.trust_unpinned)
+            print(f"ok  {b.name} v{b.version}  {b.hash}  {b.root}")
         return 0
     if args.cmd == "keygen":
         print(_engine.keygen())

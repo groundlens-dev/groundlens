@@ -8,8 +8,14 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+default = []
+# The lexical channel needs an encoder: pulls gl-onnx with tract.
+lexical = ["dep:gl-onnx"]
+
 [dependencies]
 gl-core.workspace = true
+gl-onnx = { workspace = true, optional = true, features = ["runtime"] }
 gl-text.workspace = true
 gl-numeric.workspace = true
 serde.workspace = true

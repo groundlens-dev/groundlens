@@ -80,7 +80,40 @@ def test_cli_bundle_build_and_verify(tmp_path):
     assert run("bundle", "verify", str(tmp_path)).returncode == 0
     (tmp_path / "policies" / "p.yaml").write_text("id: p\nversion: 2\n")
     assert run("bundle", "verify", str(tmp_path)).returncode == 2
-    assert run("bundle", "pull").returncode == 2  # explicit, and not in this build
+    assert run("bundle", "status").returncode == 0
+
+
+def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
+    """pull is the one network operation; exercised here over file:// so the
+    test itself stays offline."""
+    import tarfile
+
+    from groundlens import Bundle
+    from groundlens.bundle import BundleError
+
+    tiny = ROOT / "crates" / "gl-onnx" / "testdata" / "tiny-bundle"
+    archive = tmp_path / "tiny.tar.gz"
+    with tarfile.open(archive, "w:gz") as tar:
+        tar.add(tiny, arcname="tiny-bundle")
+    url = archive.resolve().as_uri()
+
+    # No pinned hash for a bundle this build does not know: refused.
+    with pytest.raises(BundleError, match="pinned"):
+        Bundle.pull("base", url=url, into=tmp_path / "b1")
+    assert not (tmp_path / "b1").exists()
+
+    b = Bundle.pull("base", url=url, into=tmp_path / "b2", trust_unpinned=True)
+    assert b.name == "tiny-test" and (tmp_path / "b2" / "manifest.json").is_file()
+    assert Bundle.open(tmp_path / "b2").hash == b.hash
+
+    # The installed bundle is what verify() picks up by default.
+    monkeypatch.setenv("GROUNDLENS_BUNDLE_DIR", str(tmp_path / "b2"))
+    r = run("verify", "--answer", str(EXAMPLE / "answer.txt"), "--source", f"s={EXAMPLE / 'invoice.txt'}", "--json")
+    assert r.returncode == 1, r.stderr
+    rec = json.loads(r.stdout)
+    assert rec["content"]["bundle_hash"] == b.hash
+    assert any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
+    assert run("bundle", "status").stdout.startswith("ok  base v1")
 
 
 @pytest.mark.skipif(sys.platform != "linux" or not Path("/usr/bin/unshare").exists(), reason="needs linux unshare")

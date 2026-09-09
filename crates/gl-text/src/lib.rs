@@ -66,6 +66,46 @@ pub const STOPWORDS_ES: &[&str] = &[
     "también", "este", "esta", "estos", "estas", "ese", "esa", "esos", "esas", "hay", "ha", "han",
 ];
 
+pub const STOPWORDS_DE: &[&str] = &[
+    "der", "die", "das", "den", "dem", "des", "ein", "eine", "einer", "eines", "einem", "einen", "und",
+    "oder", "aber", "wenn", "dann", "von", "vom", "zu", "zum", "zur", "in", "im", "an", "am", "auf", "für",
+    "mit", "aus", "bei", "nach", "über", "unter", "zwischen", "ist", "sind", "war", "waren", "sein", "wird",
+    "werden", "wurde", "hat", "haben", "hatte", "es", "er", "sie", "wir", "ihr", "ich", "du", "sich",
+    "nicht", "kein", "keine", "ja", "auch", "noch", "nur", "sehr", "als", "wie", "dass", "dies", "diese",
+    "dieser", "dieses", "jene", "so", "um",
+];
+
+pub const STOPWORDS_FR: &[&str] = &[
+    "le", "la", "les", "l", "un", "une", "des", "du", "de", "d", "et", "ou", "mais", "si", "à", "au", "aux",
+    "en", "dans", "sur", "sous", "par", "pour", "avec", "sans", "entre", "chez", "est", "sont", "était",
+    "étaient", "être", "sera", "seront", "a", "ont", "avait", "avoir", "il", "elle", "ils", "elles", "on",
+    "nous", "vous", "je", "tu", "ce", "cet", "cette", "ces", "se", "sa", "son", "ses", "leur", "leurs", "ne",
+    "pas", "que", "qui", "quoi", "dont", "où", "y", "aussi", "très", "plus", "moins", "comme", "donc",
+    "ainsi",
+];
+
+pub const STOPWORDS_IT: &[&str] = &[
+    "il", "lo", "la", "i", "gli", "le", "l", "un", "uno", "una", "e", "ed", "o", "ma", "se", "di", "del",
+    "dello", "della", "dei", "degli", "delle", "a", "al", "allo", "alla", "ai", "agli", "alle", "da", "dal",
+    "dallo", "dalla", "dai", "dagli", "dalle", "in", "nel", "nello", "nella", "nei", "negli", "nelle", "su",
+    "sul", "sullo", "sulla", "sui", "sugli", "sulle", "con", "per", "tra", "fra", "è", "sono", "era",
+    "erano", "essere", "sarà", "ha", "hanno", "aveva", "avere", "che", "chi", "cui", "si", "non", "più",
+    "meno", "molto", "come", "anche", "questo", "questa", "questi", "queste", "quello", "quella", "quelli",
+    "quelle", "ci", "vi", "ne", "lui", "lei", "loro", "noi", "voi", "io", "tu",
+];
+
+/// The stopword list a locale uses. Unknown locales use English, as
+/// groundlens 3.x did for every locale.
+pub fn stopwords(locale: &str) -> &'static [&'static str] {
+    match locale {
+        "es" | "ca" | "gl" => STOPWORDS_ES,
+        "de" => STOPWORDS_DE,
+        "fr" => STOPWORDS_FR,
+        "it" => STOPWORDS_IT,
+        _ => STOPWORDS_EN,
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Word {
     pub text: String,
@@ -77,10 +117,7 @@ pub struct Word {
 /// crate claims them first and the pipeline removes overlaps.
 pub fn words(text: &str, locale: &str) -> Vec<Word> {
     let pattern = re(r"[^\W\d_](?:[\w'’\-]*[^\W_])?|[^\W\d_]");
-    let stop: &[&str] = match locale {
-        "es" | "ca" | "gl" => STOPWORDS_ES,
-        _ => STOPWORDS_EN,
-    };
+    let stop = stopwords(locale);
     pattern
         .find_iter(text)
         .map(|m| {

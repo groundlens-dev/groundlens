@@ -29,6 +29,7 @@ NOTE_CODES = frozenset(
         "stopword",  # excluded from scoring
         "no_alpha",  # punctuation-only token, excluded from scoring
         "single_digit",  # bare 1-digit numeral, treated lexically (enumerators)
+        "not_scored",  # no encoder available (no bundle installed); word not scored
         "exact_string_in_span",  # the word occurs verbatim in the winning evidence;
         # support is a contextual score, so the two can disagree, and that
         # disagreement is the signature of the same word used differently

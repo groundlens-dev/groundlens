@@ -29,7 +29,8 @@ def verify(
     question: str | None = None,
     locale: str = "und",
     rules: Sequence[str | Path | Mapping] = (),
-    bundle: Bundle | None = None,
+    bundle: Bundle | str | Path | None = None,
+    lexical: bool = True,
     signing_key: str | None = None,
     previous: Record | str | None = None,
     log: str | Path | None = None,
@@ -50,7 +51,11 @@ def verify(
             it are noted.
         locale: how the documents write numbers: ``"und"``, ``"en"``, ``"es"``...
         rules: rule sets (YAML/JSON paths or dicts) run as symbolic verifiers.
-        bundle: an opened :class:`Bundle`; its hash goes into the record.
+        bundle: a :class:`Bundle`, a bundle directory, or a bundle name.
+            ``None`` uses the installed ``base`` bundle when there is one
+            (``groundlens bundle pull base``). The bundle hash goes into the
+            record and its encoder runs the lexical channel.
+        lexical: run the lexical channel when an encoder is available.
         signing_key: 32-byte hex Ed25519 seed. An ephemeral key is used if absent.
         previous: the previous record (or its ``record_hash``) to chain to.
         log: an append-only JSON Lines file; the record is appended and the
@@ -90,7 +95,8 @@ def verify(
         percent_as_fraction=percent_as_fraction,
         signing_key=signing_key,
         previous_record_hash=previous_hash,
-        bundle_hash=bundle.hash if bundle else None,
+        bundle=str(bundle.root) if isinstance(bundle, Bundle) else (str(bundle) if bundle else None),
+        lexical=lexical,
         metadata=metadata,
     )
     record = Record.from_json(_engine.verify_json(request))

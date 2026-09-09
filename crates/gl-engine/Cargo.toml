@@ -8,7 +8,14 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+default = ["lexical"]
+# The lexical channel: tract + tokenizers, pure Rust. Off for builds that
+# only need the exact and symbolic verifiers.
+lexical = ["gl-verifiers/lexical", "dep:gl-onnx"]
+
 [dependencies]
+gl-onnx = { workspace = true, optional = true, features = ["runtime"] }
 gl-numeric.workspace = true
 gl-core.workspace = true
 gl-text.workspace = true
