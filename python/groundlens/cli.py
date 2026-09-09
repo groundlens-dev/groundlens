@@ -74,6 +74,8 @@ def build_parser() -> argparse.ArgumentParser:
     bp = b.add_parser("pull", help="download and install a published bundle (the only command that uses the network)")
     bp.add_argument("name", nargs="?", default="base")
     bp.add_argument("--into", help="install directory (default: the per-user bundle directory)")
+    bp.add_argument("--url", help="download from here instead of the known release URL")
+    bp.add_argument("--sha256", help="expected archive hash for a bundle this build does not know")
     bp.add_argument("--trust-unpinned", action="store_true", help="accept a bundle this build has no pinned hash for (development)")
 
     sub.add_parser("keygen", help="print a fresh Ed25519 signing seed")
@@ -144,7 +146,7 @@ def _run(args: argparse.Namespace) -> int:
                 if s["url"]:
                     print(f"    groundlens bundle pull {s['name']}   <- {s['url']}")
         else:
-            b = Bundle.pull(args.name, into=args.into, trust_unpinned=args.trust_unpinned)
+            b = Bundle.pull(args.name, into=args.into, url=args.url, sha256=args.sha256, trust_unpinned=args.trust_unpinned)
             print(f"ok  {b.name} v{b.version}  {b.hash}  {b.root}")
         return 0
     if args.cmd == "keygen":

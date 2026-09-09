@@ -74,6 +74,7 @@ class Bundle:
         *,
         into: str | Path | None = None,
         url: str | None = None,
+        sha256: str | None = None,
         trust_unpinned: bool = False,
     ) -> Bundle:
         """Download a published bundle and install it.
@@ -81,8 +82,9 @@ class Bundle:
         This is the one operation in the package that opens a network
         connection, and it only happens when you call it. The archive is
         hashed and compared with the value pinned in this build before a
-        single file is unpacked; ``trust_unpinned`` accepts a bundle this
-        build has no hash for (development only).
+        single file is unpacked. For a bundle this build does not know
+        (your own, from your own ``url``), pass its ``sha256`` explicitly;
+        ``trust_unpinned`` skips the check entirely and is for development.
         """
         import urllib.request  # imported here: nothing else in the package touches the network
 
@@ -92,6 +94,8 @@ class Bundle:
         entry = known.get(name, {})
         url = url or entry["url"]
         pinned = entry.get("archive_sha256", "sha256:unpinned")
+        if sha256:
+            pinned = sha256 if sha256.startswith("sha256:") else f"sha256:{sha256}"
         target = Path(into) if into else Path(_engine.bundle_locate(name))
 
         with tempfile.TemporaryDirectory() as tmp:
