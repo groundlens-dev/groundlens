@@ -12,7 +12,7 @@ fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
 }
 
-fn run_verify(with_question: bool) -> serde_json::Value {
+fn run_verify(with_question: bool, bundle: Option<&str>) -> serde_json::Value {
     let root = repo_root();
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_glv"));
     cmd.current_dir(&root)
@@ -24,6 +24,14 @@ fn run_verify(with_question: bool) -> serde_json::Value {
         .args(["--locale", "en"]);
     if with_question {
         cmd.args(["--question", "examples/invoice/question.txt"]);
+    }
+    match bundle {
+        Some(b) => {
+            cmd.args(["--bundle", b]);
+        }
+        None => {
+            cmd.arg("--no-lexical");
+        }
     }
     // Hostile environment on purpose: nothing here may leak into the output.
     cmd.env("LC_ALL", "tr_TR.UTF-8").env("LANG", "tr_TR.UTF-8").env("TZ", "Pacific/Kiritimati");
@@ -39,9 +47,26 @@ fn run_verify(with_question: bool) -> serde_json::Value {
 
 #[test]
 fn invoice_example_matches_committed_golden_hash() {
-    let record = run_verify(true);
+    check_golden(run_verify(true, None), "crates/gl-cli/tests/golden/invoice.hash");
+}
+
+/// The same example through the lexical channel on the tiny test encoder:
+/// tract must produce the same quantised scores, and so the same record,
+/// on every platform.
+#[test]
+fn invoice_example_with_lexical_channel_matches_committed_golden_hash() {
+    let record = run_verify(true, Some("crates/gl-onnx/testdata/tiny-bundle"));
+    assert!(record["content"]["graph"]["evidence"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e["verifier_id"] == "groundlens.lexical"));
+    check_golden(record, "crates/gl-cli/tests/golden/invoice-lexical.hash");
+}
+
+fn check_golden(record: serde_json::Value, golden_file: &str) {
     let hash = record["content_hash"].as_str().unwrap();
-    let golden_path = repo_root().join("crates/gl-cli/tests/golden/invoice.hash");
+    let golden_path = repo_root().join(golden_file);
     let golden = std::fs::read_to_string(&golden_path).unwrap_or_default();
     assert_eq!(
         hash,
@@ -56,8 +81,8 @@ fn invoice_example_matches_committed_golden_hash() {
 
 #[test]
 fn two_runs_are_identical_and_the_timestamp_stays_outside_the_content_hash() {
-    let a = run_verify(false);
-    let b = run_verify(false);
+    let a = run_verify(false, None);
+    let b = run_verify(false, None);
     assert_eq!(a["content_hash"], b["content_hash"]);
     assert_eq!(a["content"], b["content"]);
 }

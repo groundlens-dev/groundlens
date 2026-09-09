@@ -55,6 +55,8 @@ def build_request(
     signing_key: str | None = None,
     previous_record_hash: str | None = None,
     bundle_hash: str | None = None,
+    bundle: str | None = None,
+    lexical: bool = True,
     metadata: Mapping[str, str] | None = None,
 ) -> str:
     request = {
@@ -74,6 +76,8 @@ def build_request(
         "signing_key_hex": signing_key,
         "previous_record_hash": previous_record_hash,
         "bundle_hash": bundle_hash,
+        "bundle": bundle,
+        "lexical": lexical,
         "metadata": dict(metadata or {}),
     }
     return json.dumps(request, ensure_ascii=False)

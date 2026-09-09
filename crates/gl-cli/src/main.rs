@@ -19,7 +19,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "glv", version, about = "GroundLens: the verification and evidence layer for AI")]
+#[command(name = "glv", version, about = "Deterministic AI response verification")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -49,9 +49,13 @@ enum Command {
         /// 32-byte hex Ed25519 seed. A fresh ephemeral key is used if absent.
         #[arg(long, env = "GLV_SIGNING_KEY")]
         signing_key: Option<String>,
-        /// Bundle directory; its manifest hash goes into the record.
+        /// A bundle directory or the name of an installed bundle. Default:
+        /// the installed `base` bundle, if any.
         #[arg(long)]
-        bundle: Option<PathBuf>,
+        bundle: Option<String>,
+        /// Skip the lexical channel even when a bundle is available.
+        #[arg(long)]
+        no_lexical: bool,
     },
     /// Policy tools.
     Policy {
@@ -94,6 +98,24 @@ enum BundleCmd {
     Verify {
         root: PathBuf,
     },
+    /// Whether a named bundle is installed, where, and with which hash.
+    Status {
+        #[arg(default_value = "base")]
+        name: String,
+    },
+    /// Download a published bundle and install it. The only command in glv
+    /// that opens a network connection; the archive hash must match the
+    /// value pinned in this build.
+    Pull {
+        #[arg(default_value = "base")]
+        name: String,
+        /// Install here instead of the per-user bundle directory.
+        #[arg(long)]
+        into: Option<PathBuf>,
+        /// Accept a bundle this build has no pinned hash for (development).
+        #[arg(long)]
+        trust_unpinned: bool,
+    },
 }
 
 fn read(path: &PathBuf) -> anyhow_lite::Result<String> {
@@ -102,6 +124,91 @@ fn read(path: &PathBuf) -> anyhow_lite::Result<String> {
 
 mod anyhow_lite {
     pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+}
+
+fn pull_bundle(
+    name: &str,
+    into: Option<PathBuf>,
+    trust_unpinned: bool,
+) -> Result<gl_bundle::Bundle, Box<dyn std::error::Error>> {
+    use sha2::Digest;
+    let known = gl_bundle::known(name).ok_or_else(|| format!("unknown bundle {name:?}"))?;
+    let target = into.unwrap_or_else(|| gl_bundle::locate(name));
+    eprintln!("fetching {}", known.url);
+    let mut body = ureq::get(known.url).call()?.into_body().into_reader();
+    let mut bytes = Vec::new();
+    std::io::Read::read_to_end(&mut body, &mut bytes)?;
+    let digest = format!("sha256:{}", hex::encode(sha2::Sha256::digest(&bytes)));
+    if known.archive_sha256 == "sha256:unpinned" {
+        if !trust_unpinned {
+            return Err(format!(
+                "this build has no pinned hash for bundle {name:?} (downloaded {digest}); refusing to install it. \
+                 Pass --trust-unpinned only in development."
+            )
+            .into());
+        }
+    } else if digest != known.archive_sha256 {
+        return Err(format!(
+            "download hash {digest} does not match the pinned {}; not installed",
+            known.archive_sha256
+        )
+        .into());
+    }
+    let staging = std::env::temp_dir().join(format!("glv-bundle-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&staging);
+    std::fs::create_dir_all(&staging)?;
+    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(std::io::Cursor::new(bytes)));
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let path = entry.path()?.to_path_buf();
+        if path
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir | std::path::Component::RootDir))
+        {
+            return Err(format!("archive entry escapes the target directory: {}", path.display()).into());
+        }
+        if !entry.unpack_in(&staging)? {
+            return Err(format!("refused to unpack {}", path.display()).into());
+        }
+    }
+    let root = if staging.join("manifest.json").is_file() {
+        staging.clone()
+    } else {
+        let dirs: Vec<PathBuf> = std::fs::read_dir(&staging)?
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .filter(|p| p.is_dir())
+            .collect();
+        match dirs.as_slice() {
+            [one] if one.join("manifest.json").is_file() => one.clone(),
+            _ => return Err("archive has no manifest.json at its top level".into()),
+        }
+    };
+    if target.exists() {
+        std::fs::remove_dir_all(&target)?;
+    }
+    if let Some(parent) = target.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    if std::fs::rename(&root, &target).is_err() {
+        copy_dir(&root, &target)?;
+    }
+    let _ = std::fs::remove_dir_all(&staging);
+    Ok(gl_bundle::Bundle::open(&target)?)
+}
+
+fn copy_dir(from: &std::path::Path, to: &std::path::Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(to)?;
+    for entry in std::fs::read_dir(from)? {
+        let entry = entry?;
+        let dest = to.join(entry.file_name());
+        if entry.path().is_dir() {
+            copy_dir(&entry.path(), &dest)?;
+        } else {
+            std::fs::copy(entry.path(), dest)?;
+        }
+    }
+    Ok(())
 }
 
 fn load_rules_json(path: &PathBuf) -> anyhow_lite::Result<String> {
@@ -123,7 +230,18 @@ fn main() {
 
 fn run() -> anyhow_lite::Result<()> {
     match Cli::parse().command {
-        Command::Verify { answer, sources, question, policy, rules, locale, log, signing_key, bundle } => {
+        Command::Verify {
+            answer,
+            sources,
+            question,
+            policy,
+            rules,
+            locale,
+            log,
+            signing_key,
+            bundle,
+            no_lexical,
+        } => {
             let mut srcs = Vec::new();
             for s in sources {
                 let (id, path) = s.split_once('=').ok_or("--source expects id=path")?;
@@ -137,10 +255,8 @@ fn run() -> anyhow_lite::Result<()> {
                 req.rule_sets_json.push(load_rules_json(r)?);
             }
             req.signing_key_hex = signing_key;
-            req.bundle_hash = match bundle {
-                Some(root) => Some(gl_bundle::Bundle::open(root)?.manifest_hash),
-                None => None,
-            };
+            req.bundle = bundle;
+            req.lexical = !no_lexical;
             req.previous_record_hash = match &log {
                 Some(p) if p.exists() => {
                     gl_record::from_jsonl(&read(p)?)?.last().map(|r| r.record_hash.clone())
@@ -186,6 +302,33 @@ fn run() -> anyhow_lite::Result<()> {
         Command::Bundle { cmd: BundleCmd::Verify { root } } => {
             let b = gl_bundle::Bundle::open(&root)?;
             println!("ok  {} v{}  {}", b.manifest.name, b.manifest.version, b.manifest_hash);
+        }
+        Command::Bundle { cmd: BundleCmd::Status { name } } => {
+            let s = gl_engine::bundle::status(&name);
+            if s.installed {
+                println!(
+                    "ok  {} v{}  {}  {}",
+                    s.name,
+                    s.version.unwrap_or_default(),
+                    s.manifest_hash.unwrap_or_default(),
+                    s.path
+                );
+            } else {
+                println!("not installed  {}  (would go to {})", s.name, s.path);
+                if !s.url.is_empty() {
+                    println!("    glv bundle pull {}   ← {}", s.name, s.url);
+                }
+            }
+        }
+        Command::Bundle { cmd: BundleCmd::Pull { name, into, trust_unpinned } } => {
+            let b = pull_bundle(&name, into, trust_unpinned)?;
+            println!(
+                "ok  {} v{}  {}  {}",
+                b.manifest.name,
+                b.manifest.version,
+                b.manifest_hash,
+                b.root.display()
+            );
         }
         Command::Keygen => {
             let signer = RecordSigner::generate();

@@ -52,6 +52,6 @@ def test_floor_and_k_follow_3_1_rules():
     assert empty.floor == 1.0 and empty.k == 0 and empty.n_marked == 0
 
 
-def test_encoder_is_refused_until_lexical_channel_lands():
-    with pytest.raises(NotImplementedError):
+def test_python_encoders_are_refused():
+    with pytest.raises(TypeError):
         proofread("x 12", ["12"], encoder=object())

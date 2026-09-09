@@ -1,0 +1,45 @@
+name: bundle
+
+# Builds the `base` bundle (multilingual-e5-small, f32) from the model
+# authors' ONNX export at a pinned revision and publishes it as a GitHub
+# Release. Run by hand. The printed sha256 is then pinned in
+# crates/gl-bundle/src/lib.rs (KNOWN_BUNDLES) by a pull request.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/build_bundle.py --out dist/bundle
+      - name: verify the bundle with the engine
+        run: |
+          pip install maturin
+          (cd python && maturin build --release --out ../dist/wheels)
+          pip install --no-index --find-links dist/wheels groundlens
+          tar -xzf dist/bundle/groundlens-base-v1.tar.gz -C dist/bundle
+          groundlens bundle verify dist/bundle/groundlens-base-v1
+          GROUNDLENS_BUNDLE_DIR=dist/bundle/groundlens-base-v1 groundlens verify \
+            --answer examples/invoice/answer.txt --question examples/invoice/question.txt \
+            --source "invoice.pdf#p1=examples/invoice/invoice.txt" --locale en --json \
+            | python -c "import json,sys; r=json.load(sys.stdin); ev=[e for e in r['content']['graph']['evidence'] if e['verifier_id']=='groundlens.lexical']; assert ev, 'no lexical evidence'; print(len(ev), 'lexical evidence entries; bundle', r['content']['bundle_hash'])"
+      - name: publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=bundle-base-v1
+          sha=$(cut -d' ' -f1 dist/bundle/groundlens-base-v1.tar.gz.sha256)
+          gh release view "$tag" >/dev/null 2>&1 && gh release delete "$tag" --yes --cleanup-tag || true
+          gh release create "$tag" dist/bundle/groundlens-base-v1.tar.gz dist/bundle/groundlens-base-v1.tar.gz.sha256 dist/bundle/manifest.json \
+            --title "Bundle base v1 (multilingual-e5-small, f32)" \
+            --notes "sha256: $sha
+          Model: intfloat/multilingual-e5-small @ 614241f622f53c4eeff9890bdc4f31cfecc418b3 (ONNX f32 export by the model authors). Install with \`groundlens bundle pull base\`."
+          echo "archive sha256: $sha"

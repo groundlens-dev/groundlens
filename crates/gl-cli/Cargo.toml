@@ -25,6 +25,13 @@ serde_json.workspace = true
 serde_yaml.workspace = true
 clap.workspace = true
 chrono.workspace = true
+sha2.workspace = true
+hex.workspace = true
+# Only `glv bundle pull` uses these. The engine crates never do; a CI job
+# checks that.
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+flate2 = "1"
+tar = "0.4"
 
 [dev-dependencies]
 serde_json.workspace = true

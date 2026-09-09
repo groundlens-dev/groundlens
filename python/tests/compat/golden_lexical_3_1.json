@@ -1,0 +1,2207 @@
+{
+ "groundlens_version": "3.1.0",
+ "encoder_id": "tiny@sha256:2c514f6c5c7734b722024a768d7749d893a8c6d3f7ab56d3f21746f56052fb9d",
+ "cases": [
+  {
+   "case": {
+    "locale": "en",
+    "question": "What is the invoice total?",
+    "answer": "The invoice total is 1,000 dollars, due in 30 days.",
+    "context": [
+     [
+      "invoice.pdf#p1",
+      "...the total amount due is 10,000 dollars, payable within 30 days..."
+     ]
+    ]
+   },
+   "floor": 0.0,
+   "k": 1,
+   "n_marked": 7,
+   "anchors": [
+    {
+     "text": "The",
+     "span": [
+      0,
+      3
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "invoice",
+     "span": [
+      4,
+      11
+     ],
+     "kind": "lexical",
+     "support": 0.6967968940734863,
+     "value": null,
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "due",
+     "evidence_span": [
+      20,
+      23
+     ],
+     "notes": [
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "total",
+     "span": [
+      12,
+      17
+     ],
+     "kind": "lexical",
+     "support": 0.9639469981193542,
+     "value": null,
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "total",
+     "evidence_span": [
+      7,
+      12
+     ],
+     "notes": [
+      "exact_string_in_span",
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "is",
+     "span": [
+      18,
+      20
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "1,000",
+     "span": [
+      21,
+      26
+     ],
+     "kind": "numeral",
+     "support": 0.0,
+     "value": "1000",
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "10,000",
+     "evidence_span": [
+      27,
+      33
+     ],
+     "notes": []
+    },
+    {
+     "text": "dollars",
+     "span": [
+      27,
+      34
+     ],
+     "kind": "lexical",
+     "support": 0.9616711139678955,
+     "value": null,
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "dollars",
+     "evidence_span": [
+      34,
+      41
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "due",
+     "span": [
+      36,
+      39
+     ],
+     "kind": "lexical",
+     "support": 0.9853866100311279,
+     "value": null,
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "due",
+     "evidence_span": [
+      20,
+      23
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "in",
+     "span": [
+      40,
+      42
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "30",
+     "span": [
+      43,
+      45
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "30",
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "30",
+     "evidence_span": [
+      58,
+      60
+     ],
+     "notes": []
+    },
+    {
+     "text": "days",
+     "span": [
+      46,
+      50
+     ],
+     "kind": "lexical",
+     "support": 0.9567939043045044,
+     "value": null,
+     "evidence_id": "invoice.pdf#p1",
+     "evidence_text": "days",
+     "evidence_span": [
+      61,
+      65
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "es",
+    "question": "¿Cuál es el importe de la factura?",
+    "answer": "La factura asciende a 10.000 euros, pagaderos en 30 días en Madrid.",
+    "context": [
+     [
+      "factura",
+      "Importe total: 10.000 euros, pagaderos en 30 días. Oficina registrada en Madrid."
+     ]
+    ]
+   },
+   "floor": 0.34915366768836975,
+   "k": 1,
+   "n_marked": 11,
+   "anchors": [
+    {
+     "text": "La",
+     "span": [
+      0,
+      2
+     ],
+     "kind": "lexical",
+     "support": 0.34915366768836975,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "Oficina",
+     "evidence_span": [
+      51,
+      58
+     ],
+     "notes": [
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "factura",
+     "span": [
+      3,
+      10
+     ],
+     "kind": "lexical",
+     "support": 0.46001675724983215,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "30",
+     "evidence_span": [
+      42,
+      44
+     ],
+     "notes": [
+      "echoes_question"
+     ]
+    },
+    {
+     "text": "asciende",
+     "span": [
+      11,
+      19
+     ],
+     "kind": "lexical",
+     "support": 0.5371085405349731,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "Importe",
+     "evidence_span": [
+      0,
+      7
+     ],
+     "notes": []
+    },
+    {
+     "text": "a",
+     "span": [
+      20,
+      21
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "10.000",
+     "span": [
+      22,
+      28
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "10000",
+     "evidence_id": "factura",
+     "evidence_text": "10.000",
+     "evidence_span": [
+      15,
+      21
+     ],
+     "notes": []
+    },
+    {
+     "text": "euros",
+     "span": [
+      29,
+      34
+     ],
+     "kind": "lexical",
+     "support": 0.9509186744689941,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "euros",
+     "evidence_span": [
+      22,
+      27
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "pagaderos",
+     "span": [
+      36,
+      45
+     ],
+     "kind": "lexical",
+     "support": 0.9752553701400757,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "pagaderos",
+     "evidence_span": [
+      29,
+      38
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "en",
+     "span": [
+      46,
+      48
+     ],
+     "kind": "lexical",
+     "support": 0.9824562072753906,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "en",
+     "evidence_span": [
+      39,
+      41
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "30",
+     "span": [
+      49,
+      51
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "30",
+     "evidence_id": "factura",
+     "evidence_text": "30",
+     "evidence_span": [
+      42,
+      44
+     ],
+     "notes": []
+    },
+    {
+     "text": "días",
+     "span": [
+      52,
+      56
+     ],
+     "kind": "lexical",
+     "support": 0.996193528175354,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "días",
+     "evidence_span": [
+      45,
+      49
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "en",
+     "span": [
+      57,
+      59
+     ],
+     "kind": "lexical",
+     "support": 0.9824562072753906,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "en",
+     "evidence_span": [
+      39,
+      41
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "Madrid",
+     "span": [
+      60,
+      66
+     ],
+     "kind": "lexical",
+     "support": 0.9825716614723206,
+     "value": null,
+     "evidence_id": "factura",
+     "evidence_text": "Madrid",
+     "evidence_span": [
+      73,
+      79
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "de",
+    "question": null,
+    "answer": "Die Rechnung beläuft sich auf 1.000 Euro, zahlbar innerhalb von 30 Tagen.",
+    "context": [
+     [
+      "rechnung",
+      "Die Rechnung beläuft sich auf 10.000 Euro, zahlbar innerhalb von 30 Tagen."
+     ]
+    ]
+   },
+   "floor": 0.0,
+   "k": 1,
+   "n_marked": 12,
+   "anchors": [
+    {
+     "text": "Die",
+     "span": [
+      0,
+      3
+     ],
+     "kind": "lexical",
+     "support": 0.9965879917144775,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "Die",
+     "evidence_span": [
+      0,
+      3
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "Rechnung",
+     "span": [
+      4,
+      12
+     ],
+     "kind": "lexical",
+     "support": 0.9949175715446472,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "Rechnung",
+     "evidence_span": [
+      4,
+      12
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "beläuft",
+     "span": [
+      13,
+      20
+     ],
+     "kind": "lexical",
+     "support": 0.9981640577316284,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "beläuft",
+     "evidence_span": [
+      13,
+      20
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "sich",
+     "span": [
+      21,
+      25
+     ],
+     "kind": "lexical",
+     "support": 0.9986608624458313,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "sich",
+     "evidence_span": [
+      21,
+      25
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "auf",
+     "span": [
+      26,
+      29
+     ],
+     "kind": "lexical",
+     "support": 0.995444655418396,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "auf",
+     "evidence_span": [
+      26,
+      29
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "1.000",
+     "span": [
+      30,
+      35
+     ],
+     "kind": "numeral",
+     "support": 0.0,
+     "value": "1000",
+     "evidence_id": "rechnung",
+     "evidence_text": "10.000",
+     "evidence_span": [
+      30,
+      36
+     ],
+     "notes": []
+    },
+    {
+     "text": "Euro",
+     "span": [
+      36,
+      40
+     ],
+     "kind": "lexical",
+     "support": 0.9957444071769714,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "Euro",
+     "evidence_span": [
+      37,
+      41
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "zahlbar",
+     "span": [
+      42,
+      49
+     ],
+     "kind": "lexical",
+     "support": 0.9962226748466492,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "zahlbar",
+     "evidence_span": [
+      43,
+      50
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "innerhalb",
+     "span": [
+      50,
+      59
+     ],
+     "kind": "lexical",
+     "support": 0.9938043355941772,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "innerhalb",
+     "evidence_span": [
+      51,
+      60
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "von",
+     "span": [
+      60,
+      63
+     ],
+     "kind": "lexical",
+     "support": 0.9969059228897095,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "von",
+     "evidence_span": [
+      61,
+      64
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "30",
+     "span": [
+      64,
+      66
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "30",
+     "evidence_id": "rechnung",
+     "evidence_text": "30",
+     "evidence_span": [
+      65,
+      67
+     ],
+     "notes": []
+    },
+    {
+     "text": "Tagen",
+     "span": [
+      67,
+      72
+     ],
+     "kind": "lexical",
+     "support": 0.9957429766654968,
+     "value": null,
+     "evidence_id": "rechnung",
+     "evidence_text": "Tagen",
+     "evidence_span": [
+      68,
+      73
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "fr",
+    "question": null,
+    "answer": "Le contrat court sur 24 mois avec un taux de 3,90 % à Paris.",
+    "context": [
+     [
+      "contrat",
+      "Le contrat court sur 24 mois avec un taux de 3,90 %."
+     ],
+     [
+      "annexe",
+      "Siège social à Paris."
+     ]
+    ]
+   },
+   "floor": 0.9432429671287537,
+   "k": 1,
+   "n_marked": 13,
+   "anchors": [
+    {
+     "text": "Le",
+     "span": [
+      0,
+      2
+     ],
+     "kind": "lexical",
+     "support": 0.9936937093734741,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "Le",
+     "evidence_span": [
+      0,
+      2
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "contrat",
+     "span": [
+      3,
+      10
+     ],
+     "kind": "lexical",
+     "support": 0.9885613322257996,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "contrat",
+     "evidence_span": [
+      3,
+      10
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "court",
+     "span": [
+      11,
+      16
+     ],
+     "kind": "lexical",
+     "support": 0.9776880741119385,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "court",
+     "evidence_span": [
+      11,
+      16
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "sur",
+     "span": [
+      17,
+      20
+     ],
+     "kind": "lexical",
+     "support": 0.9783079624176025,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "sur",
+     "evidence_span": [
+      17,
+      20
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "24",
+     "span": [
+      21,
+      23
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "24",
+     "evidence_id": "contrat",
+     "evidence_text": "24",
+     "evidence_span": [
+      21,
+      23
+     ],
+     "notes": []
+    },
+    {
+     "text": "mois",
+     "span": [
+      24,
+      28
+     ],
+     "kind": "lexical",
+     "support": 0.9889076352119446,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "mois",
+     "evidence_span": [
+      24,
+      28
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "avec",
+     "span": [
+      29,
+      33
+     ],
+     "kind": "lexical",
+     "support": 0.9894933700561523,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "avec",
+     "evidence_span": [
+      29,
+      33
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "un",
+     "span": [
+      34,
+      36
+     ],
+     "kind": "lexical",
+     "support": 0.9922872185707092,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "un",
+     "evidence_span": [
+      34,
+      36
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "taux",
+     "span": [
+      37,
+      41
+     ],
+     "kind": "lexical",
+     "support": 0.9749008417129517,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "taux",
+     "evidence_span": [
+      37,
+      41
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "de",
+     "span": [
+      42,
+      44
+     ],
+     "kind": "lexical",
+     "support": 0.9870750308036804,
+     "value": null,
+     "evidence_id": "contrat",
+     "evidence_text": "de",
+     "evidence_span": [
+      42,
+      44
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "3,90 %",
+     "span": [
+      45,
+      51
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "3.9",
+     "evidence_id": "contrat",
+     "evidence_text": "3,90 %",
+     "evidence_span": [
+      45,
+      51
+     ],
+     "notes": []
+    },
+    {
+     "text": "à",
+     "span": [
+      52,
+      53
+     ],
+     "kind": "lexical",
+     "support": 0.9432429671287537,
+     "value": null,
+     "evidence_id": "annexe",
+     "evidence_text": "à",
+     "evidence_span": [
+      13,
+      14
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "Paris",
+     "span": [
+      54,
+      59
+     ],
+     "kind": "lexical",
+     "support": 0.9668050408363342,
+     "value": null,
+     "evidence_id": "annexe",
+     "evidence_text": "Paris",
+     "evidence_span": [
+      15,
+      20
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "it",
+    "question": null,
+    "answer": "I ricavi sono saliti a 37,35 miliardi di euro nel 2024 secondo il bilancio.",
+    "context": [
+     [
+      "bilancio",
+      "I ricavi sono saliti a 37,35 miliardi di euro nel 2024."
+     ]
+    ]
+   },
+   "floor": 0.2779536843299866,
+   "k": 1,
+   "n_marked": 12,
+   "anchors": [
+    {
+     "text": "I",
+     "span": [
+      0,
+      1
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "ricavi",
+     "span": [
+      2,
+      8
+     ],
+     "kind": "lexical",
+     "support": 0.9444717764854431,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "ricavi",
+     "evidence_span": [
+      2,
+      8
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "sono",
+     "span": [
+      9,
+      13
+     ],
+     "kind": "lexical",
+     "support": 0.9662987589836121,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "sono",
+     "evidence_span": [
+      9,
+      13
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "saliti",
+     "span": [
+      14,
+      20
+     ],
+     "kind": "lexical",
+     "support": 0.9552735090255737,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "saliti",
+     "evidence_span": [
+      14,
+      20
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "a",
+     "span": [
+      21,
+      22
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "37,35",
+     "span": [
+      23,
+      28
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "37.35",
+     "evidence_id": "bilancio",
+     "evidence_text": "37,35",
+     "evidence_span": [
+      23,
+      28
+     ],
+     "notes": []
+    },
+    {
+     "text": "miliardi",
+     "span": [
+      29,
+      37
+     ],
+     "kind": "lexical",
+     "support": 0.9627267122268677,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "miliardi",
+     "evidence_span": [
+      29,
+      37
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "di",
+     "span": [
+      38,
+      40
+     ],
+     "kind": "lexical",
+     "support": 0.9317620992660522,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "di",
+     "evidence_span": [
+      38,
+      40
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "euro",
+     "span": [
+      41,
+      45
+     ],
+     "kind": "lexical",
+     "support": 0.9611637592315674,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "euro",
+     "evidence_span": [
+      41,
+      45
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "nel",
+     "span": [
+      46,
+      49
+     ],
+     "kind": "lexical",
+     "support": 0.9228982925415039,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "nel",
+     "evidence_span": [
+      46,
+      49
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "2024",
+     "span": [
+      50,
+      54
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "2024",
+     "evidence_id": "bilancio",
+     "evidence_text": "2024",
+     "evidence_span": [
+      50,
+      54
+     ],
+     "notes": []
+    },
+    {
+     "text": "secondo",
+     "span": [
+      55,
+      62
+     ],
+     "kind": "lexical",
+     "support": 0.6887434124946594,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "a",
+     "evidence_span": [
+      21,
+      22
+     ],
+     "notes": []
+    },
+    {
+     "text": "il",
+     "span": [
+      63,
+      65
+     ],
+     "kind": "lexical",
+     "support": 0.2779536843299866,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "saliti",
+     "evidence_span": [
+      14,
+      20
+     ],
+     "notes": []
+    },
+    {
+     "text": "bilancio",
+     "span": [
+      66,
+      74
+     ],
+     "kind": "lexical",
+     "support": 0.3313412666320801,
+     "value": null,
+     "evidence_id": "bilancio",
+     "evidence_text": "2024",
+     "evidence_span": [
+      50,
+      54
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "en",
+    "question": null,
+    "answer": "The line is 1.2 km long and the boiling point is 212 °F, said the engineer from Lisbon.",
+    "context": [
+     [
+      "s",
+      "Line length: 1200 m. Boiling point 100 °C. Engineer based in Porto."
+     ]
+    ]
+   },
+   "floor": 0.0,
+   "k": 1,
+   "n_marked": 11,
+   "anchors": [
+    {
+     "text": "The",
+     "span": [
+      0,
+      3
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "line",
+     "span": [
+      4,
+      8
+     ],
+     "kind": "lexical",
+     "support": 0.9640485048294067,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Line",
+     "evidence_span": [
+      0,
+      4
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "is",
+     "span": [
+      9,
+      11
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "1.2",
+     "span": [
+      12,
+      15
+     ],
+     "kind": "numeral",
+     "support": 0.0,
+     "value": "1.2",
+     "evidence_id": "s",
+     "evidence_text": "100",
+     "evidence_span": [
+      35,
+      38
+     ],
+     "notes": []
+    },
+    {
+     "text": "km",
+     "span": [
+      16,
+      18
+     ],
+     "kind": "lexical",
+     "support": 0.49631282687187195,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Engineer",
+     "evidence_span": [
+      43,
+      51
+     ],
+     "notes": []
+    },
+    {
+     "text": "long",
+     "span": [
+      19,
+      23
+     ],
+     "kind": "lexical",
+     "support": 0.44878607988357544,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Engineer",
+     "evidence_span": [
+      43,
+      51
+     ],
+     "notes": []
+    },
+    {
+     "text": "and",
+     "span": [
+      24,
+      27
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "the",
+     "span": [
+      28,
+      31
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "boiling",
+     "span": [
+      32,
+      39
+     ],
+     "kind": "lexical",
+     "support": 0.9803223013877869,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Boiling",
+     "evidence_span": [
+      21,
+      28
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "point",
+     "span": [
+      40,
+      45
+     ],
+     "kind": "lexical",
+     "support": 0.9824492931365967,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "point",
+     "evidence_span": [
+      29,
+      34
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "is",
+     "span": [
+      46,
+      48
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "212",
+     "span": [
+      49,
+      52
+     ],
+     "kind": "numeral",
+     "support": 0.0,
+     "value": "212",
+     "evidence_id": "s",
+     "evidence_text": "100",
+     "evidence_span": [
+      35,
+      38
+     ],
+     "notes": []
+    },
+    {
+     "text": "F",
+     "span": [
+      54,
+      55
+     ],
+     "kind": "lexical",
+     "support": 0.43395695090293884,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Engineer",
+     "evidence_span": [
+      43,
+      51
+     ],
+     "notes": []
+    },
+    {
+     "text": "said",
+     "span": [
+      57,
+      61
+     ],
+     "kind": "lexical",
+     "support": 0.5205734968185425,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "based",
+     "evidence_span": [
+      52,
+      57
+     ],
+     "notes": []
+    },
+    {
+     "text": "the",
+     "span": [
+      62,
+      65
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "engineer",
+     "span": [
+      66,
+      74
+     ],
+     "kind": "lexical",
+     "support": 0.9969502091407776,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "Engineer",
+     "evidence_span": [
+      43,
+      51
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "from",
+     "span": [
+      75,
+      79
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "Lisbon",
+     "span": [
+      80,
+      86
+     ],
+     "kind": "lexical",
+     "support": 0.667236864566803,
+     "value": null,
+     "evidence_id": "s",
+     "evidence_text": "length",
+     "evidence_span": [
+      5,
+      11
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "en",
+    "question": null,
+    "answer": "Payment is due on 15 March 2025 at the registered office in Madrid, and the margin was four percent, which the auditor confirmed after reviewing the ledger twice.",
+    "context": [
+     [
+      "long",
+      "Payment is due on 15 March 2025 at the registered office in Madrid. The auditor confirmed the margin after reviewing the ledger."
+     ]
+    ]
+   },
+   "floor": 0.557145357131958,
+   "k": 1,
+   "n_marked": 17,
+   "anchors": [
+    {
+     "text": "Payment",
+     "span": [
+      0,
+      7
+     ],
+     "kind": "lexical",
+     "support": 0.9859031438827515,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "Payment",
+     "evidence_span": [
+      0,
+      7
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "is",
+     "span": [
+      8,
+      10
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "due",
+     "span": [
+      11,
+      14
+     ],
+     "kind": "lexical",
+     "support": 0.977146565914154,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "due",
+     "evidence_span": [
+      11,
+      14
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "on",
+     "span": [
+      15,
+      17
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "15",
+     "span": [
+      18,
+      20
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "15",
+     "evidence_id": "long",
+     "evidence_text": "15",
+     "evidence_span": [
+      18,
+      20
+     ],
+     "notes": []
+    },
+    {
+     "text": "March",
+     "span": [
+      21,
+      26
+     ],
+     "kind": "lexical",
+     "support": 0.9872439503669739,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "March",
+     "evidence_span": [
+      21,
+      26
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "2025",
+     "span": [
+      27,
+      31
+     ],
+     "kind": "numeral",
+     "support": 1.0,
+     "value": "2025",
+     "evidence_id": "long",
+     "evidence_text": "2025",
+     "evidence_span": [
+      27,
+      31
+     ],
+     "notes": []
+    },
+    {
+     "text": "at",
+     "span": [
+      32,
+      34
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "the",
+     "span": [
+      35,
+      38
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "registered",
+     "span": [
+      39,
+      49
+     ],
+     "kind": "lexical",
+     "support": 0.9894099831581116,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "registered",
+     "evidence_span": [
+      39,
+      49
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "office",
+     "span": [
+      50,
+      56
+     ],
+     "kind": "lexical",
+     "support": 0.9699766635894775,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "office",
+     "evidence_span": [
+      50,
+      56
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "in",
+     "span": [
+      57,
+      59
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "Madrid",
+     "span": [
+      60,
+      66
+     ],
+     "kind": "lexical",
+     "support": 0.9910799860954285,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "Madrid",
+     "evidence_span": [
+      60,
+      66
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "and",
+     "span": [
+      68,
+      71
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "the",
+     "span": [
+      72,
+      75
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "margin",
+     "span": [
+      76,
+      82
+     ],
+     "kind": "lexical",
+     "support": 0.9653462767601013,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "margin",
+     "evidence_span": [
+      94,
+      100
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "was",
+     "span": [
+      83,
+      86
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "four",
+     "span": [
+      87,
+      91
+     ],
+     "kind": "lexical",
+     "support": 0.557145357131958,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "15",
+     "evidence_span": [
+      18,
+      20
+     ],
+     "notes": []
+    },
+    {
+     "text": "percent",
+     "span": [
+      92,
+      99
+     ],
+     "kind": "lexical",
+     "support": 0.9609619379043579,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "ledger",
+     "evidence_span": [
+      121,
+      127
+     ],
+     "notes": []
+    },
+    {
+     "text": "which",
+     "span": [
+      101,
+      106
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "the",
+     "span": [
+      107,
+      110
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "auditor",
+     "span": [
+      111,
+      118
+     ],
+     "kind": "lexical",
+     "support": 0.9933626055717468,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "confirmed",
+     "evidence_span": [
+      80,
+      89
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "confirmed",
+     "span": [
+      119,
+      128
+     ],
+     "kind": "lexical",
+     "support": 0.9960564374923706,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "after",
+     "evidence_span": [
+      101,
+      106
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "after",
+     "span": [
+      129,
+      134
+     ],
+     "kind": "lexical",
+     "support": 0.9975574612617493,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "after",
+     "evidence_span": [
+      101,
+      106
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "reviewing",
+     "span": [
+      135,
+      144
+     ],
+     "kind": "lexical",
+     "support": 0.9958615899085999,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "reviewing",
+     "evidence_span": [
+      107,
+      116
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "the",
+     "span": [
+      145,
+      148
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "ledger",
+     "span": [
+      149,
+      155
+     ],
+     "kind": "lexical",
+     "support": 0.9975689053535461,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "ledger",
+     "evidence_span": [
+      121,
+      127
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "twice",
+     "span": [
+      156,
+      161
+     ],
+     "kind": "lexical",
+     "support": 0.9958615899085999,
+     "value": null,
+     "evidence_id": "long",
+     "evidence_text": "reviewing",
+     "evidence_span": [
+      107,
+      116
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "Nothing numeric here at all.",
+    "context": [
+     [
+      "n",
+      "Still nothing."
+     ]
+    ]
+   },
+   "floor": 0.9424164295196533,
+   "k": 1,
+   "n_marked": 3,
+   "anchors": [
+    {
+     "text": "Nothing",
+     "span": [
+      0,
+      7
+     ],
+     "kind": "lexical",
+     "support": 0.9614331126213074,
+     "value": null,
+     "evidence_id": "n",
+     "evidence_text": "nothing",
+     "evidence_span": [
+      6,
+      13
+     ],
+     "notes": [
+      "exact_string_in_span"
+     ]
+    },
+    {
+     "text": "numeric",
+     "span": [
+      8,
+      15
+     ],
+     "kind": "lexical",
+     "support": 0.9563218951225281,
+     "value": null,
+     "evidence_id": "n",
+     "evidence_text": "nothing",
+     "evidence_span": [
+      6,
+      13
+     ],
+     "notes": []
+    },
+    {
+     "text": "here",
+     "span": [
+      16,
+      20
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "at",
+     "span": [
+      21,
+      23
+     ],
+     "kind": "skipped",
+     "support": 1.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "stopword"
+     ]
+    },
+    {
+     "text": "all",
+     "span": [
+      24,
+      27
+     ],
+     "kind": "lexical",
+     "support": 0.9424164295196533,
+     "value": null,
+     "evidence_id": "n",
+     "evidence_text": "Still",
+     "evidence_span": [
+      0,
+      5
+     ],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "case": {
+    "locale": "und",
+    "question": null,
+    "answer": "Total 10,000 dollars.",
+    "context": []
+   },
+   "floor": 0.0,
+   "k": 1,
+   "n_marked": 3,
+   "anchors": [
+    {
+     "text": "Total",
+     "span": [
+      0,
+      5
+     ],
+     "kind": "lexical",
+     "support": 0.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": []
+    },
+    {
+     "text": "10,000",
+     "span": [
+      6,
+      12
+     ],
+     "kind": "numeral",
+     "support": 0.0,
+     "value": "10000 | 10",
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": [
+      "grouping_vs_decimal",
+      "numeral_ambiguous"
+     ]
+    },
+    {
+     "text": "dollars",
+     "span": [
+      13,
+      20
+     ],
+     "kind": "lexical",
+     "support": 0.0,
+     "value": null,
+     "evidence_id": null,
+     "evidence_text": null,
+     "evidence_span": null,
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

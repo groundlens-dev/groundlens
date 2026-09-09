@@ -1,0 +1,38 @@
+{
+  "artefacts": {
+    "models/tiny.onnx": {
+      "bytes": 34393,
+      "kind": "onnx-model",
+      "path": "models/tiny.onnx",
+      "sha256": "sha256:2c514f6c5c7734b722024a768d7749d893a8c6d3f7ab56d3f21746f56052fb9d",
+      "used_by": [
+        "groundlens.lexical"
+      ]
+    },
+    "tokenizers/tiny/tokenizer.json": {
+      "bytes": 9212,
+      "kind": "tokenizer",
+      "path": "tokenizers/tiny/tokenizer.json",
+      "sha256": "sha256:4e846822a2f861086bcf3f8068f40b9b5c748eb16e91a1138997bc76875cd9f0",
+      "used_by": [
+        "groundlens.lexical"
+      ]
+    }
+  },
+  "encoders": {
+    "default": {
+      "dim": 16,
+      "max_tokens": 24,
+      "model": "models/tiny.onnx",
+      "pooling": "mean",
+      "prefix": "",
+      "tokenizer": "tokenizers/tiny/tokenizer.json"
+    }
+  },
+  "engine_version": "4.0.0",
+  "execution_profile": "cpu-f32",
+  "name": "tiny-test",
+  "offline_only": true,
+  "schema": "groundlens.bundle-manifest/1",
+  "version": "1"
+}

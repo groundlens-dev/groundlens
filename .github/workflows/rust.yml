@@ -45,5 +45,5 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: the engine crates must not depend on any HTTP or TLS crate
         run: |
-          cargo tree -p gl-core -p gl-text -p gl-numeric -p gl-verifiers -p gl-policy -p gl-record -p gl-bundle -e normal \
-            | grep -Ei 'reqwest|hyper|ureq|curl|openssl|rustls|native-tls|tokio-tungstenite' && exit 1 || echo "clean"
+          cargo tree -p gl-core -p gl-text -p gl-numeric -p gl-verifiers -p gl-policy -p gl-record -p gl-bundle -p gl-onnx -p gl-engine -p gl-python --features gl-onnx/runtime -e normal \
+            | grep -Ei 'reqwest|hyper|ureq|curl|openssl|rustls|native-tls|tokio-tungstenite|hf-hub' && exit 1 || echo "clean"

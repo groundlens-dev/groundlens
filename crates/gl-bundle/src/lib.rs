@@ -39,6 +39,30 @@ pub struct Artefact {
     pub used_by: Vec<String>,
 }
 
+/// How to run one encoder. Plain data; `gl-onnx` turns it into a model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EncoderSpec {
+    /// Bundle-relative path of the ONNX graph.
+    pub model: String,
+    /// Bundle-relative path of `tokenizer.json`.
+    pub tokenizer: String,
+    /// Content tokens per window, special tokens excluded.
+    pub max_tokens: usize,
+    /// Text prepended to every input (`"query: "` for the e5 family). Never
+    /// part of a span.
+    #[serde(default)]
+    pub prefix: String,
+    /// `mean` or `cls`, for the pooled sentence vector.
+    #[serde(default = "mean")]
+    pub pooling: String,
+    #[serde(default)]
+    pub dim: usize,
+}
+
+fn mean() -> String {
+    "mean".into()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Manifest {
     pub schema: String,
@@ -53,6 +77,13 @@ pub struct Manifest {
     /// then refuses any verifier whose `needs_network` is set.
     #[serde(default)]
     pub offline_only: bool,
+    /// Encoders by role. The lexical verifier uses `default`.
+    #[serde(default)]
+    pub encoders: BTreeMap<String, EncoderSpec>,
+    /// Where the artefacts came from (model repository, revision, files).
+    /// Free-form, hashed with the rest of the manifest.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provenance: Option<serde_json::Value>,
 }
 
 pub const MANIFEST_SCHEMA: &str = "groundlens.bundle-manifest/1";
@@ -136,7 +167,72 @@ pub fn build_manifest(root: &Path, name: &str, version: &str, engine_version: &s
         execution_profile: "cpu-f32".into(),
         artefacts,
         offline_only: true,
+        encoders: BTreeMap::new(),
+        provenance: None,
     })
+}
+
+/// A bundle the engine knows how to fetch and verify. The archive hash is
+/// pinned in the engine, so a download is trusted only if it matches what
+/// this build was released with.
+#[derive(Debug, Clone, Copy)]
+pub struct KnownBundle {
+    pub name: &'static str,
+    pub version: &'static str,
+    pub url: &'static str,
+    /// `sha256:<hex>` of the `.tar.gz`, or `sha256:unpinned` before the
+    /// first release of that bundle (pull then refuses).
+    pub archive_sha256: &'static str,
+    pub description: &'static str,
+}
+
+pub const KNOWN_BUNDLES: &[KnownBundle] = &[KnownBundle {
+    name: "base",
+    version: "1",
+    url: "https://github.com/groundlens-dev/groundlens/releases/download/bundle-base-v1/groundlens-base-v1.tar.gz",
+    archive_sha256: "sha256:unpinned",
+    description: "multilingual-e5-small (f32) for the lexical channel; 100 languages",
+}];
+
+pub fn known(name: &str) -> Option<&'static KnownBundle> {
+    KNOWN_BUNDLES.iter().find(|b| b.name == name)
+}
+
+/// Where bundles live on this machine, unless `GROUNDLENS_BUNDLE_DIR` says
+/// otherwise: the per-user data directory of the OS.
+pub fn bundles_home() -> PathBuf {
+    if let Some(dir) = std::env::var_os("GROUNDLENS_BUNDLE_DIR") {
+        return PathBuf::from(dir);
+    }
+    let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from);
+    let base = if cfg!(target_os = "macos") {
+        home.map(|h| h.join("Library/Application Support"))
+    } else if cfg!(target_os = "windows") {
+        std::env::var_os("LOCALAPPDATA").map(PathBuf::from).or(home)
+    } else {
+        std::env::var_os("XDG_DATA_HOME").map(PathBuf::from).or_else(|| home.map(|h| h.join(".local/share")))
+    };
+    base.unwrap_or_else(|| PathBuf::from(".")).join("groundlens").join("bundles")
+}
+
+/// The directory a named bundle would be installed in. `GROUNDLENS_BUNDLE_DIR`
+/// pointing straight at a bundle (it contains `manifest.json`) is honoured
+/// as that bundle, whatever its name.
+pub fn locate(name: &str) -> PathBuf {
+    let home = bundles_home();
+    if home.join("manifest.json").is_file() {
+        return home;
+    }
+    home.join(name)
+}
+
+/// Open the named bundle if it is installed; `Ok(None)` when it is not.
+pub fn open_installed(name: &str) -> Result<Option<Bundle>> {
+    let dir = locate(name);
+    if !dir.join("manifest.json").is_file() {
+        return Ok(None);
+    }
+    Bundle::open(dir).map(Some)
 }
 
 fn walk(dir: &Path) -> Result<Vec<PathBuf>> {

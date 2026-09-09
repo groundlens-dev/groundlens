@@ -1,10 +1,8 @@
 <div align="center">
 
-# GroundLens
-
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/Groundlens_02.png)
 
-**The verification and evidence layer for AI.**
+# GroundLens: The verification and evidence layer for AI.
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -14,158 +12,255 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 
-[How it works](#how-it-works) · [Python](#python) · [Command line](#command-line) · [Determinism](#determinism-is-a-ci-job-not-a-sentence-in-a-readme) · [Crates](#crates) · [Status](#status)
+[What it is](#what-groundlens-is) · [What you install](#what-pip-install-groundlens-gives-you) · [Quick start](#quick-start) · [Verifiers](#verifiers) · [Policies](#policies-decide-the-engine-only-measures) · [Evidence records](#every-check-leaves-a-record) · [Command line](#command-line) · [Notebooks](#notebooks) · [Roadmap](#roadmap)
 
 </div>
 
 <br>
 
-Deterministic where possible, reproducible where required, explicit
-provenance when not. Powered by the GLV engine.
+## What GroundLens is
 
-A GroundLens **verifier produces evidence, never truth**. A **policy** turns
-evidence into `PASS`, `REVIEW` or `FAIL`. The whole chain is sealed in a
-**signed, hash-chained record** that anyone can check offline, and mapped
-to the governance or regulatory controls your policy names.
+GroundLens is AI verification infrastructure.
 
+AI systems increasingly produce factual claims, recommendations and
+decisions that organisations need to trust. Tools exist to evaluate models,
+observe applications, detect hallucinations or apply individual guardrails.
+What they do not provide is a common verification layer in which several
+verification methods can be combined, governed by explicit policies, and
+turned into durable evidence. GroundLens provides that layer.
+
+In plain words: you give GroundLens an AI answer and the documents it was
+supposed to be based on. GroundLens runs a set of independent checks on it,
+applies the rules your organisation wrote, gives you `PASS`, `REVIEW` or
+`FAIL`, and writes the whole check into a signed record that anyone can
+verify later, offline.
+
+```mermaid
+flowchart LR
+    A[answer + sources] --> B[claims] --> C[verifiers] --> D[evidence] --> E[policy] --> F[decision]
+    E --> G[signed evidence record]
 ```
-answer + sources ──► claims ──► verifiers ──► evidence graph ──► policy ──► decision + controls
-                                                                   │
-                                                                   └──► signed, hash-chained evidence record
-```
 
-The engine measures. The policy interprets. The rules are yours. Those three
-never mix, and that is the whole design.
+Three ideas carry the design:
 
-## How it works
+**A verifier produces evidence, not truth.** Exact numeric checks, lexical
+grounding, semantic similarity, NLI, the geometric SGI and DGI indices,
+symbolic rules, your own verifiers and, if you allow it, an LLM judge: each
+one reports what it measured and how sure it is. None of them decides.
 
-```
-QUESTION    What is the invoice total?
-SOURCE      ...the total amount due is 10,000 dollars, payable within 30 days...
-ANSWER      The invoice total is 1,000 dollars, due in 30 days.
+**A policy interprets the evidence.** A short YAML file you control says
+which verifiers are required, recommended, optional or forbidden, what
+thresholds apply, and how evidence becomes a decision. It can map each
+outcome to the governance or regulatory control it concerns, such as an
+article of the EU AI Act.
+
+**The whole chain becomes a record.** Input hashes, the verifiers and model
+hashes that ran, the evidence, the policy and its hash, the decision, the
+regulatory mapping, and the hash of the previous record, sealed with an
+Ed25519 signature. A log of records is an audit trail you can hand over as
+a file.
+
+GroundLens does not need to know how your AI system is built. It works on
+outputs and evidence, locally, with no network access, so independent
+verification is possible even in sensitive environments.
+
+GroundLens does not try to be the best hallucination detector. It aims to
+be the infrastructure through which AI verification is performed, governed
+and evidenced.
+
+## What `pip install groundlens` gives you
+
+It is worth being exact about this.
+
+`pip install groundlens` installs the **GLV engine**: a Rust library
+wrapped for Python, with no runtime dependencies and no network access of
+any kind. It contains the claim extractor, the exact **numeric** verifier
+(numbers, currencies, percentages, physical units, in several locales), the
+symbolic **rules** verifier, the **policy engine** with two bundled
+policies, the signed **evidence records**, and the `groundlens` command
+line. Everything in this README except the lexical verifier works with that
+install alone. Nothing leaves your machine.
+
+`groundlens bundle pull base` is a separate, explicit step. It downloads the
+**base bundle** (about 470 MB: the multilingual-e5-small encoder in f32,
+its tokenizer and a manifest of hashes) from this repository's releases
+into a per-user directory, checks it against a hash pinned in the engine,
+and refuses anything else. It is the only command in the package that
+opens a network connection. With the bundle installed, the **lexical**
+verifier runs and every record names the bundle by hash. In an isolated
+environment, copy the bundle directory by hand and point
+`GROUNDLENS_BUNDLE_DIR` at it.
+
+What it is not: not a hosted service, not a model, not a wrapper around an
+LLM API, and not a hallucination score you compare with a magic number.
+
+## Quick start
+
+```bash
+pip install groundlens
+groundlens bundle pull base      # optional: enables the lexical verifier (≈470 MB, once)
 ```
 
 ```python
 from groundlens import verify
 
-record = verify(answer, [("invoice.pdf#p1", source)], question=question, policy="eu_ai_act_high_risk_v1")
+question = "What is the invoice total?"
+source = "...the total amount due is 10,000 dollars, payable within 30 days..."
+answer = "The invoice total is 1,000 dollars, due in 30 days."
+
+record = verify(answer, [("invoice.pdf#p1", source)], question=question)
 print(record.report())
 ```
 
 ```
-FAIL  policy=eu_ai_act_high_risk_v1  record=rec_350455f44e60_4dbfea8eb79c
+FAIL  policy=groundlens_default_v1  record=rec_350455f44e60_4dbfea8eb79c
   c2   groundlens.numeric       contradicted  0.00  nearest in invoice.pdf#p1: '10,000 dollars'
 ```
 
-Ten is not a hundred. An embedding sees the right answer and the wrong one
-at 0.99 similarity; the numeric verifier compares quantities exactly, in
-base units, and says which source span the number lost to. The policy turns
-that evidence into a decision and maps it to Art. 15(1) and Art. 12(1) of
-Regulation (EU) 2024/1689. The same engine reads `1.2 km` against `1200 m`,
-`$37.35 billion` against a table cell `37,350` under "in millions of
-dollars", and `212 °F` against `100 °C` as equal, with exact arithmetic.
+Ten is not a hundred. A similarity score would rate the right answer and the
+wrong one at 0.99; the numeric verifier compares the quantities exactly and
+points at the source passage the number lost to.
 
-## Python
+Python 3.10 or later, on Linux, macOS and Windows.
 
-```bash
-pip install groundlens          # zero runtime dependencies, no network at any point
-```
+## Verifiers
+
+| verifier | what it does | guarantee | in `pip install` |
+|---|---|---|---|
+| `groundlens.numeric` | numbers, currencies, percentages and physical units, compared exactly in base units: `1.2 km` equals `1200 m`, `212 °F` equals `100 °C`, `$37.35 billion` equals a table cell `37,350` under "in millions of dollars" | exact, bit-identical everywhere | yes |
+| `groundlens.rules` | your own symbolic rules (an APR must be a percentage, a date must fall inside the contract term) | exact | yes |
+| `groundlens.lexical` | whether each word of the answer is anchored in the sources, by contextual token similarity on a frozen multilingual encoder, reported as the weakest anchor rather than an average | reproducible: pinned model hash, scores within 1e-6 across machines | with the base bundle |
+| NLI, semantic, SGI, DGI, LLM judge | entailment, meaning, geometric grounding and model-based judgement | optional verifiers, see the [roadmap](#roadmap) | later releases |
+
+Locales matter for numbers: `1.234` is one thousand in Spanish and one and a
+bit in English. GroundLens reads `en`, `es`, `ca`, `de`, `fr`, `it`, `pt`,
+`nl` and Swiss formats, knows short and long scale words, and keeps every
+legitimate reading of an ambiguous numeral instead of guessing. The base
+bundle's encoder covers about a hundred languages.
+
+## Policies decide, the engine only measures
+
+A policy is a short YAML file. Two policies over the same evidence can reach
+different decisions, and both are correct: that is where your risk
+appetite lives, not in the engine.
 
 ```python
-from groundlens import verify, proofread, Policy, Record, Bundle, calibrate
-
-record = verify("Revenue was €15M.", [("10k.pdf#p4", "Revenue was €10M.")])
-record.decision        # 'FAIL'  (the policy decided; the verifier only produced evidence)
-record.evidence[0]     # groundlens.numeric · contradicted · exact · nearest '€10M'
-record.content_hash    # identical on every machine for the same input, policy and bundle
-record.verify()        # recompute hashes and the Ed25519 signature, offline
+record = verify(answer, sources, policy="eu_ai_act_high_risk_v1")
+record.decision              # 'FAIL'
+record.regulatory_mapping    # [{'article': 'Art. 15(1)', ...}, {'article': 'Art. 12(1)', ...}]
 ```
 
-`Policy` is YAML with a version and a hash; the hash goes into every record
-it decides. Two policies over the same evidence can reach two decisions and
-both are correct, which is what it means for the policy, not the engine, to
-have an opinion. `Record.verify_chain()` checks a whole log.
+The bundled `eu_ai_act_high_risk_v1` policy maps outcomes to Art. 15(1)
+(accuracy and robustness) and Art. 12(1) (record keeping) of Regulation
+(EU) 2024/1689. Write your own with `Policy.from_yaml()`; every policy has a
+version and a hash, and the hash goes into every record it decides.
 
-The 3.x `proofread()` API is kept, same types and same numeral semantics,
-and is tested against a golden file produced by groundlens 3.1 itself
-(`python/tests/compat`). In this development build only the numeral channel
-is scored; the lexical channel is the release gate of 4.0.0. Until then,
-`pip install groundlens` gives you 3.1.
-
-From source:
-
-```bash
-cd python && maturin build --release && pip install ../target/wheels/groundlens-*.whl
+```yaml
+id: acme_rag_v1
+version: 1.0.0
+verifiers:
+  required: [groundlens.numeric, groundlens.lexical]
+  forbidden: [llm_judge.*]
+thresholds:
+  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
+decision:
+  any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
+  unresolved_claims: REVIEW
 ```
+
+Scores from statistical verifiers drift slightly between machines, so every
+threshold carries a guard band: a score inside the band is `REVIEW`
+everywhere, never `PASS` on one laptop and `FAIL` on another.
+`groundlens policy lint` refuses a band narrower than the verifier's
+declared tolerance.
+
+## Every check leaves a record
+
+```python
+record.content_hash     # same input, policy and bundle → same hash, on any machine
+record.verify()         # recompute every hash and the Ed25519 signature, offline
+Record.verify_chain(Record.read_log("records.jsonl"))
+```
+
+Change one byte anywhere in a record and verification fails. Append records
+to a JSON Lines log and each one carries the hash of the previous one.
+`groundlens report` turns a log into a human-readable report with a
+one-page guide for auditors.
 
 ## Command line
 
 ```bash
 groundlens verify --answer answer.txt --question question.txt \
-  --source "invoice.pdf#p1=invoice.txt" --policy eu_ai_act_high_risk_v1 \
-  --rules rules/es_banking_v1.yaml --locale en --log records.jsonl
+  --source "invoice.pdf#p1=invoice.txt" --policy eu_ai_act_high_risk_v1 --log records.jsonl
 groundlens record verify records.jsonl        # every hash, every link, every signature
-groundlens report records.jsonl --out report  # report.md, report.json, records.jsonl, README-auditor.md
+groundlens report records.jsonl --out report  # report.md, report.json, README-auditor.md
 groundlens policy lint policies/eu_ai_act_high_risk_v1.yaml
+groundlens bundle status                      # is the base bundle installed, where, which hash
 ```
 
-Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary `glv`
-exposes the same commands.
+Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary
+`glv` exposes the same commands.
 
-## Determinism is a CI job, not a sentence in a README
+## Same input, same answer, on any machine
 
-Functional determinism, declared per verifier and checked on every commit:
+Each verifier declares what it guarantees. `exact` verifiers use no
+floating point at all. `reproducible` verifiers run a pinned model, in
+f32, on a pure-Rust inference engine, and their scores stay within a
+declared tolerance. Anything `non_deterministic`, such as an LLM judge, is
+recorded with its model, prompt hash and settings, and only decides if the
+policy says so.
 
-* same input, same bundle, same policy → **same classification**, on every OS and CPU;
-* every score within a **declared tolerance** of the reference run;
-* the **content hash** of the result is identical across platforms.
+This is tested rather than promised: the CI runs the invoice example, with
+and without the lexical channel, on Linux, macOS and Windows under a
+Turkish locale and a Pacific timezone, and compares the record hash with a
+committed value.
 
-| class | example | guarantee |
-|---|---|---|
-| `exact` | numeric, rules | bit-identical, no floats decide anything |
-| `reproducible` | NLI, lexical anchors, SGI, DGI | pinned ONNX hash + `cpu-f32` profile → scores within 1e-6 |
-| `non_deterministic` | LLM-as-a-judge | recorded with model, prompt hash and settings; decides only if the policy says so |
+## Built in Rust, used from Python
 
-A threshold compared with a drifting score is exactly where classifications
-flip, so every threshold in a policy carries a **guard band**: a score inside
-the band is `REVIEW` on every platform, and `policy lint` refuses a band
-narrower than twice the verifier's tolerance.
+The engine is a Rust workspace under `crates/`: contracts and hashing
+(`gl-core`), text normalisation (`gl-text`), numerals and units
+(`gl-numeric`), the verifiers, the policy engine, records, bundles, the
+model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no
+native library) and the one pipeline everything calls (`gl-engine`). The
+Python package is a thin binding over it; `glv` is the same engine as a
+binary. No engine crate depends on an HTTP or TLS library, and a CI job
+fails the build if one ever does.
 
-The `rust` workflow (`crates/gl-cli/tests/golden.rs`) runs the invoice example under a Turkish
-locale and a Pacific timezone on Linux x86_64, macOS arm64 and Windows, and
-compares the record's `content_hash` with the committed golden value. A
-change to that file has to explain itself in the commit.
+```bash
+cargo build --release                 # engine and glv
+cd python && maturin build --release  # Python wheel
+```
 
-## Crates
+## Notebooks
 
-| crate | what it owns |
-|---|---|
-| `gl-core` | `Claim`, `Evidence`, the `Verifier` trait, `EvidenceGraph`, determinism classes, canonical JSON + SHA-256 |
-| `gl-text` | NFKC normalisation, thin-space group separators, word segmentation, stopwords (en, es) |
-| `gl-numeric` | numerals with locale, scale words (short and long scale), currencies, percent, physical units with exact rational conversion, header-declared scales |
-| `gl-verifiers` | claim extractor, `groundlens.numeric` (exact), `groundlens.rules` (symbolic) |
-| `gl-policy` | policy schema (YAML), lint, evaluation, guard bands, regulatory mapping |
-| `gl-record` | evidence record, hash chain, Ed25519 signatures, JSON Lines log |
-| `gl-bundle` | bundle manifest, artefact hashing, offline-only flag |
-| `gl-onnx` | `Encoder` and `EntailmentModel` traits, SGI and DGI formulas; ONNX Runtime behind the `runtime` feature |
-| `gl-engine` | the one pipeline the CLI and every binding call |
-| `gl-python` | `groundlens._engine`, the PyO3 extension |
-| `gl-cli` | `glv` |
+Two notebooks under [`examples/notebooks`](examples/notebooks) run in
+Google Colab against the published package:
 
-No crate in the engine depends on an HTTP or TLS library; a CI job fails
-the build if one ever appears.
+* **Verify an AI answer against its sources**: one example in English,
+  German, French, Spanish and Italian, from `pip install` to a signed
+  record, with a wrong number, a paraphrase and a policy change.
+* **Evidence records for auditors**: a log of verifications, chain
+  verification, tamper detection, the EU AI Act mapping and the report an
+  auditor receives.
 
-## Status
+## Roadmap
 
-4.0 development. The contracts, the exact verifiers, the policy engine, the
-signed records and the Python package are in place and tested end to end.
-The lexical channel on ONNX, then NLI and semantic verifiers, then SGI and
-DGI, calibration and the public benchmark follow, in that order. groundlens
-3.x stays at tag `v3.1.0-final` and on PyPI until 4.0.0 ships.
+The open-source engine is the adoption and trust layer. Next, in order:
+entailment (NLI) and semantic verifiers on the same model host, the
+geometric SGI and DGI verifiers, calibration tooling, and a public
+benchmark reporting false positive rate at 95 % recall.
+
+The commercial product is verification at production scale: calibration,
+evidence packages, policies, governance, private deployment, specialised
+verifiers and regulatory mappings. It is built around the evidence and the
+policies, on top of this engine, not instead of it.
+
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) and
+[SECURITY.md](SECURITY.md).
 
 <div align="center">
 
-[groundlens.dev](https://groundlens.dev) · [Docs](https://docs.groundlens.dev) · [PyPI](https://pypi.org/project/groundlens/) · [Contributing](CONTRIBUTING.md) · Apache-2.0
+[groundlens.dev](https://groundlens.dev) · [PyPI](https://pypi.org/project/groundlens/) · Apache-2.0
 
 <br>
 Javier Marín, 2026 (javier@jmarin.info)

@@ -1,8 +1,7 @@
 //! Model hosting. Everything a Reproducible verifier needs and nothing else.
 //!
-//! The reference execution profile is `cpu-f32`: CPU execution provider,
-//! float32 graph, intra-op threads pinned to 1 for the reference run, graph
-//! optimisation level fixed at load time and recorded. Under that profile the
+//! The reference execution profile is `cpu-f32`: float32 graph run by tract
+//! (pure Rust, single thread, no native library). Under that profile the
 //! same ONNX file (by sha256) gives scores within `1e-6` across x86_64 and
 //! arm64. That is the tolerance the `Reproducible` class declares.
 //!
@@ -65,10 +64,9 @@ pub fn dgi(response: &[f32], question: &[f32], mu_hat: &[f32]) -> f64 {
 }
 
 #[cfg(feature = "runtime")]
-pub mod session {
-    //! ONNX-backed implementations land here behind the `runtime` feature.
-    //! See ROADMAP milestone M2.
-}
+pub mod tract;
+#[cfg(feature = "runtime")]
+pub use tract::{encoder_from_bundle, EncoderSpec, TractEncoder};
 
 #[cfg(test)]
 mod tests {
@@ -90,5 +88,62 @@ mod tests {
         let r = [0.0f32, 1.0];
         let mu = [-0.70710677f32, 0.70710677];
         assert!((dgi(&r, &q, &mu) - 1.0).abs() < 1e-6);
+    }
+}
+
+#[cfg(all(test, feature = "runtime"))]
+mod tract_tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    fn tiny() -> TractEncoder {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("testdata/tiny-bundle");
+        let spec = EncoderSpec {
+            model: "models/tiny.onnx".into(),
+            tokenizer: "tokenizers/tiny/tokenizer.json".into(),
+            max_tokens: 24,
+            prefix: String::new(),
+            pooling: "mean".into(),
+            dim: 16,
+        };
+        TractEncoder::load(&root, "tiny", &spec, "sha256:test").unwrap()
+    }
+
+    #[test]
+    fn spans_are_byte_offsets_and_vectors_are_unit_length() {
+        let enc = tiny();
+        let text = "Café total 10,000 €";
+        let spans = enc.token_spans(text).unwrap();
+        // Pieces of "Café" tile the word exactly, on byte boundaries.
+        let cafe: Vec<&str> =
+            spans.iter().take_while(|s| s.end <= 5).map(|s| &text[s.start..s.end]).collect();
+        assert_eq!(cafe.concat(), "Café");
+        assert!(spans.iter().any(|s| &text[s.start..s.end] == "total"));
+        let w = enc.encode_window(text).unwrap();
+        assert_eq!(w.token_spans, spans);
+        for v in &w.vectors {
+            let n: f32 = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+            assert!((n - 1.0).abs() < 1e-5);
+        }
+        let s = enc.encode_sentence(text).unwrap();
+        assert_eq!(s.len(), 16);
+    }
+
+    #[test]
+    fn prefix_is_invisible_to_spans() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("testdata/tiny-bundle");
+        let spec = EncoderSpec {
+            model: "models/tiny.onnx".into(),
+            tokenizer: "tokenizers/tiny/tokenizer.json".into(),
+            max_tokens: 24,
+            prefix: "query: ".into(),
+            pooling: "mean".into(),
+            dim: 16,
+        };
+        let enc = TractEncoder::load(&root, "tiny", &spec, "sha256:test").unwrap();
+        let text = "invoice total";
+        let spans = enc.token_spans(text).unwrap();
+        assert_eq!(&text[spans[0].start..spans[0].end], "invoice");
+        assert_eq!(spans.len(), 2);
     }
 }
