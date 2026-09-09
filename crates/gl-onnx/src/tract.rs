@@ -96,15 +96,34 @@ impl TractEncoder {
         format!("{}{}", self.spec.prefix, text)
     }
 
-    /// Drop prefix and special tokens; shift offsets back to `text`.
-    fn content_tokens(&self, offsets: &[(usize, usize)]) -> Vec<(usize, Span)> {
+    /// Drop prefix and special tokens; shift offsets back to `text`; trim
+    /// the whitespace SentencePiece tokenizers fold into a piece's offsets,
+    /// so a span never starts on the space before the word.
+    fn content_tokens(&self, text: &str, offsets: &[(usize, usize)]) -> Vec<(usize, Span)> {
         let p = self.spec.prefix.len();
-        offsets
-            .iter()
-            .enumerate()
-            .filter(|(_, (a, b))| b > a && *a >= p)
-            .map(|(i, (a, b))| (i, Span::new(a - p, b - p)))
-            .collect()
+        let mut out = Vec::new();
+        for (i, (a, b)) in offsets.iter().enumerate() {
+            if b <= a || *a < p {
+                continue;
+            }
+            let (mut start, mut end) = (a - p, b - p);
+            while start < end {
+                match text[start..end].chars().next() {
+                    Some(c) if c.is_whitespace() => start += c.len_utf8(),
+                    _ => break,
+                }
+            }
+            while end > start {
+                match text[start..end].chars().next_back() {
+                    Some(c) if c.is_whitespace() => end -= c.len_utf8(),
+                    _ => break,
+                }
+            }
+            if end > start {
+                out.push((i, Span::new(start, end)));
+            }
+        }
+        out
     }
 }
 
@@ -152,14 +171,14 @@ impl Encoder for TractEncoder {
             .tokenizer
             .encode(self.with_prefix(text), false)
             .map_err(|e| Error::InvalidInput(format!("tokenize: {e}")))?;
-        Ok(self.content_tokens(enc.get_offsets()).into_iter().map(|(_, s)| s).collect())
+        Ok(self.content_tokens(text, enc.get_offsets()).into_iter().map(|(_, s)| s).collect())
     }
 
     fn encode_window(&self, text: &str) -> Result<WindowEncoding> {
         let (offsets, _mask, rows) = self.forward(&self.with_prefix(text))?;
         let mut spans = Vec::new();
         let mut vectors = Vec::new();
-        for (i, span) in self.content_tokens(&offsets) {
+        for (i, span) in self.content_tokens(text, &offsets) {
             let mut v = rows[i].clone();
             l2(&mut v);
             spans.push(span);

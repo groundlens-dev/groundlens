@@ -63,7 +63,7 @@ Runs in Google Colab. Nothing here sends your text anywhere: the engine runs loc
     md("""
 ## 1. Install
 
-`pip install groundlens` installs the GLV engine: the numeric and rules verifiers, the policy engine, the signed records and the command line. No dependencies, no network.
+`pip install groundlens` installs the GroundLens engine (GLV, for GroundLens Verification): the numeric and rules verifiers, the policy engine, the signed records and the command line. No dependencies, no network.
 
 The **base bundle** is an optional, explicit download (about 470 MB, once): the multilingual encoder that powers the lexical verifier. It is the only command in the package that touches the network, and the download is checked against a hash pinned in the engine.
 """),
