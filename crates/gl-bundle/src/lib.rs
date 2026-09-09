@@ -190,7 +190,7 @@ pub const KNOWN_BUNDLES: &[KnownBundle] = &[KnownBundle {
     name: "base",
     version: "1",
     url: "https://github.com/groundlens-dev/groundlens/releases/download/bundle-base-v1/groundlens-base-v1.tar.gz",
-    archive_sha256: "sha256:unpinned",
+    archive_sha256: "sha256:eab5904f1c8da9d679d32afb2309ff3e15ddb6f74bdd0a7bffd3a5ccca4c1571",
     description: "multilingual-e5-small (f32) for the lexical channel; 100 languages",
 }];
 

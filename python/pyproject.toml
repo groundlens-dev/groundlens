@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "groundlens"
 version = "4.0.0"
-description = "GroundLens: the verification and evidence layer for AI. Powered by the GLV engine."
+description = "GroundLens: the verification and evidence layer for AI."
 readme = "../README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"

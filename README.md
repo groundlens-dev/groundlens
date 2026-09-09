@@ -72,9 +72,9 @@ and evidenced.
 
 It is worth being exact about this.
 
-`pip install groundlens` installs the **GLV engine**: a Rust library
-wrapped for Python, with no runtime dependencies and no network access of
-any kind. It contains the claim extractor, the exact **numeric** verifier
+`pip install groundlens` installs the **GroundLens engine** (GLV, for
+GroundLens Verification): a Rust library wrapped for Python, with no
+runtime dependencies and no network access of any kind. It contains the claim extractor, the exact **numeric** verifier
 (numbers, currencies, percentages, physical units, in several locales), the
 symbolic **rules** verifier, the **policy engine** with two bundled
 policies, the signed **evidence records**, and the `groundlens` command
