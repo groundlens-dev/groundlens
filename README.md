@@ -52,20 +52,20 @@ flowchart LR
 The whole chain becomes a record. Input hashes, the verifiers and model hashes that ran, the evidence, the policy and its hash, the decision, the
 regulatory mapping, and the hash of the previous record, sealed with an Ed25519 signature. A log of records is an audit trail you can hand over as a file.
 
-GroundLens is AI system agnostic. It works on outputs and evidence, locally, with no network access, so independent verification is possible even in sensitive environments.
+<br>
+
+> GroundLens is AI system agnostic. It works on outputs and evidence, locally, with no network access, so independent verification is possible even in sensitive environments.
 
 <br>
 
 ## Engine
 
-The engine is a Rust workspace under `crates/`: contracts and hashing
-(`gl-core`), text normalisation (`gl-text`), numerals and units
-(`gl-numeric`), the verifiers, the policy engine, records, bundles, the
-model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no
-native library) and the one pipeline everything calls (`gl-engine`). The
-Python package is a thin binding over it; `glv` is the same engine as a
-binary. No engine crate depends on an HTTP or TLS library, and a CI job
-fails the build if one ever does.
+Groundlens engine is a Rust library wrapped for Python, with no runtime dependencies and no network access of any kind. It contains the claim extractor, the exact **numeric** verifier (numbers, currencies, percentages, physical units, in several locales), the symbolic **rules** verifier, the **policy engine** with two bundled policies, and the signed **evidence records**.
+
+The engine is a Rust workspace under `crates/`: contracts and hashing (`gl-core`), text normalisation (`gl-text`), numerals and units
+(`gl-numeric`), the verifiers, the policy engine, records, bundles, the model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no
+native library) and the one pipeline everything calls (`gl-engine`). The Python package is a thin binding over it; `glv` is the same engine as a
+binary. No engine crate depends on an HTTP or TLS library, and a CI job fails the build if one ever does.
 
 ```bash
 cargo build --release                 # engine and glv
@@ -149,13 +149,11 @@ pip install groundlens     # installs the GroundLens engine
 groundlens bundle pull base      # optional: enables the lexical verifier (≈470 MB, once)
 ```
 
-`pip install`  # installs the froundLens engine: a Rust library wrapped for Python, with no runtime dependencies and no network access of any kind. It contains the claim extractor, the exact **numeric** verifier (numbers, currencies, percentages, physical units, in several locales), the symbolic **rules** verifier, the **policy engine** with two bundled policies, the signed **evidence records**, and the `groundlens` command line. Everything in this README except the lexical verifier works with that install alone. Nothing leaves your machine.
+- `pip install` installs the groundLens engine.  
+- `groundlens` command line. Everything in this README except the lexical verifier works with that install alone. Nothing leaves your machine.
 
 
 ```python
-"""
-
-"""
 from groundlens import verify
 
 question = "What is the invoice total?"
@@ -171,7 +169,7 @@ FAIL  policy=groundlens_default_v1  record=rec_350455f44e60_4dbfea8eb79c
   c2   groundlens.numeric       contradicted  0.00  nearest in invoice.pdf#p1: '10,000 dollars'
 ```
 
-`groundlens bundle pull base` is a separate, explicit step. It downloads the
+- `groundlens bundle pull base` is a separate, explicit step. It downloads the
 **base bundle** (about 470 MB: the multilingual-e5-small encoder in f32,
 its tokenizer and a manifest of hashes) from this repository's releases
 into a per-user directory, checks it against a hash pinned in the engine,
@@ -218,14 +216,25 @@ committed value.
 ## Examples
 
 Two notebooks under [`examples/notebooks`](examples/notebooks) run in
-Google Colab against the published package:
+Google Colab:
 
-* **Verify an AI answer against its sources**: one example in English,
+- **Verify an AI answer against its sources**: one example in English,
   German, French, Spanish and Italian, from `pip install` to a signed
   record, with a wrong number, a paraphrase and a policy change.
-* **Evidence records for auditors**: a log of verifications, chain
+  <a target="_blank" href="https://colab.research.google.com/github/groundlens-dev/groundlens/blob/main/examples/notebooks/01_verify_an_answer_in_five_languages.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
+- **Evidence records for auditors**: a log of verifications, chain
   verification, tamper detection, the EU AI Act mapping and the report an
   auditor receives.
+  <a target="_blank" href="https://colab.research.google.com/github/groundlens-dev/groundlens/blob/main/examples/notebooks/02_evidence_records_for_auditors.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
+ 
+
+<br>
 
 ## Roadmap
 
@@ -238,6 +247,8 @@ The commercial product is verification at production scale: calibration,
 evidence packages, policies, governance, private deployment, specialised
 verifiers and regulatory mappings. It is built around the evidence and the
 policies, on top of this engine, not instead of it.
+
+<br>
 
 Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) and
 [SECURITY.md](SECURITY.md).
