@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Shapes people actually have → the engine's VerifyRequest."""
 
 from __future__ import annotations

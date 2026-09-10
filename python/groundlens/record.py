@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """The evidence record: what a verification leaves behind.
 
 One per verification, hash-chained to the previous one, signed. It carries

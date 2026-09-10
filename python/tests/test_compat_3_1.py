@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """The numeral channel of proofread() must match groundlens 3.1 exactly.
 
 The golden file was produced by 3.1 itself (see compat/generate_golden.py).

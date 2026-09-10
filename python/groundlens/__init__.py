@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """GroundLens: the verification and evidence layer for AI.
 
     >>> from groundlens import verify

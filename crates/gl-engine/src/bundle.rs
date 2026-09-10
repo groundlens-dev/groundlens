@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Loading a bundle once per process. A 470 MB encoder is not something to
 //! read on every call.
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Bare numerals: port of groundlens 3.x `_numerals.py`, same rules.
 //!
 //! * `Decimal`, never float.

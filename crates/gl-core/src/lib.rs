@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Core contracts of the Groundlens verification engine.
 //!
 //! Everything in this crate is a *contract*, not an implementation:

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! How a corpus writes numbers. From an argument, never from the environment.
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

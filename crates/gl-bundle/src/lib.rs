@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The verification bundle: engine + ONNX models + tokenizers + rules +
 //! policies + checksums, in one directory that needs no network.
 //!

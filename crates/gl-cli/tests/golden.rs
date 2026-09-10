@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Determinism, checked rather than promised.
 //!
 //! The same input, policy and rule set must produce the same `content_hash`

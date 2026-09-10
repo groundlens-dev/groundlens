@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Build the tiny test bundle under crates/gl-onnx/testdata/tiny-bundle.
 
 A 16-dimensional contextual encoder with random (seeded) weights and a

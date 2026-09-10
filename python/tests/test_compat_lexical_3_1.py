@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """The lexical channel of proofread() must match groundlens 3.1.
 
 The golden file was produced by 3.1 itself over the tiny test encoder run

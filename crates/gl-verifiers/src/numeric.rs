@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The exact channel. Support is 1.0 or 0.0. Similarity is not allowed to
 //! vote. What is new against groundlens 3.x: scale words, currencies,
 //! percentages and physical units are compared in a canonical base unit, and

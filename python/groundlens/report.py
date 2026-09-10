@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """``groundlens report``: turn a log of records into a verification report.
 
 JSON for machines, Markdown for people. Every number in it can be

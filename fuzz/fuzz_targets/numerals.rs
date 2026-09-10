@@ -1,4 +1,9 @@
 #![no_main]
+
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The numeral grammar must never panic and must stay linear on hostile
 //! input (the digit-group bound is what keeps it so).
 use libfuzzer_sys::fuzz_target;

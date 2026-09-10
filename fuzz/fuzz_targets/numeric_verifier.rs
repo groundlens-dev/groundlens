@@ -1,4 +1,9 @@
 #![no_main]
+
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The whole exact channel: extract claims from one half of the input,
 //! verify against the other half. Must never panic; evidence spans must
 //! index the normalised texts.

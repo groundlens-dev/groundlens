@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The evidence record. One per verification. Hash-chained to the previous
 //! one, signed with Ed25519, appended to a JSON Lines log that is never
 //! rewritten.

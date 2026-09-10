@@ -1,4 +1,9 @@
 #![no_main]
+
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Policy YAML from an untrusted source must parse or fail cleanly, and a
 //! parsed policy must lint and hash without panicking.
 use libfuzzer_sys::fuzz_target;
