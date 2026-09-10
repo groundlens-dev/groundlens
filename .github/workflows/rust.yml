@@ -52,3 +52,12 @@ jobs:
         run: |
           cargo tree -p gl-core -p gl-text -p gl-numeric -p gl-verifiers -p gl-policy -p gl-record -p gl-bundle -p gl-onnx -p gl-engine -p gl-python --features gl-onnx/runtime -e normal \
             | grep -Ei 'reqwest|hyper|ureq|curl|openssl|rustls|native-tls|tokio-tungstenite|hf-hub' && exit 1 || echo "clean"
+
+  # Licensing: every file carries SPDX copyright and licence information
+  # (REUSE specification 3.3), so the bill of materials of a release is
+  # complete without reading the source.
+  reuse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
