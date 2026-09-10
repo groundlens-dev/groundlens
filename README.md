@@ -6,17 +6,19 @@
 
 <br>
 
-[![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
+[![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
 [![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
+[![REUSE status](https://api.reuse.software/badge/github.com/groundlens-dev/groundlens)](https://api.reuse.software/info/github.com/groundlens-dev/groundlens)
+[![SLSA](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev/images/gh-badge-level2.svg)
 
 <br>
 
-[What it is](#what-groundlens-is) · [How it works](#how-ir-works) · [Engine](#engine) · [Verifiers](#verifiers) · [Policies](#policiess) · [Evidence records](#every-check-leaves-a-record) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/f8adbc19f8654fdda196bd45817691616d6c7ca9/FAQ.md) · [Roadmap](#roadmap)
+[What it is](#what-groundlens-is) · [How it works](#how-it-works) · [Engine](#engine) · [Verifiers](#verifiers) · [Policies](#policies) · [Evidence records](#every-check-leaves-a-record) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/f8adbc19f8654fdda196bd45817691616d6c7ca9/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/46e78970f3ba344028743427f4b4e3238dfe8ba0/ROADMAP.md)
 
 </div>
 
@@ -36,6 +38,7 @@ GroundLens checks what an AI system said, decides under rules you wrote, and pro
 
 ## How it works
 
+<br>
 
 ```mermaid
 flowchart LR
@@ -127,6 +130,8 @@ everywhere, never `PASS` on one laptop and `FAIL` on another.
 `groundlens policy lint` refuses a band narrower than the verifier's
 declared tolerance.
 
+<br>
+
 ## Every check leaves a record
 
 ```python
@@ -144,14 +149,12 @@ one-page guide for auditors.
 
 ## Quick start
 
+
+1. `pip install` installs the groundlens engine.  
+
 ```python
 pip install groundlens     # installs the GroundLens engine
-groundlens bundle pull base      # optional: enables the lexical verifier (≈470 MB, once)
 ```
-
-- `pip install` installs the groundLens engine.  
-- `groundlens` command line. Everything in this README except the lexical verifier works with that install alone. Nothing leaves your machine.
-
 
 ```python
 from groundlens import verify
@@ -169,8 +172,14 @@ FAIL  policy=groundlens_default_v1  record=rec_350455f44e60_4dbfea8eb79c
   c2   groundlens.numeric       contradicted  0.00  nearest in invoice.pdf#p1: '10,000 dollars'
 ```
 
-- `groundlens bundle pull base` is a separate, explicit step. It downloads the
-**base bundle** (about 470 MB: the multilingual-e5-small encoder in f32,
+---
+
+- `groundlens bundle pull base` is a separate, explicit step.
+  
+```python
+groundlens bundle pull base      # optional: enables the lexical verifier (≈470 MB, once)
+```
+It downloads the **base bundle** (about 470 MB: the multilingual-e5-small encoder in f32,
 its tokenizer and a manifest of hashes) from this repository's releases
 into a per-user directory, checks it against a hash pinned in the engine,
 and refuses anything else. It is the only command in the package that
@@ -179,7 +188,10 @@ verifier runs and every record names the bundle by hash. In an isolated
 environment, copy the bundle directory by hand and point
 `GROUNDLENS_BUNDLE_DIR` at it.
 
-### Command line
+
+---
+
+- `groundlens` command line. Everything in this README except the lexical verifier works with that install alone. Nothing leaves your machine.
 
 ```bash
 groundlens verify --answer answer.txt --question question.txt \
@@ -195,7 +207,7 @@ Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary
 
 <br>
 
-## Deterninism
+## Determinism
 
 Same input, same answer, on any machine
 
@@ -233,20 +245,6 @@ Google Colab:
 </a>
 
  
-
-<br>
-
-## Roadmap
-
-The open-source engine is the adoption and trust layer. Next, in order:
-entailment (NLI) and semantic verifiers on the same model host, the
-geometric SGI and DGI verifiers, calibration tooling, and a public
-benchmark reporting false positive rate at 95 % recall.
-
-The commercial product is verification at production scale: calibration,
-evidence packages, policies, governance, private deployment, specialised
-verifiers and regulatory mappings. It is built around the evidence and the
-policies, on top of this engine, not instead of it.
 
 <br>
 
