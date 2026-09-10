@@ -1,0 +1,12 @@
+version = 1
+SPDX-PackageName = "groundlens"
+SPDX-PackageSupplier = "Javier Marín <javier@jmarin.info>"
+SPDX-PackageDownloadLocation = "https://github.com/groundlens-dev/groundlens"
+
+# Source files carry their own SPDX header. Everything that cannot (data,
+# goldens, models, notebooks, images, lock files) is covered here.
+[[annotations]]
+path = ["**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Javier Marín <javier@jmarin.info>"
+SPDX-License-Identifier = "Apache-2.0"
