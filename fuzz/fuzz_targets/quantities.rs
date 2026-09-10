@@ -1,4 +1,9 @@
 #![no_main]
+
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Quantities: scale words, currencies, percent, physical units, headers.
 use libfuzzer_sys::fuzz_target;
 

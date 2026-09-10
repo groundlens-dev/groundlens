@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The lexical channel: groundlens 3.x word anchors, ported rule for rule.
 //!
 //! A word's support is the highest cosine similarity its contextual token

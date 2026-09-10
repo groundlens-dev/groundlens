@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Model hosting. Everything a Reproducible verifier needs and nothing else.
 //!
 //! The reference execution profile is `cpu-f32`: float32 graph run by tract

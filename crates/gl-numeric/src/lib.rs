@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Numbers, decided by arithmetic. With units this time.
 //!
 //! groundlens 3.x compared bare values: `10,000` against `10000`. That is

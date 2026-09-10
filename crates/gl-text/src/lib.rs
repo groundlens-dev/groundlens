@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Normalisation and segmentation. Applied exactly once, before anything
 //! else looks at the text. Every span in the engine indexes the normalised
 //! string, never the caller's original.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """``groundlens``: the CLI. Same engine as the Python API and the Rust binary.
 
 Exit codes: 0 PASS, 1 FAIL, 2 error, 3 REVIEW.

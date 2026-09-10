@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Claim extraction, rule-based. Numerals are claimed first so `10,000` is
 //! one claim rather than three; content words fill the rest. An ML claim
 //! splitter can replace this stage without touching any verifier, because

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Public data types and the encoder seam.
 
 Nothing in this module imports numpy, torch or transformers. The encoder is a

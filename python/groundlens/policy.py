@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """A policy is what your organisation considers acceptable. The engine has
 no opinion; the policy does. It is YAML with a version and a hash, and the
 hash goes into every record it decides."""

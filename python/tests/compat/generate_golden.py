@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Produce the 3.1 compatibility golden for the numeral channel.
 
 Run with groundlens **3.1** on the path (the archived tag), never with 4.0:

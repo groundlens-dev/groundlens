@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Turning a floor into a threshold -- on your data, with the cost shown.
 
 This library ships no threshold. This function is how you get one, and it is

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Write the two example notebooks under examples/notebooks/.
 
 Kept as a script so the notebooks can be regenerated without a notebook

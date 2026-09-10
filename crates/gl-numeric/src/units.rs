@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Units and dimensions with exact conversion factors.
 //!
 //! A conversion is `base = (value * num + offset_num) / den`, all in

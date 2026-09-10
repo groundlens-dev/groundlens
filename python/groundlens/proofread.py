@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """``proofread()``: the groundlens 3.x API, kept.
 
 Same signature, same :class:`Proofread` and :class:`Anchor` types, same

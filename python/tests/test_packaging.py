@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """The product requirements, as tests: no dependencies, no network, a CLI
 that works, a report that can be recomputed."""
 

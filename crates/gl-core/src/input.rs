@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! What gets verified.
 //!
 //! The engine never sees "an answer". It sees a set of [`Claim`]s, each one an

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! `groundlens._engine`. Every function takes and returns plain strings
 //! (JSON, YAML, hex) so the extension ABI is trivially stable and the Python
 //! layer owns the ergonomics. No function here opens a network connection.

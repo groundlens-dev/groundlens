@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """A bundle is everything a verification needs, in one directory, with
 checksums: models, tokenizers, calibrations, rules, policies.
 

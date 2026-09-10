@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The one pipeline. The CLI, the Python package and any future binding call
 //! this and nothing else, so there is exactly one implementation of
 //! "verify an answer under a policy and seal the record".

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Built-in verifiers.
 //!
 //! | id                    | kind      | determinism  | status in 4.0 |

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! The reference encoder: an ONNX transformer run by tract (pure Rust),
 //! tokenised by HF `tokenizers` with the pure-Rust regex backend.
 //!

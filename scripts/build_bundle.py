@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Build the `base` bundle: multilingual-e5-small (f32) for the lexical channel.
 
 The model and tokenizer are the ONNX export published by the model authors

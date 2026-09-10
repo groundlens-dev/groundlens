@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 //! Symbolic rules. Logic the organisation writes, not the engine.
 //!
 //! A rule looks at claims (kind, attributes, text) and at the answer, and
