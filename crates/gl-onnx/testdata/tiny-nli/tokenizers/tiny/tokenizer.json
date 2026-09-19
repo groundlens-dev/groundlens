@@ -1,0 +1,341 @@
+{
+  "version": "1.0",
+  "truncation": null,
+  "padding": null,
+  "added_tokens": [
+    {
+      "id": 0,
+      "content": "[PAD]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 1,
+      "content": "[UNK]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 2,
+      "content": "[CLS]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 3,
+      "content": "[SEP]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    }
+  ],
+  "normalizer": {
+    "type": "Sequence",
+    "normalizers": [
+      {
+        "type": "NFKC"
+      },
+      {
+        "type": "Lowercase"
+      }
+    ]
+  },
+  "pre_tokenizer": {
+    "type": "BertPreTokenizer"
+  },
+  "post_processor": {
+    "type": "TemplateProcessing",
+    "single": [
+      {
+        "SpecialToken": {
+          "id": "[CLS]",
+          "type_id": 0
+        }
+      },
+      {
+        "Sequence": {
+          "id": "A",
+          "type_id": 0
+        }
+      },
+      {
+        "SpecialToken": {
+          "id": "[SEP]",
+          "type_id": 0
+        }
+      }
+    ],
+    "pair": [
+      {
+        "SpecialToken": {
+          "id": "[CLS]",
+          "type_id": 0
+        }
+      },
+      {
+        "Sequence": {
+          "id": "A",
+          "type_id": 0
+        }
+      },
+      {
+        "SpecialToken": {
+          "id": "[SEP]",
+          "type_id": 0
+        }
+      },
+      {
+        "Sequence": {
+          "id": "B",
+          "type_id": 1
+        }
+      },
+      {
+        "SpecialToken": {
+          "id": "[SEP]",
+          "type_id": 1
+        }
+      }
+    ],
+    "special_tokens": {
+      "[CLS]": {
+        "id": "[CLS]",
+        "ids": [
+          2
+        ],
+        "tokens": [
+          "[CLS]"
+        ]
+      },
+      "[SEP]": {
+        "id": "[SEP]",
+        "ids": [
+          3
+        ],
+        "tokens": [
+          "[SEP]"
+        ]
+      }
+    }
+  },
+  "decoder": null,
+  "model": {
+    "type": "WordPiece",
+    "unk_token": "[UNK]",
+    "continuing_subword_prefix": "##",
+    "max_input_chars_per_word": 100,
+    "vocab": {
+      "[PAD]": 0,
+      "[UNK]": 1,
+      "[CLS]": 2,
+      "[SEP]": 3,
+      "'": 4,
+      ",": 5,
+      ".": 6,
+      "0": 7,
+      "1": 8,
+      "2": 9,
+      "3": 10,
+      "4": 11,
+      "5": 12,
+      "7": 13,
+      "9": 14,
+      "a": 15,
+      "b": 16,
+      "c": 17,
+      "d": 18,
+      "e": 19,
+      "f": 20,
+      "g": 21,
+      "h": 22,
+      "i": 23,
+      "l": 24,
+      "m": 25,
+      "n": 26,
+      "o": 27,
+      "p": 28,
+      "r": 29,
+      "s": 30,
+      "t": 31,
+      "u": 32,
+      "v": 33,
+      "w": 34,
+      "ä": 35,
+      "##t": 36,
+      "##n": 37,
+      "##o": 38,
+      "##r": 39,
+      "##a": 40,
+      "##c": 41,
+      "##u": 42,
+      "##f": 43,
+      "##s": 44,
+      "##g": 45,
+      "##e": 46,
+      "##l": 47,
+      "##i": 48,
+      "##0": 49,
+      "##h": 50,
+      "##7": 51,
+      "##d": 52,
+      "##2": 53,
+      "##4": 54,
+      "##5": 55,
+      "##ä": 56,
+      "##v": 57,
+      "##w": 58,
+      "##m": 59,
+      "##on": 60,
+      "##ur": 61,
+      "##re": 62,
+      "##ll": 63,
+      "00": 64,
+      "10": 65,
+      "eur": 66,
+      "##os": 67,
+      "000": 68,
+      "37": 69,
+      "35": 70,
+      "in": 71,
+      "mi": 72,
+      "##ta": 73,
+      "##ar": 74,
+      "##en": 75,
+      "20": 76,
+      "at": 77,
+      "do": 78,
+      "fa": 79,
+      "la": 80,
+      "re": 81,
+      "to": 82,
+      "th": 83,
+      "##tur": 84,
+      "##ci": 85,
+      "##ch": 86,
+      "##un": 87,
+      "##uf": 88,
+      "##ff": 89,
+      "##er": 90,
+      "##24": 91,
+      "##ont": 92,
+      "##res": 93,
+      "##lli": 94,
+      "##llar": 95,
+      "euro": 96,
+      "euros": 97,
+      "2024": 98,
+      "dollar": 99,
+      "the": 100,
+      "##tura": 101,
+      "dollars": 102,
+      "24": 103,
+      "90": 104,
+      "as": 105,
+      "am": 106,
+      "auf": 107,
+      "aff": 108,
+      "be": 109,
+      "bi": 110,
+      "ch": 111,
+      "cre": 112,
+      "cont": 113,
+      "di": 114,
+      "en": 115,
+      "fo": 116,
+      "gre": 117,
+      "ha": 118,
+      "is": 119,
+      "le": 120,
+      "los": 121,
+      "mont": 122,
+      "per": 123,
+      "run": 124,
+      "si": 125,
+      "##te": 126,
+      "##ttura": 127,
+      "##nt": 128,
+      "##nun": 129,
+      "##oi": 130,
+      "##ra": 131,
+      "##ai": 132,
+      "##ct": 133,
+      "##ce": 134,
+      "##cen": 135,
+      "##ctura": 136,
+      "##ue": 137,
+      "##sta": 138,
+      "##gres": 139,
+      "##es": 140,
+      "##lä": 141,
+      "##iff": 142,
+      "##int": 143,
+      "##hs": 144,
+      "##ds": 145,
+      "##de": 146,
+      "##ven": 147,
+      "##voi": 148,
+      "##mon": 149,
+      "##ones": 150,
+      "##llones": 151,
+      "ingres": 152,
+      "invoi": 153,
+      "mil": 154,
+      "milli": 155,
+      "millones": 156,
+      "##tal": 157,
+      "##ards": 158,
+      "##ende": 159,
+      "atte": 160,
+      "fattura": 161,
+      "factura": 162,
+      "rech": 163,
+      "reven": 164,
+      "total": 165,
+      "##cier": 166,
+      "##ciende": 167,
+      "##uft": 168,
+      "##llion": 169,
+      "asciende": 170,
+      "ammon": 171,
+      "affai": 172,
+      "belä": 173,
+      "billion": 174,
+      "chiff": 175,
+      "crecier": 176,
+      "contra": 177,
+      "die": 178,
+      "for": 179,
+      "grew": 180,
+      "hasta": 181,
+      "months": 182,
+      "percen": 183,
+      "runs": 184,
+      "sich": 185,
+      "##nung": 186,
+      "ingresos": 187,
+      "invoice": 188,
+      "milliards": 189,
+      "atteint": 190,
+      "rechnung": 191,
+      "revenue": 192,
+      "ammonta": 193,
+      "affaires": 194,
+      "beläuft": 195,
+      "chiffre": 196,
+      "crecieron": 197,
+      "contract": 198,
+      "percent": 199
+    }
+  }
+}
