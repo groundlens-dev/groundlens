@@ -30,14 +30,18 @@ impl Quantity {
     }
 
     /// Base-unit value of one reading as an exact fraction `(num, den)`.
-    fn canonical(&self, reading: Decimal) -> (Decimal, Decimal) {
-        (reading * self.unit.num + self.unit.offset_num, self.unit.den)
+    /// `None` if the conversion overflows `Decimal`: an adversarial input can
+    /// pair a huge scale word with a large unit factor, and a verifier must
+    /// return "not comparable", never panic.
+    fn canonical(&self, reading: Decimal) -> Option<(Decimal, Decimal)> {
+        let num = reading.checked_mul(self.unit.num)?.checked_add(self.unit.offset_num)?;
+        Some((num, self.unit.den))
     }
 
     /// Approximate base value, only for distances and rounding, never for
     /// equality.
     fn approx_base(&self, reading: Decimal) -> Option<Decimal> {
-        let (n, d) = self.canonical(reading);
+        let (n, d) = self.canonical(reading)?;
         n.checked_div(d)
     }
 
@@ -146,18 +150,26 @@ pub fn compare(answer: &Quantity, source: &Quantity, options: MatchOptions) -> M
             // the answer's primary reading only, as groundlens 3.x did, so an
             // ambiguous answer points at the number a digit was dropped from.
             let primary = std::ptr::eq(a, &answer.readings[0]);
-            let (an, ad) = answer.canonical(*a);
-            let (sn, sd) = source.canonical(*s);
-            if same_dimension {
-                if an * sd == sn * ad {
-                    return Match::Exact;
-                }
-            } else {
-                // percent pair: compare a/100 (if a is percent) with s.
-                let an = an * scale_for(answer);
-                let sn = sn * scale_for(source);
-                if an * sd == sn * ad {
-                    return Match::PercentAsFraction;
+            // Cross-multiplied equality, all checked: an overflow means the two
+            // readings cannot be shown equal here, not that the engine panics.
+            if let (Some((an, ad)), Some((sn, sd))) = (answer.canonical(*a), source.canonical(*s)) {
+                if same_dimension {
+                    if let (Some(l), Some(r)) = (an.checked_mul(sd), sn.checked_mul(ad)) {
+                        if l == r {
+                            return Match::Exact;
+                        }
+                    }
+                } else {
+                    // percent pair: compare a/100 (if a is percent) with s.
+                    if let (Some(an), Some(sn)) =
+                        (an.checked_mul(scale_for(answer)), sn.checked_mul(scale_for(source)))
+                    {
+                        if let (Some(l), Some(r)) = (an.checked_mul(sd), sn.checked_mul(ad)) {
+                            if l == r {
+                                return Match::PercentAsFraction;
+                            }
+                        }
+                    }
                 }
             }
             if !primary {
@@ -165,9 +177,10 @@ pub fn compare(answer: &Quantity, source: &Quantity, options: MatchOptions) -> M
             }
             if let (Some(ab), Some(sb)) = (answer.approx_base(*a), source.approx_base(*s)) {
                 let scale = ab.abs().max(sb.abs()).max(Decimal::ONE);
-                let distance = (ab - sb).abs() / scale;
-                if best_distance.is_none_or(|b| distance < b) {
-                    best_distance = Some(distance);
+                if let Some(distance) = ab.checked_sub(sb).and_then(|d| d.abs().checked_div(scale)) {
+                    if best_distance.is_none_or(|b| distance < b) {
+                        best_distance = Some(distance);
+                    }
                 }
             }
         }
@@ -396,7 +409,13 @@ fn find_quantities_with(text: &str, profile: &LocaleProfile, attach_units: bool)
         }
 
         let factor = pow10(exponent);
-        let readings = numeral.readings.iter().map(|r| *r * factor).collect();
+        // A scale word can push a numeral past `Decimal`'s range (`9…9
+        // trillones`). Drop the readings that overflow and record it; a
+        // quantity with no representable reading is simply not comparable.
+        let readings: Vec<Decimal> = numeral.readings.iter().filter_map(|r| r.checked_mul(factor)).collect();
+        if readings.len() < numeral.readings.len() {
+            notes.push("scale_overflow");
+        }
         out.push(Quantity {
             span,
             readings,
