@@ -26,6 +26,9 @@ use serde::{Deserialize, Serialize};
 use gl_core::canonical::content_hash;
 use gl_core::{Error, Result};
 
+pub mod log;
+pub use log::{RunLog, SealedEvent};
+
 // ---------------------------------------------------------------- identifiers
 
 /// Stable identifier of a run. Opaque string; a producer picks the scheme
