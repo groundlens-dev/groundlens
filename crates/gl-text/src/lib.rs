@@ -25,6 +25,13 @@ pub fn normalise(text: &str) -> String {
     // first and restored as one canonical U+202F afterwards. This is one
     // step further than groundlens 3.x, which lost U+00A0 to NFKC.
     const PARK: char = '\u{E000}';
+    // Delete invisibles *before* NFKC. A format character can sit between a
+    // base and a combining mark and block their composition (a soft hyphen
+    // between `x` and a combining diaeresis). If we removed it after NFKC, the
+    // composition it was blocking would only happen on the next pass, and
+    // normalisation would not be idempotent. Removing it first makes the one
+    // NFKC pass final.
+    let text: String = text.chars().filter(|c| !INVISIBLE.contains(c)).collect();
     let text: String = text
         .chars()
         .map(|c| match c {
@@ -35,9 +42,6 @@ pub fn normalise(text: &str) -> String {
     let text: String = text.nfkc().collect();
     let mut out = String::with_capacity(text.len());
     for ch in text.chars() {
-        if INVISIBLE.contains(&ch) {
-            continue;
-        }
         out.push(if ch == PARK { '\u{202F}' } else { ch });
     }
     let horizontal = re(r"[ \t\x0B\x0C]+");
@@ -198,6 +202,17 @@ mod tests {
         let w = words("el total de la factura", "es");
         assert!(w[0].stopword && w[2].stopword && w[3].stopword);
         assert!(!w[1].stopword);
+    }
+
+    #[test]
+    fn idempotent_when_a_format_char_blocked_a_composition() {
+        // cargo-fuzz regression: a soft hyphen (an invisible) sat between `x`
+        // and a combining diaeresis and blocked their NFKC composition. When
+        // invisibles were deleted after NFKC, the composition surfaced only on
+        // the next pass and normalise was not idempotent.
+        let once = normalise("x\u{00AD}\u{0308}y");
+        assert_eq!(once, "\u{1E8D}y"); // composed x-diaeresis, then y
+        assert!(is_normalised(&once));
     }
 
     #[test]
