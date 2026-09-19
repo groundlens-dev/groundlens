@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "gl-runtime"
+description = "Execution-verification contracts for GroundLens: runs, events and the identities they reference. Pure data, no I/O and no network."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+gl-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
