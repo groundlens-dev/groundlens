@@ -19,6 +19,8 @@
 pub mod extract;
 #[cfg(feature = "lexical")]
 pub mod lexical;
+#[cfg(feature = "nli")]
+pub mod nli;
 pub mod numeric;
 pub mod rules;
 
@@ -28,5 +30,9 @@ pub use lexical::LexicalVerifier;
 
 /// Id of the lexical verifier, known even when the feature is off.
 pub const LEXICAL_ID: &str = "groundlens.lexical";
+#[cfg(feature = "nli")]
+pub use nli::NliVerifier;
+/// Id of the NLI verifier, known even when the feature is off.
+pub const NLI_ID: &str = "nli";
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};

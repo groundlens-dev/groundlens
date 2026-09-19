@@ -1,0 +1,10 @@
+{
+  "labels": [
+    "entailment",
+    "neutral",
+    "contradiction"
+  ],
+  "max_tokens": 32,
+  "model": "models/tiny.onnx",
+  "tokenizer": "tokenizers/tiny/tokenizer.json"
+}
