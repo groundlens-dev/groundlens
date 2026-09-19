@@ -26,7 +26,9 @@ use serde::{Deserialize, Serialize};
 use gl_core::canonical::content_hash;
 use gl_core::{Error, Result};
 
+pub mod gate;
 pub mod log;
+pub use gate::{ExecutionPolicy, GateEffect, GateOutcome, Match, Rule, RunGate};
 pub use log::{RunLog, SealedEvent};
 
 // ---------------------------------------------------------------- identifiers
@@ -133,7 +135,9 @@ pub struct ArtifactRef {
     pub sha256: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+/// Variants are ordered `Low < Medium < High`, which the gate relies on for
+/// "risk at or above this class".
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum RiskClass {
     Low,
