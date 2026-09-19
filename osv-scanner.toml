@@ -1,0 +1,14 @@
+# Suppressions for the OpenSSF Scorecard / osv-scanner vulnerability check.
+#
+# Each entry documents a finding that has no action available to us, so the
+# scanner stops reporting it. Review this file whenever dependencies change.
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0436"
+# `paste` is unmaintained, which is a maintenance advisory, not a security
+# vulnerability: there is no exploit and no fixed version to upgrade to. It
+# reaches the tree only as a transitive dependency of huggingface `tokenizers`
+# (the tokenizer behind the lexical/ML verifiers). No released `tokenizers`
+# has dropped `paste` yet; it is expected to go with the tokenizers v1 line.
+# Revisit and remove this entry once `tokenizers` no longer pulls `paste`.
+reason = "paste is unmaintained (not a vulnerability); transitive via tokenizers; no fixed version available"
