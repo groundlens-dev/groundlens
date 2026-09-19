@@ -10,6 +10,7 @@ members = [
     "crates/gl-bundle",
     "crates/gl-onnx",
     "crates/gl-engine",
+    "crates/gl-runtime",
     "crates/gl-python",
     "crates/gl-cli",
 ]
@@ -34,6 +35,7 @@ gl-record = { path = "crates/gl-record" }
 gl-bundle = { path = "crates/gl-bundle" }
 gl-onnx = { path = "crates/gl-onnx" }
 gl-engine = { path = "crates/gl-engine" }
+gl-runtime = { path = "crates/gl-runtime" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
