@@ -13,7 +13,9 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 pub const MISSING_BASE: &str = "the policy requires groundlens.lexical, which needs the base bundle (multilingual-e5-small). Install it once with `groundlens bundle pull base`, or point GROUNDLENS_BUNDLE_DIR at a bundle directory";
 
-/// A verified bundle with its encoder loaded.
+pub const MISSING_NLI: &str = "the policy requires groundlens.nli, which needs a bundle carrying an entailment model. Use a bundle whose manifest declares an `entailment` model, or point GROUNDLENS_BUNDLE_DIR at one";
+
+/// A verified bundle with its models loaded.
 pub struct Loaded {
     pub root: PathBuf,
     pub name: String,
@@ -22,6 +24,9 @@ pub struct Loaded {
     pub model_hash: String,
     #[cfg(feature = "lexical")]
     pub encoder: Arc<dyn gl_onnx::Encoder>,
+    /// The entailment model and its hash, when the bundle declares one.
+    #[cfg(feature = "nli")]
+    pub entailment: Option<(Arc<dyn gl_onnx::EntailmentModel>, String)>,
 }
 
 fn cache() -> &'static Mutex<HashMap<PathBuf, Arc<Loaded>>> {
@@ -66,27 +71,33 @@ pub fn load(spec: Option<&str>) -> Result<Option<Arc<Loaded>>> {
     Ok(Some(loaded))
 }
 
-#[cfg(feature = "lexical")]
 fn build(bundle: Bundle) -> Result<Loaded> {
-    let (encoder, model_hash) = gl_onnx::encoder_from_bundle(&bundle, "default")?;
+    #[cfg(feature = "lexical")]
+    let (encoder, model_hash) = {
+        let (enc, hash) = gl_onnx::encoder_from_bundle(&bundle, "default")?;
+        (Arc::new(enc) as Arc<dyn gl_onnx::Encoder>, hash)
+    };
+    #[cfg(not(feature = "lexical"))]
+    let model_hash = String::new();
+
+    #[cfg(feature = "nli")]
+    let entailment = if bundle.manifest.entailment.contains_key("default") {
+        let (model, hash) = gl_onnx::entailment_from_bundle(&bundle, "default")?;
+        Some((Arc::new(model) as Arc<dyn gl_onnx::EntailmentModel>, hash))
+    } else {
+        None
+    };
+
     Ok(Loaded {
         root: bundle.root.clone(),
         name: bundle.manifest.name.clone(),
         version: bundle.manifest.version.clone(),
         manifest_hash: bundle.manifest_hash.clone(),
         model_hash,
-        encoder: Arc::new(encoder),
-    })
-}
-
-#[cfg(not(feature = "lexical"))]
-fn build(bundle: Bundle) -> Result<Loaded> {
-    Ok(Loaded {
-        root: bundle.root.clone(),
-        name: bundle.manifest.name.clone(),
-        version: bundle.manifest.version.clone(),
-        manifest_hash: bundle.manifest_hash.clone(),
-        model_hash: String::new(),
+        #[cfg(feature = "lexical")]
+        encoder,
+        #[cfg(feature = "nli")]
+        entailment,
     })
 }
 

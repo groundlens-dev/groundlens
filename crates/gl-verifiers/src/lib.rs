@@ -33,6 +33,6 @@ pub const LEXICAL_ID: &str = "groundlens.lexical";
 #[cfg(feature = "nli")]
 pub use nli::NliVerifier;
 /// Id of the NLI verifier, known even when the feature is off.
-pub const NLI_ID: &str = "nli";
+pub const NLI_ID: &str = "groundlens.nli";
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};
