@@ -2,7 +2,7 @@
 
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
 
-## The verification and evidence layer for AI systems and agents.
+## Execution verification runtime for AI systems and agents
 
 <br>
 
@@ -26,6 +26,10 @@
 
 ## What GroundLens is
 
+GroundLens is an execution verification runtime for AI systems and agents. It turns observable AI execution into deterministic, policy-governed evidence that can be independently verified.
+
+GroundLens provides a vendor-neutral runtime and evidence protocol for observing AI executions, evaluating claims, tool calls, actions and outcomes against composable verifiers and policies, and producing signed, reproducible evidence records.
+
 AI systems, and increasingly agents, produce factual claims, recommendations and actions that an organisation is accountable for. When one of those outputs is later questioned, by a customer, a risk officer or an auditor, the organisation has to answer four things: was this specific output checked, with what, under which rules, and would the same check give the same result today. A score in a log cannot answer that. Your own application cannot vouch for itself.
 
 GroundLens is the layer that answers it. You give it an AI output and, when they exist, the documents it was supposed to rest on. It runs independent checks on that output, applies the rules your organisation wrote, returns `PASS`, `REVIEW` or `FAIL`, and seals the whole check into a signed record that a third party can verify offline, without trusting you. It runs locally, needs no knowledge of how your system is built, and treats every check as evidence someone can inspect rather than a number they have to believe.
@@ -34,7 +38,7 @@ GroundLens is the layer that answers it. You give it an AI output and, when they
 
 | Best for teams | Standout |
 |---|---|
-| Shipping AI answers and agents into regulated or high-stakes workflows who need proof, not a score, that each output was checked. | Several verification methods under one contract, with or without source documents (exact numeric and rule checks, lexical grounding, geometric indices, an optional LLM judge); policies in YAML that decide instead of hard-coded thresholds; signed, hash-chained records verifiable offline; no network, no runtime dependencies. |
+| Shipping AI answers and agents into regulated or high-stakes workflows who need proof, not a score, that each output and each execution was checked. | Answers and executions verified under one contract; several verification methods (exact numeric and rule checks, lexical grounding, geometric indices, an optional LLM judge); an execution policy that gates tool calls and actions `ALLOW` / `REVIEW` / `DENY`; policies in YAML that decide instead of hard-coded thresholds; signed, hash-chained records verifiable offline; the engine and runtime never touch the network; no runtime dependencies. |
 
 <br>
 
@@ -48,7 +52,26 @@ GroundLens sits beside your AI system, not inside it. It observes what the syste
 
 </div>
 
-Today the shipped verifiers check answers and the claims inside them: numbers exactly, words by anchoring them to the sources, and your own symbolic rules. The same contract, an input that produces evidence, a policy that decides and a signed record that captures both, is designed to extend to the steps an agent takes: which tool it called, with what arguments, whether an action required human approval, what it read and wrote. That extension is the near-term direction, tracked in the [roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md). What ships in `pip install` today is described exactly below, with nothing marked as available that is not.
+GroundLens verifies two things under one contract. It verifies an **answer** and the claims inside it: numbers exactly, words by anchoring them to the sources, and your own symbolic rules. And it verifies an **execution**: it observes what an agent did, step by step, as it drives its tools. A model call, a retrieval, a tool request and its result, an action with side effects, a human approval. Each step becomes an event in an ordered, hash-linked log. An execution policy decides `ALLOW`, `REVIEW` or `DENY` for each tool call and action, and the whole run is sealed into a signed record, the same way an answer is.
+
+The runtime reads a Model Context Protocol (MCP) execution: the JSON-RPC messages an agent already exchanges with its tools. It records hashes of the arguments and results, never the content itself, so the record is safe to keep in a regulated place while still being independently verifiable.
+
+```bash
+glv run verify \
+  --trace examples/run/trace.jsonl \
+  --policy examples/run/execution-policy.yaml \
+  --run-id run_demo --system invoice-agent --log runs.jsonl
+```
+
+```python
+from groundlens import verify_run
+
+record = verify_run(trace, policy, run_id="run_demo", system="invoice-agent")
+record.gate        # 'DENY'  — the agent called a tool the policy forbids
+record.breaches    # actions executed against the policy, if any
+```
+
+Run this on the shipped example and the agent calls `shell.exec`, which the policy denies, so the run's `gate` is `DENY`. `glv run check` verifies a log of run records offline. See [`examples/run`](examples/run).
 
 <br>
 
@@ -70,15 +93,17 @@ The whole chain becomes a record. Input hashes, the verifiers and model hashes t
 
 <br>
 
-> GroundLens is AI system agnostic. It works on outputs and evidence, locally, with no network access, so independent verification is possible even in sensitive environments.
+> GroundLens is AI system agnostic. It works on outputs, executions and evidence, locally. The engine and the runtime never touch the network, so independent verification is possible even in sensitive environments. The one network operation in the whole project is a single explicit command, `bundle pull`, which fetches the optional lexical model and nothing else.
 
 <br>
 
 ## Engine
 
-GroundLens engine is a Rust library wrapped for Python, with no runtime dependencies and no network access of any kind. It contains the claim extractor, the exact **numeric** verifier (numbers, currencies, percentages, physical units, in several locales), the symbolic **rules** verifier, the **policy engine** with two bundled policies, and the signed **evidence records**.
+The GroundLens engine and runtime are a Rust library wrapped for Python, with no runtime dependencies and no network access of any kind. They contain the claim extractor, the exact **numeric** verifier (numbers, currencies, percentages, physical units, in several locales), the symbolic **rules** verifier, the **policy engine** with two bundled policies, the signed **evidence records**, and the **execution runtime**: the event log, the execution policy gate and the MCP adapter.
 
-The engine is a Rust workspace under `crates/`: contracts and hashing (`gl-core`), text normalisation (`gl-text`), numerals and units (`gl-numeric`), the verifiers, the policy engine, records, bundles, the model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no native library) and the one pipeline everything calls (`gl-engine`). The Python package is a thin binding over it; `glv` is the same engine as a binary. No engine crate depends on an HTTP or TLS library, and a CI job fails the build if one ever does.
+It is a Rust workspace under `crates/`: contracts and hashing (`gl-core`), text normalisation (`gl-text`), numerals and units (`gl-numeric`), the verifiers, the policy engine, records, bundles, the model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no native library), the execution runtime and its gate (`gl-runtime`), the MCP adapter (`gl-mcp`), and the one pipeline everything calls (`gl-engine`). The Python package is a thin binding over it; `glv` is the same engine as a binary.
+
+The distinction matters for a regulated deployment: **no engine or runtime crate depends on an HTTP or TLS library, and a CI job fails the build if one ever does.** Network belongs only to the command line, in one explicit artefact-acquisition step, `bundle pull`. Verification never reaches the network.
 
 ```bash
 cargo build --release                 # engine and glv
@@ -190,7 +215,7 @@ groundlens policy lint policies/eu_ai_act_high_risk_v1.yaml
 groundlens bundle status                      # is the base bundle installed, where, which hash
 ```
 
-Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary `glv` exposes the same commands.
+Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary `glv` exposes the same commands, and adds execution verification: `glv run verify` seals an agent run (exit `0`/`3`/`1` on `ALLOW`/`REVIEW`/`DENY`) and `glv run check` verifies a log of run records offline. From Python, `groundlens.verify_run` does the same.
 
 <br>
 

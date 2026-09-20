@@ -8,6 +8,8 @@ currencies, percentages, physical units); symbolic rules verifier; lexical verif
 
 - [x] 4.1 · October 2026 · Rust distribution and the first ML verifiers. Crates published on crates.io under `groundlens-*` names with a `groundlens` facade crate and `cargo install glv`; `nli.*` verifier (entailment on ONNX) and `semantic.*` verifier (sentence similarity), both on the same model host as the lexical channel; `base` bundle v2 carrying their models; policy thresholds and guard bands exercised by real statistical verifiers.
 
+- [x] 5.0 · the execution verification runtime. GroundLens verifies an execution, not only an answer: a `VerificationRun` recorded as an ordered, hash-chained event log (model calls, retrievals, tool requests and results, actions, human approvals), in `gl-runtime`; an execution policy **gate** that decides `ALLOW` / `REVIEW` / `DENY` per tool call and action, with a whole-run audit that flags an action executed against the policy or without a required approval; signed **run records** with the same Ed25519, offline-verifiable guarantee as an answer record, in `gl-record`; the **MCP adapter** (`gl-mcp`) that turns a real Model Context Protocol trace into a run, recording hashes not content; and the end-to-end surface, `glv run verify` / `glv run check`, `groundlens.verify_run`, and a runnable example under `examples/run`. This is additive: an answer verification is a run with one claim, so the 4.x pipeline is unchanged.
+
 - [ ] 4.2 · November 2026 · geometry, calibration and your own verifiers. `sgi` and `dgi` verifiers (the geometric grounding indices from our papers) as optional verifiers; `groundlens calibrate` over a labelled log of records, producing a threshold per verifier with its false positive rate at the target recall; user-defined verifiers in Python (a small interface, declared determinism class, recorded like any built-in); adapters that run existing detectors (Vectara HHEM, LettuceDetect) as verifiers.
 
 - [ ] 4.3 · December 2026 · the public benchmark. A public benchmark harness and report, "How existing AI
@@ -23,10 +25,16 @@ templates per regulatory framework beyond the AI Act mapping shipped in
 4.0; private-deployment guidance.
 
 
+- [ ] the runtime as a live path, not only a recorder: an MCP proxy or gateway
+that gates tool calls and actions in flight (the 5.0 adapter records and audits
+a trace; this stands in the execution path and enforces); signer identity and
+trust for run records; more execution-event sources beyond MCP.
+
 - [ ] HTTP and WASM bindings of the same engine; LLM-as-a-judge as a verifier
 with recorded model, prompt hash and settings; bundles per language or
-sector; an MCP server over the engine (the 3.x server is not in 4.0);
-record attestation and transparency-log integration.
+sector; an MCP **server** that exposes verification as a tool an agent can call
+(distinct from the 5.0 adapter, which observes MCP rather than serving it; the
+3.x server is not in 4.x); record attestation and transparency-log integration.
 
 <br>
 
