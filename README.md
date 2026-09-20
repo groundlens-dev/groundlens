@@ -9,6 +9,7 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
+[![Docs](https://readthedocs.org/projects/groundlens/badge/?version=latest)](https://groundlens.readthedocs.io/en/latest/)
 [![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
 [![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
@@ -18,7 +19,7 @@
 
 <br>
 
-[What it is](#what-groundlens-is) · [Architecture](#architecture) · [How it works](#how-it-works) · [Engine](#engine) · [Runtime](#runtime) · [Records](#evidence-records) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
+[What it is](#what-groundlens-is) · [Architecture](#architecture) · [How it works](#how-it-works) · [Engine](#engine) · [Runtime](#runtime) · [Records](#evidence-records) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [Docs](https://groundlens.readthedocs.io) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
 
 </div>
 
