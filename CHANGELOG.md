@@ -5,6 +5,43 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
+## [Unreleased]
+
+The execution verification runtime. GroundLens now verifies an *execution*,
+not only an answer, under the same contract: an input produces evidence, a
+policy decides, a signed record captures both. An answer verification is a run
+with one claim, so nothing in 4.x changes.
+
+### Added
+
+- **`gl-runtime`**, the execution contracts: a `VerificationRun` recorded as an
+  ordered, hash-chained event log (`RunLog`) of model calls, retrievals, tool
+  requests and results, state reads and writes, human approvals, actions and
+  policy decisions. Pure data, no I/O, no network. What a run stores of the
+  world is hashes, not content.
+- **The gate** (`gl-runtime::gate`): an `ExecutionPolicy` of ordered rules that
+  decides `ALLOW` / `REVIEW` / `DENY` for a tool call or an action
+  (first match wins, with a default). `audit_run` rolls a finished run up to its
+  strictest outcome and flags breaches: an action executed under a `DENY` rule,
+  or one that needed a human approval that never came.
+- **Run records** (`gl-record::run`): `seal_run` seals a run into a signed,
+  hash-chained record with the same Ed25519, offline-verifiable guarantee as an
+  answer record; `verify_run_record`, `verify_run_chain`,
+  `verify_run_against_record`. The signing envelope is now shared by both record
+  kinds with no change to 4.x answer records.
+- **The MCP adapter** (`gl-mcp`): turns a real Model Context Protocol execution
+  into a run. `McpRecorder` ingests JSON-RPC messages off a transport
+  (`tools/call` and its result, `sampling/createMessage`), correlates request
+  and response, and records hashes of arguments and results, never the content.
+- **`gl-engine::run::verify_run`**: the one pipeline for a run
+  (trace → event log → execution policy → signed record), next to `verify()`,
+  called by every binding.
+- **`glv run verify`** and **`glv run check`** on the command line, and
+  **`groundlens.verify_run`** / **`groundlens.RunRecord`** in Python. Exit codes
+  `0` / `3` / `1` on `ALLOW` / `REVIEW` / `DENY`.
+- A runnable example under `examples/run` (an MCP trace, an execution policy and
+  a README).
+
 ## [4.0.0] - 2026-09-10
 
 GroundLens 4 is a new engine. The Python package name, the `proofread()`
