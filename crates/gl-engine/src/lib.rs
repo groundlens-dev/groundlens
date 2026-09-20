@@ -37,7 +37,7 @@ description: >
 verifiers:
   required: [groundlens.numeric]
   recommended: [groundlens.rules.*]
-  optional: [groundlens.lexical, nli.*, semantic.*, sgi, dgi]
+  optional: [groundlens.lexical, groundlens.nli, semantic.*, sgi, dgi]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
@@ -45,7 +45,7 @@ decision:
   any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
   unresolved_claims: REVIEW
   conflicts: REVIEW
-  tolerate_unresolved_kinds: [word]
+  tolerate_unresolved_kinds: [word, statement]
 "#;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -142,12 +142,22 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
             bundle_hash = b.manifest_hash.clone();
             #[cfg(feature = "lexical")]
             verifiers.push(Box::new(gl_verifiers::LexicalVerifier::new(b.encoder.clone(), &b.model_hash)));
+            #[cfg(feature = "nli")]
+            if let Some((model, hash)) = &b.entailment {
+                verifiers.push(Box::new(gl_verifiers::NliVerifier::new(model.clone(), hash)));
+            }
         }
         None => {
             if policy.verifiers.required.iter().any(|r| r == gl_verifiers::LEXICAL_ID) {
                 return Err(gl_core::Error::InvalidInput(bundle::MISSING_BASE.into()));
             }
         }
+    }
+    #[cfg(feature = "nli")]
+    if policy.verifiers.required.iter().any(|r| r == gl_verifiers::NLI_ID)
+        && !verifiers.iter().any(|v| v.info().id == gl_verifiers::NLI_ID)
+    {
+        return Err(gl_core::Error::InvalidInput(bundle::MISSING_NLI.into()));
     }
     let mut infos: Vec<_> = verifiers.iter().map(|v| v.info().clone()).collect();
     for k in known_verifiers() {
@@ -237,6 +247,8 @@ pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
     let mut known = vec![NumericVerifier::default().info().clone()];
     #[cfg(feature = "lexical")]
     known.push(gl_verifiers::LexicalVerifier::info_without_model());
+    #[cfg(feature = "nli")]
+    known.push(gl_verifiers::NliVerifier::info_without_model());
     known
 }
 

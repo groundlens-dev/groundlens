@@ -75,7 +75,7 @@ pub use tract::{encoder_from_bundle, EncoderSpec, TractEncoder};
 #[cfg(feature = "runtime")]
 pub mod nli;
 #[cfg(feature = "runtime")]
-pub use nli::{EntailmentSpec, TractEntailment};
+pub use nli::{entailment_from_bundle, EntailmentSpec, TractEntailment};
 
 #[cfg(test)]
 mod tests {

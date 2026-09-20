@@ -21,7 +21,7 @@ use gl_core::{
 };
 use gl_onnx::EntailmentModel;
 
-pub const ID: &str = "nli";
+pub const ID: &str = "groundlens.nli";
 pub const VERSION: &str = "1.0.0";
 
 const REPRODUCIBLE: Determinism = Determinism::Reproducible { tolerance: Tolerance::FLOAT32_CPU };

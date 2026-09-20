@@ -16,26 +16,16 @@
 use std::path::Path;
 
 use gl_core::{Error, Result};
-use serde::{Deserialize, Serialize};
 use tokenizers::Tokenizer;
 use tract_onnx::prelude::*;
 
 use crate::EntailmentModel;
 
-type Model = std::sync::Arc<TypedRunnableModel>;
+/// How to load and read one entailment model, declared in the bundle manifest
+/// (parallel to [`EncoderSpec`](crate::tract::EncoderSpec)).
+pub use gl_bundle::EntailmentSpec;
 
-/// How to load and read one entailment model. Kept parallel to
-/// [`EncoderSpec`](crate::tract::EncoderSpec) so a bundle can name both.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EntailmentSpec {
-    pub model: String,
-    pub tokenizer: String,
-    pub max_tokens: usize,
-    /// The meaning of each output logit, in order. Must contain exactly
-    /// `entailment`, `neutral` and `contradiction`. MoritzLaurer's mnli-xnli
-    /// models use `[entailment, neutral, contradiction]`.
-    pub labels: Vec<String>,
-}
+type Model = std::sync::Arc<TypedRunnableModel>;
 
 pub struct TractEntailment {
     id: String,
@@ -172,6 +162,26 @@ impl EntailmentModel for TractEntailment {
         let (e, n, c) = self.order;
         Ok((p[e] as f32, p[n] as f32, p[c] as f32))
     }
+}
+
+/// Build the entailment model a bundle declares under `role` (`default` for the
+/// `groundlens.nli` verifier). The model hash comes from the manifest, which
+/// `Bundle::open` has already checked against the file, and becomes part of the
+/// model id, so every piece of evidence names the exact graph.
+pub fn entailment_from_bundle(bundle: &gl_bundle::Bundle, role: &str) -> Result<(TractEntailment, String)> {
+    let spec = bundle.manifest.entailment.get(role).ok_or_else(|| {
+        Error::Integrity(format!("bundle {} has no entailment model {role:?}", bundle.manifest.name))
+    })?;
+    let model_hash =
+        bundle.manifest.artefacts.get(&spec.model).map(|a| a.sha256.clone()).ok_or_else(|| {
+            Error::Integrity(format!("entailment model {} is not an artefact of the bundle", spec.model))
+        })?;
+    let name = std::path::Path::new(&spec.model)
+        .file_stem()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|| role.to_string());
+    let model = TractEntailment::load(&bundle.root, &name, spec, &model_hash)?;
+    Ok((model, model_hash))
 }
 
 #[cfg(test)]
