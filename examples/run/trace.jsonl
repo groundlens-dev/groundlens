@@ -1,0 +1,6 @@
+{"jsonrpc":"2.0","id":1,"method":"sampling/createMessage","params":{"messages":[{"role":"user","content":"look at the invoice and check the total"}]},"ts":"2026-09-20T10:00:00Z"}
+{"jsonrpc":"2.0","id":1,"result":{"model":"claude-x","role":"assistant","content":{"text":"the total is 10,000"}},"ts":"2026-09-20T10:00:01Z"}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"crm.lookup","arguments":{"account":42}},"ts":"2026-09-20T10:00:02Z"}
+{"jsonrpc":"2.0","id":2,"result":{"isError":false,"content":[{"type":"text","text":"ok"}]},"ts":"2026-09-20T10:00:03Z"}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"shell.exec","arguments":{"cmd":"rm -rf /"}},"ts":"2026-09-20T10:00:04Z"}
+{"jsonrpc":"2.0","id":3,"result":{"isError":true,"content":[{"type":"text","text":"blocked"}]},"ts":"2026-09-20T10:00:05Z"}

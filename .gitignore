@@ -1,8 +1,12 @@
 /target
 *.jsonl
+# but example traces are part of the repo
+!examples/**/*.jsonl
 signer.key
 .DS_Store
 .venv/
+# the built Python extension (maturin develop drops it in the source tree)
+python/groundlens/*.so
 
 # cargo-fuzz
 fuzz/target/

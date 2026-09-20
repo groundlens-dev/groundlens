@@ -33,6 +33,7 @@ from groundlens.calibrate import calibrate
 from groundlens.policy import Policy
 from groundlens.proofread import adaptive_k, as_evidence, proofread
 from groundlens.record import Record
+from groundlens.run import RunRecord, verify_run
 from groundlens.verify import verify
 
 __version__ = "4.0.0"
@@ -50,6 +51,7 @@ __all__ = [
     "Policy",
     "Proofread",
     "Record",
+    "RunRecord",
     "Span",
     "WindowEncoding",
     "__version__",
@@ -58,4 +60,5 @@ __all__ = [
     "calibrate",
     "proofread",
     "verify",
+    "verify_run",
 ]
