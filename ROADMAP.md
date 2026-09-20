@@ -8,7 +8,7 @@ Shipped is marked done. Everything unmarked is not built yet.
 
 - [x] Also in the released package: the `calibrate()` operating-point tool, which turns a labelled log into a per-verifier threshold and always returns its measured false-positive rate at 95 % recall alongside it.
 
-- [ ] **5.1** · Rust distribution and the first ML verifiers. Ship the `nli` entailment verifier in the wheel (the code has landed, behind a feature flag) and add a `semantic` sentence-similarity verifier, both on the model host the lexical channel already uses; a `base` bundle v2 carrying their models; policy thresholds and guard bands exercised by real statistical verifiers; publish the crates on crates.io (this needs a package name for the binary, since `glv` on crates.io is an unrelated project).
+- [ ] **5.1** · Rust distribution and the first ML verifiers. Ship the entailment model in a `base` bundle v2 (`groundlens.nli` is wired into the pipeline and runs whenever a bundle carries the model) and add a `semantic` sentence-similarity verifier, both on the model host the lexical channel already uses; policy thresholds and guard bands exercised by real statistical verifiers; publish the crates on crates.io (this needs a package name for the binary, since `glv` on crates.io is an unrelated project).
 
 - [ ] **5.2** · geometry and your own verifiers. `sgi` and `dgi` verifiers (the geometric grounding indices from our papers) as optional verifiers; user-defined verifiers in Python (a small interface, a declared determinism class, recorded like any built-in); adapters that run existing detectors (Vectara HHEM, LettuceDetect) as verifiers.
 
