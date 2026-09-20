@@ -76,8 +76,45 @@ enum Command {
         #[command(subcommand)]
         cmd: BundleCmd,
     },
+    /// Execution tools: verify a whole agent run, not one answer.
+    Run {
+        #[command(subcommand)]
+        cmd: RunCmd,
+    },
     /// Print a fresh Ed25519 signing seed (hex) to stdout.
     Keygen,
+}
+
+#[derive(Subcommand)]
+enum RunCmd {
+    /// Verify an MCP execution trace under an execution policy and seal a
+    /// signed run record. The trace is one JSON-RPC message per line (an MCP
+    /// stdio transport), each optionally carrying a top-level `ts`.
+    Verify {
+        /// The MCP trace, JSON Lines.
+        #[arg(long)]
+        trace: PathBuf,
+        /// The execution policy, YAML or JSON.
+        #[arg(long)]
+        policy: PathBuf,
+        #[arg(long = "run-id")]
+        run_id: String,
+        /// The deployed system this run belongs to.
+        #[arg(long)]
+        system: String,
+        #[arg(long = "system-version")]
+        system_version: Option<String>,
+        #[arg(long = "started-at")]
+        started_at: Option<String>,
+        /// Append the signed run record to this JSON Lines log.
+        #[arg(long)]
+        log: Option<PathBuf>,
+        /// 32-byte hex Ed25519 seed. A fresh ephemeral key is used if absent.
+        #[arg(long, env = "GLV_SIGNING_KEY")]
+        signing_key: Option<String>,
+    },
+    /// Verify a run-record JSON Lines log: every record and every link.
+    Check { path: PathBuf },
 }
 
 #[derive(Subcommand)]
@@ -333,6 +370,42 @@ fn run() -> anyhow_lite::Result<()> {
                 b.manifest_hash,
                 b.root.display()
             );
+        }
+        Command::Run {
+            cmd:
+                RunCmd::Verify { trace, policy, run_id, system, system_version, started_at, log, signing_key },
+        } => {
+            let req = gl_engine::RunVerifyRequest {
+                trace: read(&trace)?,
+                policy_json: load_rules_json(&policy)?,
+                run_id,
+                system_id: system,
+                system_version,
+                started_at,
+                signing_key_hex: signing_key,
+                previous_record_hash: match &log {
+                    Some(p) if p.exists() => {
+                        gl_record::run_records_from_jsonl(&read(p)?)?.last().map(|r| r.record_hash.clone())
+                    }
+                    _ => None,
+                },
+            };
+            let record = gl_engine::verify_run(&req)?;
+            if let Some(p) = log {
+                let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&p)?;
+                writeln!(f, "{}", gl_record::run_record_to_jsonl_line(&record)?)?;
+            }
+            println!("{}", serde_json::to_string_pretty(&record)?);
+            match record.content.gate {
+                gl_engine::gl_runtime::GateEffect::Deny => std::process::exit(1),
+                gl_engine::gl_runtime::GateEffect::Review => std::process::exit(3),
+                gl_engine::gl_runtime::GateEffect::Allow => {}
+            }
+        }
+        Command::Run { cmd: RunCmd::Check { path } } => {
+            let records = gl_record::run_records_from_jsonl(&read(&path)?)?;
+            gl_record::verify_run_chain(&records)?;
+            println!("ok  {} run records, chain intact, all signatures verify", records.len());
         }
         Command::Keygen => {
             let signer = RecordSigner::generate();

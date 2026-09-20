@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# An execution policy for glv run. Rules are tried in order; the first that
+# matches a tool call or an action decides. When none matches, `default`
+# applies. DENY stops the step, REVIEW holds it for a human, ALLOW lets it run.
+id: eu_high_risk_v1
+rules:
+  # A shell tool is never allowed, whatever server offers it.
+  - id: no-shell
+    match: tool
+    name: shell.exec
+    effect: DENY
+  # Any action at or above high risk needs a human approval.
+  - id: high-risk-needs-human
+    match: risk_at_least
+    risk: high
+    effect: REVIEW
+default: ALLOW

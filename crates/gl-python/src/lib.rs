@@ -22,6 +22,24 @@ fn verify_json(request_json: &str) -> PyResult<String> {
     serde_json::to_string(&record).map_err(err)
 }
 
+/// Verify a whole MCP execution. `request_json` is a `RunVerifyRequest`; the
+/// result is a sealed `RunRecord` as JSON. Its `content.gate` is the decision.
+#[pyfunction]
+fn run_verify_json(request_json: &str) -> PyResult<String> {
+    let req: gl_engine::RunVerifyRequest = serde_json::from_str(request_json).map_err(err)?;
+    let record = gl_engine::verify_run(&req).map_err(err)?;
+    serde_json::to_string(&record).map_err(err)
+}
+
+/// Verify one run record or a whole JSON Lines chain of them. Returns the
+/// number checked; raises on the first broken hash, link or signature.
+#[pyfunction]
+fn run_record_verify(jsonl: &str) -> PyResult<usize> {
+    let records = gl_record::run_records_from_jsonl(jsonl).map_err(err)?;
+    gl_record::verify_run_chain(&records).map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+    Ok(records.len())
+}
+
 /// Normalise and extract claims without running verifiers.
 #[pyfunction]
 fn prepare_json(request_json: &str) -> PyResult<String> {
@@ -126,6 +144,8 @@ fn yaml_to_json(text: &str) -> PyResult<String> {
 #[pymodule]
 fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(verify_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_verify_json, m)?)?;
+    m.add_function(wrap_pyfunction!(run_record_verify, m)?)?;
     m.add_function(wrap_pyfunction!(prepare_json, m)?)?;
     m.add_function(wrap_pyfunction!(record_verify, m)?)?;
     m.add_function(wrap_pyfunction!(policy_lint, m)?)?;

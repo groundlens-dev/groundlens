@@ -15,11 +15,15 @@ use std::collections::BTreeMap;
 
 pub use gl_bundle;
 pub use gl_core;
+pub use gl_mcp;
 pub use gl_policy;
 pub use gl_record;
+pub use gl_runtime;
 pub use gl_verifiers;
 
 pub mod bundle;
+pub mod run;
+pub use run::{verify_run, RunVerifyRequest};
 
 /// A policy that ships inside every build: numeric contradictions fail,
 /// anything unresolved goes to review, no generative verifier decides.
