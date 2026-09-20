@@ -854,6 +854,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gl-mcp"
+version = "4.0.0"
+dependencies = [
+ "gl-core",
+ "gl-runtime",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "gl-numeric"
 version = "4.0.0"
 dependencies = [
