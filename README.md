@@ -41,11 +41,12 @@ Where a guardrail blocks or scores an output in the moment and leaves nothing be
 
 ## Architecture
 
-<div align="center">
+Verifying a single answer is the smallest case, a run with one claim, so one contract covers both ends of the range:
 
-![Where GroundLens sits](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/diagram_layer.png)
+- an **answer**, and the claims inside it, gets `PASS`, `REVIEW` or `FAIL` from verifiers and a policy;
+- a **tool call or an action** gets `ALLOW`, `REVIEW` or `DENY` from an execution policy.
 
-</div>
+Either way the run is sealed into a signed, chained record. What the record keeps of the world is hashes, not content, so it is safe to hold in a regulated place while staying independently verifiable.
 
 GroundLens sits beside your AI system, not inside it. It observes what the system produces and does, and never sees your weights, your prompts or your internal architecture, so independent verification is possible even in a bank or a sensitive deployment.
 
@@ -70,6 +71,8 @@ A verifier produces evidence, not truth: it reports what it measured and how sur
 ## Engine
 
 The engine verifies an answer and the claims inside it. A verifier produces evidence; a policy turns it into `PASS`, `REVIEW` or `FAIL`.
+
+These verifiers examine an **answer** and the claims inside it. What an agent **did**, its tool calls and actions, is decided by the execution policy in [Gating tool calls and actions](#gating-tool-calls-and-actions).
 
 | verifier | what it does | guarantee | in `pip install` |
 |---|---|---|---|
@@ -118,6 +121,8 @@ After a run, GroundLens audits the whole log against the policy, rolls it up to 
 ## Evidence records
 
 Whether GroundLens checked one answer or a whole run, the result is the same artefact: a signed record, chained to the one before it, that anyone can verify offline.
+
+Whether GroundLens checked one answer or a whole run, the result is the same kind of artefact: a signed record, chained to the one before it, that anyone can verify offline.
 
 ```python
 record.content_hash     # same input, policy and bundle → same hash, on any machine
