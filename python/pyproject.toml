@@ -34,6 +34,7 @@ glv = "groundlens.cli:main"
 
 [project.urls]
 Homepage = "https://groundlens.dev"
+Documentation = "https://groundlens.readthedocs.io"
 Source = "https://github.com/groundlens-dev/groundlens"
 
 [tool.maturin]

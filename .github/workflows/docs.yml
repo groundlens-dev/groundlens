@@ -1,0 +1,35 @@
+name: docs
+
+# A fast smoke build of the Sphinx documentation. It runs only when the docs,
+# the README or the Read the Docs config change, so a docs-only pull request is
+# not held up by the Rust and Python test matrices. Read the Docs builds and
+# publishes the site separately, from its own webhook.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".readthedocs.yaml"
+      - "README.md"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".readthedocs.yaml"
+      - "README.md"
+      - ".github/workflows/docs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r docs/requirements.txt
+      - run: python -m sphinx -b html --keep-going docs docs/_build/html
