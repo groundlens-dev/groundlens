@@ -19,6 +19,12 @@ use gl_core::{Error, EvidenceGraph, Result, VerificationInput};
 use gl_policy::PolicyOutcome;
 use serde::{Deserialize, Serialize};
 
+pub mod run;
+pub use run::{
+    run_record_to_jsonl_line, run_records_from_jsonl, seal_run, verify_run_against_record, verify_run_chain,
+    verify_run_record, RunRecord, RunRecordContent, RUN_RECORD_SCHEMA,
+};
+
 pub const RECORD_SCHEMA: &str = "groundlens.evidence-record/1";
 
 /// Everything that is a function of the input, the bundle and the policy.
@@ -75,9 +81,63 @@ pub fn input_hash(input: &VerificationInput) -> Result<String> {
     content_hash(input)
 }
 
-fn chain_hash(content_hash: &str, previous: Option<&str>, record_id: &str, timestamp: &str) -> String {
+pub(crate) fn chain_hash(
+    content_hash: &str,
+    previous: Option<&str>,
+    record_id: &str,
+    timestamp: &str,
+) -> String {
     let material = format!("{content_hash}\n{}\n{record_id}\n{timestamp}", previous.unwrap_or(""));
     format!("sha256:{}", sha256_hex(material.as_bytes()))
+}
+
+/// The signed, hash-chained envelope around a content hash. Independent of what
+/// the content is, so an answer record and a run record share exactly the same
+/// signing and chaining. Returns `(record_hash, signature_hex, public_key_hex)`.
+pub(crate) fn sign_envelope(
+    content_hash: &str,
+    previous: Option<&str>,
+    record_id: &str,
+    timestamp: &str,
+    signer: &RecordSigner,
+) -> (String, String, String) {
+    let record_hash = chain_hash(content_hash, previous, record_id, timestamp);
+    let signature = signer.key.sign(record_hash.as_bytes());
+    (record_hash, hex::encode(signature.to_bytes()), signer.public_key_hex())
+}
+
+/// Recompute the envelope and check the signature, given a freshly recomputed
+/// content hash. The single place both record kinds verify.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn verify_envelope(
+    recomputed_content_hash: &str,
+    stored_content_hash: &str,
+    previous: Option<&str>,
+    record_id: &str,
+    timestamp: &str,
+    stored_record_hash: &str,
+    signature_hex: &str,
+    signer_public_key: &str,
+) -> Result<()> {
+    if recomputed_content_hash != stored_content_hash {
+        return Err(Error::Integrity(format!("{record_id}: content hash mismatch")));
+    }
+    let expected = chain_hash(stored_content_hash, previous, record_id, timestamp);
+    if expected != stored_record_hash {
+        return Err(Error::Integrity(format!("{record_id}: record hash mismatch")));
+    }
+    let pk_bytes: [u8; 32] = hex::decode(signer_public_key)
+        .ok()
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| Error::Integrity("bad public key".into()))?;
+    let pk = VerifyingKey::from_bytes(&pk_bytes).map_err(|e| Error::Integrity(e.to_string()))?;
+    let sig_bytes: [u8; 64] = hex::decode(signature_hex)
+        .ok()
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| Error::Integrity("bad signature encoding".into()))?;
+    let sig = Signature::from_bytes(&sig_bytes);
+    pk.verify(stored_record_hash.as_bytes(), &sig)
+        .map_err(|_| Error::Integrity(format!("{record_id}: signature does not verify")))
 }
 
 pub fn seal(
@@ -88,8 +148,8 @@ pub fn seal(
     signer: &RecordSigner,
 ) -> Result<EvidenceRecord> {
     let content_hash = content_hash(&content)?;
-    let record_hash = chain_hash(&content_hash, previous_record_hash.as_deref(), &record_id, &timestamp);
-    let signature = signer.key.sign(record_hash.as_bytes());
+    let (record_hash, signature, signer_public_key) =
+        sign_envelope(&content_hash, previous_record_hash.as_deref(), &record_id, &timestamp, signer);
     Ok(EvidenceRecord {
         record_id,
         timestamp,
@@ -97,38 +157,24 @@ pub fn seal(
         content_hash,
         previous_record_hash,
         record_hash,
-        signature: hex::encode(signature.to_bytes()),
-        signer_public_key: signer.public_key_hex(),
+        signature,
+        signer_public_key,
     })
 }
 
 /// Recompute every hash and check the signature of one record.
 pub fn verify_record(record: &EvidenceRecord) -> Result<()> {
-    let expected = content_hash(&record.content)?;
-    if expected != record.content_hash {
-        return Err(Error::Integrity(format!("{}: content hash mismatch", record.record_id)));
-    }
-    let expected = chain_hash(
+    let recomputed = content_hash(&record.content)?;
+    verify_envelope(
+        &recomputed,
         &record.content_hash,
         record.previous_record_hash.as_deref(),
         &record.record_id,
         &record.timestamp,
-    );
-    if expected != record.record_hash {
-        return Err(Error::Integrity(format!("{}: record hash mismatch", record.record_id)));
-    }
-    let pk_bytes: [u8; 32] = hex::decode(&record.signer_public_key)
-        .ok()
-        .and_then(|v| v.try_into().ok())
-        .ok_or_else(|| Error::Integrity("bad public key".into()))?;
-    let pk = VerifyingKey::from_bytes(&pk_bytes).map_err(|e| Error::Integrity(e.to_string()))?;
-    let sig_bytes: [u8; 64] = hex::decode(&record.signature)
-        .ok()
-        .and_then(|v| v.try_into().ok())
-        .ok_or_else(|| Error::Integrity("bad signature encoding".into()))?;
-    let sig = Signature::from_bytes(&sig_bytes);
-    pk.verify(record.record_hash.as_bytes(), &sig)
-        .map_err(|_| Error::Integrity(format!("{}: signature does not verify", record.record_id)))
+        &record.record_hash,
+        &record.signature,
+        &record.signer_public_key,
+    )
 }
 
 /// Verify a whole log: every record individually, and every link.

@@ -905,6 +905,7 @@ dependencies = [
  "ed25519-dalek",
  "gl-core",
  "gl-policy",
+ "gl-runtime",
  "hex",
  "rand_core 0.6.4",
  "serde",
