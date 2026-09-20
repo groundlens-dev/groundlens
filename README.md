@@ -18,7 +18,7 @@
 
 <br>
 
-[What it is](#what-groundlens-is) · [Built for AI systems and agents](#built-for-ai-systems-and-agents) · [How it works](#how-it-works) · [Engine](#engine) · [Verifiers](#verifiers) · [Policies](#policies) · [Evidence records](#every-check-leaves-a-record) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
+[What it is](#what-groundlens-is) · [What it verifies](#what-groundlens-verifies) · [Beside your system](#beside-your-system-not-inside-it) · [How it works](#how-it-works) · [Verifiers](#verifiers) · [Gating tool calls and actions](#gating-tool-calls-and-actions) · [Policies](#policies) · [Evidence records](#every-check-leaves-a-record) · [Quick start](#quick-start) · [Determinism](#determinism) · [Examples](#examples) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
 
 </div>
 
@@ -30,21 +30,32 @@ GroundLens is an execution verification runtime for AI systems and agents. It tu
 
 GroundLens provides a vendor-neutral runtime and evidence protocol for observing AI executions, evaluating claims, tool calls, actions and outcomes against composable verifiers and policies, and producing signed, reproducible evidence records.
 
-AI systems, and increasingly agents, produce factual claims, recommendations and actions that an organisation is accountable for. When one of those outputs is later questioned, by a customer, a risk officer or an auditor, the organisation has to answer four things: was this specific output checked, with what, under which rules, and would the same check give the same result today. A score in a log cannot answer that. Your own application cannot vouch for itself.
+An AI system, and increasingly an agent, does things an organisation is accountable for: it answers, it retrieves, it calls tools, it takes actions with consequences. When one of those is later questioned, by a customer, a risk officer or an auditor, the organisation has to show four things: what happened, what was checked, under which rules, and whether the same check gives the same result today. A score in a log cannot show that, and a system cannot vouch for itself.
 
-GroundLens is the layer that answers it. You give it an AI output and, when they exist, the documents it was supposed to rest on. It runs independent checks on that output, applies the rules your organisation wrote, returns `PASS`, `REVIEW` or `FAIL`, and seals the whole check into a signed record that a third party can verify offline, without trusting you. It runs locally, needs no knowledge of how your system is built, and treats every check as evidence someone can inspect rather than a number they have to believe.
+GroundLens is the layer that shows it. It watches what an AI system produces and does, runs independent checks against the rules you wrote, and seals the whole thing into a signed record a third party can verify offline, without trusting you. It runs locally, needs no access to your weights, prompts or architecture, and treats every check as evidence someone can inspect rather than a number they have to believe.
 
 <br>
 
 | Best for teams | Standout |
 |---|---|
-| Shipping AI answers and agents into regulated or high-stakes workflows who need proof, not a score, that each output and each execution was checked. | Answers and executions verified under one contract; several verification methods (exact numeric and rule checks, lexical grounding, geometric indices, an optional LLM judge); an execution policy that gates tool calls and actions `ALLOW` / `REVIEW` / `DENY`; policies in YAML that decide instead of hard-coded thresholds; signed, hash-chained records verifiable offline; the engine and runtime never touch the network; no runtime dependencies. |
+| Shipping AI answers and agents into regulated or high-stakes workflows who need proof, not a score, that each output and each action was checked. | Answers and executions verified under one contract; composable verifiers (exact numeric and rule checks, lexical grounding, and more); an execution policy that gates tool calls and actions `ALLOW` / `REVIEW` / `DENY`; policies in YAML that decide instead of hard-coded thresholds; signed, hash-chained records verifiable offline; the engine and runtime never touch the network. |
 
 <br>
 
-## Built for AI systems and agents
+## What GroundLens verifies
 
-GroundLens sits beside your AI system, not inside it. It observes what the system produces and the evidence around it, and turns that into a verifiable record. It never sees your weights, your prompts or your internal architecture, so independent verification is possible even in a bank or a sensitive deployment.
+The unit is the execution. An execution is an ordered sequence of steps: a model is called, documents are retrieved, a tool is requested and returns, an action with side effects runs, a human approves. GroundLens records each step as an event in a hash-linked log, checks it, and reaches a decision.
+
+Verifying a single answer is the smallest case, a run with one claim, so one contract covers both ends of the range:
+
+- an **answer**, and the claims inside it, gets `PASS`, `REVIEW` or `FAIL` from verifiers and a policy;
+- a **tool call or an action** gets `ALLOW`, `REVIEW` or `DENY` from an execution policy.
+
+Either way the run is sealed into a signed, chained record. What the record keeps of the world is hashes, not content, so it is safe to hold in a regulated place while staying independently verifiable.
+
+<br>
+
+## Beside your system, not inside it
 
 <div align="center">
 
@@ -52,26 +63,9 @@ GroundLens sits beside your AI system, not inside it. It observes what the syste
 
 </div>
 
-GroundLens verifies two things under one contract. It verifies an **answer** and the claims inside it: numbers exactly, words by anchoring them to the sources, and your own symbolic rules. And it verifies an **execution**: it observes what an agent did, step by step, as it drives its tools. A model call, a retrieval, a tool request and its result, an action with side effects, a human approval. Each step becomes an event in an ordered, hash-linked log. An execution policy decides `ALLOW`, `REVIEW` or `DENY` for each tool call and action, and the whole run is sealed into a signed record, the same way an answer is.
+GroundLens sits next to your AI system. It observes what the system produces and does, and the evidence around it, and never sees your weights, your prompts or your internal architecture, so independent verification is possible even in a bank or a sensitive deployment.
 
-The runtime reads a Model Context Protocol (MCP) execution: the JSON-RPC messages an agent already exchanges with its tools. It records hashes of the arguments and results, never the content itself, so the record is safe to keep in a regulated place while still being independently verifiable.
-
-```bash
-glv run verify \
-  --trace examples/run/trace.jsonl \
-  --policy examples/run/execution-policy.yaml \
-  --run-id run_demo --system invoice-agent --log runs.jsonl
-```
-
-```python
-from groundlens import verify_run
-
-record = verify_run(trace, policy, run_id="run_demo", system="invoice-agent")
-record.gate        # 'DENY'  — the agent called a tool the policy forbids
-record.breaches    # actions executed against the policy, if any
-```
-
-Run this on the shipped example and the agent calls `shell.exec`, which the policy denies, so the run's `gate` is `DENY`. `glv run check` verifies a log of run records offline. See [`examples/run`](examples/run).
+It reads a run from what an agent already emits. An agent driving its tools speaks the Model Context Protocol (MCP): the JSON-RPC messages it exchanges to call a tool and read the result. GroundLens ingests those messages and turns them into a run, recording hashes of the arguments and results, never the content itself. Recording a run needs no change to how the agent is built.
 
 <br>
 
@@ -89,7 +83,7 @@ Run this on the shipped example and the agent calls `shell.exec`, which the poli
 |---|---|
 | A verifier produces evidence, not truth. Exact numeric checks, lexical grounding, semantic similarity, NLI, the geometric SGI and DGI indices, symbolic rules, your own verifiers and, if you allow it, an LLM judge: each one reports what it measured and how sure it is. None of them decides. | A policy interprets the evidence. A short YAML file you control says which verifiers are required, recommended, optional or forbidden, what thresholds apply, and how evidence becomes a decision. It can map each outcome to the governance or regulatory control it concerns, such as an article of the EU AI Act. |
 
-The whole chain becomes a record. Input hashes, the verifiers and model hashes that ran, the evidence, the policy and its hash, the decision, the regulatory mapping, and the hash of the previous record, sealed with an Ed25519 signature. A log of records is an audit trail you can hand over as a file.
+The whole chain becomes a record: the input hashes, the verifiers and model hashes that ran, the evidence, the policy and its hash, the decision, the regulatory mapping, and the hash of the previous record, sealed with an Ed25519 signature. A log of records is an audit trail you can hand over as a file.
 
 <br>
 
@@ -97,22 +91,22 @@ The whole chain becomes a record. Input hashes, the verifiers and model hashes t
 
 <br>
 
-## Engine
+## Engine and runtime
 
-The GroundLens engine and runtime are a Rust library wrapped for Python, with no runtime dependencies and no network access of any kind. They contain the claim extractor, the exact **numeric** verifier (numbers, currencies, percentages, physical units, in several locales), the symbolic **rules** verifier, the **policy engine** with two bundled policies, the signed **evidence records**, and the **execution runtime**: the event log, the execution policy gate and the MCP adapter.
+The engine and runtime are a Rust workspace under `crates/`, wrapped for Python, with no runtime dependencies. They hold the claim extractor and verifiers, the numerals-and-units machinery, the policy engine, the signed evidence records, and the execution runtime: the event log, the execution policy gate and the MCP adapter. The Python package is a thin binding over them; `glv` is the same code as a binary.
 
-It is a Rust workspace under `crates/`: contracts and hashing (`gl-core`), text normalisation (`gl-text`), numerals and units (`gl-numeric`), the verifiers, the policy engine, records, bundles, the model host (`gl-onnx`, on [tract](https://github.com/sonos/tract), no native library), the execution runtime and its gate (`gl-runtime`), the MCP adapter (`gl-mcp`), and the one pipeline everything calls (`gl-engine`). The Python package is a thin binding over it; `glv` is the same engine as a binary.
-
-The distinction matters for a regulated deployment: **no engine or runtime crate depends on an HTTP or TLS library, and a CI job fails the build if one ever does.** Network belongs only to the command line, in one explicit artefact-acquisition step, `bundle pull`. Verification never reaches the network.
+The distinction matters for a regulated deployment: **no engine or runtime crate depends on an HTTP or TLS library, and a CI job fails the build if one ever does.** The network belongs only to the command line, in one explicit artefact-acquisition step, `bundle pull`. Verification itself never reaches the network.
 
 ```bash
-cargo build --release                 # engine and glv
+cargo build --release                 # engine, runtime and glv
 cd python && maturin build --release  # Python wheel
 ```
 
 <br>
 
 ## Verifiers
+
+These verifiers examine an **answer** and the claims inside it. What an agent **did**, its tool calls and actions, is decided by the execution policy in [Gating tool calls and actions](#gating-tool-calls-and-actions).
 
 | verifier | what it does | guarantee | in `pip install` |
 |---|---|---|---|
@@ -122,6 +116,28 @@ cd python && maturin build --release  # Python wheel
 | NLI, semantic, SGI, DGI, LLM judge | entailment, meaning, geometric grounding and model-based judgement | optional verifiers, see the [roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md) | later releases |
 
 Locales matter for numbers: `1.234` is one thousand in Spanish and one and a bit in English. GroundLens reads `en`, `es`, `ca`, `de`, `fr`, `it`, `pt`, `nl` and Swiss formats, knows short and long scale words, and keeps every legitimate reading of an ambiguous numeral instead of guessing. The base bundle's encoder covers about a hundred languages.
+
+<br>
+
+## Gating tool calls and actions
+
+An execution policy decides what an agent is allowed to do. It is a short, ordered list of rules; each rule matches a tool call or an action and carries an effect. `DENY` stops the step, `REVIEW` holds it for a human, `ALLOW` lets it proceed. The first rule that matches decides, and when none does the policy's default applies, so a conservative deployment denies anything it did not explicitly allow.
+
+```yaml
+id: eu_high_risk_v1
+rules:
+  - id: no-shell          # a shell tool is never allowed, from any server
+    match: tool
+    name: shell.exec
+    effect: DENY
+  - id: high-risk         # any action at or above high risk needs a human
+    match: risk_at_least
+    risk: high
+    effect: REVIEW
+default: ALLOW
+```
+
+After a run, GroundLens audits the whole log against the policy and rolls it up to a single verdict. It flags any action that ran against the policy: one the policy forbade, or one that needed a human approval that never came. The verdict and the breaches go into the signed record, so an auditor can replay a run and see whether the policy was actually honoured. The gate is pure rule matching, with the same `exact` guarantee as the numeric verifier.
 
 <br>
 
@@ -156,6 +172,8 @@ Scores from statistical verifiers drift slightly between machines, so every thre
 
 ## Every check leaves a record
 
+Whether GroundLens checked one answer or a whole run, the result is the same kind of artefact: a signed record, chained to the one before it, that anyone can verify offline.
+
 ```python
 record.content_hash     # same input, policy and bundle → same hash, on any machine
 record.verify()         # recompute every hash and the Ed25519 signature, offline
@@ -168,11 +186,11 @@ Change one byte anywhere in a record and verification fails. Append records to a
 
 ## Quick start
 
-`pip install` installs the GroundLens engine.
-
 ```bash
-pip install groundlens     # installs the GroundLens engine
+pip install groundlens     # installs the GroundLens engine and runtime
 ```
+
+**Verify an answer** against its sources under a policy.
 
 ```python
 from groundlens import verify
@@ -192,6 +210,24 @@ FAIL  policy=groundlens_default_v1  record=rec_350455f44e60_4dbfea8eb79c
 
 Ten is not a hundred. A similarity score would rate the right answer and the wrong one alike; the numeric verifier compares the quantities exactly and points at the source passage the number lost to.
 
+**Verify a run.** Give GroundLens an MCP execution trace and an execution policy; it seals a signed run record and tells you what the policy decided.
+
+```python
+from groundlens import verify_run
+
+record = verify_run(trace, policy, run_id="run_demo", system="invoice-agent")
+record.gate        # 'DENY'  — the agent called a tool the policy forbids
+record.breaches    # any action executed against the policy
+```
+
+```bash
+glv run verify --trace examples/run/trace.jsonl --policy examples/run/execution-policy.yaml \
+  --run-id run_demo --system invoice-agent --log runs.jsonl
+glv run check runs.jsonl        # every hash, every link, every signature, offline
+```
+
+A runnable version of both is under [`examples/run`](examples/run).
+
 ---
 
 `groundlens bundle pull base` is a separate, explicit step.
@@ -204,7 +240,7 @@ It downloads the **base bundle** (about 470 MB: the multilingual-e5-small encode
 
 ---
 
-The `groundlens` command line. Everything in this README except the lexical verifier works with the base install alone. Nothing leaves your machine.
+The command line. Everything here except the lexical verifier works with the base install alone. Nothing leaves your machine.
 
 ```bash
 groundlens verify --answer answer.txt --question question.txt \
@@ -215,15 +251,15 @@ groundlens policy lint policies/eu_ai_act_high_risk_v1.yaml
 groundlens bundle status                      # is the base bundle installed, where, which hash
 ```
 
-Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary `glv` exposes the same commands, and adds execution verification: `glv run verify` seals an agent run (exit `0`/`3`/`1` on `ALLOW`/`REVIEW`/`DENY`) and `glv run check` verifies a log of run records offline. From Python, `groundlens.verify_run` does the same.
+Exit codes: `0` PASS, `1` FAIL, `2` error, `3` REVIEW. The Rust binary `glv` exposes the same commands and adds execution verification: `glv run verify` seals an agent run (exit `0` / `3` / `1` on `ALLOW` / `REVIEW` / `DENY`) and `glv run check` verifies a log of run records offline.
 
 <br>
 
 ## Determinism
 
-Same input, same answer, on any machine.
+Same input, same result, on any machine.
 
-Each verifier declares what it guarantees. `exact` verifiers use no floating point at all. `reproducible` verifiers run a pinned model, in f32, on a pure-Rust inference engine, and their scores stay within a declared tolerance. Anything `non_deterministic`, such as an LLM judge, is recorded with its model, prompt hash and settings, and only decides if the policy says so.
+Each verifier declares what it guarantees. `exact` verifiers, and the execution gate, use no floating point at all. `reproducible` verifiers run a pinned model, in f32, on a pure-Rust inference engine, and their scores stay within a declared tolerance. Anything `non_deterministic`, such as an LLM judge, is recorded with its model, prompt hash and settings, and only decides if the policy says so.
 
 This is tested rather than promised: the CI runs the invoice example, with and without the lexical channel, on Linux, macOS and Windows under a Turkish locale and a Pacific timezone, and compares the record hash with a committed value.
 
@@ -242,6 +278,8 @@ Two notebooks under [`examples/notebooks`](examples/notebooks) run in Google Col
   <a target="_blank" href="https://colab.research.google.com/github/groundlens-dev/groundlens/blob/main/examples/notebooks/02_evidence_records_for_auditors.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
+
+And a shell example of a whole agent run under [`examples/run`](examples/run): a trace, an execution policy and a signed run record.
 
 <br>
 
