@@ -70,17 +70,16 @@ A verifier produces evidence, not truth: it reports what it measured and how sur
 
 ## Engine
 
-The engine verifies an answer and the claims inside it. A verifier produces evidence; a policy turns it into `PASS`, `REVIEW` or `FAIL`.
-
-These verifiers examine an **answer** and the claims inside it. What an agent **did**, its tool calls and actions, is decided by the execution policy in [Gating tool calls and actions](#gating-tool-calls-and-actions).
+The engine verifies an answer and the claims inside it. A verifier produces evidence; a policy turns it into `PASS`, `REVIEW` or `FAIL`. What an agent **did**, its tool calls and actions, is decided by the execution policy in the [Runtime](#runtime).
 
 | verifier | what it does | guarantee | in `pip install` |
 |---|---|---|---|
 | `groundlens.numeric` | numbers, currencies, percentages and physical units, compared exactly in base units: `1.2 km` equals `1200 m`, `212 °F` equals `100 °C`, `$37.35 billion` equals a table cell `37,350` under "in millions of dollars" | exact, bit-identical everywhere | yes |
 | `groundlens.rules` | your own symbolic rules (an APR must be a percentage, a date must fall inside the contract term) | exact | yes |
 | `groundlens.lexical` | whether each word of the answer is anchored in the sources, by contextual token similarity on a frozen multilingual encoder, reported as the weakest anchor rather than an average | reproducible: pinned model hash, scores within 1e-6 across machines | with the base bundle |
+| `groundlens.nli` | whether a source entails, contradicts or is neutral to each statement in the answer, by a cross-encoder on the same pure-Rust model host | reproducible: pinned model hash, scores within a declared tolerance | with an NLI bundle |
 
-An entailment (NLI) verifier is in the codebase behind a feature flag and is not yet in the released wheel. Semantic, geometric (SGI, DGI) and LLM-judge verifiers are planned; see the [roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md). Every one plugs into the same contract.
+The engine runs `groundlens.nli` whenever the loaded bundle carries an entailment model; the base bundle ships one from v2 (see the [roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)). Semantic, geometric (SGI, DGI) and LLM-judge verifiers are planned. Every one plugs into the same contract.
 
 Locales matter for numbers: `1.234` is one thousand in Spanish and one and a bit in English. GroundLens reads `en`, `es`, `ca`, `de`, `fr`, `it`, `pt`, `nl` and Swiss formats, knows short and long scale words, and keeps every legitimate reading of an ambiguous numeral instead of guessing. The base bundle's encoder covers about a hundred languages.
 
