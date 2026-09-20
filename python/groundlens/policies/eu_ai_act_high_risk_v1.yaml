@@ -9,19 +9,19 @@ description: >
 verifiers:
   required: [groundlens.numeric]
   recommended: [groundlens.rules.*]
-  optional: [nli.deberta_v3_small, groundlens.lexical, sgi, dgi]
+  optional: [groundlens.nli, groundlens.lexical, sgi, dgi]
   fallback: []
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 thresholds:
-  nli.deberta_v3_small: { support_min: 0.85, guard_band: 0.02 }
+  groundlens.nli: { support_min: 0.85, guard_band: 0.02 }
   groundlens.lexical:   { support_min: 0.60, guard_band: 0.02 }
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
   unresolved_claims: REVIEW
   conflicts: REVIEW
-  tolerate_unresolved_kinds: [word]
+  tolerate_unresolved_kinds: [word, statement]
 regulatory_mapping:
   - framework: EU-AI-Act-2024/1689
     article: "Art. 15(1)"

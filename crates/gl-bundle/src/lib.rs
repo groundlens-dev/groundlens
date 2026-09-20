@@ -67,6 +67,21 @@ fn mean() -> String {
     "mean".into()
 }
 
+/// How to run one entailment (NLI) model. Plain data; `gl-onnx` turns it into
+/// a model. Parallel to [`EncoderSpec`].
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EntailmentSpec {
+    /// Bundle-relative path of the ONNX graph.
+    pub model: String,
+    /// Bundle-relative path of `tokenizer.json`.
+    pub tokenizer: String,
+    /// Content tokens per (premise, hypothesis) pair, special tokens excluded.
+    pub max_tokens: usize,
+    /// The meaning of each output logit, in order. Must contain exactly
+    /// `entailment`, `neutral` and `contradiction`.
+    pub labels: Vec<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Manifest {
     pub schema: String,
@@ -84,6 +99,9 @@ pub struct Manifest {
     /// Encoders by role. The lexical verifier uses `default`.
     #[serde(default)]
     pub encoders: BTreeMap<String, EncoderSpec>,
+    /// Entailment models by role. The `groundlens.nli` verifier uses `default`.
+    #[serde(default)]
+    pub entailment: BTreeMap<String, EntailmentSpec>,
     /// Where the artefacts came from (model repository, revision, files).
     /// Free-form, hashed with the rest of the manifest.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -172,6 +190,7 @@ pub fn build_manifest(root: &Path, name: &str, version: &str, engine_version: &s
         artefacts,
         offline_only: true,
         encoders: BTreeMap::new(),
+        entailment: BTreeMap::new(),
         provenance: None,
     })
 }
