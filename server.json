@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.groundlens-dev/groundlens",
+  "title": "GroundLens",
+  "description": "Verify AI answers and executions and seal signed, offline-verifiable evidence records.",
+  "repository": {
+    "url": "https://github.com/groundlens-dev/groundlens",
+    "source": "github"
+  },
+  "version": "5.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "groundlens",
+      "version": "5.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

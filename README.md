@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.groundlens-dev/groundlens -->
+
 <div align="center">
 
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
