@@ -790,7 +790,7 @@ dependencies = [
 
 [[package]]
 name = "gl-bundle"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "serde",
@@ -799,7 +799,7 @@ dependencies = [
 
 [[package]]
 name = "gl-cli"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "chrono",
  "clap",
@@ -822,7 +822,7 @@ dependencies = [
 
 [[package]]
 name = "gl-core"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "hex",
  "indexmap",
@@ -834,7 +834,7 @@ dependencies = [
 
 [[package]]
 name = "gl-engine"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "chrono",
  "gl-bundle",
@@ -857,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "gl-mcp"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "gl-runtime",
@@ -867,7 +867,7 @@ dependencies = [
 
 [[package]]
 name = "gl-numeric"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "regex",
@@ -877,7 +877,7 @@ dependencies = [
 
 [[package]]
 name = "gl-onnx"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-bundle",
  "gl-core",
@@ -888,7 +888,7 @@ dependencies = [
 
 [[package]]
 name = "gl-policy"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "serde",
@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "gl-python"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-bundle",
  "gl-core",
@@ -912,7 +912,7 @@ dependencies = [
 
 [[package]]
 name = "gl-record"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "ed25519-dalek",
  "gl-core",
@@ -926,7 +926,7 @@ dependencies = [
 
 [[package]]
 name = "gl-runtime"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "serde",
@@ -935,7 +935,7 @@ dependencies = [
 
 [[package]]
 name = "gl-text"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "regex",
@@ -944,7 +944,7 @@ dependencies = [
 
 [[package]]
 name = "gl-verifiers"
-version = "5.1.0"
+version = "5.2.0"
 dependencies = [
  "gl-core",
  "gl-numeric",
