@@ -5,7 +5,7 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
-## [Unreleased]
+## [5.0.0] - 2026-09-21
 
 The execution verification runtime. GroundLens now verifies an *execution*,
 not only an answer, under the same contract: an input produces evidence, a
@@ -41,6 +41,13 @@ with one claim, so nothing in 4.x changes.
   `0` / `3` / `1` on `ALLOW` / `REVIEW` / `DENY`.
 - A runnable example under `examples/run` (an MCP trace, an execution policy and
   a README).
+- **`groundlens.nli`**, the entailment verifier, wired into the engine: the
+  answer is split into sentence-level statement claims, and when the loaded
+  bundle carries an entailment model the verifier scores each claim against its
+  sources. The shipped policies list it and tolerate unresolved statements, so
+  decisions are unchanged; the model itself ships in a later bundle.
+- **Documentation** on Read the Docs, built from the docstrings, with concept
+  guides, a CLI reference and an `ARCHITECTURE.md` describing the workspace.
 
 ## [4.0.0] - 2026-09-10
 
@@ -147,4 +154,5 @@ The 3.x Python implementation is kept at tag
 for reproducibility of published numbers. Its history is in the release
 notes of each 3.x tag.
 
+[5.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.0.0
 [4.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v4.0.0
