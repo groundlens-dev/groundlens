@@ -5,6 +5,18 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
+## [Unreleased]
+
+### Added
+
+- **MCP server** (`groundlens.mcp`, `pip install "groundlens[mcp]"`, command
+  `groundlens-mcp`): verification as tools an agent or any Model Context Protocol
+  client can call, over stdio. Three tools — `verify_answer`, `verify_run` and
+  `verify_records` — each a thin layer over the engine. The MCP SDK is an
+  optional dependency, so the base package keeps its zero dependencies. This is
+  the counterpart to the 5.0 MCP adapter, which observes a session rather than
+  serving one.
+
 ## [5.0.0] - 2026-09-21
 
 The execution verification runtime. GroundLens now verifies an *execution*,
