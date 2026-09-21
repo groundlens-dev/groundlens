@@ -25,6 +25,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python: ["3.10", "3.11", "3.12", "3.13"]
+        # The wheels are abi3: one wheel per platform runs on every Python
+        # from the 3.10 floor up, so a full 4-version sweep is redundant. The
+        # Windows runners are also the slow ones (11-16 min a job), so there
+        # we build and test on the abi3 floor (3.10) and the newest (3.13)
+        # only. Linux and macOS keep the full sweep; they are cheap.
+        exclude:
+          - os: windows-latest
+            python: "3.11"
+          - os: windows-latest
+            python: "3.12"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
