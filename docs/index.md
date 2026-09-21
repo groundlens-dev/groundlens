@@ -1,6 +1,10 @@
-# GroundLens
+```{image} assets/groundlens_header.png
+:alt: GroundLens
+:align: center
+:width: 640px
+```
 
-**Execution verification runtime for AI systems and agents.**
+# Execution verification runtime for AI systems and agents
 
 GroundLens turns what an AI system does into evidence that someone else can
 check. It reads an answer or a whole execution, runs a pipeline of verifiers
