@@ -88,6 +88,7 @@ concepts/eu-ai-act
 
 guides/verify-an-answer
 guides/verify-a-run
+guides/mcp-server
 guides/writing-policies
 guides/rules
 guides/calibration

@@ -19,7 +19,7 @@
 
 <br>
 
-[What it is](#what-groundlens-is) · [Quick start](#quick-start) · [Architecture](#architecture) · [How it works](#how-it-works) · [Engine](#engine) · [Runtime](#runtime) · [Records](#evidence-records) · [Determinism](#determinism) · [Examples](#examples) · [Docs](https://groundlens.readthedocs.io) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
+[What it is](#what-groundlens-is) · [Quick start](#quick-start) · [Architecture](#architecture) · [How it works](#how-it-works) · [Engine](#engine) · [Runtime](#runtime) · [Records](#evidence-records) · [MCP server](#mcp-server) · [Determinism](#determinism) · [Examples](#examples) · [Docs](https://groundlens.readthedocs.io) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md) · [Roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)
 
 </div>
 
@@ -255,6 +255,29 @@ Record.verify_chain(Record.read_log("records.jsonl"))
 ```
 
 Change one byte anywhere in a record and verification fails. Append records to a JSON Lines log and each one carries the hash of the previous one. `groundlens report` turns a log into a human-readable report with a one-page guide for auditors.
+
+<br>
+
+## MCP server
+
+The same verification is available as an MCP server, so an agent (or any Model Context Protocol client, including Claude) can call GroundLens as a tool: check an answer, gate an execution, or verify a log of records. It is a thin layer over the engine and runs over stdio.
+
+It is an optional extra, so the base package keeps its zero dependencies:
+
+```bash
+pip install "groundlens[mcp]"
+groundlens-mcp                     # runs the server over stdio
+```
+
+Three tools:
+
+| tool | what it does |
+|---|---|
+| `verify_answer` | verify an answer against its sources under a policy; returns the decision, the evidence and the signed record |
+| `verify_run` | gate an MCP execution trace under an execution policy; returns `ALLOW` / `REVIEW` / `DENY`, any breaches and the run record |
+| `verify_records` | verify a log of records offline: every hash, every link, every signature |
+
+Point an MCP client at the `groundlens-mcp` command. See [the docs](https://groundlens.readthedocs.io/en/latest/guides/mcp-server.html) for a client configuration example.
 
 <br>
 

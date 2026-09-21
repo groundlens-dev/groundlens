@@ -27,10 +27,13 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+# The MCP server. Opt-in, so the core keeps zero runtime dependencies.
+mcp = ["mcp>=2,<3"]
 
 [project.scripts]
 groundlens = "groundlens.cli:main"
 glv = "groundlens.cli:main"
+groundlens-mcp = "groundlens.mcp:main"
 
 [project.urls]
 Homepage = "https://groundlens.dev"
