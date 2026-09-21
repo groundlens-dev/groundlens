@@ -9,7 +9,8 @@
 //! | `groundlens.numeric`  | exact     | Exact        | implemented   |
 //! | `groundlens.rules`    | symbolic  | Exact        | implemented   |
 //! | `groundlens.lexical`  | lexical   | Reproducible | feature `lexical` |
-//! | `nli.*`               | ml        | Reproducible | needs gl-onnx |
+//! | `groundlens.nli`      | ml        | Reproducible | feature `nli` |
+//! | `semantic.cosine`     | ml        | Reproducible | feature `semantic` |
 //! | `sgi`, `dgi`          | geometric | Reproducible | needs gl-onnx |
 //! | `llm_judge.*`         | generative| NonDet.      | adapter only  |
 //!
@@ -23,6 +24,8 @@ pub mod lexical;
 pub mod nli;
 pub mod numeric;
 pub mod rules;
+#[cfg(feature = "semantic")]
+pub mod semantic;
 
 pub use extract::{extract_claims, extract_claims_with};
 #[cfg(feature = "lexical")]
@@ -34,5 +37,9 @@ pub const LEXICAL_ID: &str = "groundlens.lexical";
 pub use nli::NliVerifier;
 /// Id of the NLI verifier, known even when the feature is off.
 pub const NLI_ID: &str = "groundlens.nli";
+#[cfg(feature = "semantic")]
+pub use semantic::SemanticVerifier;
+/// Id of the semantic verifier, known even when the feature is off.
+pub const SEMANTIC_ID: &str = "semantic.cosine";
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};

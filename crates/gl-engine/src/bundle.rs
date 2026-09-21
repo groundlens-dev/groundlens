@@ -22,7 +22,7 @@ pub struct Loaded {
     pub version: String,
     pub manifest_hash: String,
     pub model_hash: String,
-    #[cfg(feature = "lexical")]
+    #[cfg(any(feature = "lexical", feature = "semantic"))]
     pub encoder: Arc<dyn gl_onnx::Encoder>,
     /// The entailment model and its hash, when the bundle declares one.
     #[cfg(feature = "nli")]
@@ -72,12 +72,12 @@ pub fn load(spec: Option<&str>) -> Result<Option<Arc<Loaded>>> {
 }
 
 fn build(bundle: Bundle) -> Result<Loaded> {
-    #[cfg(feature = "lexical")]
+    #[cfg(any(feature = "lexical", feature = "semantic"))]
     let (encoder, model_hash) = {
         let (enc, hash) = gl_onnx::encoder_from_bundle(&bundle, "default")?;
         (Arc::new(enc) as Arc<dyn gl_onnx::Encoder>, hash)
     };
-    #[cfg(not(feature = "lexical"))]
+    #[cfg(not(any(feature = "lexical", feature = "semantic")))]
     let model_hash = String::new();
 
     #[cfg(feature = "nli")]
@@ -94,7 +94,7 @@ fn build(bundle: Bundle) -> Result<Loaded> {
         version: bundle.manifest.version.clone(),
         manifest_hash: bundle.manifest_hash.clone(),
         model_hash,
-        #[cfg(feature = "lexical")]
+        #[cfg(any(feature = "lexical", feature = "semantic"))]
         encoder,
         #[cfg(feature = "nli")]
         entailment,

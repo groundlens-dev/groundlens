@@ -9,13 +9,16 @@ repository.workspace = true
 authors.workspace = true
 
 [features]
-default = ["lexical", "nli"]
+default = ["lexical", "nli", "semantic"]
 # The lexical channel: tract + tokenizers, pure Rust. Off for builds that
 # only need the exact and symbolic verifiers.
 lexical = ["gl-verifiers/lexical", "dep:gl-onnx"]
 # The entailment (NLI) channel: same pure-Rust model host as lexical. Runs
 # only when the loaded bundle carries an entailment model.
 nli = ["gl-verifiers/nli", "dep:gl-onnx"]
+# The semantic (sentence-similarity) channel: shares the loaded encoder with
+# the lexical channel. Runs whenever a bundle with an encoder is loaded.
+semantic = ["gl-verifiers/semantic", "dep:gl-onnx"]
 
 [dependencies]
 gl-onnx = { workspace = true, optional = true, features = ["runtime"] }
