@@ -9,7 +9,7 @@ description: >
 verifiers:
   required: [groundlens.numeric]
   recommended: [groundlens.rules.*]
-  optional: [groundlens.nli, groundlens.lexical, sgi, dgi]
+  optional: [groundlens.nli, groundlens.lexical, semantic.cosine, sgi, dgi]
   fallback: []
   forbidden: [llm_judge.*]
 determinism:

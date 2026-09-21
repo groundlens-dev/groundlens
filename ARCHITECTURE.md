@@ -102,7 +102,7 @@ reasons about through the determinism class:
 |---|---|---|
 | exact | `groundlens.numeric`, `groundlens.rules`, the execution gate | deterministic, bit-identical everywhere |
 | lexical | `groundlens.lexical` | reproducible under a pinned model |
-| statistical | `groundlens.nli`, semantic similarity (planned) | reproducible under a pinned model, calibrated |
+| statistical | `groundlens.nli`, `semantic.cosine` | reproducible under a pinned model, calibrated |
 | geometric | SGI, DGI (planned) | reproducible / calibrable |
 | generative | LLM-as-a-judge (planned) | non-deterministic, recorded in full |
 

@@ -146,6 +146,8 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
             if let Some((model, hash)) = &b.entailment {
                 verifiers.push(Box::new(gl_verifiers::NliVerifier::new(model.clone(), hash)));
             }
+            #[cfg(feature = "semantic")]
+            verifiers.push(Box::new(gl_verifiers::SemanticVerifier::new(b.encoder.clone(), &b.model_hash)));
         }
         None => {
             if policy.verifiers.required.iter().any(|r| r == gl_verifiers::LEXICAL_ID) {
@@ -249,6 +251,8 @@ pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
     known.push(gl_verifiers::LexicalVerifier::info_without_model());
     #[cfg(feature = "nli")]
     known.push(gl_verifiers::NliVerifier::info_without_model());
+    #[cfg(feature = "semantic")]
+    known.push(gl_verifiers::SemanticVerifier::info_without_model());
     known
 }
 

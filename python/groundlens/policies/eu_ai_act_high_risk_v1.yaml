@@ -9,14 +9,14 @@ description: >
 verifiers:
   required: [groundlens.numeric]
   recommended: [groundlens.rules.*]
-  optional: [groundlens.nli, groundlens.lexical, sgi, dgi]
+  optional: [groundlens.nli, groundlens.lexical, semantic.cosine, sgi, dgi]
   fallback: []
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 thresholds:
-  groundlens.nli: { support_min: 0.85, guard_band: 0.02 }
-  groundlens.lexical:   { support_min: 0.60, guard_band: 0.02 }
+  groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
+  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
   unresolved_claims: REVIEW
