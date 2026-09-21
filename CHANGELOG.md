@@ -5,7 +5,7 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
-## [Unreleased]
+## [5.1.0] - 2026-09-21
 
 ### Added
 
@@ -166,5 +166,6 @@ The 3.x Python implementation is kept at tag
 for reproducibility of published numbers. Its history is in the release
 notes of each 3.x tag.
 
+[5.1.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.1.0
 [5.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.0.0
 [4.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v4.0.0
