@@ -8,10 +8,10 @@
 # Hash pinning (like python/requirements-ci.txt) is a follow-up: these are the
 # heavy export-only deps of a manual workflow, not the release supply chain.
 optimum==1.23.3
-transformers==4.44.2
-onnx==1.16.2
+transformers==5.10.1
+onnx==1.22.0
 onnxruntime==1.19.2
 huggingface-hub==0.25.2
 numpy==1.26.4
-sentencepiece==0.2.0
-protobuf==5.28.2
+sentencepiece==0.2.1
+protobuf==5.29.6
