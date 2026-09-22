@@ -2,34 +2,52 @@
 
 GroundLens is not scored. It is checked.
 
-This suite demonstrates GroundLens the way trust infrastructure is demonstrated:
-by what it does, not by a single number. It has separate parts, each measured on
-its own terms.
+Trust infrastructure is demonstrated by what it does, not by a single number. This
+suite is that demonstration, and anyone can run it. It has four parts, each measured
+on its own terms.
 
 ## Conformance — does it do what it says?
 
-`conformance.py` runs canonical executions through the engine and asserts the
-behaviours GroundLens promises, grouped by contract. The result is PASS or FAIL
-per contract, never a score.
+Canonical executions run through the engine, asserting the contracts GroundLens
+promises: evidence generation, policy semantics, decision determinism, record
+integrity, tamper detection, offline verification, and scope boundaries. The result
+is PASS or FAIL per contract, never a score. Includes adversarial checks: an altered
+decision, signature or piece of evidence is rejected, and verification runs with the
+network disabled.
 
-    pip install groundlens
-    python suite/conformance.py          # human report; exit 1 if any contract fails
-    python suite/conformance.py --json   # machine-readable
+    python suite/conformance.py            # exit 1 if any contract fails
+    python suite/conformance.py --json
 
-Contracts checked: evidence generation (a verifier produces structured evidence
-with a source span), policy semantics (the policy decides, not the verifier; the
-EU AI Act policy maps to articles), decision determinism (same input, same content
-hash and decision; a fixed key gives a fixed signer identity), record integrity (a
-fresh record verifies; a chain links and verifies), tamper detection (an altered
-decision, signature or piece of evidence is rejected), offline verification (records
-verify with the network disabled), and scope boundaries (only the given evidence is
-a source, never the question).
+## Performance — the operational numbers
 
-It uses only the deterministic verifiers, so it needs no model bundle and no network.
+Per-property percentiles, the way OpenTelemetry and Open Policy Agent report theirs:
+latency to verify an answer, latency to verify a sealed record offline, record size,
+and throughput. Numbers are environment-specific, so the report prints the machine it
+ran on.
 
-## Coming next
+    python suite/performance.py
+    python suite/performance.py --json
 
-Performance (latency, throughput, record overhead on a fixed, disclosed machine),
-interoperability (a record verified across CLI, Python and an independent verifier),
-and verifier evaluation (per-verifier detection metrics such as FPR at 95% recall —
-a measurement of the verifiers, not of the infrastructure).
+## Interoperability — verifiable by someone else
+
+One sealed record, verified by three separate verifiers: the Python API, the
+`groundlens record verify` command line, and an independent from-scratch verifier
+that shares no code with the engine (it recomputes the hashes with `hashlib` and
+checks the Ed25519 signature with `cryptography`, from the record format alone). Then
+a tampered record, rejected by all three.
+
+    pip install cryptography
+    python suite/interoperability.py
+    python suite/interoperability.py --json
+
+## Verifier evaluation — the detectors, measured
+
+Detection metrics for the individual verifiers (false-positive rate at 95% recall,
+AUROC, balanced accuracy) on public datasets. This measures the verifiers, which are
+swappable, not the infrastructure. See `verifier_evaluation/`.
+
+## Not invented here
+
+Every check traces to a public standard, RFC or regulation, and the suite/score split
+follows the shape used by conformity assessment and by infrastructure projects like
+Open Policy Agent, OpenTelemetry and W3C. See [STANDARDS.md](STANDARDS.md).

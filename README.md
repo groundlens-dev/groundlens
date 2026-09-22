@@ -57,18 +57,38 @@ Where a guardrail blocks or scores an output in the moment and leaves nothing be
 
 <br>
 
-## What makes a verification trustworthy
+## Verification Suite
 
-GroundLens does not collapse verification into a single score.
+You can verify the record yourself. The suite is how: checks anyone can run, in four
+parts, none of them a single "trust score".
 
-It keeps:
+- **Conformance** — does GroundLens do what it says? Seven contracts (evidence, policy,
+  determinism, integrity, tamper detection, offline verification, scope), PASS or FAIL
+  each: `python suite/conformance.py`
+- **Performance** — latency, record size and throughput, as per-property percentiles:
+  `python suite/performance.py`
+- **Interoperability** — the same record verified by the Python API, the command line
+  and an independent from-scratch verifier; a tampered record rejected by all three:
+  `python suite/interoperability.py`
+- **Verifier evaluation** — detection metrics for the individual verifiers, which are
+  swappable. This measures the verifiers, not the infrastructure.
 
-**what was checked → how it was checked → what evidence was produced → which policy interpreted it → what decision was made → which record proves it**
+Every check traces to a public standard, RFC or regulation (Ed25519, SHA-256, canonical
+JSON, append-only logs, SLSA, C2PA, W3C Verifiable Credentials, EU AI Act Art. 12 and
+15). See [suite/STANDARDS.md](suite/STANDARDS.md). Full suite in [suite/](suite/).
 
-The result can be verified independently, offline.
+```
+$ python suite/conformance.py
+PASS  Evidence generation      PASS  Record integrity       PASS  Offline verification
+PASS  Policy semantics         PASS  Tamper detection       PASS  Scope boundaries
+PASS  Decision determinism
+ALL CONTRACTS PASS
 
-
-<br>
+$ python suite/interoperability.py
+Python API, command line and an independent verifier all accept the genuine record
+all three reject a tampered record
+PORTABLE AND INDEPENDENTLY VERIFIABLE
+```
 
 ## Quick start
 
