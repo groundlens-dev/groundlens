@@ -65,9 +65,8 @@ ENCODER = {
 
 # --- NLI: a multilingual entailment model, exported to ONNX with optimum. ---
 NLI_REPO = "MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli"
-# TODO: pin to the commit sha this build resolves and prints (recorded in
-# provenance), so the ONNX export is reproducible to a fixed model revision.
-NLI_REVISION = "main"
+# Pinned to the commit the base v2 build exported, so a rebuild is reproducible.
+NLI_REVISION = "0a71e92a985b6e1ad1828cf67ce9c459639c1dca"
 # tract 0.23 runs the tiny NLI test model at opset 13; export the real one the
 # same way so the graph stays within what the engine's runtime supports.
 NLI_OPSET = 13
