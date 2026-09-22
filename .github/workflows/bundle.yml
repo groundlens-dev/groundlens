@@ -26,11 +26,23 @@ jobs:
         with:
           python-version: "3.11"
       - name: install the ONNX export toolchain
+        # Build-only, ephemeral tooling for this manual workflow. Pinned by
+        # version for a reproducible export. Kept inline, not in a committed
+        # requirements file: these are not dependencies of the shipped package
+        # (which has none), so they must not appear as project vulnerabilities.
         run: |
           python -m pip install --upgrade pip
           # Torch (CPU) lives on the PyTorch index, not PyPI.
           pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
-          pip install -r scripts/requirements-bundle.txt
+          pip install \
+            optimum==1.23.3 \
+            transformers==4.44.2 \
+            onnx==1.16.2 \
+            onnxruntime==1.19.2 \
+            huggingface-hub==0.25.2 \
+            numpy==1.26.4 \
+            sentencepiece==0.2.0 \
+            protobuf==5.28.2
       - name: build the bundle
         run: python scripts/build_bundle.py --out dist/bundle
       - name: verify the bundle with the engine
