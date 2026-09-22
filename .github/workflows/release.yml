@@ -6,6 +6,13 @@ name: release
 # Every wheel, the sdist and every glv binary gets a signed build provenance
 # attestation (SLSA build level 2); verify one with
 #   gh attestation verify <file> --repo groundlens-dev/groundlens
+# The GitHub Release additionally carries, for every binary, a sigstore
+# keyless signature (`.sig` + `.pem`) and the SLSA provenance bundle
+# (`.intoto.jsonl`) as downloadable assets, so the release is verifiable
+# offline and the artifacts are signed on the release itself. Verify one with
+#   cosign verify-blob --certificate glv-... .pem --signature glv-... .sig \
+#     --certificate-identity-regexp 'https://github.com/groundlens-dev/groundlens/.*' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com  glv-...
 
 on:
   push:
@@ -150,13 +157,38 @@ jobs:
     needs: [pypi, glv]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write      # create the release and upload assets
+      id-token: write      # keyless sigstore signing and provenance OIDC
+      attestations: write  # SLSA build provenance attestation
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: "glv-*"
           merge-multiple: true
           path: bin
+      # SLSA build provenance over the exact binaries being released, kept as a
+      # file so it can ride along on the release (Scorecard reads it there).
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        id: provenance
+        with:
+          subject-path: "bin/*"
+      - name: Attach the provenance bundle as a release asset
+        shell: bash
+        run: cp "${{ steps.provenance.outputs.bundle-path }}" "bin/${GITHUB_REF_NAME}.intoto.jsonl"
+      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+      - name: Sign each binary with sigstore (keyless)
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for f in bin/*; do
+            case "$f" in
+              *.sig|*.pem|*.intoto.jsonl) continue ;;  # never sign a signature or the provenance
+            esac
+            cosign sign-blob --yes \
+              --output-signature "$f.sig" \
+              --output-certificate "$f.pem" \
+              "$f"
+          done
       - env:
           GH_TOKEN: ${{ github.token }}
         run: |
