@@ -213,10 +213,9 @@ pub const KNOWN_BUNDLES: &[KnownBundle] = &[KnownBundle {
     name: "base",
     version: "2",
     url: "https://github.com/groundlens-dev/groundlens/releases/download/bundle-base-v2/groundlens-base-v2.tar.gz",
-    // Pinned from what the bundle workflow publishes. `sha256:unpinned` makes
-    // `bundle pull base` refuse the download until the v2 archive exists and
-    // its hash is pinned here (do not release the engine with this value).
-    archive_sha256: "sha256:unpinned",
+    // sha256 of the published groundlens-base-v2.tar.gz, from the bundle
+    // workflow. `bundle pull base` refuses any archive that does not match.
+    archive_sha256: "sha256:aa7fee3a801fd7492d8cc1d2124fff4881a11ba4f0d811066df8dec1e4d28c6e",
     description: "multilingual-e5-small encoder (lexical + semantic) and a multilingual NLI model (entailment); 100 languages",
 }];
 
