@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="648" viewBox="0 0 460 648" font-family='Inter, "Söhne", "Helvetica Neue", Helvetica, Arial, sans-serif'>
+<rect width="460" height="648" fill="#FFFFFF"/>
+<rect x="44" y="22" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="51" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Input</text>
+<text x="230" y="72" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">question · answer · sources</text>
+<line x1="230" y1="103" x2="230" y2="119" stroke="#C2C2C2" stroke-width="1.25"/>
+<path d="M 226 116 L 230 120 L 234 116" fill="none" stroke="#C2C2C2" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="128" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="157" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Claims</text>
+<text x="230" y="178" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">atomic, checkable units of the answer</text>
+<line x1="230" y1="209" x2="230" y2="225" stroke="#C2C2C2" stroke-width="1.25"/>
+<path d="M 226 222 L 230 226 L 234 222" fill="none" stroke="#C2C2C2" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="234" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="263" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Verifiers</text>
+<text x="230" y="284" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">numeric · lexical · NLI · semantic</text>
+<line x1="230" y1="315" x2="230" y2="331" stroke="#C2C2C2" stroke-width="1.25"/>
+<path d="M 226 328 L 230 332 L 234 328" fill="none" stroke="#C2C2C2" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="340" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="369" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Evidence</text>
+<text x="230" y="390" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">every signal, with conflicts kept</text>
+<line x1="230" y1="421" x2="230" y2="437" stroke="#C2C2C2" stroke-width="1.25"/>
+<path d="M 226 434 L 230 438 L 234 434" fill="none" stroke="#C2C2C2" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="446" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="475" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Policy</text>
+<text x="230" y="496" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">thresholds · composition · regulation</text>
+<line x1="230" y1="527" x2="230" y2="543" stroke="#C2C2C2" stroke-width="1.25"/>
+<path d="M 226 540 L 230 544 L 234 540" fill="none" stroke="#C2C2C2" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="552" width="372" height="74" rx="12" ry="12" fill="#FFFFFF" stroke="#E4E4E4" stroke-width="1"/>
+<text x="230" y="581" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="500" fill="#000000">Signed record</text>
+<text x="230" y="602" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="400" fill="#000000">PASS · REVIEW · FAIL, hash-chained</text>
+</svg>

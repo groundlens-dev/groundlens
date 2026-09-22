@@ -48,7 +48,7 @@ Where a guardrail blocks or scores an output in the moment and leaves nothing be
 pip install groundlens
 ```
 
-The package installs the engine, the `groundlens` and `glv` commands, and needs no other dependency. Numbers and rules are checked out of the box; the lexical verifier needs one optional download, shown at the end.
+The package installs the engine, the `groundlens` and `glv` commands, and needs no other dependency. Numbers and rules are checked out of the box; the model-based verifiers need one optional download, shown at the end.
 
 ### Verify an answer
 
@@ -145,11 +145,11 @@ supported  0.90  pagaderos
 supported  0.88  factura
 ```
 
-The score is a contextual similarity, so the same word used differently scores lower, and the weakest anchor is what a reviewer reads first. The download is checked against a hash pinned in the engine and refuses anything else; in an isolated environment, copy the bundle directory by hand and point `GROUNDLENS_BUNDLE_DIR` at it.
+The score is a contextual similarity, so the same word used differently scores lower, and the weakest anchor is what a reviewer reads first. In an isolated environment, copy the bundle directory by hand and point `GROUNDLENS_BUNDLE_DIR` at it.
 
 ### The command line
 
-Everything except the lexical verifier works with the base install alone.
+Everything except the model-based verifiers works with the base install alone.
 
 ```bash
 groundlens verify --answer answer.txt --question question.txt \
@@ -179,7 +179,7 @@ GroundLens sits beside your AI system, not inside it. It observes what the syste
 
 It reads a run from what an agent already emits. An agent driving its tools speaks the Model Context Protocol (MCP); GroundLens ingests those JSON-RPC messages and turns them into a run, recording hashes of the arguments and results, never the content itself. Recording a run needs no change to how the agent is built.
 
-The engine and runtime are a Rust workspace, wrapped for Python, with no runtime dependencies; `glv` is the same code as a binary. No engine or runtime crate depends on an HTTP or TLS library, and a CI job fails the build if one ever appears. The only network operation in the project is one explicit command, `bundle pull`, which fetches the optional lexical model. Verification never reaches the network.
+The engine and runtime are a Rust workspace, wrapped for Python, with no runtime dependencies; `glv` is the same code as a binary. No engine or runtime crate depends on an HTTP or TLS library, and a CI job fails the build if one ever appears. The only network operation in the project is one explicit command, `bundle pull`, which fetches the optional model bundle. Verification never reaches the network.
 
 For the full design, the crate-by-crate layout, the core contracts (verifier, evidence, claim, policy, record, run) and the data flow, see [**ARCHITECTURE.md**](ARCHITECTURE.md).
 
@@ -290,7 +290,7 @@ GroundLens is deterministic where it can be, and reproducible where it cannot.
 
 `exact` verifiers and the execution gate use no floating point: the same input gives the same result, bit for bit, on any machine. `reproducible` verifiers run a pinned model in f32 on a pure-Rust inference engine, and their scores stay within a declared tolerance across machines. Anything `non_deterministic`, such as an LLM judge, is recorded with its model, prompt hash and settings, and decides only if the policy allows it.
 
-This is tested, not asserted: CI runs the invoice example, with and without the lexical channel, on Linux, macOS and Windows under a Turkish locale and a Pacific timezone, and compares the record hash with a committed value.
+This is tested, not asserted: CI runs the invoice example, with and without the model bundle, on Linux, macOS and Windows under a Turkish locale and a Pacific timezone, and compares the record hash with a committed value.
 
 <br>
 

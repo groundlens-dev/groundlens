@@ -5,6 +5,35 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
+## [5.3.0] - 2026-09-22
+
+The first ML verifiers, live. The `base` bundle now ships a model for the
+entailment channel, so `groundlens.nli` runs after `bundle pull base`, and a
+new sentence-similarity verifier runs on the same encoder as the lexical
+channel.
+
+### Added
+
+- **`semantic.cosine`**, the semantic verifier: for each statement claim it
+  pools a sentence vector for the claim and for every source and reports the
+  highest cosine similarity as support, on the `base` bundle's encoder.
+  `reproducible` under the pinned encoder. Similarity is not entailment, so it
+  reports support but never a contradiction. Listed as an optional verifier in
+  the default and AI-Act policies.
+- **`base` bundle v2** carries a multilingual entailment model
+  (`MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli`, exported to ONNX), so
+  `groundlens.nli` (wired since 5.0) now runs from `bundle pull base`. The
+  encoder feeds both the lexical and semantic channels.
+
+### Changed
+
+- **Windows CI** builds and tests only the abi3 floor (3.10) and newest (3.13)
+  Python; the wheels are abi3, so the full four-version sweep on the slow
+  Windows runners was redundant.
+- **Releases are signed.** Each release binary gets a sigstore signature and the
+  build gets SLSA provenance, attached to the GitHub Release as assets, so the
+  release is verifiable offline (OpenSSF Signed-Releases).
+
 ## [5.2.0] - 2026-09-21
 
 ### Added
@@ -175,6 +204,7 @@ The 3.x Python implementation is kept at tag
 for reproducibility of published numbers. Its history is in the release
 notes of each 3.x tag.
 
+[5.3.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.3.0
 [5.2.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.2.0
 [5.1.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.1.0
 [5.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.0.0

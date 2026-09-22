@@ -12,7 +12,9 @@ Shipped is marked done. Everything unmarked is not built yet.
 
 - [x] **5.2.0** · September 2026 · shipped to PyPI. Listed on the **official MCP registry**: a `server.json` and an `mcp-name` marker in the README (PyPI ownership), so GroundLens is discoverable from the registry and the directories that ingest it.
 
-- [ ] **5.3** · the first ML verifiers, live. The `base` bundle v2 ships the entailment model, so `groundlens.nli` runs after `bundle pull base`; a new `semantic.cosine` sentence-similarity verifier runs on the same encoder as the lexical channel; the shipped policies exercise real statistical verifiers. Also: the Windows CI matrix trimmed (abi3 wheels make it redundant), and releases sign their binaries and attach provenance so the OpenSSF Signed-Releases score rises. Still open for a later point release: publish the crates on crates.io (this needs a package name for the binary, since `glv` on crates.io is an unrelated project).
+- [x] **5.3.0** · September 2026 · shipped to PyPI. The first ML verifiers, live. The `base` bundle v2 ships the entailment model, so `groundlens.nli` runs after `bundle pull base`; a new `semantic.cosine` sentence-similarity verifier runs on the same encoder as the lexical channel; the shipped policies exercise real statistical verifiers. Also: the Windows CI matrix trimmed (abi3 wheels make it redundant), and releases sign their binaries and attach SLSA provenance as assets (OpenSSF Signed-Releases).
+
+- [ ] Publish the crates on crates.io: this needs a package name for the binary, since `glv` on crates.io is an unrelated project.
 
 - [ ] **5.4** · geometry and your own verifiers. `sgi` and `dgi` verifiers (the geometric grounding indices from our papers) as optional verifiers; user-defined verifiers in Python (a small interface, a declared determinism class, recorded like any built-in); adapters that run existing detectors (Vectara HHEM, LettuceDetect) as verifiers.
 
