@@ -189,8 +189,7 @@ For the full design, the crate-by-crate layout, the core contracts (verifier, ev
 
 <div align="center">
 
-![How a verification works](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/diagram_pipeline.png)
-
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/diagram_pipeline.png" alt="How a verification works" width="42%">
 </div>
 
 A verifier produces evidence, not truth: it reports what it measured and how sure it is, and none of them decides. A policy interprets the evidence and reaches the decision. The whole chain becomes a record: the input hashes, the verifiers and model hashes that ran, the evidence, the policy and its hash, the decision, the regulatory mapping, and the hash of the previous record, sealed with an Ed25519 signature. A log of records is an audit trail you can hand over as a file.
@@ -313,6 +312,8 @@ And a shell example of a whole agent run under [`examples/run`](examples/run): a
 <br>
 
 Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+<br>
 
 <div align="center">
 
