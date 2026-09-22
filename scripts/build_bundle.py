@@ -34,7 +34,6 @@ import io
 import json
 import shutil
 import subprocess
-import sys
 import tarfile
 import tempfile
 import urllib.request
@@ -102,17 +101,28 @@ def download(repo: str, revision: str, rel: str, dest: Path) -> None:
 def export_nli(stage: Path) -> tuple[list[str], str]:
     """Export the NLI model to ONNX with optimum. Returns (labels, resolved
     commit sha). The labels come from the model's own config, in logit order,
-    so the manifest never disagrees with the graph."""
+    so the manifest never disagrees with the graph.
+
+    `optimum-cli export onnx` has no `--revision`, so the model is downloaded at
+    the pinned revision first and exported from that local snapshot; that also
+    fixes the exact commit the export used."""
+    from huggingface_hub import HfApi, snapshot_download
+
+    # Resolve the revision to an exact commit sha, so the export is pinnable.
+    resolved = NLI_REVISION
+    try:
+        resolved = HfApi().model_info(NLI_REPO, revision=NLI_REVISION).sha or NLI_REVISION
+    except Exception as e:  # noqa: BLE001 - provenance is best effort
+        print(f"note: could not resolve NLI revision sha ({e})")
+
     with tempfile.TemporaryDirectory() as tmp:
+        src = snapshot_download(NLI_REPO, revision=resolved)
         tmp_out = Path(tmp) / "nli"
         cmd = [
-            sys.executable, "-m", "optimum.commands.optimum_cli",
-            "export", "onnx",
-            "--model", NLI_REPO,
-            "--revision", NLI_REVISION,
+            "optimum-cli", "export", "onnx",
+            "--model", src,
             "--task", "text-classification",
             "--opset", str(NLI_OPSET),
-            "--framework", "pt",
             str(tmp_out),
         ]
         print("export", " ".join(cmd))
@@ -127,14 +137,6 @@ def export_nli(stage: Path) -> tuple[list[str], str]:
         id2label = config["id2label"]
         labels = [id2label[str(i)].lower() for i in range(len(id2label))]
 
-    # Record the exact revision the export resolved to, so it can be pinned.
-    resolved = NLI_REVISION
-    try:
-        from huggingface_hub import HfApi  # type: ignore
-
-        resolved = HfApi().model_info(NLI_REPO, revision=NLI_REVISION).sha or NLI_REVISION
-    except Exception as e:  # noqa: BLE001 - provenance is best effort
-        print(f"note: could not resolve NLI revision sha ({e})")
     return labels, resolved
 
 
