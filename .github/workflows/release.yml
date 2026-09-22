@@ -176,6 +176,10 @@ jobs:
         shell: bash
         run: cp "${{ steps.provenance.outputs.bundle-path }}" "bin/${GITHUB_REF_NAME}.intoto.jsonl"
       - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        with:
+          # cosign 3.x defaults to the new bundle format and drops the detached
+          # .sig/.pem output Scorecard's Signed-Releases check looks for; pin v2.
+          cosign-release: v2.6.5
       - name: Sign each binary with sigstore (keyless)
         shell: bash
         run: |
