@@ -114,15 +114,15 @@ glv run check runs.jsonl
 
 A runnable version of both is under [`examples/run`](examples/run).
 
-### Enable the lexical verifier
+### Enable the model-based verifiers
 
-The numeric and rules verifiers need nothing. The lexical verifier (word-level grounding against the sources) needs the `base` bundle: the multilingual encoder, its tokenizer and a manifest of hashes.
+The numeric and rules verifiers need nothing. The lexical, semantic and NLI verifiers need the `base` bundle: the multilingual encoder and a multilingual entailment model, their tokenizers, and a manifest of hashes.
 
 ```bash
-groundlens bundle pull base      # ≈470 MB, once; the only command that uses the network
+groundlens bundle pull base      # downloaded once; the only command that uses the network
 ```
 
-With the bundle installed, the lexical verifier runs and its evidence appears in the record, one row per content word, each anchored to the source word it was scored against.
+With the bundle installed, the lexical verifier runs (one row per content word, each anchored to the source word it was scored against), and so do the semantic verifier (sentence similarity to the nearest source) and `groundlens.nli` (entailment, neutral or contradiction for each statement). The download is verified against a hash pinned in the engine.
 
 ```python
 from groundlens import verify
@@ -209,7 +209,7 @@ The engine verifies an answer and the claims inside it. A verifier produces evid
 | `groundlens.nli` | whether a source entails, contradicts or is neutral to each statement in the answer | statement "the fee is 0.75%" against a source saying `0.50%` → `contradiction` at high confidence |
 | `semantic.cosine` | how close each statement in the answer is, in the encoder's meaning space, to the nearest source, as cosine similarity | statement paraphrasing a source scores near `1.0`; one on an unrelated topic scores low and surfaces for review |
 
-`groundlens.numeric` and `groundlens.rules` are `exact` (bit-identical on any machine) and need no download. `groundlens.lexical`, `groundlens.nli` and `semantic.cosine` are `reproducible` (a pinned model, scores within a declared tolerance across machines) and run from a bundle: `lexical` and `semantic` from the `base` bundle's encoder, `nli` whenever the loaded bundle carries an entailment model. The base bundle ships the entailment model from v2 (see the [roadmap](https://github.com/groundlens-dev/groundlens/blob/main/ROADMAP.md)). Similarity is not entailment, so `semantic.cosine` reports support but never a contradiction. Geometric (SGI, DGI) and LLM-judge verifiers are planned; every one plugs into the same contract.
+`groundlens.numeric` and `groundlens.rules` are `exact` (bit-identical on any machine) and need no download. `groundlens.lexical`, `groundlens.nli` and `semantic.cosine` are `reproducible` (a pinned model, scores within a declared tolerance across machines) and run from the `base` bundle: `lexical` and `semantic` on its encoder, `nli` on its entailment model. `groundlens bundle pull base` installs all three. Similarity is not entailment, so `semantic.cosine` reports support but never a contradiction. Geometric (SGI, DGI) and LLM-judge verifiers are planned; every one plugs into the same contract.
 
 Locales matter for numbers: `1.234` is one thousand in Spanish and one and a bit in English. GroundLens reads `en`, `es`, `ca`, `de`, `fr`, `it`, `pt`, `nl` and Swiss formats, knows short and long scale words, and keeps every legitimate reading of an ambiguous numeral instead of guessing. The base bundle's encoder covers about a hundred languages.
 

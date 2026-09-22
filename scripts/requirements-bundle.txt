@@ -1,0 +1,17 @@
+# Toolchain for building the `base` bundle's NLI model in CI
+# (.github/workflows/bundle.yml). Pinned by version so the ONNX export is
+# reproducible on the pinned toolchain; the archive sha256 is then pinned in
+# crates/gl-bundle/src/lib.rs from what the build produces. Torch (CPU) is
+# installed separately from its own index in the workflow, since its wheels
+# do not live on PyPI.
+#
+# Hash pinning (like python/requirements-ci.txt) is a follow-up: these are the
+# heavy export-only deps of a manual workflow, not the release supply chain.
+optimum==1.23.3
+transformers==4.44.2
+onnx==1.16.2
+onnxruntime==1.19.2
+huggingface-hub==0.25.2
+numpy==1.26.4
+sentencepiece==0.2.0
+protobuf==5.28.2
