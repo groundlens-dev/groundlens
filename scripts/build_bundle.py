@@ -11,9 +11,9 @@ channel.
 The encoder is the ONNX export the model authors publish on the Hugging Face
 Hub, taken at a pinned revision and downloaded as-is. The NLI model ships only
 as PyTorch, so it is exported to ONNX with `optimum` at a pinned opset; the
-export is byte-reproducible on the pinned toolchain in scripts/requirements-
-bundle.txt. The archive is written with fixed metadata, so the same inputs give
-the same sha256 everywhere.
+export is byte-reproducible on the version-pinned toolchain installed by
+.github/workflows/bundle.yml. The archive is written with fixed metadata, so
+the same inputs give the same sha256 everywhere.
 
     python scripts/build_bundle.py --out dist/bundle
     → dist/bundle/groundlens-base-v2.tar.gz
