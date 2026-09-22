@@ -1,9 +1,11 @@
 name: bundle
 
-# Builds the `base` bundle (multilingual-e5-small, f32) from the model
-# authors' ONNX export at a pinned revision and publishes it as a GitHub
-# Release. Run by hand. The printed sha256 is then pinned in
-# crates/gl-bundle/src/lib.rs (KNOWN_BUNDLES) by a pull request.
+# Builds the `base` bundle (v2): the multilingual-e5-small encoder (the model
+# authors' ONNX export, downloaded) for the lexical and semantic channels, and
+# a multilingual NLI model exported to ONNX with optimum for the entailment
+# channel. Publishes it as a GitHub Release. Run by hand. The printed sha256 is
+# then pinned in crates/gl-bundle/src/lib.rs (KNOWN_BUNDLES) by a pull request,
+# and NLI_REVISION in scripts/build_bundle.py is pinned to the sha it resolved.
 
 on:
   workflow_dispatch:
@@ -15,33 +17,68 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # to create the bundle release
+      contents: write      # to create the bundle release
+      id-token: write      # keyless sigstore signing and provenance OIDC
+      attestations: write  # SLSA build provenance attestation
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
-      - run: python scripts/build_bundle.py --out dist/bundle
+          python-version: "3.11"
+      - name: install the ONNX export toolchain
+        run: |
+          python -m pip install --upgrade pip
+          # Torch (CPU) lives on the PyTorch index, not PyPI.
+          pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r scripts/requirements-bundle.txt
+      - name: build the bundle
+        run: python scripts/build_bundle.py --out dist/bundle
       - name: verify the bundle with the engine
         run: |
           pip install --require-hashes -r python/requirements-ci.txt
           (cd python && maturin build --release --out ../dist/wheels)
           pip install --no-deps dist/wheels/groundlens-*.whl
-          tar -xzf dist/bundle/groundlens-base-v1.tar.gz -C dist/bundle
-          groundlens bundle verify dist/bundle/groundlens-base-v1
-          GROUNDLENS_BUNDLE_DIR=dist/bundle/groundlens-base-v1 groundlens verify \
+          tar -xzf dist/bundle/groundlens-base-v2.tar.gz -C dist/bundle
+          groundlens bundle verify dist/bundle/groundlens-base-v2
+          GROUNDLENS_BUNDLE_DIR=dist/bundle/groundlens-base-v2 groundlens verify \
             --answer examples/invoice/answer.txt --question examples/invoice/question.txt \
             --source "invoice.pdf#p1=examples/invoice/invoice.txt" --locale en --json \
-            | python -c "import json,sys; r=json.load(sys.stdin); ev=[e for e in r['content']['graph']['evidence'] if e['verifier_id']=='groundlens.lexical']; assert ev, 'no lexical evidence'; print(len(ev), 'lexical evidence entries; bundle', r['content']['bundle_hash'])"
+            | python -c "import json,sys; r=json.load(sys.stdin); ids={e['verifier_id'] for e in r['content']['graph']['evidence']}; miss=[v for v in ('groundlens.lexical','semantic.cosine','groundlens.nli') if v not in ids]; assert not miss, f'missing {miss}; ran {sorted(ids)}'; print('ran', sorted(ids), 'bundle', r['content']['bundle_hash'])"
+      # Sign the archive and attach SLSA provenance, so the bundle release is a
+      # signed release too and does not drag the OpenSSF Signed-Releases score.
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        id: provenance
+        with:
+          subject-path: dist/bundle/groundlens-base-v2.tar.gz
+      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        with:
+          # cosign 3.x defaults to the new bundle format and drops the detached
+          # .sig/.pem output Scorecard's Signed-Releases check looks for; pin v2.
+          cosign-release: v2.6.5
+      - name: sign the archive (keyless)
+        run: |
+          cp "${{ steps.provenance.outputs.bundle-path }}" dist/bundle/groundlens-base-v2.intoto.jsonl
+          cosign sign-blob --yes \
+            --output-signature dist/bundle/groundlens-base-v2.tar.gz.sig \
+            --output-certificate dist/bundle/groundlens-base-v2.tar.gz.pem \
+            dist/bundle/groundlens-base-v2.tar.gz
       - name: publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag=bundle-base-v1
-          sha=$(cut -d' ' -f1 dist/bundle/groundlens-base-v1.tar.gz.sha256)
+          tag=bundle-base-v2
+          sha=$(cut -d' ' -f1 dist/bundle/groundlens-base-v2.tar.gz.sha256)
           gh release view "$tag" >/dev/null 2>&1 && gh release delete "$tag" --yes --cleanup-tag
-          gh release create "$tag" dist/bundle/groundlens-base-v1.tar.gz dist/bundle/groundlens-base-v1.tar.gz.sha256 dist/bundle/manifest.json \
-            --title "Bundle base v1 (multilingual-e5-small, f32)" \
+          gh release create "$tag" \
+            dist/bundle/groundlens-base-v2.tar.gz \
+            dist/bundle/groundlens-base-v2.tar.gz.sig \
+            dist/bundle/groundlens-base-v2.tar.gz.pem \
+            dist/bundle/groundlens-base-v2.intoto.jsonl \
+            dist/bundle/groundlens-base-v2.tar.gz.sha256 dist/bundle/manifest.json \
+            --title "Bundle base v2 (multilingual-e5-small encoder + multilingual NLI)" \
             --notes "sha256: $sha
-          Model: intfloat/multilingual-e5-small @ 614241f622f53c4eeff9890bdc4f31cfecc418b3 (ONNX f32 export by the model authors). Install with \`groundlens bundle pull base\`."
+          Encoder: intfloat/multilingual-e5-small @ 614241f622f53c4eeff9890bdc4f31cfecc418b3 (ONNX f32 export by the authors), for the lexical and semantic channels.
+          NLI: MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli exported to ONNX (opset 13), for the entailment channel.
+          Install with \`groundlens bundle pull base\`."
           echo "archive sha256: $sha"
+          echo "Now pin this sha in crates/gl-bundle/src/lib.rs KNOWN_BUNDLES, and pin NLI_REVISION in scripts/build_bundle.py to the sha printed above."
