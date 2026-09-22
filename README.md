@@ -4,7 +4,13 @@
 
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
 
-## Execution verification runtime for AI systems and agents
+# Execution verification runtime for AI systems and agents
+
+<br>
+
+|         Exact        |     Explicit scope     |   Reproducible   |    Signed evidence   |       Offline       |
+| :------------------: | :--------------------: | :--------------: | :------------------: | :-----------------: |
+| Deterministic checks | No hidden truth claims | Pinned artifacts | Hash-chained records | No network required |
 
 <br>
 
@@ -29,11 +35,20 @@
 
 ## What GroundLens is
 
-GroundLens is an execution verification runtime for AI systems and agents. It turns observable AI execution into deterministic, policy-governed evidence that can be independently verified.
+<div align="center">
 
-GroundLens provides a vendor-neutral runtime and evidence protocol for observing AI executions, evaluating claims, tool calls, actions and outcomes against composable verifiers and policies, and producing signed, reproducible evidence records.
+| Runs locally | No telemetry | No SaaS dependency | Signed records | Reproducible |
+| :------------------: | :--------------------: | :--------------: | :------------------: | :-----------------: |
+| Local       | No data sent | Fully self-hosted  | Ed25519 + chain  | Pinned       |
 
-The unit is the execution: an ordered sequence of steps an AI system or agent takes, from a model call and a retrieval to a tool call, an action with side effects and a human approval. GroundLens records each step, checks it, decides, and seals the run into a signed record anyone can verify offline. Verifying a single answer is the smallest case, a run with one claim.
+
+</div>
+
+GroundLens is an execution verification runtime for AI systems and agents. It turns observable AI execution into deterministic, policy-governed evidence that can be independently verified. It provides a vendor-neutral runtime and evidence protocol for observing AI executions, evaluating claims, tool calls, actions and outcomes against composable verifiers and policies, and producing signed, reproducible evidence records.
+
+### You don't have to trust GroundLens. You can verify the record
+
+The unit is the **execution**: an ordered sequence of steps an AI system or agent takes, from a model call and a retrieval to a tool call, an action with side effects and a human approval. GroundLens records each step, checks it, decides, and seals the run into a signed record anyone can verify offline. Verifying a single answer is the smallest case, a run with one claim.
 
 - an **answer**, and the claims inside it → `PASS`, `REVIEW` or `FAIL`
 - a **tool call or an action** → `ALLOW`, `REVIEW` or `DENY`
