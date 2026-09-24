@@ -1,145 +1,189 @@
-<!-- SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info> -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- mcp-name: io.github.groundlens-dev/groundlens -->
 
-# GroundLens
+<div align="center">
 
-**Prove your AI ran under the controls you set, with evidence anyone can check.**
+![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
 
-Sooner or later, someone will ask you to prove that an AI system operated under its controls.
+# The control and evidence layer for production AI
 
-Too often, when a system reaches production, the proof that it was under control lives in a folder: policies, spreadsheets, architecture diagrams, sample logs and test reports. That tells you what the system was supposed to do. It does not prove what happened when it ran.
+ ### Define a control once · Verify it across your AI estate  ·  Keep evidence that proves whether it actually operated
 
-GroundLens turns defined controls into executable verification over real AI execution, produces evidence, applies policy, and seals the result into a portable record that can be verified independently, offline.
+</div>
 
-> **CHECKED → METHOD → EVIDENCE → POLICY → DECISION → RECORD**
+Your AI estate may span different models, clouds, agent frameworks and vendors. You already have observability, evaluations, cloud controls and GRC. GroundLens connects them at the point they currently leave a gap: **can you prove that the controls you defined actually operated on the AI execution?**
 
-### Not a universal trust score
+<div align="center">
 
-GroundLens does not reduce an AI system to a single 0 to 100 number. Numbers are useful when they measure something specific. GroundLens keeps each measurement tied to the verifier, evidence, policy and execution that produced it.
+```mermaid
+---
+config:
+  theme: redux
+  look: classic
+  fontFamily: '''Open Sans Variable'', sans-serif'
+  themeVariables:
+    fontFamily: '''Open Sans Variable'', sans-serif'
+  layout: fixed
+---
+flowchart BT
+    A["AI estate<br>Models · Clouds · Agents · Vendors"] --> G["`**GroundLens**<br>Controls<br>Verification<br>Evidence`"]
+    G --> R["RISK"] & C["COMPLIANCE"] & A2["AUDIT"]
 
-### Evidence without scope is not assurance
-
-Every record states what was verified, what was not, and the boundary of the verification. A signed record of the wrong perimeter is not proof. This is the line an auditor can rely on, and the question you can ask of anyone else claiming to have "signed records": signed records of what, and how do you know you captured everything inside the boundary you claim.
-
-## What it does
-
-You define a control in plain terms. For example, "an answer must be supported by the retrieved sources", or "the agent may not move money without a human approval".
-
-GroundLens does four things with it, every time the AI runs.
-
-- Checks the execution against that control, using verifiers that produce evidence rather than a verdict.
-- Applies your policy to that evidence and reaches a decision. Pass, review, or fail.
-- Records what was checked, which verifier checked it, what evidence came out, which policy applied, and what was decided.
-- Seals the record with a signature and a hash chain, so any change to it is detectable and anyone can confirm it independently.
-
-## An example
-
-A support agent may answer from the knowledge base but not invent policy. You set the control. GroundLens produces, for each answer, a record like this.
-
-```
-decision   REVIEW
-control    ANSWER_MUST_BE_GROUNDED
-claim      "Refunds are available for digital purchases"
-
-numeric    NOT_APPLICABLE
-grounding  UNSUPPORTED
-           source: kb/refunds#p2
-           evidence: "Refunds are issued within five business days"
-
-policy     support_v1
-           unsupported_claim -> REVIEW
-
-scope      1/1 claims checked · 0 outside perimeter
-record     signed · offline-verifiable · hash-chained
+    style G stroke:#012092,fill:#dcfdff
 ```
 
-You can read it top to bottom. A verifier produced evidence, the policy turned that evidence into a decision, and the scope line states that one claim was checked and nothing was left outside the perimeter.
+<br>
 
-## How it works
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
+[![Docs](https://readthedocs.org/projects/groundlens/badge/?version=latest)](https://groundlens.readthedocs.io/en/latest/)
+[![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
+[![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
 
-One path, every time.
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13390/badge)](https://www.bestpractices.dev/projects/13390)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
+[![REUSE status](https://api.reuse.software/badge/github.com/groundlens-dev/groundlens)](https://api.reuse.software/info/github.com/groundlens-dev/groundlens)
+[![SLSA](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev/images/gh-badge-level2.svg)
 
-```
-execution  ->  scope  ->  verify  ->  policy  ->  evidence  ->  signed record
-```
+<br>
 
-A verifier produces evidence, never truth. GroundLens runs the verifiers, records their evidence, and lets policy determine how that evidence affects the decision. The decision and its evidence are sealed into a portable record.
+[Quick start](#quick-start) · [Why Groundlens](#why-groundlens) · [How it works](#how-it-works) · [Architecture](#architecture) · [Examples & Docs](#examples_and_docs) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md)
 
-The verification path is designed to run without network access. Deterministic checks produce stable results. Model based verifiers are reproducible only under their declared artifact and configuration constraints, and the record states which ones ran and with what settings.
+</div>
+<br>
 
-Verifiers are pluggable. Exact numeric and rule checks are deterministic. Entailment and similarity checks add model based judgement. An external detector, or an LLM used as a judge, can be wrapped as one more verifier. GroundLens does not care which ones you choose. It runs them, records what they said, and makes the result checkable.
+### GroundLens is not an AI evaluation platform, an observability platform, or an AI governance system. It is the verification and evidence **layer** that sits between AI execution and those systems.
 
-## What you can do with it
-
-The same record answers four questions that teams are starting to face as AI moves into production.
-
-**Make a rule executable.** A regulation or an internal standard says you must be able to trace what the system did. GroundLens turns that requirement into a concrete test, runs it, and keeps the evidence, instead of leaving you with a document and a promise.
-
-**Follow an action across systems.** When a business task is carried out by several agents crossing several platforms, no single platform can reconstruct the whole chain. A portable, vendor neutral record can.
-
-**Re-check only what changed.** A model, a prompt, a tool, or a permission changes. GroundLens re-runs the controls that the change affects and produces fresh evidence, so a small change does not force a full re-review.
-
-**Reconstruct a past decision.** Months later someone asks why the system did what it did. A signed record of what was checked at the time answers the question that a live dashboard cannot.
-
-## Why it is different
-
-**Evidence, not a rating.** You get a record you can review, investigate and present, not a score whose meaning nobody can pin down.
-
-**It states its own limits.** The evidence is explicit about what was checked and what was outside scope. An honest perimeter is what makes the rest worth anything.
-
-**Someone else can check it.** A record produced here is designed to be verified three ways: by the command line, by the Python library, and by a from-scratch verifier that shares no code with GroundLens. Portable evidence, not "trust our platform".
-
-**Cheap enough to run on everything.** The deterministic core is designed to run continuously and locally, with no per-check model bill, so you can verify every run instead of sampling a few.
+<br>
 
 ## Quick start
+
+Install:
 
 ```bash
 pip install groundlens
 ```
+
+Verify a claim against evidence:
 
 ```python
 from groundlens import verify
 
 record = verify(
     "Refunds are processed in 3 days.",
-    evidence=[("kb/refunds#p2", "Refunds are issued within five business days.")],
-    policy="eu_ai_act_high_risk_v1",
+    evidence=[
+        (
+            "kb/refunds#p2",
+            "Refunds are issued within five business days.",
+        )
+    ],
+    policy="payments_v4",
 )
 
-print(record.decision)     # FAIL  (3 days contradicts five business days)
-print(record.reasons)      # what a reviewer should read first
-record.verify()            # recompute hashes and signature, offline
+print(record.decision)
+print(record.reasons)
+
+record.verify()  # offline verification
 ```
 
-From the command line.
+Or from the CLI:
 
 ```bash
-groundlens verify --answer "…" --source kb/refunds#p2:"…"
-groundlens record verify records.jsonl     # re-check a sealed log
+groundlens verify \
+  --answer "Refunds are processed in 3 days." \
+  --source kb/refunds#p2:"Refunds are issued within five business days."
 ```
-
-## Who it is for
-
-Engineers integrate it. Risk and compliance teams rely on it. Auditors verify it. Each of them can meet the record on their own terms, which is why the same artifact works for all three.
-
-## Verify it yourself
-
-GroundLens ships a suite that checks the tool against its own promises, so you do not have to take them on faith.
+A record can then be verified independently:
 
 ```bash
-python suite/conformance.py        # does it do what it says
-python suite/performance.py        # latency, throughput, record size
-python suite/interoperability.py   # one record, three independent verifiers
+groundlens record verify records.jsonl
 ```
 
-The performance numbers are whatever they measure on your machine. The suite prints the machine it ran on, so a number always comes with the conditions that produced it.
+<br>
 
-## Standards it builds on
+## Why Groundlens
 
-The evidence model reuses established primitives rather than inventing its own. SHA-256 for hashing, Ed25519 signatures, canonical JSON, and append-only hash chaining in the style of transparency logs, together with the tamper-evident, independently verifiable pattern of content provenance and verifiable credentials.
 
-GroundLens can encode controls derived from applicable regulatory and internal requirements, with the mapping recorded alongside the verification evidence. It does not claim legal conformity on your behalf. See `suite/STANDARDS.md`.
+| Layer | Primary question |
+|---|---|
+| Observability | What happened? |
+| Evaluation | How well did it perform? |
+| Policy / governance | What should be allowed? |
+| **GroundLens** | **Can we prove the control actually operated on the execution?** |
 
-## License
+<br>
 
-Apache 2.0.
+### What you get
+
+
+<div align="center">
+
+| A common control layer | Continuous verification | Explicit coverage | Portable evidence | Independent verification |
+| :------------------: | :--------------------: | :--------------: | :------------------: | :-----------------: |
+| Define the business control once and apply it across different AI systems vendors and platforms | Run the control against real execution, not only against development benchmarks| Know what was verified, what was not, and where the verification boundary ends | Keep an evidence record that survives changes in models, clouds and vendors | Verify the record without trusting the service that produced it |
+
+<br>
+
+```text
+POLICY
+
+"Transfer requires
+human approval"
+
+▼
+AI EXECUTION
+┌────────────┼────────────┐
+▼            ▼            ▼
+tool call    approval     side effect
+│            │            │
+└────────────┼────────────┘
+▼
+GROUNDLENS
+┌───────────┴───────────┐
+▼                       ▼
+COVERED               EXCEPTION
+99.9%                   7
+│                       │
+└───────────┬───────────┘
+▼
+PORTABLE EVIDENCE
+┌─────────┼─────────┐
+▼         ▼         ▼
+     RISK      AUDIT   COMPLIANCE
+```
+
+</div>
+
+<br>
+
+## How it works
+
+- A **control** defines what must be true.
+
+- The **capture boundary** defines which execution GroundLens can actually
+observe.
+
+- A **verifier** produces evidence. It does not claim truth.
+
+<div align="center">
+
+| Verifier type        | Typical property                                        |
+| -------------------- | ------------------------------------------------------- |
+| Numeric / rules      | Exact                                                   |
+| NLI / semantic       | Reproducible under pinned artifacts                     |
+| External / LLM judge | Configuration-dependent / potentially non-deterministic |
+
+</div>
+
+- A **policy** interprets the evidence and produces a decision.
+
+The resulting record preserves the scope, evidence, policy, decision and integrity information needed for later review.
+
+
+
+<br>
+
+## Architecture
+
+<br>
+
+## Examples and Docs
