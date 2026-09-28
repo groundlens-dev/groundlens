@@ -4,13 +4,14 @@
 
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
 
-# The control and evidence layer for production AI
+# AI control testing for production systems and agents.
 
- ### Define a control once · Verify it across your AI estate  ·  Keep evidence that proves whether it actually operated
+### Test the controls · Gate the release · Keep the evidence
 
 </div>
 
-Your AI estate may span different models, clouds, agent frameworks and vendors. You already have observability, evaluations, cloud controls and GRC. GroundLens connects them at the point they currently leave a gap: **can you prove that the controls you defined actually operated on the AI execution?**
+GroundLens is designed to test the controls defined for an AI system against real execution, produce explicit results, and retain portable evidence that can be reviewed and independently verified.
+
 
 <div align="center">
 
@@ -46,26 +47,102 @@ flowchart BT
 
 <br>
 
-[Quick start](#quick-start) · [Why Groundlens](#why-groundlens) · [How it works](#how-it-works) · [Architecture](#architecture) · [Examples & Docs](#examples_and_docs) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md)
+[Quick start](#quick-start) · [Why Groundlens](#why-groundlens) · [How it works](#how-it-works) · [Architecture](#architecture) · [Examples and Docs](#examples-and-docs) · [FAQ](https://github.com/groundlens-dev/groundlens/blob/main/FAQ.md)
 
 </div>
 <br>
 
-### GroundLens is not an AI evaluation platform, an observability platform, or an AI governance system. It is the verification and evidence **layer** that sits between AI execution and those systems.
+# Why GroundLens
 
-<br>
+Production AI is moving beyond a single model call. An enterprise AI estate can contain models from different providers, RAG
+systems, agents, tools, internal applications, third-party AI products and systems running across different clouds and frameworks.
 
-## Quick start
+Organizations already have:
 
-Install:
+<div align="center">
 
-```bash
-pip install groundlens
+| Existing layer | Primary question |
+|:------:|:-----:|
+| Observability |What happened?|
+| Evaluation |How well did it perform? |
+| Policy / governance |What should be allowed? |
+| GRC / Risk | Which controls and risks apply?|
+
+</div>
+
+
+GroundLens is designed for the gap between:Did the control actually pass on the execution, and what evidence proves it?
+
+```
+"We have defined the control."
+                 │
+                 ▼
+"Did the control actually operate?"
+                 │
+                 ▼
+"Can we prove the result?"
 ```
 
-Verify a claim against evidence:
+What you get
 
-```python
+One control model
+
+Define a business control once and apply it across different AI systems,
+models, clouds, frameworks and vendors.
+
+Executable tests
+
+Turn controls into repeatable tests against real AI execution, not only
+development benchmarks.
+
+Release gates
+
+Use control tests as a deployment decision:
+
+PASS    → release
+REVIEW  → human decision
+FAIL    → block / remediate
+
+Explicit coverage
+
+Know what was tested, what was not, and where the verification boundary ends.
+
+Portable evidence
+
+Keep a record of the test, execution, evidence, policy and decision that can
+survive changes in the underlying AI platform.
+
+Independent verification
+
+Verify the resulting record without relying on a permanent GroundLens service.
+
+In one picture
+
+flowchart LR
+    A["AI estate<br/>Models · RAG · Agents · Tools · Vendors"]
+    B["GROUNDLENS<br/><br/>Control tests<br/>Execution capture<br/>Verification<br/>Evidence"]
+    C["Release"]
+    D["Risk / Compliance"]
+    E["Audit"]
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+
+GroundLens is not another AI evaluation platform, observability platform or
+GRC system.
+
+It is the control-testing and evidence layer that works across them.
+
+2. Quick start
+
+The developer experience is designed to be simple:
+
+pip install groundlens
+
+Run a control test
+
 from groundlens import verify
 
 record = verify(
@@ -82,108 +159,477 @@ record = verify(
 print(record.decision)
 print(record.reasons)
 
-record.verify()  # offline verification
-```
+# Verify the sealed record offline.
+record.verify()
 
-Or from the CLI:
+From the CLI:
 
-```bash
 groundlens verify \
   --answer "Refunds are processed in 3 days." \
   --source kb/refunds#p2:"Refunds are issued within five business days."
-```
-A record can then be verified independently:
 
-```bash
+Verify a stored record later:
+
 groundlens record verify records.jsonl
-```
 
-<br>
+The same core contract is intended to be available through:
 
-## Why Groundlens
+Python SDK
+CLI
+execution runtime
+MCP
+policy engine
+verification libraries
+portable evidence records
 
+3. How GroundLens works
 
-| Layer | Primary question |
-|---|---|
-| Observability | What happened? |
-| Evaluation | How well did it perform? |
-| Policy / governance | What should be allowed? |
-| **GroundLens** | **Can we prove the control actually operated on the execution?** |
+A GroundLens control test follows one path:
 
-<br>
+flowchart LR
+    A["CONTROL"] --> B["SCOPE"]
+    B --> C["CAPTURE"]
+    C --> D["VERIFY"]
+    D --> E["EVIDENCE"]
+    E --> F["POLICY"]
+    F --> G["DECISION"]
+    G --> H["ASSURANCE RECORD"]
 
-### What you get
+Control
 
+A control defines what the AI system is required to satisfy.
 
-<div align="center">
+Examples:
 
-| A common control layer | Continuous verification | Explicit coverage | Portable evidence | Independent verification |
-| :------------------: | :--------------------: | :--------------: | :------------------: | :-----------------: |
-| Define the business control once and apply it across different AI systems vendors and platforms | Run the control against real execution, not only against development benchmarks| Know what was verified, what was not, and where the verification boundary ends | Keep an evidence record that survives changes in models, clouds and vendors | Verify the record without trusting the service that produced it |
+"Customer-facing answers must be supported by approved sources."
 
-<br>
+"Transfers require human approval."
 
-```text
-POLICY
+"Only approved tools may be called."
 
-"Transfer requires
-human approval"
+"Sensitive data must remain inside the defined boundary."
 
-▼
-AI EXECUTION
-┌────────────┼────────────┐
-▼            ▼            ▼
-tool call    approval     side effect
-│            │            │
-└────────────┼────────────┘
-▼
-GROUNDLENS
-┌───────────┴───────────┐
-▼                       ▼
-COVERED               EXCEPTION
-99.9%                   7
-│                       │
-└───────────┬───────────┘
-▼
-PORTABLE EVIDENCE
-┌─────────┼─────────┐
-▼         ▼         ▼
-     RISK      AUDIT   COMPLIANCE
-```
+"Changes to permissions require re-verification."
 
-</div>
+A control is a business or technical requirement that can be turned into one or
+more executable tests.
 
-<br>
+Scope
 
-## How it works
+Scope defines what the test claims to cover.
 
-- A **control** defines what must be true.
+A record should be able to say:
 
-- The **capture boundary** defines which execution GroundLens can actually
-observe.
+what was in scope
+what was tested
+what was not tested
+what could not be observed
 
-- A **verifier** produces evidence. It does not claim truth.
+A signed record must not imply more coverage than actually existed.
 
-<div align="center">
+Capture
 
-| Verifier type        | Typical property                                        |
-| -------------------- | ------------------------------------------------------- |
-| Numeric / rules      | Exact                                                   |
-| NLI / semantic       | Reproducible under pinned artifacts                     |
-| External / LLM judge | Configuration-dependent / potentially non-deterministic |
+Capture defines how the AI execution entered the test.
 
-</div>
+Possible modes include:
 
-- A **policy** interprets the evidence and produces a decision.
+supplied trace
+instrumented execution
+inline capture
+gateway / enforced path
 
-The resulting record preserves the scope, evidence, policy, decision and integrity information needed for later review.
+These modes provide different assurance boundaries.
 
+GroundLens must never turn:
 
+"We tested the trace we received."
 
-<br>
+into:
 
-## Architecture
+"We tested everything the system did."
 
-<br>
+Verify
 
-## Examples and Docs
+A verifier checks an execution or part of an execution.
+
+Examples:
+
+numeric
+rules
+lexical
+NLI / entailment
+semantic similarity
+permission checks
+custom domain verifiers
+external detectors
+LLM-based judges
+
+A verifier produces evidence, not truth.
+
+Evidence
+
+Evidence describes what a verifier found and how it produced the result.
+
+A result can contain:
+
+verifier
+version
+model / artifact
+configuration
+execution reference
+result
+score where meaningful
+confidence where meaningful
+source / answer spans
+timestamp
+calibration
+
+The evidence remains tied to the verifier that produced it.
+
+Policy
+
+A policy determines how evidence becomes a decision.
+
+For example:
+
+policy: payments_v4
+
+rules:
+  - when: missing_human_approval
+    decision: FAIL
+
+  - when: unsupported_financial_claim
+    decision: REVIEW
+
+  - when: required_controls_pass
+    decision: PASS
+
+Decision
+
+The standard decision model is:
+
+PASS
+REVIEW
+FAIL
+
+A deployment or operational workflow can map those outcomes to its own actions:
+
+PASS    → release
+REVIEW  → human approval
+FAIL    → block / remediate
+
+Assurance record
+
+The assurance record preserves:
+
+control
+scope
+capture mode
+execution reference
+verifiers
+evidence
+policy
+decision
+integrity information
+
+The record is designed to be portable and independently verifiable.
+
+4. Product model and architecture
+
+GroundLens is designed as a test system first, with the surrounding assurance
+capabilities growing around the same test contract.
+
+A control test is the basic unit
+
+The core unit is not a score.
+
+It is:
+
+CONTROL
+   +
+EXECUTION
+   ↓
+TEST
+   ↓
+EVIDENCE
+   ↓
+DECISION
+   ↓
+RECORD
+
+For example:
+
+Control:
+    REFUND_REQUIRES_HUMAN_APPROVAL
+
+Execution:
+    agent requested refund €1,850
+
+Test:
+    approval present?
+
+Evidence:
+    approval = missing
+
+Policy:
+    missing_human_approval -> FAIL
+
+Decision:
+    FAIL
+
+Record:
+    signed · scoped · independently verifiable
+
+Multiple controls can test one system
+
+flowchart TB
+    A["AI Agent"] --> B["GroundLens"]
+
+    B --> C["Grounding test"]
+    B --> D["Tool permission test"]
+    B --> E["Human approval test"]
+    B --> F["PII boundary test"]
+    B --> G["Traceability test"]
+
+    C --> H["Control results"]
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+
+    H --> I["Release / Review / Fail"]
+    H --> J["Evidence package"]
+
+The same controls can test many systems
+
+                    CONTROL
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+     Agent A        RAG App        Vendor AI
+        │              │              │
+        └──────────────┼──────────────┘
+                       ▼
+             common test semantics
+                       │
+                       ▼
+                comparable evidence
+
+This is the reason for a vendor-neutral control layer.
+
+Release testing
+
+The first operational use of GroundLens can be a release gate.
+
+AI SYSTEM
+    │
+    ▼
+CONTROL TEST SUITE
+    │
+    ├── grounding .............. PASS
+    ├── tool permissions ....... PASS
+    ├── human approval ......... PASS
+    ├── sensitive-data boundary  PASS
+    └── side-effect policy ..... REVIEW
+                         │
+                         ▼
+                    RELEASE GATE
+                         │
+                 ┌───────┴───────┐
+                 ▼               ▼
+              RELEASE           REVIEW
+
+This makes GroundLens familiar to developers:
+
+an AI control test suite that can gate a release.
+
+Continuous testing
+
+The same control tests can move from pre-production to production:
+
+design
+  ↓
+pre-production tests
+  ↓
+release gate
+  ↓
+production execution
+  ↓
+continuous control testing
+  ↓
+exception
+  ↓
+re-verification
+
+A model, prompt, tool, permission or orchestration change can trigger targeted
+re-testing.
+
+The objective is not to retest everything whenever anything changes.
+
+The objective is to re-test the controls affected by the change.
+
+Enforcement
+
+Testing and enforcement are related but distinct.
+
+A test can produce:
+
+PASS
+REVIEW
+FAIL
+
+An enforcement path can turn that result into:
+
+PASS    → allow action
+REVIEW  → hold / request approval
+FAIL    → block action
+
+This allows the same control definition to move from:
+
+test
+
+to:
+
+gate
+
+to:
+
+runtime enforcement
+
+without changing its business meaning.
+
+Evidence is the hand-off to the rest of the organization
+
+The developer needs the test result.
+
+Risk and Compliance need the control result and exceptions.
+
+Audit needs the underlying evidence and scope.
+
+GroundLens is designed so that all three can refer to the same artifact.
+
+developer
+    │
+    │ runs / fixes tests
+    ▼
+GroundLens
+    │
+    │ produces evidence
+    ▼
+risk / compliance / audit
+
+The developer should not need to implement a GRC platform.
+
+The risk team should not need to understand the internals of every AI system.
+
+5. Examples, boundaries and design principles
+
+Example: grounded answers
+
+Control:
+
+CUSTOMER_ANSWER_MUST_BE_GROUNDED
+
+Execution:
+
+Answer:
+"Refunds are processed in 3 days."
+
+Source:
+"Refunds are issued within five business days."
+
+Result:
+
+decision   FAIL
+evidence   contradiction / unsupported claim
+scope      1/1 claims tested
+
+The test produces evidence that can be inspected and retained.
+
+Example: agent action
+
+Control:
+
+REFUND_REQUIRES_HUMAN_APPROVAL
+
+Execution:
+
+customer.read
+refund.create
+human.approval = missing
+
+Result:
+
+decision   FAIL
+
+evidence
+  customer.read       allowed
+  refund.create       requested
+  approval            missing
+
+scope
+  3/3 relevant events covered
+
+The same control can later become an enforcement rule:
+
+missing_human_approval -> BLOCK
+
+What GroundLens does not claim
+
+GroundLens does not turn a weak verifier into a strong assurance claim.
+
+A signed record proves the integrity of the record.
+
+It does not prove that:
+
+the verifier was objectively correct;
+
+an event outside the declared capture boundary did not occur;
+
+the AI system is generally safe;
+
+the organization is legally compliant.
+
+Those are separate questions.
+
+Independent verification
+
+The target architecture is:
+
+GroundLens record
+      │
+      ├── GroundLens CLI
+      ├── GroundLens library
+      └── independent implementation
+
+The record should be checkable without requiring a permanent GroundLens
+service.
+
+Local-first
+
+The verification core is designed to run locally.
+
+Target properties include:
+
+No telemetry
+No SaaS dependency for verification
+Offline verification
+Signed records
+Append-only history
+Explicit execution boundaries
+
+Vendor-neutral
+
+GroundLens is designed to operate across:
+
+model providers
+clouds
+agent frameworks
+application frameworks
+third-party AI systems
+internal AI systems
+
+The AI platform runs the system.
+
+GroundLens tests the controls applied to its execution.
+
