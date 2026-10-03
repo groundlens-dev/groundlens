@@ -115,7 +115,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
@@ -175,7 +175,7 @@ jobs:
       - name: Attach the provenance bundle as a release asset
         shell: bash
         run: cp "${{ steps.provenance.outputs.bundle-path }}" "bin/${GITHUB_REF_NAME}.intoto.jsonl"
-      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         with:
           # cosign 3.x defaults to the new bundle format and drops the detached
           # .sig/.pem output Scorecard's Signed-Releases check looks for; pin v2.
