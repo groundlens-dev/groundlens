@@ -14,17 +14,27 @@ Shipped is marked done. Everything unmarked is not built yet.
 
 - [x] **5.3.0** · September 2026 · shipped to PyPI. The first ML verifiers, live. The `base` bundle v2 ships the entailment model, so `groundlens.nli` runs after `bundle pull base`; a new `semantic.cosine` sentence-similarity verifier runs on the same encoder as the lexical channel; the shipped policies exercise real statistical verifiers. Also: the Windows CI matrix trimmed (abi3 wheels make it redundant), and releases sign their binaries and attach SLSA provenance as assets (OpenSSF Signed-Releases).
 
+- [ ] **Scope and provenance.** A request carries its scope (entity, contract and version, customer, document set) and every passage carries its provenance (document, version, entity, page, hash). An exact scope check: a passage the answer uses from outside the scope is `FAIL`, a missing scope key is `REVIEW`. Record schema `groundlens.evidence-record/2`, with readers that keep verifying `/1`. Record compatibility fixtures in CI.
+
+- [ ] **A lighter default path.** The lexical, entailment and similarity channels leave the default install and the shipped policies and move behind an extra, deprecated for one release. Our measurements on real answers showed that presence checks miss the costly errors. The default install becomes the engine alone, with no model and no network.
+
+- [ ] **Exact arithmetic, units and intent.** Figures recomputed from the passages with exact rational arithmetic under the rounding rule and locale of the policy; a units check; an intent check (a percentage when a percentage was asked).
+
+- [ ] **The policy as the single place of configuration.** `extends` from shipped baselines, a published schema with unknown keys rejected, risk classes that can require human review, a declared meaning of `PASS`, `policy show --resolved`, and explicit failure semantics: a timeout, an error or a missing input is `REVIEW`, never `PASS`.
+
+- [ ] **Signers and sinks.** Signing through AWS KMS, Azure Key Vault or PKCS#11; storage in JSONL, S3 Object Lock, Azure Blob with immutability or Postgres. `check()` returns only after the record is stored.
+
+- [ ] **The judge as a verifier.** The model you already use, through Bedrock, Azure OpenAI or any OpenAI-compatible endpoint, including your own servers. A versioned template filled with the policy, the scope and the provenance; evidence per claim; the judge can escalate to `REVIEW` and never decides on its own; `judge show-template`; adversarial tests against instructions hidden in passages.
+
+- [ ] **Measurement and replay.** `measure`: the rate of wrong answers passed under your policy, with a confidence interval from a small labelled sample (prediction-powered inference), per risk class, with the cost per decision; signed. `replay`: how many decisions a policy change would flip on past traffic.
+
+- [ ] **A regression suite on labelled real answers**, with recorded judge output, run in CI without network.
+
 - [ ] Publish the crates on crates.io: this needs a package name for the binary, since `glv` on crates.io is an unrelated project.
 
-- [ ] **5.4** · geometry and your own verifiers. `sgi` and `dgi` verifiers (the geometric grounding indices from our papers) as optional verifiers; user-defined verifiers in Python (a small interface, a declared determinism class, recorded like any built-in); adapters that run existing detectors (Vectara HHEM, LettuceDetect) as verifiers.
+- [ ] The runtime as a live path: an MCP proxy or gateway that gates tool calls in flight; more execution-event sources beyond MCP; HTTP and WASM bindings of the same engine.
 
-- [ ] **5.5** · the public benchmark. A public benchmark harness and report, "How existing AI grounding methods behave at 95 % recall", reporting false-positive rate at 95 % recall for every verifier and for common external methods, on public datasets, reproducible from the repository; benchmark results referenced by hash in calibration artefacts.
-
-- [ ] **5.6** · the evidence package. `groundlens report` as a complete evidence package (report, auditor guide, records, policies and bundle hashes, verification instructions) suitable for a procurement or conformity file; policy templates per regulatory framework beyond the AI Act mapping shipped in 4.0; private-deployment guidance.
-
-- [ ] The runtime as a live path, not only a recorder: an MCP proxy or gateway that gates tool calls and actions in flight (the 5.0 adapter records and audits a trace; this stands in the execution path and enforces); signer identity and trust for run records; more execution-event sources beyond MCP.
-
-- [ ] HTTP and WASM bindings of the same engine; LLM-as-a-judge as a verifier with recorded model, prompt hash and settings; bundles per language or sector; record attestation and transparency-log integration.
+The design behind these items, and the order they ship in, is in [docs/design/next.md](docs/design/next.md).
 
 <br>
 
