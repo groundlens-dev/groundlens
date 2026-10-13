@@ -94,6 +94,7 @@ guides/writing-policies
 guides/sign-and-store
 guides/use-a-judge
 guides/measure-and-replay
+guides/observability
 guides/rules
 guides/evidence-for-auditors
 ```

@@ -20,6 +20,7 @@ no decision: a decision without its record is not one GroundLens gives.
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -28,6 +29,7 @@ from groundlens._request import EvidenceArg
 from groundlens.policy import Policy
 from groundlens.record import Record
 from groundlens.judges import Judge, ask
+from groundlens.observe import CheckEvent, JudgeCall, Observer, Span, notify
 from groundlens.signers import LocalKey, Signer
 from groundlens.sinks import ChainConflict, Sink, StoreError
 from groundlens.verify import _request
@@ -55,6 +57,9 @@ class Verifier:
             :func:`groundlens.verify`. A ``locale`` or ``rounding`` written in
             the policy wins.
         rules: rule sets run as symbolic verifiers.
+        observers: told about every stored record and how long each step
+            took (:mod:`groundlens.observe`, :mod:`groundlens.integrations`).
+            They report; they never change a decision.
     """
 
     def __init__(
@@ -69,6 +74,7 @@ class Verifier:
         units: bool = True,
         derive: bool = True,
         rules: Sequence[str | Path | Mapping] = (),
+        observers: Sequence[Observer] = (),
     ) -> None:
         self.policy = Policy.coerce(policy)
         self.signer = signer
@@ -79,6 +85,7 @@ class Verifier:
         self.units = units
         self.derive = derive
         self.rules = tuple(rules)
+        self.observers = tuple(observers)
 
     def check(
         self,
@@ -97,10 +104,13 @@ class Verifier:
         """
         if self.sink is None:
             raise ValueError("check() stores the record before it returns; pass sink=, or use seal() and store()")
+        timer = _Timer(time.time_ns())
         # The judge is asked once; a retry after a chain conflict reuses its
         # reply, since the prompt does not depend on the chain.
-        reply = self._ask_judge(answer=answer, passages=passages, question=question, scope=scope, risk_class=risk_class)
-        for _ in range(CONFLICT_RETRIES):
+        reply = self._ask_judge(
+            answer=answer, passages=passages, question=question, scope=scope, risk_class=risk_class, timer=timer
+        )
+        for attempt in range(CONFLICT_RETRIES):
             record = self._seal(
                 answer=answer,
                 passages=passages,
@@ -110,11 +120,17 @@ class Verifier:
                 metadata=metadata,
                 previous=self.sink.head(),
                 judge_reply=reply,
+                timer=timer,
             )
+            store_start = time.time_ns()
             try:
                 self.sink.append(record)
             except ChainConflict:
                 continue
+            end = time.time_ns()
+            timer.store = Span("store", store_start, end)
+            if self.observers:
+                notify(self.observers, timer.event(record, end, attempt, metadata))
             return record
         raise StoreError(f"the chain kept moving under {CONFLICT_RETRIES} attempts; give each writer its own chain")
 
@@ -130,7 +146,8 @@ class Verifier:
         previous: str | None = None,
     ) -> Record:
         """Verify and sign, without storing. For batch writers, who store with
-        :meth:`store`. ``previous`` is the ``record_hash`` to chain to."""
+        :meth:`store`. ``previous`` is the ``record_hash`` to chain to.
+        Observers are not called: nothing has been stored yet."""
         reply = self._ask_judge(answer=answer, passages=passages, question=question, scope=scope, risk_class=risk_class)
         return self._seal(
             answer=answer,
@@ -157,11 +174,25 @@ class Verifier:
         request = self._request(answer, passages, question, scope, risk_class, None, None)
         return json.loads(_engine.judge_prompt_json(request))
 
-    def _ask_judge(self, *, answer, passages, question, scope, risk_class) -> dict | None:
+    def _ask_judge(self, *, answer, passages, question, scope, risk_class, timer=None) -> dict | None:
         if self.judge is None:
             return None
         prompt = self.judge_prompt(answer=answer, passages=passages, question=question, scope=scope, risk_class=risk_class)
-        return ask(self.judge, prompt)
+        start = time.time_ns()
+        reply = ask(self.judge, prompt)
+        if timer is not None:
+            timer.judge = JudgeCall(
+                "judge",
+                start,
+                time.time_ns(),
+                adapter=reply["adapter"],
+                model=reply["model"],
+                error=reply["error"],
+                response=reply["response"],
+                system=prompt["system"],
+                user=prompt["user"],
+            )
+        return reply
 
     def _request(self, answer, passages, question, scope, risk_class, metadata, previous) -> str:
         local_seed = self.signer.seed_hex if isinstance(self.signer, LocalKey) else None
@@ -186,16 +217,25 @@ class Verifier:
             risk_class=risk_class,
         )
 
-    def _seal(self, *, answer, passages, question, scope, risk_class, metadata, previous, judge_reply) -> Record:
+    def _seal(
+        self, *, answer, passages, question, scope, risk_class, metadata, previous, judge_reply, timer=None
+    ) -> Record:
         request = self._request(answer, passages, question, scope, risk_class, metadata, previous)
         if judge_reply is not None:
             request = json.dumps(dict(json.loads(request), judge=judge_reply), ensure_ascii=False)
-        if self.signer is None or isinstance(self.signer, LocalKey):
-            return Record.from_json(_engine.verify_json(request))
-        unsigned = _engine.verify_unsigned_json(request)
-        record_hash = json.loads(unsigned)["record_hash"]
-        signature = self.signer.sign(record_hash.encode("utf-8"))
+        local = self.signer is None or isinstance(self.signer, LocalKey)
+        start = time.time_ns()
+        out = json.loads((_engine.verify_timed_json if local else _engine.verify_unsigned_timed_json)(request))
+        if timer is not None:
+            timer.engine(start, time.time_ns(), out["timings"])
+        if local:
+            return Record.from_json(json.dumps(out["record"]))
+        unsigned = json.dumps(out["record"])
+        sign_start = time.time_ns()
+        signature = self.signer.sign(out["record"]["record_hash"].encode("utf-8"))
         public_key = self.signer.public_key()
+        if timer is not None:
+            timer.sign = Span("sign", sign_start, time.time_ns())
         return Record.from_json(
             _engine.attach_signature_json(unsigned, self.signer.algorithm, public_key.hex(), bytes(signature).hex())
         )
@@ -205,3 +245,39 @@ class Verifier:
         if self.sink is None:
             raise ValueError("no sink configured")
         self.sink.append(record)
+
+
+class _Timer:
+    """What one ``check`` measured, until it becomes a :class:`CheckEvent`.
+    A retry after a chain conflict overwrites the engine and signer times, so
+    the event describes the attempt that was stored."""
+
+    def __init__(self, start_ns: int) -> None:
+        self.start_ns = start_ns
+        self.judge: JudgeCall | None = None
+        self.sign: Span | None = None
+        self.store: Span | None = None
+        self.engine_span = Span("engine", start_ns, start_ns)
+        self.verifiers: tuple[Span, ...] = ()
+
+    def engine(self, start: int, end: int, timings: dict) -> None:
+        self.engine_span = Span("engine", start, end)
+        spans, at = [], start
+        for verifier_id, micros in timings["verifiers"]:
+            spans.append(Span(verifier_id, at, at + micros * 1000))
+            at += micros * 1000
+        self.verifiers = tuple(spans)
+
+    def event(self, record: Record, end_ns: int, retries: int, metadata) -> CheckEvent:
+        return CheckEvent(
+            record=record,
+            start_ns=self.start_ns,
+            end_ns=end_ns,
+            verifiers=self.verifiers,
+            engine=self.engine_span,
+            judge=self.judge,
+            sign=self.sign,
+            store=self.store,
+            retries=retries,
+            metadata=dict(metadata or {}),
+        )

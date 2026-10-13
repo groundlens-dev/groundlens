@@ -1,0 +1,10 @@
+# The policy of the demo credit desk: the shipped high-risk policy, plus the
+# borrower every request must name, and a class of request a person always sees.
+id: credit_desk
+version: 1.0.0
+extends: eu_ai_act_high_risk_v1
+scope:
+  required: [entity]
+risk_classes:
+  default: credit_information
+  mandatory_review: [credit_limit_change]

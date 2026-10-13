@@ -28,7 +28,7 @@ from groundlens._types import (
     Span,
     WindowEncoding,
 )
-from groundlens import judges, signers, sinks
+from groundlens import integrations, judges, observe, signers, sinks
 from groundlens.bundle import Bundle
 from groundlens.calibrate import calibrate
 from groundlens.policy import Policy
@@ -61,7 +61,9 @@ __all__ = [
     "adaptive_k",
     "as_evidence",
     "calibrate",
+    "integrations",
     "judges",
+    "observe",
     "proofread",
     "signers",
     "sinks",

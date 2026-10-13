@@ -1,0 +1,42 @@
+{
+  "passages": {
+    "tn-2024#p12": {
+      "text": "Talleres Norte S.L., consolidated income statement 2024. Revenue was €41,200 thousand, up from €38,600 thousand in 2023. EBITDA was €4,890 thousand. Depreciation and amortisation were €985 thousand, so EBIT was €3,905 thousand.",
+      "entity": "Talleres Norte"
+    },
+    "tn-2024#p31": {
+      "text": "Talleres Norte S.L., balance sheet at 31 December 2024. Total financial debt was €12,400 thousand and cash was €2,150 thousand, giving net debt of €10,250 thousand.",
+      "entity": "Talleres Norte"
+    },
+    "lm-2024#p08": {
+      "text": "Logística Mediterránea S.A., income statement 2024. Revenue was €58,700 thousand and EBITDA was €6,120 thousand.",
+      "entity": "Logística Mediterránea"
+    }
+  },
+  "cases": [
+    {"id": "revenue", "weight": 30, "question": "What was Talleres Norte's revenue in 2024?",
+     "answer": "Talleres Norte's revenue in 2024 was €41,200 thousand, up from €38,600 thousand in 2023.",
+     "retrieved": ["tn-2024#p12"], "scope": {"entity": "Talleres Norte"}},
+    {"id": "net-debt", "weight": 30, "question": "What was Talleres Norte's net debt at the end of 2024?",
+     "answer": "Net debt at 31 December 2024 was €10,250 thousand.",
+     "retrieved": ["tn-2024#p31"], "scope": {"entity": "Talleres Norte"}},
+    {"id": "ebitda", "weight": 20, "question": "What was Talleres Norte's EBITDA in 2024?",
+     "answer": "Talleres Norte's EBITDA in 2024 was €4,890 thousand.",
+     "retrieved": ["tn-2024#p12"], "scope": {"entity": "Talleres Norte"}},
+    {"id": "transposed", "weight": 4, "question": "What was Talleres Norte's EBITDA in 2024?",
+     "answer": "Talleres Norte's EBITDA in 2024 was €4,980 thousand.",
+     "retrieved": ["tn-2024#p12"], "scope": {"entity": "Talleres Norte"}},
+    {"id": "other-borrower", "weight": 4, "question": "What was Talleres Norte's EBITDA in 2024?",
+     "answer": "EBITDA in 2024 was €6,120 thousand.",
+     "retrieved": ["lm-2024#p08"], "scope": {"entity": "Talleres Norte"}},
+    {"id": "limit-change", "weight": 8, "question": "Can we raise Talleres Norte's credit limit given its 2024 net debt?",
+     "answer": "Net debt at 31 December 2024 was €10,250 thousand.",
+     "retrieved": ["tn-2024#p31"], "scope": {"entity": "Talleres Norte"}, "risk_class": "credit_limit_change"},
+    {"id": "no-scope", "weight": 4, "question": "What was revenue in 2024?",
+     "answer": "Revenue in 2024 was €41,200 thousand.",
+     "retrieved": ["tn-2024#p12"], "scope": {}},
+    {"id": "wrong-line", "weight": 0, "judge_only": true, "question": "What was Talleres Norte's EBITDA in 2024?",
+     "answer": "Talleres Norte's EBITDA in 2024 was €3,905 thousand.",
+     "retrieved": ["tn-2024#p12"], "scope": {"entity": "Talleres Norte"}}
+  ]
+}
