@@ -60,6 +60,14 @@ enum Command {
         /// Skip the lexical channel even when a bundle is available.
         #[arg(long)]
         no_lexical: bool,
+        /// What the request is about, `key=value`, repeatable
+        /// (`--scope entity=UPS`). Turns on the scope check.
+        #[arg(long = "scope")]
+        scope: Vec<String>,
+        /// Provenance of a source, `id:key=value`, repeatable
+        /// (`--provenance 10k#p114:entity=UPS`).
+        #[arg(long = "provenance")]
+        provenance: Vec<String>,
     },
     /// Policy tools.
     Policy {
@@ -282,13 +290,31 @@ fn run() -> anyhow_lite::Result<()> {
             signing_key,
             bundle,
             no_lexical,
+            scope,
+            provenance,
         } => {
             let mut srcs = Vec::new();
             for s in sources {
                 let (id, path) = s.split_once('=').ok_or("--source expects id=path")?;
-                srcs.push(Source { id: id.to_string(), text: read(&PathBuf::from(path))?, locator: None });
+                srcs.push(Source {
+                    id: id.to_string(),
+                    text: read(&PathBuf::from(path))?,
+                    locator: None,
+                    provenance: Default::default(),
+                });
+            }
+            for p in &provenance {
+                let (id, pair) = p.rsplit_once(':').ok_or("--provenance expects id:key=value")?;
+                let (key, value) = pair.split_once('=').ok_or("--provenance expects id:key=value")?;
+                let source =
+                    srcs.iter_mut().find(|s| s.id == id).ok_or("--provenance names an unknown source id")?;
+                source.provenance.insert(key.to_string(), value.to_string());
             }
             let mut req = VerifyRequest::new(read(&answer)?, srcs);
+            for s in &scope {
+                let (key, value) = s.split_once('=').ok_or("--scope expects key=value")?;
+                req.scope.insert(key.to_string(), value.to_string());
+            }
             req.question = question.map(|p| read(&p)).transpose()?;
             req.locale = locale;
             req.policy_yaml = read(&policy)?;

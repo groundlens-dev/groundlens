@@ -253,8 +253,9 @@ the documentation it touches in the same pull request.
 1. **This design page and the roadmap.**
 2. **Record compatibility fixtures.** Records written by the current release
    are committed and verified in CI, forever.
-3. **Scope and provenance** in the input contract, the scope check, record
-   schema `/2` with a `/1` reader.
+3. **Scope and provenance** in the input contract and the scope check. The
+   record schema stays `/1`: scope and provenance are part of the input, so
+   `input_hash` covers them.
 4. **Model channels out of the default path.** Lexical, entailment and
    similarity move behind an extra and out of the shipped policies.
 5. **Exact arithmetic recompute** with policy rounding, and the **units**

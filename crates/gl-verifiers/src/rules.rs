@@ -272,10 +272,16 @@ mod tests {
         let input = VerificationInput {
             question: None,
             answer: answer.into(),
-            sources: vec![Source { id: "s".into(), text: "".into(), locator: None }],
+            sources: vec![Source {
+                id: "s".into(),
+                text: "".into(),
+                locator: None,
+                provenance: Default::default(),
+            }],
             claims: extract_claims(answer, "en"),
             locale: "en".into(),
             metadata: Default::default(),
+            scope: Default::default(),
         };
         let ev = v.verify(&input).unwrap();
         assert_eq!(ev.len(), 2);

@@ -120,6 +120,7 @@ fn nli_runs_end_to_end_when_the_bundle_carries_a_model() {
             id: "s".into(),
             text: "The total amount due is 10,000 dollars.".into(),
             locator: None,
+            provenance: Default::default(),
         }],
     );
     req.policy_yaml = POLICY.into();
@@ -145,7 +146,12 @@ fn a_policy_that_requires_nli_without_a_model_is_a_clear_error() {
         + "decision:\n  any_contradiction_from: [groundlens.numeric]\n  unresolved_claims: REVIEW\n  tolerate_unresolved_kinds: [word, statement]\n";
     let mut req = VerifyRequest::new(
         "A statement.",
-        vec![Source { id: "s".into(), text: "A statement.".into(), locator: None }],
+        vec![Source {
+            id: "s".into(),
+            text: "A statement.".into(),
+            locator: None,
+            provenance: Default::default(),
+        }],
     );
     req.policy_yaml = policy;
     req.lexical = false;

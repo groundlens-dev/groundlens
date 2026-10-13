@@ -183,11 +183,17 @@ mod tests {
             answer: claims.first().map(|c| c.text.clone()).unwrap_or_default(),
             sources: sources
                 .into_iter()
-                .map(|(id, t)| Source { id: id.into(), text: t.into(), locator: None })
+                .map(|(id, t)| Source {
+                    id: id.into(),
+                    text: t.into(),
+                    locator: None,
+                    provenance: Default::default(),
+                })
                 .collect(),
             claims,
             locale: "en".into(),
             metadata: Default::default(),
+            scope: Default::default(),
         }
     }
 

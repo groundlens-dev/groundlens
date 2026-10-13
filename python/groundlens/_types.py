@@ -11,8 +11,8 @@ user can swap in their own retrieval encoder.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Literal, Protocol, runtime_checkable
 
 Span = tuple[int, int]
@@ -144,10 +144,16 @@ class OperatingPoint:
 
 @dataclass(frozen=True, slots=True)
 class Evidence:
-    """One retrieved source, with an id so findings can point at it."""
+    """One retrieved source, with an id so findings can point at it.
+
+    ``provenance`` says where the passage comes from (``entity``, ``version``,
+    ``doc_id``, ``page``, ``sha256``, or any key your application uses). It is
+    matched against the ``scope`` of :func:`groundlens.verify`.
+    """
 
     id: str
     text: str
+    provenance: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

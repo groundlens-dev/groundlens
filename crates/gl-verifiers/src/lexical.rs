@@ -399,10 +399,16 @@ mod tests {
         VerificationInput {
             question: None,
             answer,
-            sources: vec![Source { id: "s".into(), text: gl_text::normalise(source), locator: None }],
+            sources: vec![Source {
+                id: "s".into(),
+                text: gl_text::normalise(source),
+                locator: None,
+                provenance: Default::default(),
+            }],
             claims,
             locale: "en".into(),
             metadata: Default::default(),
+            scope: Default::default(),
         }
     }
 

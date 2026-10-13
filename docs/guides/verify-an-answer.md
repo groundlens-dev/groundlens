@@ -23,6 +23,25 @@ record = verify(
 reviewer's view: it shows only the claims that need a look, each next to the
 source it lost to. See {func}`groundlens.verify` for every argument.
 
+## Say what the request is about
+
+If your application knows what the question is about (the company, the
+customer, the contract and its version), pass it as `scope` and give every
+source its provenance. A figure taken only from a passage outside that scope
+then fails, even though the figure exists in the sources:
+
+```{code-block} python
+record = verify(
+    answer,
+    [("10k#p114", text, {"entity": "UPS", "year": "2016"})],   # (id, text, provenance)
+    scope={"entity": "UPS"},
+    locale="en",
+)
+```
+
+See [Scope and provenance](../concepts/scope.md) for what the check does and
+does not do.
+
 ## Numbers are compared as quantities
 
 Verification is not string matching. A paraphrase with the right numbers passes,

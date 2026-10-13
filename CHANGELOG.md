@@ -7,7 +7,30 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- **Scope and provenance.** A request can state its scope (`scope={"entity":
+  "AAPL"}`, `--scope entity=AAPL`) and every source its provenance (a third
+  tuple element or a `provenance` key in Python, `--provenance id:key=value`
+  on the command line). Both are hashed into the record's `input_hash`.
+- **`groundlens.scope`**, an exact verifier that runs when a scope is stated.
+  A figure found only in passages outside the scope is `contradicted` (note
+  `out_of_scope_source`); a figure found only in passages that do not state
+  their provenance is `unsupported` (note `provenance_missing`). This is the
+  error measured most often on unfiltered retrieval: a real figure from
+  another company's report.
+- **`decision.unsupported_from`** in policies: an `unsupported` from a listed
+  verifier sends the claim to review. Left out of the policy hash when empty,
+  so existing policies keep their hash.
+
 ### Changed
+
+- **The shipped policies are now version 1.1.0.** `groundlens_default_v1` and
+  `eu_ai_act_high_risk_v1` list `groundlens.scope` as recommended, fail on its
+  contradictions and review its unsupported claims. Their hashes change, and
+  so do the golden content hashes of the invoice example; the evidence and the
+  input hash of a request without a scope are unchanged. Records written under
+  1.0.0 keep verifying.
 
 - **The Rust toolchain in CI is pinned** to `1.99.0` in the Rust, Python and
   release workflows, instead of following `stable`. A new Rust release can add

@@ -76,6 +76,7 @@ getting-started/bundles
 concepts/overview
 concepts/verifiers
 concepts/claims-and-evidence
+concepts/scope
 concepts/policies
 concepts/records
 concepts/runtime

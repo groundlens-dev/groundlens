@@ -9,7 +9,7 @@
 use gl_core::{EvidenceGraph, Result, Source, VerificationInput, Verifier};
 use gl_policy::Policy;
 use gl_record::{seal, EvidenceRecord, RecordContent, RecordSigner, RECORD_SCHEMA};
-use gl_verifiers::{extract_claims_with, NumericConfig, NumericVerifier, RuleSet};
+use gl_verifiers::{extract_claims_with, NumericConfig, NumericVerifier, RuleSet, ScopeVerifier};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -25,24 +25,27 @@ pub mod bundle;
 pub mod run;
 pub use run::{verify_run, RunVerifyRequest};
 
-/// A policy that ships inside every build: numeric contradictions fail,
-/// anything unresolved goes to review, no generative verifier decides.
+/// A policy that ships inside every build: numeric contradictions fail, a
+/// figure taken from outside the request's scope fails, anything unresolved
+/// goes to review, no generative verifier decides.
 pub const DEFAULT_POLICY_ID: &str = "groundlens_default_v1";
 pub const DEFAULT_POLICY_YAML: &str = r#"id: groundlens_default_v1
-version: 1.0.0
+version: 1.1.0
 description: >
   Numeric claims must be exactly supported by the sources. A numeric
-  contradiction fails the answer. Claims no deterministic verifier can
-  resolve go to review. No generative verifier decides.
+  contradiction fails the answer, and so does a figure taken from a passage
+  outside the request's scope. Claims no deterministic verifier can resolve
+  go to review. No generative verifier decides.
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.rules.*]
+  recommended: [groundlens.scope, groundlens.rules.*]
   optional: [groundlens.lexical, groundlens.nli, semantic.*, sgi, dgi]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
-  any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
+  any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
+  unsupported_from: [groundlens.scope]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -81,6 +84,11 @@ pub struct VerifyRequest {
     pub lexical: bool,
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
+    /// What the request is about (`entity = UPS`). When present, the scope
+    /// verifier checks that every figure the answer uses comes from a passage
+    /// inside this scope. Hashed into the record's `input_hash`.
+    #[serde(default)]
+    pub scope: BTreeMap<String, String>,
 }
 
 fn default_true() -> bool {
@@ -107,6 +115,7 @@ impl VerifyRequest {
             bundle: None,
             lexical: true,
             metadata: BTreeMap::new(),
+            scope: BTreeMap::new(),
         }
     }
 }
@@ -119,19 +128,32 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
     let sources: Vec<Source> = req
         .sources
         .iter()
-        .map(|s| Source { id: s.id.clone(), text: gl_text::normalise(&s.text), locator: s.locator.clone() })
+        .map(|s| Source {
+            id: s.id.clone(),
+            text: gl_text::normalise(&s.text),
+            locator: s.locator.clone(),
+            provenance: s.provenance.clone(),
+        })
         .collect();
     let claims = extract_claims_with(&answer, &req.locale, req.numeric.units);
     let mut metadata = indexmap::IndexMap::new();
     for (k, v) in &req.metadata {
         metadata.insert(k.clone(), v.clone());
     }
-    let input = VerificationInput { question, answer, sources, claims, locale: req.locale.clone(), metadata };
+    let scope: indexmap::IndexMap<String, String> =
+        req.scope.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+    let input =
+        VerificationInput { question, answer, sources, claims, locale: req.locale.clone(), metadata, scope };
 
     let policy_yaml = if req.policy_yaml.trim().is_empty() { DEFAULT_POLICY_YAML } else { &req.policy_yaml };
     let policy = Policy::from_yaml(policy_yaml)?;
 
     let mut verifiers: Vec<Box<dyn Verifier>> = vec![Box::new(NumericVerifier::new(req.numeric.clone()))];
+    // The scope channel runs only when the request states a scope, so a
+    // request without one produces exactly the record it produced before.
+    if !input.scope.is_empty() {
+        verifiers.push(Box::new(ScopeVerifier::new()));
+    }
     for json in &req.rule_sets_json {
         verifiers.push(Box::new(RuleSet::from_json(json)?.compile()?));
     }
@@ -229,11 +251,13 @@ pub fn prepare(req: &VerifyRequest) -> VerificationInput {
                 id: s.id.clone(),
                 text: gl_text::normalise(&s.text),
                 locator: s.locator.clone(),
+                provenance: s.provenance.clone(),
             })
             .collect(),
         claims,
         locale: req.locale.clone(),
         metadata: Default::default(),
+        scope: req.scope.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
     }
 }
 
@@ -246,7 +270,7 @@ pub fn policy_lint(yaml: &str) -> Result<(String, Vec<String>)> {
 /// Declarations of every built-in verifier, model or no model.
 pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
     #[allow(unused_mut)]
-    let mut known = vec![NumericVerifier::default().info().clone()];
+    let mut known = vec![NumericVerifier::default().info().clone(), ScopeVerifier::default().info().clone()];
     #[cfg(feature = "lexical")]
     known.push(gl_verifiers::LexicalVerifier::info_without_model());
     #[cfg(feature = "nli")]
@@ -269,7 +293,12 @@ mod tests {
     fn end_to_end_numeric_contradiction_fails_and_record_verifies() {
         let req = VerifyRequest::new(
             "Revenue was €15M.",
-            vec![Source { id: "10k".into(), text: "Revenue was €10M.".into(), locator: None }],
+            vec![Source {
+                id: "10k".into(),
+                text: "Revenue was €10M.".into(),
+                locator: None,
+                provenance: Default::default(),
+            }],
         );
         let record = verify(&req).unwrap();
         assert_eq!(record.content.outcome.decision, Decision::Fail);
@@ -293,6 +322,7 @@ mod tests {
                 id: "s".into(),
                 text: "The total amount due is 10,000 dollars.".into(),
                 locator: None,
+                provenance: Default::default(),
             }],
         );
         req.bundle = Some(tiny.into());
