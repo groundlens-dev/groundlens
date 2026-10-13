@@ -31,6 +31,14 @@ fn verify_unsigned_json(request_json: &str) -> PyResult<String> {
     serde_json::to_string(&unsigned).map_err(err)
 }
 
+/// The exact prompt a judge is sent for a request, as JSON: `system`,
+/// `user`, `template_id`, `template_hash`, `prompt_hash`, `claims`.
+#[pyfunction]
+fn judge_prompt_json(request_json: &str) -> PyResult<String> {
+    let req: gl_engine::VerifyRequest = serde_json::from_str(request_json).map_err(err)?;
+    serde_json::to_string(&gl_engine::judge_prompt(&req).map_err(err)?).map_err(err)
+}
+
 /// Attach a key service's signature (hex) and public key (hex) to an unsigned
 /// record. The signature is checked first; the result is a sealed record.
 #[pyfunction]
@@ -192,6 +200,7 @@ fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(verify_unsigned_json, m)?)?;
+    m.add_function(wrap_pyfunction!(judge_prompt_json, m)?)?;
     m.add_function(wrap_pyfunction!(attach_signature_json, m)?)?;
     m.add_function(wrap_pyfunction!(record_verify_chains, m)?)?;
     m.add_function(wrap_pyfunction!(run_record_verify, m)?)?;

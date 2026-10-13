@@ -121,9 +121,16 @@ fn sentences(text: &str) -> Vec<Span> {
     let mut spans = Vec::new();
     let mut start = 0usize;
     let mut idx = 0usize;
-    for c in text.chars() {
+    let chars: Vec<char> = text.chars().collect();
+    for (i, &c) in chars.iter().enumerate() {
         let end = idx + c.len_utf8();
-        if matches!(c, '.' | '!' | '?' | '\u{3002}' | '\u{FF01}' | '\u{FF1F}' | '\n') {
+        // A point between two digits is a decimal point (`$37.35`), not the
+        // end of a sentence.
+        let decimal = c == '.'
+            && i > 0
+            && chars[i - 1].is_ascii_digit()
+            && chars.get(i + 1).is_some_and(|n| n.is_ascii_digit());
+        if !decimal && matches!(c, '.' | '!' | '?' | '\u{3002}' | '\u{FF01}' | '\u{FF1F}' | '\n') {
             if let Some(s) = trim_to_span(text, start, end) {
                 spans.push(s);
             }
@@ -150,6 +157,13 @@ fn trim_to_span(text: &str, start: usize, end: usize) -> Option<Span> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_decimal_point_does_not_end_a_sentence() {
+        let text = "Revenue was $37.35 billion. The line is 1.2 km long.";
+        let statements: Vec<&str> = sentences(text).iter().map(|s| &text[s.start..s.end]).collect();
+        assert_eq!(statements, ["Revenue was $37.35 billion.", "The line is 1.2 km long."]);
+    }
 
     #[test]
     fn numerals_win_overlaps_and_ids_follow_answer_order() {

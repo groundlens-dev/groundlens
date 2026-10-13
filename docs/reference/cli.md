@@ -114,6 +114,18 @@ groundlens bundle build path/ --name base --bundle-version 1
 | `bundle verify ROOT` | Re-hash every artefact of a bundle directory. |
 | `bundle build ROOT` | Write `manifest.json`. `--name`, `--bundle-version` required. |
 
+## judge show-template
+
+Print the exact prompt a [judge](../guides/use-a-judge.md) is sent for an
+input, with the template id and the prompt hash that go into the record.
+Nothing is sent anywhere. Takes the same `--answer`, `--source`,
+`--question`, `--policy`, `--locale`, `--scope` and `--provenance` options as
+`verify`; `--json` prints the prompt as JSON.
+
+```{code-block} bash
+groundlens judge show-template --answer a.txt --source 10k#p114=p114.txt --scope entity=UPS
+```
+
 ## keygen
 
 Print a fresh Ed25519 signing seed. Put it in `GROUNDLENS_SIGNING_KEY` so

@@ -102,8 +102,40 @@ enum Command {
         #[command(subcommand)]
         cmd: RunCmd,
     },
+    /// The judge: the prompt it is sent.
+    Judge {
+        #[command(subcommand)]
+        cmd: JudgeCmd,
+    },
     /// Print a fresh Ed25519 signing seed (hex) to stdout.
     Keygen,
+}
+
+#[derive(Subcommand)]
+enum JudgeCmd {
+    /// Print the exact prompt a judge is sent for this input, with the
+    /// template id and the prompt hash that go into the record.
+    ShowTemplate {
+        #[arg(long)]
+        answer: PathBuf,
+        /// `id=path`, repeatable.
+        #[arg(long = "source")]
+        sources: Vec<String>,
+        #[arg(long)]
+        question: Option<PathBuf>,
+        /// A policy file, or the id of a shipped policy.
+        #[arg(long, default_value = "groundlens_default_v1")]
+        policy: String,
+        #[arg(long, default_value = "und")]
+        locale: String,
+        #[arg(long = "scope")]
+        scope: Vec<String>,
+        #[arg(long = "provenance")]
+        provenance: Vec<String>,
+        /// Print the prompt as JSON.
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -199,6 +231,40 @@ enum BundleCmd {
 
 fn read(path: &PathBuf) -> anyhow_lite::Result<String> {
     std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()).into())
+}
+
+/// The request both `verify` and `judge show-template` build from the same
+/// options: answer, sources with provenance, scope and question.
+fn base_request(
+    answer: &PathBuf,
+    sources: &[String],
+    provenance: &[String],
+    scope: &[String],
+    question: Option<&PathBuf>,
+) -> anyhow_lite::Result<VerifyRequest> {
+    let mut srcs = Vec::new();
+    for s in sources {
+        let (id, path) = s.split_once('=').ok_or("--source expects id=path")?;
+        srcs.push(Source {
+            id: id.to_string(),
+            text: read(&PathBuf::from(path))?,
+            locator: None,
+            provenance: Default::default(),
+        });
+    }
+    for p in provenance {
+        let (id, pair) = p.rsplit_once(':').ok_or("--provenance expects id:key=value")?;
+        let (key, value) = pair.split_once('=').ok_or("--provenance expects id:key=value")?;
+        let source = srcs.iter_mut().find(|s| s.id == id).ok_or("--provenance names an unknown source id")?;
+        source.provenance.insert(key.to_string(), value.to_string());
+    }
+    let mut req = VerifyRequest::new(read(answer)?, srcs);
+    for s in scope {
+        let (key, value) = s.split_once('=').ok_or("--scope expects key=value")?;
+        req.scope.insert(key.to_string(), value.to_string());
+    }
+    req.question = question.map(read).transpose()?;
+    Ok(req)
 }
 
 /// A policy argument: a file, or the id of a shipped policy.
@@ -338,29 +404,7 @@ fn run() -> anyhow_lite::Result<()> {
             provenance,
             risk_class,
         } => {
-            let mut srcs = Vec::new();
-            for s in sources {
-                let (id, path) = s.split_once('=').ok_or("--source expects id=path")?;
-                srcs.push(Source {
-                    id: id.to_string(),
-                    text: read(&PathBuf::from(path))?,
-                    locator: None,
-                    provenance: Default::default(),
-                });
-            }
-            for p in &provenance {
-                let (id, pair) = p.rsplit_once(':').ok_or("--provenance expects id:key=value")?;
-                let (key, value) = pair.split_once('=').ok_or("--provenance expects id:key=value")?;
-                let source =
-                    srcs.iter_mut().find(|s| s.id == id).ok_or("--provenance names an unknown source id")?;
-                source.provenance.insert(key.to_string(), value.to_string());
-            }
-            let mut req = VerifyRequest::new(read(&answer)?, srcs);
-            for s in &scope {
-                let (key, value) = s.split_once('=').ok_or("--scope expects key=value")?;
-                req.scope.insert(key.to_string(), value.to_string());
-            }
-            req.question = question.map(|p| read(&p)).transpose()?;
+            let mut req = base_request(&answer, &sources, &provenance, &scope, question.as_ref())?;
             req.locale = locale;
             req.policy_yaml = read_policy(&policy)?;
             req.risk_class = risk_class;
@@ -522,6 +566,21 @@ fn run() -> anyhow_lite::Result<()> {
             let records = gl_record::run_records_from_jsonl(&read(&path)?)?;
             gl_record::verify_run_chain(&records)?;
             println!("ok  {} run records, chain intact, all signatures verify", records.len());
+        }
+        Command::Judge {
+            cmd: JudgeCmd::ShowTemplate { answer, sources, question, policy, locale, scope, provenance, json },
+        } => {
+            let mut req = base_request(&answer, &sources, &provenance, &scope, question.as_ref())?;
+            req.locale = locale;
+            req.policy_yaml = read_policy(&policy)?;
+            let prompt = gl_engine::judge_prompt(&req)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&prompt)?);
+            } else {
+                println!("# {} {}", prompt.template_id, prompt.template_hash);
+                println!("# prompt {}", prompt.prompt_hash);
+                println!("\n## system\n{}\n\n## user\n{}", prompt.system, prompt.user);
+            }
         }
         Command::Keygen => {
             let signer = RecordSigner::generate();

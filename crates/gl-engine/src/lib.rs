@@ -24,6 +24,7 @@ pub use gl_runtime;
 pub use gl_verifiers;
 
 pub mod bundle;
+pub mod judge;
 pub mod run;
 pub use run::{verify_run, RunVerifyRequest};
 
@@ -79,6 +80,10 @@ pub struct VerifyRequest {
     /// `None` means the policy's default class.
     #[serde(default)]
     pub risk_class: Option<String>,
+    /// What the caller's model replied to the prompt from [`judge_prompt`].
+    /// The engine never calls a model; the caller does, and passes the reply.
+    #[serde(default)]
+    pub judge: Option<judge::JudgeReply>,
 }
 
 fn default_true() -> bool {
@@ -107,6 +112,7 @@ impl VerifyRequest {
             metadata: BTreeMap::new(),
             scope: BTreeMap::new(),
             risk_class: None,
+            judge: None,
         }
     }
 }
@@ -218,6 +224,18 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
             Err(e) => graph.push_failure(&v.info().id, &e.to_string()),
         }
     }
+    if let Some(reply) = &req.judge {
+        let rendered = judge::render(&input, &policy);
+        let info = judge::info(&rendered, reply);
+        let id = info.id.clone();
+        match &reply.error {
+            Some(error) => {
+                graph.push_verifier(info, vec![]);
+                graph.push_failure(&id, error);
+            }
+            None => graph.push_verifier(info, judge::parse(&rendered, reply)),
+        }
+    }
     let kinds: BTreeMap<String, gl_core::ClaimKind> =
         input.claims.iter().map(|c| (c.id.clone(), c.kind)).collect();
     let facts = gl_policy::RequestFacts {
@@ -308,6 +326,14 @@ pub fn prepare(req: &VerifyRequest) -> VerificationInput {
         metadata: Default::default(),
         scope: req.scope.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
     }
+}
+
+/// The exact prompt a judge is sent for this request: the policy, the scope,
+/// the provenance of every passage, and the claims to label. Send `system`
+/// and `user` to your model and pass its reply back in `VerifyRequest::judge`.
+pub fn judge_prompt(req: &VerifyRequest) -> Result<judge::Rendered> {
+    let policy = request_policy(req)?;
+    Ok(judge::render(&prepare(req), &policy))
 }
 
 /// Load a policy from YAML text or, when the text is a single word naming a
