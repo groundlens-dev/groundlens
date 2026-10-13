@@ -14,13 +14,13 @@ id: my_policy_v1
 version: 1.0.0
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.scope, groundlens.rules.*]
+  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope]
+  unsupported_from: [groundlens.scope, groundlens.intent]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]

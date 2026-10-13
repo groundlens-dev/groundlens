@@ -350,7 +350,7 @@ fn unit_on_one_side(answer: &Quantity, source: &Quantity) -> bool {
 
 /// A bare four-digit year: `2015`, `(2011)`. No separator, no decimals, no
 /// unit, no scale, between 1900 and 2100.
-fn is_year(q: &Quantity) -> bool {
+pub(crate) fn is_year(q: &Quantity) -> bool {
     let digits = q.numeral.text.chars().filter(char::is_ascii_digit).count();
     // `(2011)` and the second half of `2022-2023` are years too.
     let only_digits =

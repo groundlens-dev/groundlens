@@ -9,7 +9,9 @@
 use gl_core::{EvidenceGraph, Result, Source, VerificationInput, Verifier};
 use gl_policy::Policy;
 use gl_record::{seal, EvidenceRecord, RecordContent, RecordSigner, RECORD_SCHEMA};
-use gl_verifiers::{extract_claims_with, NumericConfig, NumericVerifier, RuleSet, ScopeVerifier};
+use gl_verifiers::{
+    extract_claims_with, IntentVerifier, NumericConfig, NumericVerifier, RuleSet, ScopeVerifier,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -31,21 +33,23 @@ pub use run::{verify_run, RunVerifyRequest};
 /// channel: the default path runs without a model.
 pub const DEFAULT_POLICY_ID: &str = "groundlens_default_v1";
 pub const DEFAULT_POLICY_YAML: &str = r#"id: groundlens_default_v1
-version: 1.2.0
+version: 1.3.0
 description: >
   Numeric claims must be exactly supported by the sources. A numeric
   contradiction fails the answer, and so does a figure taken from a passage
-  outside the request's scope. Claims no deterministic verifier can resolve
-  go to review. No model is needed and no generative verifier decides.
+  outside the request's scope. An answer whose figure is not the kind or
+  unit the question asked for goes to review, and so do claims no
+  deterministic verifier can resolve. No model is needed and no generative
+  verifier decides.
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.scope, groundlens.rules.*]
+  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope]
+  unsupported_from: [groundlens.scope, groundlens.intent]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -156,6 +160,11 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
     // request without one produces exactly the record it produced before.
     if !input.scope.is_empty() {
         verifiers.push(Box::new(ScopeVerifier::new()));
+    }
+    // The intent channel reads the question; without one it has nothing to
+    // compare the answer with.
+    if input.question.as_deref().is_some_and(|q| !q.trim().is_empty()) {
+        verifiers.push(Box::new(IntentVerifier::new()));
     }
     for json in &req.rule_sets_json {
         verifiers.push(Box::new(RuleSet::from_json(json)?.compile()?));
@@ -273,7 +282,11 @@ pub fn policy_lint(yaml: &str) -> Result<(String, Vec<String>)> {
 /// Declarations of every built-in verifier, model or no model.
 pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
     #[allow(unused_mut)]
-    let mut known = vec![NumericVerifier::default().info().clone(), ScopeVerifier::default().info().clone()];
+    let mut known = vec![
+        NumericVerifier::default().info().clone(),
+        ScopeVerifier::default().info().clone(),
+        IntentVerifier::default().info().clone(),
+    ];
     #[cfg(feature = "lexical")]
     known.push(gl_verifiers::LexicalVerifier::info_without_model());
     #[cfg(feature = "nli")]

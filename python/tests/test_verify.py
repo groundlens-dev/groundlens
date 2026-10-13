@@ -186,3 +186,13 @@ def test_figures_the_answer_computed_are_recomputed_under_the_rounding_rule():
     assert off.decision == "FAIL"
     with pytest.raises(ValueError, match="rounding"):
         verify(answer, sources, rounding="nearest")
+
+
+def test_a_figure_of_another_kind_than_the_question_asked_goes_to_review():
+    sources = [("AAL/2013/page_172", "single-dip equity obligations | 1,246 | total obligations | 5,424")]
+    question = "What portion of the total obligations is related to single-dip equity obligations?"
+    amount = verify("The portion is $1,246 million.", sources, question=question, locale="en")
+    assert amount.decision == "REVIEW"
+    assert any("intent_mismatch" in e.notes for e in amount.evidence if e.verifier_id == "groundlens.intent")
+    share = verify("It is 1,246 of 5,424, or 22.97%.", sources, question=question, locale="en")
+    assert share.decision == "PASS"

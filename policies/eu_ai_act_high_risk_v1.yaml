@@ -1,24 +1,26 @@
 # Policy: what this organisation considers acceptable for a RAG assistant
 # whose outputs feed a decision listed in Annex III of Regulation (EU) 2024/1689.
 id: eu_ai_act_high_risk_v1
-version: 1.2.0
+version: 1.3.0
 description: >
   Numeric claims must be exactly supported by the retrieved sources. Any
   numeric contradiction fails the answer, and so does a figure taken from a
   passage outside the request's scope (another company, contract or version).
+  An answer whose figure is not the kind or unit the question asked for goes
+  to review.
   Everything a deterministic verifier
   cannot resolve goes to human review (Art. 14). No model is needed and no
   generative judge decides.
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.scope, groundlens.rules.*]
+  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
   fallback: []
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope]
+  unsupported_from: [groundlens.scope, groundlens.intent]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]

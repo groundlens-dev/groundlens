@@ -267,13 +267,15 @@ the documentation it touches in the same pull request.
    years and formula constants stop counting as wrong figures; a unit or scale
    stated on one side only is support with a note. The rounding rule is a
    request option until step 7 moves it into the policy.
-6. **Intent check,** and the **units** check that reads the question: both
+6. **Single-digit figures** with their own unit (`$2 million`) are read and
+   checked.
+7. **Intent check,** and the **units** check that reads the question: both
    compare the answer with what was asked.
-7. **Policy schema:** `extends`, strict keys, risk classes, `pass_means`,
+8. **Policy schema:** `extends`, strict keys, risk classes, `pass_means`,
    `policy show --resolved`, failure semantics.
-8. **Signer and sink interfaces;** `check()` stores before it returns.
-9. **The judge verifier:** adapters, template, claim-level evidence,
+9. **Signer and sink interfaces;** `check()` stores before it returns.
+10. **The judge verifier:** adapters, template, claim-level evidence,
    `judge show-template`, adversarial tests.
-10. **Measurement and replay.**
-11. **Regression suite on labelled real answers,** with recorded judge output,
+11. **Measurement and replay.**
+12. **Regression suite on labelled real answers,** with recorded judge output,
     run in CI without network.
