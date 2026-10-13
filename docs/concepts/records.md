@@ -81,3 +81,15 @@ offline), **attribution** (each record is signed, the key is inside it),
 and **separation of duties** (the engine measured, the named-and-hashed policy
 decided). To hand all of this to someone as a package, see
 [Evidence for auditors](../guides/evidence-for-auditors.md).
+
+## Records stay verifiable across releases
+
+Records are kept for years, often longer than any one version of GroundLens
+is in use. Every release therefore commits a set of records it wrote, signed
+with a fixed test key, under `crates/gl-record/tests/fixtures/<version>/`. A
+test in CI reads every one of those sets with the current code and checks that
+each record still deserialises and that every signature and chain link still
+verifies. A change that would break records users already keep fails the
+build. When the record format changes, the schema name changes with it
+(`groundlens.evidence-record/1` today) and the new code keeps a reader for the
+old schema; the fixtures are never edited to make a test pass.
