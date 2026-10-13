@@ -27,6 +27,9 @@ pub fn extract_claims_with(answer: &str, locale_name: &str, units: bool) -> Vec<
         gl_numeric::find_bare_numerals(answer, &profile)
     };
     for q in quantities {
+        if formula_constant(answer, &q) {
+            continue;
+        }
         let mut attributes = indexmap::IndexMap::new();
         attributes.insert("canonical".to_string(), q.canonical_text());
         attributes.insert("dimension".to_string(), dimension_name(q.dimension()));
@@ -77,6 +80,30 @@ pub fn extract_claims_with(answer: &str, locale_name: &str, units: bool) -> Vec<
         c.id = format!("c{i}");
     }
     claims
+}
+
+/// A number that belongs to a formula the answer wrote, not to the world:
+/// the `100` of `× 100` that turns a ratio into a percentage, and the small
+/// divisor of an average, `(47 + 47) / 2`. These are not claims; checking
+/// them against the sources only produced false alarms.
+fn formula_constant(answer: &str, q: &gl_numeric::Quantity) -> bool {
+    if *q.dimension() != Dimension::Dimensionless
+        || q.scale_exponent != 0
+        || q.numeral.readings.len() != 1
+        || q.numeral.readings[0].scale() != 0
+    {
+        return false;
+    }
+    let value = q.numeral.readings[0];
+    let before = answer[..q.span.start].trim_end();
+    let after = answer[q.span.end..].trim_start();
+    let times = |s: &str| ["*", "×", "·", "\\times", "\\cdot"].iter().any(|op| s.ends_with(op));
+    let times_after = |s: &str| ["*", "×", "·", "\\times", "\\cdot"].iter().any(|op| s.starts_with(op));
+    let scaling = (value == 100.into() || value == 1000.into()) && (times(before) || times_after(after));
+    let divisor = value >= 2.into()
+        && value <= 12.into()
+        && ["/", "÷"].iter().any(|op| before.strip_suffix(op).is_some_and(|b| b.trim_end().ends_with(')')));
+    scaling || divisor
 }
 
 fn dimension_name(d: &Dimension) -> String {
@@ -147,6 +174,21 @@ mod tests {
         assert_eq!(usd.attributes["dimension"], "currency:USD");
         // Every id is unique and follows answer order.
         assert_eq!(claims[0].id, "c0");
+    }
+
+    #[test]
+    fn formula_constants_are_not_claims() {
+        let claims = extract_claims("(22.1 - 24.0) / 24.0 * 100 = -7.92%, and (47 + 47) / 2 = 47.", "en");
+        let numbers: Vec<&str> =
+            claims.iter().filter(|c| c.kind == ClaimKind::Numeric).map(|c| c.text.as_str()).collect();
+        assert!(!numbers.contains(&"100"), "{numbers:?}");
+        assert!(!numbers.contains(&"2"), "{numbers:?}");
+        assert!(numbers.contains(&"-7.92%"), "{numbers:?}");
+        // A 100 that is a figure stays a claim.
+        let claims = extract_claims("The fleet has 100 trucks.", "en");
+        assert!(claims
+            .iter()
+            .any(|c| c.kind == ClaimKind::Numeric && c.text == "100 trucks" || c.text == "100"));
     }
 
     #[test]

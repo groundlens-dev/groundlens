@@ -86,6 +86,8 @@ def build_request(
     units: bool = True,
     declared_precision: bool = False,
     percent_as_fraction: bool = False,
+    derive: bool = True,
+    rounding: str = "half_up",
     signing_key: str | None = None,
     previous_record_hash: str | None = None,
     bundle_hash: str | None = None,
@@ -103,6 +105,8 @@ def build_request(
         "rule_sets_json": list(rule_sets_json),
         "numeric": {
             "units": units,
+            "derive": derive,
+            "rounding": rounding,
             "matching": {
                 "declared_precision": declared_precision,
                 "percent_as_fraction": percent_as_fraction,

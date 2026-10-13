@@ -42,6 +42,8 @@ groundlens verify \
 | `--log PATH` | Append the signed record to this JSON Lines log. |
 | `--signing-key HEX` | 32-byte hex Ed25519 seed (or `GROUNDLENS_SIGNING_KEY`). |
 | `--no-units` | GroundLens 3.x bare-number semantics. |
+| `--rounding RULE` | How a recomputed figure may differ from the one written: `half_up` (default), `half_even`, `within_last_digit`. |
+| `--no-derive` | Do not recompute figures from the answer's own supported figures. |
 | `--json` | Print the full record instead of the summary. |
 
 ## report

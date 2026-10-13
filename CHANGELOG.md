@@ -19,6 +19,16 @@ identical in the git tag and on PyPI.
   their provenance is `unsupported` (note `provenance_missing`). This is the
   error measured most often on unfiltered retrieval: a real figure from
   another company's report.
+- **Recomputed figures.** `groundlens.numeric` 1.1.0 checks a figure that no
+  source contains against the other figures of the same answer that the
+  sources support: their sum, difference, ratio and percentage change,
+  computed as exact fractions and compared at the precision the answer wrote.
+  A match is `supported` with the note `derived` and the formula in the
+  rationale; wrong arithmetic stays a contradiction. Only the answer's own
+  supported figures are operands, never pairs of source figures.
+- **A rounding rule** for recomputed figures: `half_up` (default),
+  `half_even` or `within_last_digit` (rounded or truncated). `rounding=` and
+  `derive=` in Python, `--rounding` and `--no-derive` on both command lines.
 - **`decision.unsupported_from`** in policies: an `unsupported` from a listed
   verifier sends the claim to review. Left out of the policy hash when empty,
   so existing policies keep their hash.
@@ -45,6 +55,19 @@ identical in the git tag and on PyPI.
   thresholds. Decisions on requests without a bundle are unchanged; the
   policy version and hash in the record change, and so do the golden content
   hashes of the invoice example.
+
+- **Fewer false failures on numbers.** A bare year missing from the sources is
+  `unsupported` (note `year_not_in_sources`), not a contradiction. The `100`
+  of `× 100` and the divisor of an average are no longer claims. The same
+  written number with a unit or scale on one side only (`$5,312 million`
+  against a table cell `5312`) is `supported` with the note
+  `unit_or_scale_on_one_side`, from three significant digits. On 192 labelled
+  answers over annual reports, correct answers that failed went from 90 % to
+  32 %; the wrong answers no longer flagged all had correct arithmetic on
+  figures from the wrong row, year or company. Records name verifier version
+  1.1.0, so the golden content hashes of the invoice example change; its
+  evidence and decision do not. `proofread()` keeps its 3.x numeral
+  semantics.
 
 - **The Rust toolchain in CI is pinned** to `1.99.0` in the Rust, Python and
   release workflows, instead of following `stable`. A new Rust release can add

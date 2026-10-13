@@ -61,6 +61,13 @@ enum Command {
         /// With --bundle, skip its channels.
         #[arg(long)]
         no_lexical: bool,
+        /// How a recomputed figure may differ from the one written:
+        /// half_up (default), half_even or within_last_digit.
+        #[arg(long, default_value = "half_up")]
+        rounding: String,
+        /// Do not recompute figures from the answer's own supported figures.
+        #[arg(long)]
+        no_derive: bool,
         /// What the request is about, `key=value`, repeatable
         /// (`--scope entity=UPS`). Turns on the scope check.
         #[arg(long = "scope")]
@@ -291,6 +298,8 @@ fn run() -> anyhow_lite::Result<()> {
             signing_key,
             bundle,
             no_lexical,
+            rounding,
+            no_derive,
             scope,
             provenance,
         } => {
@@ -328,6 +337,13 @@ fn run() -> anyhow_lite::Result<()> {
             }
             req.bundle = bundle;
             req.lexical = !no_lexical;
+            req.numeric.derive = !no_derive;
+            req.numeric.rounding = serde_json::from_value(serde_json::Value::String(rounding.clone()))
+                .map_err(|_| {
+                    format!(
+                        "--rounding: unknown rule {rounding:?}; use half_up, half_even or within_last_digit"
+                    )
+                })?;
             req.previous_record_hash = match &log {
                 Some(p) if p.exists() => {
                     gl_record::from_jsonl(&read(p)?)?.last().map(|r| r.record_hash.clone())

@@ -8,6 +8,7 @@ use gl_core::Span;
 use rust_decimal::{Decimal, RoundingStrategy};
 use serde::{Deserialize, Serialize};
 
+use crate::arith::Ratio;
 use crate::locale::LocaleProfile;
 use crate::numeral::{find_numerals, Numeral};
 use crate::units::{pow10, unit_for, Dimension, Unit, SCALES};
@@ -43,6 +44,37 @@ impl Quantity {
     fn approx_base(&self, reading: Decimal) -> Option<Decimal> {
         let (n, d) = self.canonical(reading)?;
         n.checked_div(d)
+    }
+
+    /// The exact base-unit value of reading `i`, as a fraction. `None` for
+    /// units with an offset (temperatures), where sums and ratios of base
+    /// values mean nothing, and on overflow.
+    pub fn base_ratio(&self, i: usize) -> Option<Ratio> {
+        let (written, scale) = self.written(i)?;
+        written.checked_mul(scale)
+    }
+
+    /// One unit of the last digit written for reading `i`, in base units:
+    /// `0.01` for `-7.92 %`, `100000` for `$1.9 million`.
+    pub fn step_ratio(&self, i: usize) -> Option<Ratio> {
+        let reading = self.numeral.readings.get(i)?;
+        let (_, scale) = self.written(i)?;
+        Ratio::pow10(-(reading.scale() as i32))?.checked_mul(scale)
+    }
+
+    /// The numeral as written for reading `i` (no scale, no unit), exact.
+    pub fn written_ratio(&self, i: usize) -> Option<Ratio> {
+        Ratio::from_decimal(*self.numeral.readings.get(i)?)
+    }
+
+    fn written(&self, i: usize) -> Option<(Ratio, Ratio)> {
+        if !self.unit.offset_num.is_zero() || self.readings.len() != self.numeral.readings.len() {
+            return None;
+        }
+        let written = self.written_ratio(i)?;
+        let unit = Ratio::from_decimal(self.unit.num)?.checked_div(Ratio::from_decimal(self.unit.den)?)?;
+        let scale = Ratio::pow10(self.scale_exponent as i32)?.checked_mul(unit)?;
+        Some((written, scale))
     }
 
     /// Every reading in the base unit of its dimension: `1200 m`,

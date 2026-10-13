@@ -171,3 +171,18 @@ def test_naming_a_bundle_is_deprecated_and_no_bundle_runs_no_model():
     with pytest.warns(DeprecationWarning, match="model channels"):
         modelled = verify("The invoice total is 1,000 dollars.", sources, locale="en", bundle=tiny)
     assert any(e.verifier_id == "groundlens.lexical" for e in modelled.evidence)
+
+
+def test_figures_the_answer_computed_are_recomputed_under_the_rounding_rule():
+    sources = [("10-K", "net cash provided by operating activities $1,410.5 million; cash flow $957.4 million; payout 31.0%")]
+    answer = "Cash flow was $957.4 million of $1,410.5 million, or 67.8%."
+    strict = verify(answer, sources, locale="en")
+    assert strict.decision == "FAIL"  # 67.876… rounds half up to 67.9
+    lenient = verify(answer, sources, locale="en", rounding="within_last_digit")
+    assert lenient.decision == "PASS"
+    derived = [e for e in lenient.evidence if "derived" in e.notes]
+    assert derived and "$957.4 million / $1,410.5 million" in derived[0].rationale
+    off = verify(answer, sources, locale="en", rounding="within_last_digit", derive=False)
+    assert off.decision == "FAIL"
+    with pytest.raises(ValueError, match="rounding"):
+        verify(answer, sources, rounding="nearest")
