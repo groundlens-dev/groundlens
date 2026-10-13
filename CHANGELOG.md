@@ -5,6 +5,22 @@ All notable changes to GroundLens. The format follows
 uses [Semantic Versioning](https://semver.org/). One version per release,
 identical in the git tag and on PyPI.
 
+## [Unreleased]
+
+### Changed
+
+- **The Rust toolchain in CI is pinned** to `1.99.0` in the Rust, Python and
+  release workflows, instead of following `stable`. A new Rust release can add
+  clippy lints that break the build with no change to the code, as 1.99 did.
+  The version is raised on purpose, in its own pull request, after checking
+  `cargo clippy --workspace --all-targets -- -D warnings` with the new
+  version. The MSRV job keeps checking `1.91`, and the fuzz job keeps
+  `nightly`.
+
+### Fixed
+
+- A needless borrow in the numeric verifier flagged by clippy in Rust 1.99.
+
 ## [5.3.0] - 2026-09-22
 
 The first ML verifiers, live. The `base` bundle now ships a model for the
