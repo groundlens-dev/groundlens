@@ -95,7 +95,7 @@ impl Verifier for NumericVerifier {
             })
             .collect();
 
-        let question_quantities: Vec<Quantity> = input.question.as_deref().map(&find).unwrap_or_default();
+        let question_quantities: Vec<Quantity> = input.question.as_deref().map(find).unwrap_or_default();
 
         let mut out = Vec::new();
         for claim in input.claims.iter().filter(|c| c.kind == ClaimKind::Numeric) {
