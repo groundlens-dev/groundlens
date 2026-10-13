@@ -93,6 +93,7 @@ guides/verify-a-run
 guides/mcp-server
 guides/writing-policies
 guides/sign-and-store
+guides/use-a-judge
 guides/rules
 guides/calibration
 guides/evidence-for-auditors

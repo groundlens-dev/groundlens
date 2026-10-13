@@ -80,6 +80,23 @@ identical in the git tag and on PyPI.
 - **`record verify` takes several chains**: several files, or a directory
   with one `.jsonl` per chain. Every chain must verify on its own, and no
   record may be in two chains. `Record.verify_chains()` in Python.
+- **The judge** (`groundlens.judges`): the model you already use, through
+  `openai_compatible` (OpenAI, vLLM, Ollama, any compatible gateway),
+  `azure_openai` or `bedrock`, passed as `Verifier(judge=...)`. GroundLens
+  ships no model and the engine never calls one: it renders a fixed prompt
+  (`groundlens.judge/1`) with the policy, the scope and the provenance of
+  every passage, the caller's client answers, and the engine reads the reply
+  into evidence per sentence under `llm_judge.<adapter>`. The record keeps the
+  template id and hash, the prompt hash, the model the provider says answered
+  and the hash of the raw reply, not the reply.
+- **`judge` in policies**: `required`, and what `contradicted` and
+  `unsupported` (which covers `uncertain`) lead to, `REVIEW` by default. The
+  judge's `supported` resolves nothing, so a judge cannot pass an answer the
+  exact checks fail. A timeout, an error or a reply that is not the JSON asked
+  for is `REVIEW`.
+- **`groundlens judge show-template`** (and `glv judge show-template`) prints
+  the exact prompt for an input, with its hash. `Verifier.judge_prompt()` in
+  Python.
 - In Rust, `gl_record::prepare_unsigned` and `gl_record::attach_signature`,
   and `gl_engine::verify_unsigned`.
 - Request-level reasons in the decision (`outcome.reasons`): a missing scope
@@ -158,6 +175,14 @@ identical in the git tag and on PyPI.
   They leave the default build in the next release.
 
 ### Fixed
+
+- **A decimal point no longer ends a sentence.** `$37.35 billion` was split
+  into two sentence claims at the point. Only the meaning channels and the
+  judge read sentences, so no decision changes, but the claim list, and with
+  it the input hash, does: the golden content hashes of the invoice example
+  (`crates/gl-cli/tests/golden/invoice.hash` and `invoice-lexical.hash`)
+  change. The evidence and the decision of the example are the same, under
+  claim ids shifted by the two fragments that are gone.
 
 - **A single-digit figure with its own unit is checked.** `$2 million`, `5 %`
   and `7 days` were never read as figures, so they were never verified. A

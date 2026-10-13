@@ -113,6 +113,24 @@ request that names none gets `default`. A class listed under
 policy does not list is an error, so a typo cannot route a request around
 review. The class is written into the record.
 
+### judge
+
+```{code-block} yaml
+judge:
+  required: true
+  contradicted: REVIEW
+  unsupported: REVIEW
+```
+
+What the labels of a [judge](../guides/use-a-judge.md) may do. The judge's
+`supported` resolves nothing; its `contradicted` sends a sentence to
+`contradicted` (REVIEW by default, FAIL allowed); its `unsupported` and
+`uncertain` send it to `unsupported` (REVIEW by default). A judge error,
+timeout or unreadable reply is REVIEW. With `required: true`, a request
+checked without a judge is REVIEW. The judge's evidence counts under these
+rules whatever `determinism.minimum_to_decide` says, because it can only
+escalate. A policy with a `judge` section must not forbid `llm_judge.*`.
+
 ### verifiers
 
 Five lists, each a set of verifier ids (globs like `groundlens.rules.*` are
@@ -184,6 +202,8 @@ Nothing that went wrong can pass:
 | a required scope key is missing | `missing_scope` (REVIEW by default) |
 | the request's risk class requires review | REVIEW |
 | the request names a risk class the policy does not list | error, no record |
+| the judge timed out, errored or gave no usable label | REVIEW |
+| the policy requires a judge and none ran | REVIEW |
 
 The final decision is the worst of all of these and of every claim.
 

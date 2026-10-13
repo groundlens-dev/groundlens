@@ -237,6 +237,33 @@ pub struct RiskClasses {
     pub mandatory_review: Vec<String>,
 }
 
+/// What the judge's labels may do. The judge is the model you already use,
+/// asked through a fixed template; it never decides on its own. Its
+/// `supported` resolves nothing; its `contradicted`, `unsupported` and
+/// `uncertain` escalate a claim, to `REVIEW` unless the policy says `FAIL`.
+/// A judge that errors, times out or does not answer for a claim is `REVIEW`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct JudgeRules {
+    /// The policy needs a judge on every request: a request checked without
+    /// one goes to `REVIEW`.
+    #[serde(default)]
+    pub required: bool,
+    /// What a claim the judge labels `contradicted` gets. `REVIEW` or `FAIL`.
+    #[serde(default = "review")]
+    pub contradicted: Decision,
+    /// What a claim the judge labels `unsupported` or `uncertain` gets.
+    #[serde(default = "review")]
+    pub unsupported: Decision,
+}
+
+/// The verifier ids a judge uses: `llm_judge.<adapter>`.
+pub const JUDGE_PREFIX: &str = "llm_judge.";
+
+fn is_judge(verifier_id: &str) -> bool {
+    verifier_id.starts_with(JUDGE_PREFIX)
+}
+
 impl RiskClasses {
     fn knows(&self, class: &str) -> bool {
         self.default == class
@@ -271,6 +298,10 @@ pub struct Policy {
     pub scope: Option<ScopeRules>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub risk_classes: Option<RiskClasses>,
+    /// How the judge's evidence counts. Absent: a judge is recorded under the
+    /// usual rules (the shipped policies forbid it).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub judge: Option<JudgeRules>,
     #[serde(default)]
     pub verifiers: VerifierSets,
     #[serde(default)]
@@ -403,6 +434,18 @@ impl Policy {
             }
             if scope.required.iter().any(|k| k.trim().is_empty()) {
                 problems.push("scope.required: empty key".into());
+            }
+        }
+        if let Some(judge) = &self.judge {
+            if judge.contradicted == Decision::Pass || judge.unsupported == Decision::Pass {
+                problems.push("judge: a label from the judge can escalate a claim, never pass it".into());
+            }
+            let probe = format!("{JUDGE_PREFIX}any");
+            if self.verifiers.forbidden.iter().any(|f| glob_matches(f, &probe)) {
+                problems.push(
+                    "judge: the policy sets judge rules but forbids llm_judge.*; set verifiers.forbidden without it"
+                        .into(),
+                );
             }
         }
         if let Some(classes) = &self.risk_classes {
@@ -551,6 +594,14 @@ pub fn evaluate_request(
         request_decision = request_decision.max(Decision::Review);
         request_reasons.push(format!("verifier_failed: {verifier_id} could not run: {message}"));
     }
+    if let Some(rules) = &policy.judge {
+        let judged = graph.verifiers.iter().any(|v| is_judge(&v.id))
+            || graph.failures.iter().any(|(id, _)| is_judge(id));
+        if rules.required && !judged {
+            request_decision = request_decision.max(Decision::Review);
+            request_reasons.push("judge_missing: the policy requires a judge and none ran".into());
+        }
+    }
     if let (Some(classes), Some(class)) = (&policy.risk_classes, &risk_class) {
         if classes.mandatory_review.contains(class) {
             request_decision = request_decision.max(Decision::Review);
@@ -566,6 +617,12 @@ pub fn evaluate_request(
             if policy.verifiers.forbidden.iter().any(|f| glob_matches(f, &v.id)) {
                 excluded.push((v.id.clone(), "forbidden by policy".into()));
                 return false;
+            }
+            // The judge only escalates, so the determinism floor, which says
+            // who may decide, does not keep it out when the policy has judge
+            // rules.
+            if policy.judge.is_some() && is_judge(&v.id) {
+                return true;
             }
             if !policy.determinism.minimum_to_decide.admits(v.determinism) {
                 excluded.push((
@@ -597,6 +654,20 @@ pub fn evaluate_request(
 
         for e in graph.for_claim(claim_id) {
             if !admitted.iter().any(|v| v.id == e.verifier_id) {
+                continue;
+            }
+            if let (Some(rules), true) = (&policy.judge, is_judge(&e.verifier_id)) {
+                let escalation = match e.result {
+                    // The judge agreeing resolves nothing.
+                    EvidenceResult::Supported | EvidenceResult::NotApplicable => None,
+                    EvidenceResult::Contradicted => Some((rules.contradicted, "contradicted")),
+                    EvidenceResult::Unsupported => Some((rules.unsupported, "unsupported")),
+                    EvidenceResult::Error => Some((Decision::Review, "could not label")),
+                };
+                if let Some((d, what)) = escalation {
+                    decision = decision.max(d);
+                    reasons.push(format!("{} {what}: {}", e.verifier_id, e.rationale));
+                }
                 continue;
             }
             match e.result {
@@ -969,6 +1040,67 @@ regulatory_mapping:
         assert_eq!(evaluate(&policy, &word_graph, &words).unwrap().decision, Decision::Pass);
     }
 
+    const JUDGED: &str = "id: judged\nversion: 1\nverifiers:\n  required: [groundlens.numeric]\n\
+                          determinism:\n  minimum_to_decide: reproducible\n\
+                          decision:\n  tolerate_unresolved_kinds: [word, statement]\njudge:\n  required: true\n";
+
+    fn judge_ev(claim: &str, result: EvidenceResult) -> Evidence {
+        ev("llm_judge.test", claim, result, 0.0, Determinism::NonDeterministic)
+    }
+
+    #[test]
+    fn the_judge_escalates_and_never_passes_a_claim() {
+        let policy = Policy::from_yaml(JUDGED).unwrap();
+        let kinds = BTreeMap::from([
+            ("c0".to_string(), ClaimKind::Numeric),
+            ("c1".to_string(), ClaimKind::Statement),
+        ]);
+        let graph_with = |results: Vec<(&str, EvidenceResult)>| {
+            let mut g = EvidenceGraph::default();
+            g.push_verifier(info("groundlens.numeric", Determinism::Exact), vec![]);
+            let mut j = info("llm_judge.test", Determinism::NonDeterministic);
+            j.kind = VerifierKind::Generative;
+            g.push_verifier(j, results.into_iter().map(|(c, r)| judge_ev(c, r)).collect());
+            g
+        };
+        // The judge says supported on a numeric claim no exact check resolved:
+        // still unresolved, still REVIEW.
+        let g = graph_with(vec![("c0", EvidenceResult::Supported), ("c1", EvidenceResult::Supported)]);
+        let out = evaluate(&policy, &g, &kinds).unwrap();
+        assert_eq!(out.decision, Decision::Review);
+        assert!(out.claims[0].reasons[0].contains("no admitted verifier"));
+        assert_eq!(out.claims[1].decision, Decision::Pass);
+        // Unsupported, uncertain and errors escalate to REVIEW; contradicted too
+        // unless the policy says FAIL.
+        for r in [EvidenceResult::Unsupported, EvidenceResult::Contradicted, EvidenceResult::Error] {
+            let out = evaluate(&policy, &graph_with(vec![("c1", r)]), &kinds).unwrap();
+            assert_eq!(out.claims[1].decision, Decision::Review, "{r:?}");
+        }
+        let strict = Policy::from_yaml(&format!("{JUDGED}  contradicted: FAIL\n")).unwrap();
+        let out = evaluate(&strict, &graph_with(vec![("c1", EvidenceResult::Contradicted)]), &kinds).unwrap();
+        assert_eq!(out.decision, Decision::Fail);
+    }
+
+    #[test]
+    fn a_required_judge_that_did_not_run_is_review_and_judge_rules_are_linted() {
+        let policy = Policy::from_yaml(JUDGED).unwrap();
+        let (graph, kinds) = passing_graph();
+        let out = evaluate(&policy, &graph, &kinds).unwrap();
+        assert_eq!(out.decision, Decision::Review);
+        assert!(out.reasons[0].starts_with("judge_missing"));
+        let mut failed = graph.clone();
+        failed.push_failure("llm_judge.test", "timeout after 30 s");
+        let out = evaluate(&policy, &failed, &kinds).unwrap();
+        assert_eq!(out.decision, Decision::Review);
+        assert!(out.reasons[0].contains("timeout"));
+
+        let bad = Policy::from_yaml(&format!("{JUDGED}  unsupported: PASS\n")).unwrap();
+        assert_eq!(bad.lint(&[]).len(), 1);
+        let forbids =
+            Policy::from_yaml("id: x\nversion: 1\nextends: groundlens_default_v1\njudge: {}\n").unwrap();
+        assert!(forbids.lint(&[])[0].contains("forbids llm_judge"));
+    }
+
     #[test]
     fn lint_rejects_an_unknown_rounding_rule() {
         let policy = Policy::from_yaml(&format!("{POLICY}rounding: bankers\n")).unwrap();
@@ -983,7 +1115,7 @@ regulatory_mapping:
         // added, is pinned: records written under it must keep naming it.
         let eu = Policy::builtin("eu_ai_act_high_risk_v1").unwrap();
         let json = gl_core::canonical::canonical_json(&eu).unwrap();
-        for key in ["extends", "pass_means", "locale", "rounding", "scope", "risk_classes"] {
+        for key in ["extends", "pass_means", "locale", "rounding", "scope", "risk_classes", "judge"] {
             assert!(!json.contains(&format!("\"{key}\"")), "{key} serialised while absent");
         }
     }

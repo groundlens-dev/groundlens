@@ -13,7 +13,7 @@ installed version.
 
 ```{eval-rst}
 .. autoclass:: groundlens.Verifier
-   :members: check, seal, store
+   :members: check, seal, store, judge_prompt
 
 .. autofunction:: groundlens.verify
 .. autofunction:: groundlens.verify_run
@@ -51,6 +51,13 @@ installed version.
    :members:
 
 .. autofunction:: groundlens.as_evidence
+```
+
+## Judges
+
+```{eval-rst}
+.. automodule:: groundlens.judges
+   :members: openai_compatible, azure_openai, bedrock, Judge
 ```
 
 ## Signers

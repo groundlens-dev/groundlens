@@ -223,8 +223,15 @@ not Ed25519, so the record envelope gained an optional `signature_algorithm`;
 absent means Ed25519, so no existing record changes. The adapters take the
 client the user already has (`boto3`, the Azure SDKs, a DB-API connection,
 `python-pkcs11`), so the package keeps zero runtime dependencies. The move to
-schema `/2` waits for the judge, which is what adds new content to the
+schema `/2` waited for the judge, which is what adds new content to the
 record.
+
+Built in step 10: the judge needed no new schema. It is a verifier like any
+other, so its template id and hash, the prompt hash, the model the provider
+returned and the hash of its raw reply are artefacts of its declaration in
+the evidence graph, already covered by the content hash. The record stays
+`groundlens.evidence-record/1`. The engine renders the prompt and reads the
+reply; the caller's client is the only thing that talks to a model.
 
 ## Measurement (planned)
 

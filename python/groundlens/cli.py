@@ -114,6 +114,17 @@ def build_parser() -> argparse.ArgumentParser:
     bp.add_argument("--sha256", help="expected archive hash for a bundle this build does not know")
     bp.add_argument("--trust-unpinned", action="store_true", help="accept a bundle this build has no pinned hash for (development)")
 
+    j = sub.add_parser("judge", help="the judge").add_subparsers(dest="sub", required=True)
+    jt = j.add_parser("show-template", help="print the exact prompt a judge is sent for this input")
+    jt.add_argument("--answer", required=True)
+    jt.add_argument("--source", action="append", default=[], type=_source, help="id=path, repeatable")
+    jt.add_argument("--question")
+    jt.add_argument("--policy", default=None)
+    jt.add_argument("--locale", default="und")
+    jt.add_argument("--scope", action="append", default=[])
+    jt.add_argument("--provenance", action="append", default=[])
+    jt.add_argument("--json", action="store_true", help="print the prompt as JSON")
+
     sub.add_parser("keygen", help="print a fresh Ed25519 signing seed")
     return p
 
@@ -205,6 +216,22 @@ def _run(args: argparse.Namespace) -> int:
         else:
             b = Bundle.pull(args.name, into=args.into, url=args.url, sha256=args.sha256, trust_unpinned=args.trust_unpinned)
             print(f"ok  {b.name} v{b.version}  {b.hash}  {b.root}")
+        return 0
+    if args.cmd == "judge":
+        from groundlens.verifier import Verifier  # noqa: PLC0415
+
+        prompt = Verifier(args.policy, locale=args.locale).judge_prompt(
+            answer=_read(args.answer),
+            passages=_with_provenance(args.source, args.provenance),
+            question=_read(args.question) if args.question else None,
+            scope=_scope(args.scope),
+        )
+        if args.json:
+            print(json.dumps(prompt, ensure_ascii=False, indent=2))
+        else:
+            print(f"# {prompt['template_id']} {prompt['template_hash']}")
+            print(f"# prompt {prompt['prompt_hash']}")
+            print(f"\n## system\n{prompt['system']}\n\n## user\n{prompt['user']}")
         return 0
     if args.cmd == "keygen":
         print(_engine.keygen())
