@@ -62,9 +62,9 @@ def summarise(records: Iterable[Record]) -> dict[str, Any]:
             "last_record": records[-1].record_id if records else None,
             "last_record_hash": records[-1].record_hash if records else None,
         },
-        "operating_point": {
-            "note": "FPR at 95% recall, precision, recall, AUROC and AUPRC require labelled records; "
-            "pass --labels to compute them (arrives with the benchmark milestone)."
+        "measurement": {
+            "note": "how many wrong answers passed needs labels from your team; "
+            "see `groundlens measure` (sample, label, measure)."
         },
     }
 
@@ -94,7 +94,7 @@ def to_markdown(summary: dict[str, Any]) -> str:
     lines.append(f"- bundles: {', '.join(summary['bundles'])}")
     ch = summary["chain"]
     lines.append(f"- chain: `{ch['first_record']}` → `{ch['last_record']}` · last hash `{ch['last_record_hash']}`")
-    lines += ["", "## Operating point", "", summary["operating_point"]["note"], ""]
+    lines += ["", "## Measurement", "", summary["measurement"]["note"], ""]
     lines.append("Verify offline: `groundlens record verify records.jsonl`")
     return "\n".join(lines) + "\n"
 
@@ -114,7 +114,7 @@ def write_report(log: str | Path, out_dir: str | Path) -> dict[str, Any]:
         "1. `pip install groundlens` (no network needed afterwards).\n"
         "2. `groundlens record verify records.jsonl` recomputes every hash and signature and every chain link.\n"
         "3. `report.json` is derived from `records.jsonl` only; regenerate it with `groundlens report records.jsonl --out .`.\n"
-        "4. Policies are identified by hash inside each record; the engine version and bundle hash are in `content`.\n",
+        "4. Policies are identified by hash inside each record; the engine version is in `content`.\n",
         encoding="utf-8",
     )
     return summary

@@ -29,9 +29,9 @@ of ours:
 - **W3C** ships conformance test suites to show a specification is met and that
   implementations interoperate, not to rank them.
 
-GroundLens follows the same shape. The verifier-evaluation part reports detection
-metrics such as false-positive rate at 95% recall, and those numbers describe the
-individual verifiers, which are swappable, never the infrastructure as a whole.
+GroundLens follows the same shape. What a deployment lets through is measured
+under its own policy, on its own answers, with `groundlens measure`; no single
+detection score stands for the infrastructure.
 
 ## References
 

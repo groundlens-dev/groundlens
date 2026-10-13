@@ -30,7 +30,6 @@ from groundlens import Record, verify
 ANSWER = "Revenue was EUR 15M and the line is 1.2 km long."
 EVIDENCE = [("10k", "Revenue was EUR 10M. Line length: 1200 m.")]
 N = 200
-NO_LEX = dict(lexical=False)
 
 
 def _percentiles(xs):
@@ -52,10 +51,10 @@ def _time(fn, n):
 
 
 def run():
-    verify(ANSWER, EVIDENCE, **NO_LEX)  # warm up
-    rec = verify(ANSWER, EVIDENCE, **NO_LEX)
+    verify(ANSWER, EVIDENCE)  # warm up
+    rec = verify(ANSWER, EVIDENCE)
 
-    verify_ms = _time(lambda: verify(ANSWER, EVIDENCE, **NO_LEX), N)
+    verify_ms = _time(lambda: verify(ANSWER, EVIDENCE), N)
     check_ms = _time(rec.verify, N)
     record_bytes = len(rec.to_json().encode("utf-8"))
     v = _percentiles(verify_ms)

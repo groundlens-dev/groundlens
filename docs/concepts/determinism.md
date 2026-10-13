@@ -9,8 +9,8 @@ and a policy can refuse to decide on evidence weaker than a class it names.
 | Class | Meaning | Example |
 | --- | --- | --- |
 | `exact` | No floating point. The same input gives bit-identical output, everywhere, always. | `groundlens.numeric`, `groundlens.rules` |
-| `reproducible` | A pinned model in a fixed execution profile gives the same result within a declared tolerance across platforms. | `groundlens.lexical`, `groundlens.nli` |
-| `non_deterministic` | Not guaranteed to repeat. Recorded in full, but a strict policy will not decide on it. | a future LLM-as-a-judge verifier |
+| `reproducible` | A pinned model in a fixed execution profile gives the same result within a declared tolerance across platforms. | the deprecated model channels (`groundlens.lexical`, `groundlens.nli`) |
+| `non_deterministic` | Not guaranteed to repeat. Recorded in full: the model the provider returned, the hash of the prompt and of the reply. | `llm_judge.<adapter>`, the judge |
 
 ## The reference execution profile
 

@@ -4,6 +4,11 @@
 
 """Turning a floor into a threshold -- on your data, with the cost shown.
 
+Deprecated: :func:`calibrate` fits a threshold for the 3.x floor and the model
+channels, which leave the default build in the next release. To know how many
+wrong answers a policy lets through, use ``groundlens measure``
+(:mod:`groundlens.measure`).
+
 This library ships no threshold. This function is how you get one, and it is
 deliberately awkward to use without seeing what it costs.
 
@@ -21,6 +26,7 @@ the threshold. You cannot extract the cut without being handed the bill.
 from __future__ import annotations
 
 import random
+import warnings
 from collections.abc import Sequence
 
 from groundlens._types import OperatingPoint, Proofread
@@ -30,6 +36,11 @@ from groundlens._types import OperatingPoint, Proofread
 MIN_LABELLED = 200
 
 BOOTSTRAP_ROUNDS = 1000
+
+CALIBRATE_DEPRECATED = (
+    "calibrate() is deprecated and leaves in the next release, with the model channels it calibrates. "
+    "To know how many wrong answers your policy lets through, use `groundlens measure`."
+)
 
 
 def _threshold_at_recall(positives: list[float], target_recall: float) -> float:
@@ -73,6 +84,7 @@ def calibrate(
     Raises:
         ValueError: too few examples, no defects, or no clean examples.
     """
+    warnings.warn(CALIBRATE_DEPRECATED, DeprecationWarning, stacklevel=2)
     if not 0.0 < target_recall <= 1.0:
         msg = f"target_recall must be in (0, 1]; got {target_recall}"
         raise ValueError(msg)

@@ -17,6 +17,7 @@ reproducible enough to decide on.
 | `groundlens.scope` | exact | Where each figure comes from: fails a figure found only in passages outside the request's scope (another company, contract or version). Runs when the request states a scope. See [Scope and provenance](scope.md). | Exact | No |
 | `groundlens.intent` | symbolic | Whether the answer's figure is the kind and unit the question asked for: a percentage when a percentage was asked, an amount in euros when euros were asked. Runs when the request has a question. | Exact | No |
 | `groundlens.rules` | symbolic | Your rule sets (YAML/JSON) run as checks. | Exact | No |
+| `llm_judge.<adapter>` | generative | The model you already use, asked a fixed question per sentence: supported, unsupported, contradicted or uncertain. Can only escalate. See [Use a judge](../guides/use-a-judge.md). | Non-deterministic | No (your own client) |
 | `groundlens.lexical` | lexical/ML | Deprecated. Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
 | `groundlens.nli` | ML | Deprecated. Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |
 | `semantic.cosine` | statistical | Deprecated. Sentence similarity between each statement and its closest source passage, on the bundle's encoder. | Reproducible | Yes (`base`) |
@@ -145,11 +146,9 @@ dollar value of an investment.
 
 ## Writing your own
 
-A user-defined verifier is on the roadmap (5.2): a small interface, a declared
-determinism class, recorded like any built-in, so your domain check joins the
-same pipeline and lands in the same record. Adapters that run existing
-detectors (for example Vectara HHEM or LettuceDetect) as verifiers are planned
-alongside it.
-
-See [Rules](../guides/rules.md) for the symbolic verifier you can use today
-without writing code.
+Today a domain check joins the pipeline as a rule set: see
+[Rules](../guides/rules.md), the symbolic verifier you can use without writing
+code. A check that reads meaning goes through the [judge](../guides/use-a-judge.md),
+with your own model. Custom checks written in Python, with a declared
+determinism class and the hash of their source in the record, are part of the
+design in [What changes next](../design/next.md).

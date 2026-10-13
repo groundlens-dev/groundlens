@@ -1,4 +1,13 @@
-# Calibration
+# Calibration (deprecated)
+
+```{admonition} Deprecated
+:class: warning
+
+`calibrate()` fits a threshold for the 3.x floor and the model channels, which
+leave the default build in the next release. It now raises a
+`DeprecationWarning`. To know how many wrong answers your policy lets through,
+use [`groundlens measure`](measure-and-replay.md).
+```
 
 GroundLens ships no threshold. A threshold fitted on someone else's data does
 not transfer, because the grounded floor moves with answer length, style and

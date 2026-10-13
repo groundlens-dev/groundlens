@@ -35,19 +35,22 @@ verification input  (question / answer / sources / metadata,  or  a run trace)
    claim / span layer          atomic claims with anchors  ·  or run events
         │
         ▼
-   verifiers                    deterministic · statistical · (generative, planned)
+   verifiers                    exact · symbolic · generative (your judge)
         │                       each: input → evidence, never input → truth
         ▼
    evidence graph               all evidence for all claims, conflicts kept
         │
         ▼
-   policy engine                thresholds · composition · determinism floor · risk class
+   policy engine                composition · scope · judge rules · risk class
         │
         ▼
    decision  +  regulatory mapping
         │
         ▼
-   signed, append-only evidence record   (hash-chained, Ed25519)
+   signed, append-only evidence record   (hash-chained; Ed25519 or a key service)
+        │
+        ▼
+   sink                         stored before the decision is returned
 ```
 
 The engine runs this once. Every surface, the Python package, the `glv` binary
@@ -89,12 +92,12 @@ classes that always go to review, and say what `PASS` means. A policy may
 A policy has a version and a hash, the hash of the resolved policy, and the
 hash goes into every record it decides.
 
-**Record.** The sealed result: input hashes, engine and bundle hashes, the
-evidence graph, the policy id and hash, the decision and its reasons, the
-regulatory mapping, the previous record's hash, and an Ed25519 signature with
-the signer's public key. A run adds its event log and gate verdict. The
-**content hash** covers everything that is a function of the input, policy and
-bundle, so the same check gives the same content hash on any machine.
+**Record.** The sealed result: input hashes, the engine version, the evidence
+graph, the policy id and hash, the decision and its reasons, the regulatory
+mapping, the previous record's hash, and a signature with the signer's public
+key. A run adds its event log and gate verdict. The **content hash** covers
+everything that is a function of the input and the policy, so the same check
+gives the same content hash on any machine.
 
 ## The layers of a verifier
 
@@ -103,16 +106,16 @@ reasons about through the determinism class:
 
 | layer | example | guarantee |
 |---|---|---|
-| exact | `groundlens.numeric`, `groundlens.rules`, the execution gate | deterministic, bit-identical everywhere |
-| lexical | `groundlens.lexical` | reproducible under a pinned model |
-| statistical | `groundlens.nli`, `semantic.cosine` | reproducible under a pinned model, calibrated |
-| geometric | SGI, DGI (planned) | reproducible / calibrable |
-| generative | LLM-as-a-judge (planned) | non-deterministic, recorded in full |
+| exact | `groundlens.numeric`, `groundlens.scope`, the execution gate | deterministic, bit-identical everywhere |
+| symbolic | `groundlens.intent`, `groundlens.rules` | deterministic, bit-identical everywhere |
+| generative | `llm_judge.<adapter>`, your own model | non-deterministic, recorded: model, prompt hash, reply hash |
+| model channels (deprecated) | `groundlens.lexical`, `groundlens.nli`, `semantic.cosine` | reproducible under a pinned model; run only when a request names a bundle |
 
 The engine does not privilege any layer. A policy composes them: one deployment
-runs numeric + scope + rules and is fully deterministic; another adds an
-LLM judge and is not, but its record still names the model, the prompt hash and
-the settings, so the run stays auditable.
+runs numeric + scope + intent + rules and is fully deterministic; another adds
+a judge and is not, but its record still names the model that answered and the
+hashes of the prompt and the reply. The judge can only escalate: its agreement
+resolves nothing.
 
 ## The workspace
 
@@ -124,14 +127,14 @@ direction runs from the contracts outward to the surfaces.
 | `gl-core` | the contracts (claim, verifier, evidence, graph), canonical JSON, `content_hash`, `sha256`, error types |
 | `gl-text` | Unicode normalisation, word and sentence segmentation, spans as byte offsets |
 | `gl-numeric` | locale-aware parsing of numbers, currencies, percentages and physical units into base units |
-| `gl-verifiers` | the built-in verifiers (`numeric`, `scope`, `rules`, `lexical`, `nli`, `semantic`) and claim extraction |
+| `gl-verifiers` | the built-in verifiers (`numeric`, `scope`, `intent`, `rules`; the deprecated `lexical`, `nli`, `semantic` behind features) and claim extraction |
 | `gl-policy` | the policy schema, the linter, and `evaluate` (evidence graph → decision) |
-| `gl-record` | signed, hash-chained records for answers and runs; verification of a record and a chain |
-| `gl-bundle` | the bundle format: a manifest of artefacts, each hashed and re-checked on open |
-| `gl-onnx` | model hosting on `tract` (pure-Rust ONNX), the encoder and entailment traits, SGI/DGI geometry |
+| `gl-record` | signed, hash-chained records for answers and runs; external signatures (ECDSA P-256 from a key service); verification of a record, a chain and a set of chains; signed reports |
+| `gl-bundle` | deprecated: the bundle format for the model channels |
+| `gl-onnx` | deprecated: model hosting on `tract` (pure-Rust ONNX) for the model channels |
 | `gl-runtime` | execution contracts: the run event log, the execution policy and the gate, the run audit |
 | `gl-mcp` | the MCP adapter: JSON-RPC trace → run, recording hashes not content |
-| `gl-engine` | the one pipeline, `verify()` and `verify_run()`, that every binding calls |
+| `gl-engine` | the one pipeline, `verify()` and `verify_run()`, that every binding calls; the judge prompt and the reading of its reply |
 | `gl-python` | the `pyo3` / `maturin` extension module (`groundlens._engine`) |
 | `gl-cli` | the `glv` binary (and `groundlens`), the same engine on the command line |
 
@@ -162,44 +165,41 @@ messages of a Model Context Protocol session (`tools/call` and its result,
 records hashes of the arguments and results. Recording a run needs no change to
 how the agent is built.
 
+## The judge
+
+GroundLens ships no model and the engine never calls one. For a request with a
+judge, the engine renders a fixed, versioned prompt (`groundlens.judge/1`) with
+what PASS means, the scope, the question, the answer, and every passage with
+its provenance, between markers the data can never contain. The caller's own
+client sends it; the engine reads the reply into evidence per sentence. A reply
+that is missing, late or not the JSON asked for is evidence too, and the policy
+sends it to review.
+
 ## Determinism and the record
 
-The reference execution profile for model-backed verifiers is `cpu-f32`: a
-float32 ONNX graph run by `tract`, pure Rust, single thread, no native math
-library. Under that profile the same model file, identified by sha256, gives
-scores within `1e-6` across x86-64 and arm64, and that tolerance is what the
-`reproducible` class declares. Because a threshold compared against a drifting
-score is exactly where a classification could flip, every policy threshold
-carries a **guard band**: a score within the band is `REVIEW` on every platform,
-so a platform difference can never turn a `PASS` into a `FAIL`.
+The exact and symbolic checks use integer and rational arithmetic, no floating
+point, so they are bit-identical on every platform. The deprecated model
+channels run under the `cpu-f32` profile on `tract`, with scores within `1e-6`
+across x86-64 and arm64 and a guard band around every threshold.
 
-The record ties all of this together. `content_hash` covers the input, policy
-and bundle, so it is identical on any machine; the record id and timestamp are
+The record ties all of this together. `content_hash` covers the input and the
+resolved policy, so it is identical on any machine; the record id and timestamp are
 deliberately left outside it. Records chain by carrying the previous record's
 hash, which makes a log tamper-evident as a whole. Answer records and run
 records share one signing envelope, so a single log can hold both.
 
-## Bundles
-
-Models are distributed as **bundles**: a directory with a `manifest.json` and,
-under it, the ONNX graphs, tokenizers, rule sets and policies a deployment
-needs. Every artefact is listed with its sha256; the engine re-hashes each one
-when it opens the bundle and refuses to start if any hash does not match. There
-is no partial trust. The manifest hash goes into every record, so a decision is
-tied to the exact set of model files that produced it. The only network
-operation in the whole project is `bundle pull`, which downloads a published
-bundle and checks it against a hash pinned in the engine.
-
 ## Surfaces
 
 The Python package (`gl-python`, built with `maturin`) exposes the engine as
-`groundlens`: `verify`, `verify_run`, `proofread`, `calibrate`, and the
-`Record`, `RunRecord`, `Policy`, `Bundle` and `Evidence` types. The wheel
-carries the compiled engine and has no runtime dependencies.
+`groundlens`: `Verifier` (with `judges`, `signers` and `sinks`), `verify`,
+`verify_run`, `measure`, and the `Record`, `RunRecord` and `Policy` types;
+`proofread` stays for 3.x users. The wheel carries the compiled engine and has
+no runtime dependencies; every adapter takes a client you already have.
 
 The `glv` binary (`gl-cli`) is the same engine on the command line, with
-`verify`, `report`, `record verify`, `policy lint`, `bundle` and, for
-executions, `run verify` and `run check`. Both surfaces call `gl-engine` and
+`verify`, `record verify`, `policy lint`, `policy show`, `judge show-template`,
+`keygen` and, for executions, `run verify` and `run check`. The Python command
+line adds `report`, `measure` and `replay`. Both surfaces call `gl-engine` and
 nothing else, so their behaviour cannot drift from each other.
 
 For the user-facing reference, the API and CLI documentation and the concept

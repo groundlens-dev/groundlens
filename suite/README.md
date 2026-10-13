@@ -3,7 +3,7 @@
 GroundLens is not scored. It is checked.
 
 Trust infrastructure is demonstrated by what it does, not by a single number. This
-suite is that demonstration, and anyone can run it. It has four parts, each measured
+suite is that demonstration, and anyone can run it. It has three parts, each measured
 on its own terms.
 
 ## Conformance — does it do what it says?
@@ -39,12 +39,6 @@ a tampered record, rejected by all three.
     pip install cryptography
     python suite/interoperability.py
     python suite/interoperability.py --json
-
-## Verifier evaluation — the detectors, measured
-
-Detection metrics for the individual verifiers (false-positive rate at 95% recall,
-AUROC, balanced accuracy) on public datasets. This measures the verifiers, which are
-swappable, not the infrastructure. See `verifier_evaluation/`.
 
 ## Not invented here
 

@@ -94,7 +94,7 @@ def _tampered(record: Record) -> Record:
 
 def run():
     genuine = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")],
-                     signing_key=SEED, lexical=False)
+                     signing_key=SEED)
     forged = _tampered(genuine)
     verifiers = {"Python API": _python_ok, "Command line": _cli_ok, "Independent verifier": _independent_ok}
     accepts = {name: fn(genuine) for name, fn in verifiers.items()}
