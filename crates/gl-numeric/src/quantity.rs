@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::arith::Ratio;
 use crate::locale::LocaleProfile;
-use crate::numeral::{find_numerals, Numeral};
+use crate::numeral::{find_numerals, find_numerals_min, Numeral, MIN_DIGITS};
 use crate::units::{pow10, unit_for, Dimension, Unit, SCALES};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -389,7 +389,8 @@ fn find_quantities_with(text: &str, profile: &LocaleProfile, attach_units: bool)
         return out;
     }
     let declared = context_scales(text, profile);
-    for numeral in find_numerals(text, profile) {
+    for numeral in find_numerals_min(text, profile, 1) {
+        let single_digit = numeral.text.chars().filter(char::is_ascii_digit).count() < MIN_DIGITS;
         let mut span = numeral.span;
         let mut exponent = 0u32;
         let mut notes: Vec<&'static str> = numeral.notes.clone();
@@ -405,7 +406,9 @@ fn find_quantities_with(text: &str, profile: &LocaleProfile, attach_units: bool)
         }
 
         let mut pos = skip_spaces(text, span.end);
+        let mut scale_is_word = false;
         if let Some((e, end, extra)) = take_scale(text, pos, profile) {
+            scale_is_word = text[pos..end].chars().filter(|c| c.is_alphabetic()).count() >= 3;
             exponent = e;
             notes.extend(extra);
             span.end = end;
@@ -428,6 +431,17 @@ fn find_quantities_with(text: &str, profile: &LocaleProfile, attach_units: bool)
                 span.end = end;
             }
             _ => {}
+        }
+
+        // A single digit is a figure only with its own unit, currency,
+        // percent sign or scale word. A header scale ("in millions") is not
+        // enough: under it, list numbers and footnote marks would become
+        // figures.
+        // Abbreviated scales need a currency: "3M" is a company, "$3M" is
+        // money. A digit glued to a letter ("Q4", "B2B") is part of a word.
+        let glued = text[..numeral.span.start].chars().next_back().is_some_and(char::is_alphabetic);
+        if single_digit && (glued || (unit.is_none() && !scale_is_word)) {
+            continue;
         }
 
         if exponent == 0 && !numeral.percent {
@@ -467,6 +481,29 @@ mod tests {
 
     fn q(text: &str, loc: &str) -> Quantity {
         find_quantities(text, &locale(loc).unwrap()).remove(0)
+    }
+
+    fn texts(text: &str) -> Vec<String> {
+        find_quantities(text, &locale("en").unwrap())
+            .into_iter()
+            .map(|q| text[q.span.start..q.span.end].to_string())
+            .collect()
+    }
+
+    #[test]
+    fn a_single_digit_is_a_figure_only_with_its_own_unit_or_scale() {
+        assert_eq!(texts("a decline of $2 million"), ["$2 million"]);
+        assert_eq!(texts("rates rose 5% in 7 days"), ["5%", "7 days"]);
+        assert_eq!(texts("about 3 billion users"), ["3 billion"]);
+        assert_eq!(texts("costs of EUR 4"), ["EUR 4"]);
+        // Enumerators, page numbers, words with a digit, and abbreviations
+        // without a currency stay out.
+        assert!(texts("page 5 of 7, step 2").is_empty());
+        assert!(texts("Q4 results, B2B sales").is_empty());
+        assert!(texts("3M reported").is_empty());
+        assert_eq!(texts("$3M reported"), ["$3M"]);
+        // A header scale alone does not make a list number a figure.
+        assert_eq!(texts("(in millions) note 3: revenue 120"), ["120"]);
     }
 
     #[test]

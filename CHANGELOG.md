@@ -89,6 +89,13 @@ identical in the git tag and on PyPI.
 
 ### Fixed
 
+- **A single-digit figure with its own unit is checked.** `$2 million`, `5 %`
+  and `7 days` were never read as figures, so they were never verified. A
+  single digit now counts when a currency, a percent sign, a unit or a scale
+  word is attached to it. Bare single digits stay out (list numbers, page
+  numbers), and so do a digit glued to a word (`Q4`), an abbreviated scale
+  without a currency (`3M` is a company, `$3M` is money) and a digit under a
+  header scale alone. `proofread()` keeps its 3.x numerals.
 - A needless borrow in the numeric verifier flagged by clippy in Rust 1.99.
 - Engine tests no longer depend on whether a bundle is installed on the
   machine running them.

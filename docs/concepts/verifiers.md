@@ -43,6 +43,8 @@ way each language writes them and compares them as quantities, not strings:
   ("in millions of dollars") all normalise to base units.
 - **Currencies, percentages, units.** `1,2 km` matches `1200 m`; `212 °F`
   matches `100 °C`; `37.35 billion` matches `37,350` under "in millions".
+- **Single digits.** `$2 million`, `5 %` and `7 days` are figures. A bare
+  single digit is not: it is usually a list or page number.
 - **Two opt-in relaxations**, each noted in the receipt: `declared_precision`
   (accept a rounded figure) and `percent_as_fraction`.
 

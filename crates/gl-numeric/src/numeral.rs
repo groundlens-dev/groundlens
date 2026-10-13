@@ -133,8 +133,17 @@ fn significant_digits(body: &str) -> u32 {
     }
 }
 
-/// Every numeral in `text`, with spans into `text`.
+/// Every numeral in `text`, with spans into `text`. Single digits are
+/// skipped: on their own they are enumerators and page numbers.
 pub fn find_numerals(text: &str, profile: &LocaleProfile) -> Vec<Numeral> {
+    find_numerals_min(text, profile, MIN_DIGITS)
+}
+
+/// Like [`find_numerals`] with a different minimum digit count. The quantity
+/// reader asks for single digits too and keeps one only when a unit, a
+/// currency, a percent sign or a scale word is attached to it (`$2 million`,
+/// `5 %`, `7 days`).
+pub(crate) fn find_numerals_min(text: &str, profile: &LocaleProfile, min_digits: usize) -> Vec<Numeral> {
     let mut found = Vec::new();
     let mut pos = 0usize;
     while pos <= text.len() {
@@ -159,7 +168,7 @@ pub fn find_numerals(text: &str, profile: &LocaleProfile) -> Vec<Numeral> {
             pos = end;
         }
         let body = body.as_str();
-        if body.chars().filter(char::is_ascii_digit).count() < MIN_DIGITS {
+        if body.chars().filter(char::is_ascii_digit).count() < min_digits {
             continue;
         }
         let (mut values, notes) = readings(body, profile);

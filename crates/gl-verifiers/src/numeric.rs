@@ -633,6 +633,23 @@ mod tests {
     }
 
     #[test]
+    fn a_single_digit_figure_with_a_unit_is_checked_too() {
+        let rows = results(
+            "Expense was $77 million and then $75 million, a decline of $2 million, or 2.60%.",
+            "amortization expense: $77 million (2016), $75 million (2017)",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$2 million"), EvidenceResult::Supported);
+        assert_eq!(result_of(&rows, "2.60%"), EvidenceResult::Supported);
+        let rows = results(
+            "A decline of $3 million.",
+            "expense $77 million and $75 million",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$3 million"), EvidenceResult::Contradicted);
+    }
+
+    #[test]
     fn wrong_arithmetic_is_still_a_contradiction() {
         let rows = results(
             "It fell from 24.0% to 22.1%, a change of -7.5%.",
