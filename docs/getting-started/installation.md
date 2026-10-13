@@ -22,14 +22,27 @@ python -c "import groundlens; print(groundlens.__version__)"
 groundlens --version
 ```
 
-## The model bundle
+## No model needed
 
-The numeric and rules verifiers work out of the box. The **lexical** verifier
-(and, in a later bundle, the entailment verifier) needs a model, and models are
-distributed as a **bundle**: a directory of ONNX graphs, tokenizers and
-checksums that the engine verifies by hash before it uses anything.
+Everything in the default path works out of the box, with no model and no
+network: numbers, currencies, percentages and units, the scope check, symbolic
+rules, and the signed record. The shipped policies use only these checks.
 
-Install the `base` bundle once:
+## The model bundle (deprecated)
+
+```{admonition} Deprecated
+:class: warning
+The lexical, entailment and similarity channels are deprecated. On the answers
+we measured they did not add value: they check that words are present, not
+that a figure is bound to the right company, year or clause. They are off
+unless you ask for them, and they leave the default build in the next release.
+See the [design page](../design/next.md).
+```
+
+The model channels need a model, and models are distributed as a **bundle**: a
+directory of ONNX graphs, tokenizers and checksums that the engine verifies by
+hash before it uses anything. If you still need them, install the `base`
+bundle once:
 
 ```{code-block} bash
 groundlens bundle pull base
@@ -40,11 +53,9 @@ the engine, unpacks it into a per-user directory, and re-hashes every artefact.
 If any hash does not match, nothing is installed. See [Bundles](bundles.md) for
 where it lands, how to move it, and how to run fully offline.
 
-```{admonition} You can skip the bundle
-Verifying numbers, currencies, percentages, units and symbolic rules needs no
-bundle at all. Add the bundle when you want the lexical channel or a policy
-that requires it.
-```
+An installed bundle is used only when a call names it: `--bundle base` on the
+command line, `bundle="base"` in Python. Naming one prints a deprecation
+warning.
 
 ## From source
 

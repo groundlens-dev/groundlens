@@ -120,11 +120,21 @@ def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
     assert b.name == "tiny-test" and (tmp_path / "b2" / "manifest.json").is_file()
     assert Bundle.open(tmp_path / "b2").hash == b.hash
 
-    # The installed bundle is what verify() picks up by default.
+    # An installed bundle is not used unless the call names it.
     monkeypatch.setenv("GROUNDLENS_BUNDLE_DIR", str(tmp_path / "b2"))
-    r = run("verify", "--answer", str(EXAMPLE / "answer.txt"), "--source", f"s={EXAMPLE / 'invoice.txt'}", "--json")
+    args = ("verify", "--answer", str(EXAMPLE / "answer.txt"), "--source", f"s={EXAMPLE / 'invoice.txt'}", "--json")
+    r = run(*args)
+    assert r.returncode == 1, r.stderr
+    rec = json.loads(r.stdout)
+    assert rec["content"]["bundle_hash"] == "sha256:unbundled"
+    assert not any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
+    assert "deprecated" not in r.stderr
+
+    # Named, it runs, with a deprecation warning.
+    r = run(*args, "--bundle", "base")
     assert r.returncode == 1, r.stderr
     rec = json.loads(r.stdout)
     assert rec["content"]["bundle_hash"] == b.hash
     assert any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
+    assert "deprecated" in r.stderr
     assert run("bundle", "status").stdout.startswith("ok  base v1")

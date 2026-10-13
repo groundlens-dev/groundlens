@@ -6,10 +6,19 @@ policies a deployment needs. Every artefact is listed in the manifest with its
 sha256. The engine re-hashes each one when it opens the bundle and refuses to
 start if any hash does not match. There is no partial trust.
 
+```{admonition} Deprecated
+:class: warning
+Bundles feed the lexical, entailment and similarity channels, which are
+deprecated and leave the default build in the next release. The default path
+needs no bundle. An installed bundle is used only when a call names it
+(`--bundle base`, `bundle="base"`); naming one prints a deprecation warning.
+```
+
 ## The base bundle
 
 `base` carries the multilingual encoder (multilingual-e5-small, f32, 100
-languages) that powers the lexical verifier.
+languages) for the lexical and similarity channels, and a multilingual
+entailment model for the entailment channel.
 
 ```{code-block} bash
 groundlens bundle pull base

@@ -16,15 +16,20 @@ reproducible enough to decide on.
 | `groundlens.numeric` | exact | Numbers, currencies, percentages and physical units, compared as quantities in base units, with locale-aware parsing. | Exact | No |
 | `groundlens.scope` | exact | Where each figure comes from: fails a figure found only in passages outside the request's scope (another company, contract or version). Runs when the request states a scope. See [Scope and provenance](scope.md). | Exact | No |
 | `groundlens.rules` | symbolic | Your rule sets (YAML/JSON) run as checks. | Exact | No |
-| `groundlens.lexical` | lexical/ML | Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
-| `groundlens.nli` | ML | Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |
+| `groundlens.lexical` | lexical/ML | Deprecated. Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
+| `groundlens.nli` | ML | Deprecated. Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |
+| `semantic.cosine` | statistical | Deprecated. Sentence similarity between each statement and its closest source passage, on the bundle's encoder. | Reproducible | Yes (`base`) |
 
-```{admonition} groundlens.nli and the model
-`groundlens.nli` is wired into the engine and runs whenever the loaded bundle
-carries an entailment model. The `base` bundle today ships the encoder for the
-lexical channel; the entailment model ships in a later bundle. Until then the
-verifier is present but does not run, and the shipped policies tolerate
-unresolved statements so decisions are unchanged.
+```{admonition} The model channels are deprecated
+:class: warning
+`groundlens.lexical`, `groundlens.nli` and `semantic.cosine` run only when the
+request names a bundle (`--bundle base`, `bundle="base"`), never by default,
+and no shipped policy uses them. On real answers from annual reports,
+contracts and a regulation they did not add value: the costly error is a real
+figure attached to the wrong company, year or clause, and these channels check
+that the words are present, not that they are bound to the right thing. They
+leave the default build in the next release. The
+[design page](../design/next.md) explains what replaces them.
 ```
 
 ## The numeric verifier in depth

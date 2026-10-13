@@ -67,25 +67,11 @@ Runs in Google Colab. Nothing here sends your text anywhere: the engine runs loc
     md("""
 ## 1. Install
 
-`pip install groundlens` installs the GroundLens engine (GLV, for GroundLens Verification): the numeric and rules verifiers, the policy engine, the signed records and the command line. No dependencies, no network.
-
-The **base bundle** is an optional, explicit download (about 470 MB, once): the multilingual encoder that powers the lexical verifier. It is the only command in the package that touches the network, and the download is checked against a hash pinned in the engine.
+`pip install groundlens` installs the GroundLens engine (GLV, for GroundLens Verification): the numeric, scope and rules verifiers, the policy engine, the signed records and the command line. No dependencies, no model, no network.
 """),
     code("""
 %pip install -q groundlens
 !groundlens --version
-"""),
-    code("""
-from groundlens import Bundle
-
-bundle = Bundle.installed("base")
-if bundle is None:
-    try:
-        bundle = Bundle.pull("base")          # ≈470 MB, a minute or two in Colab
-    except Exception as e:                    # noqa: BLE001 - keep the notebook running without it
-        print("base bundle not installed:", e)
-        print("Continuing with the numeric and rules verifiers only.")
-print(Bundle.status("base"))
 """),
     md("""
 ## 2. One situation, five languages
@@ -150,7 +136,7 @@ for e in r.evidence:
     print(f"{e.verifier_id:<20} {e.result:<13} {e.score:>6.2f}  {str(e.source_text):<24} {', '.join(e.notes)}")
 """),
     md("""
-If the base bundle is installed you also see `groundlens.lexical` rows: one per content word, with the source word it is anchored to and a support score. Words like *importe* or *pagaderos* score high because the source says the same thing; the score is a contextual similarity from a frozen multilingual encoder, so the same word used differently scores lower, and the note `exact_string_in_span` tells you when the word is there verbatim anyway.
+Each row is one verifier speaking about one claim. The numeric verifier names the source figure each number was compared to, so a reviewer sees the wrong figure next to the right one. No model is involved: the same rows come out on any machine.
 
 The 3.x API, `proofread()`, gives the same information as **receipts**: the weakest anchors first, each next to the source word it lost to.
 """),
@@ -306,7 +292,7 @@ for question, answer in EXCHANGES:
     print(f"{r.decision:<7} {question}")
 """),
     md("""
-Two answers are wrong: the fee after year five (0.75 % instead of 0.50 %) and the payment day (15th instead of 25th). Both were caught by the exact numeric verifier, with the source number they lost to. The answer about insurance contains no numbers, so the numeric verifier has nothing to say about it; with the base bundle installed, the lexical verifier anchors its words in the sources and the policy's threshold on that score applies. Which claims may go unchecked, and what happens then, is written in the policy, not in the engine.
+Two answers are wrong: the fee after year five (0.75 % instead of 0.50 %) and the payment day (15th instead of 25th). Both were caught by the exact numeric verifier, with the source number they lost to. The answer about insurance contains no numbers, so the numeric verifier has nothing to say about it, and the policy decides what happens to a claim no exact check can resolve. Which claims may go unchecked, and what happens then, is written in the policy, not in the engine.
 
 ## 2. Verify the chain, offline
 

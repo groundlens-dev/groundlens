@@ -49,7 +49,7 @@ record.verify()             # recompute every hash and the signature, offline
 ## The documentation
 
 - **[Getting started](getting-started/installation.md)** — install, verify your
-  first answer, and add the model bundle.
+  first answer. No model is needed.
 - **[Concepts](concepts/overview.md)** — verifiers, claims and evidence,
   policies, records, the execution runtime, determinism, and the EU AI Act
   mapping.

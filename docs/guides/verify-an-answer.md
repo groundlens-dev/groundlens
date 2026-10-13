@@ -73,12 +73,16 @@ for locale, (source, answer) in cases.items():
     print(locale, r.decision)      # FAIL in every language
 ```
 
-## Words, when you have the bundle
+## Words, with a bundle (deprecated)
 
-With the `base` bundle installed, the lexical verifier also scores each content
-word against the source that supports it, and the policy's threshold on that
-score applies. Without the bundle, the answer is still fully checked on numbers
-and rules. See [Bundles](../getting-started/bundles.md).
+An answer is fully checked on numbers, scope and rules with no model. The
+lexical channel, which scores each content word against the source that
+supports it, runs only when you name a bundle (`bundle="base"`). It is
+deprecated and leaves the default build in the next release. See
+[Bundles](../getting-started/bundles.md).
+
+`proofread()` below is the exception: scoring words is its whole job, so it
+keeps using the installed `base` bundle when you name none.
 
 ## The 3.x receipts API
 

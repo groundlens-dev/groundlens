@@ -11,9 +11,12 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
-pub const MISSING_BASE: &str = "the policy requires groundlens.lexical, which needs the base bundle (multilingual-e5-small). Install it once with `groundlens bundle pull base`, or point GROUNDLENS_BUNDLE_DIR at a bundle directory";
+pub const MISSING_BASE: &str = "the policy requires groundlens.lexical, which needs a model bundle, and the request names none. Model bundles are no longer used unless you ask for one: pass `--bundle base` (Python: `bundle=\"base\"`) after installing it once with `groundlens bundle pull base`. The model channels are deprecated and leave the default build in the next release";
 
-pub const MISSING_NLI: &str = "the policy requires groundlens.nli, which needs a bundle carrying an entailment model. Use a bundle whose manifest declares an `entailment` model, or point GROUNDLENS_BUNDLE_DIR at one";
+/// Printed by the command-line tools when a request names a bundle.
+pub const DEPRECATED: &str = "warning: the model channels (lexical, entailment, similarity) are deprecated. They did not add value on the answers we measured, and they leave the default build in the next release. The default path needs no model";
+
+pub const MISSING_NLI: &str = "the policy requires groundlens.nli, which needs a bundle carrying an entailment model. Name one with `--bundle` (Python: `bundle=...`) whose manifest declares an `entailment` model. The model channels are deprecated and leave the default build in the next release";
 
 /// A verified bundle with its models loaded.
 pub struct Loaded {
@@ -34,27 +37,22 @@ fn cache() -> &'static Mutex<HashMap<PathBuf, Arc<Loaded>>> {
     CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// Resolve `spec`: a directory, a known bundle name, or `None` for the
-/// installed `base` bundle. `Ok(None)` means no bundle is available.
+/// Resolve `spec`: a directory or a known bundle name. `None` resolves to no
+/// bundle, even when one is installed: the model channels run only when the
+/// request asks for them. A named bundle that is not installed is an error.
 pub fn resolve(spec: Option<&str>) -> Result<Option<PathBuf>> {
+    let Some(spec) = spec else { return Ok(None) };
     let dir = match spec {
-        Some(s) if Path::new(s).join("manifest.json").is_file() => PathBuf::from(s),
-        Some(s) if Path::new(s).is_dir() => {
+        s if Path::new(s).join("manifest.json").is_file() => PathBuf::from(s),
+        s if Path::new(s).is_dir() => {
             return Err(gl_core::Error::Integrity(format!("{s}: no manifest.json in that directory")))
         }
-        Some(name) => gl_bundle::locate(name),
-        None => gl_bundle::locate("base"),
+        name => gl_bundle::locate(name),
     };
     if dir.join("manifest.json").is_file() {
         Ok(Some(dir))
-    } else if spec.is_some() {
-        Err(gl_core::Error::Integrity(format!(
-            "bundle {:?} is not installed ({})",
-            spec.unwrap(),
-            dir.display()
-        )))
     } else {
-        Ok(None)
+        Err(gl_core::Error::Integrity(format!("bundle {spec:?} is not installed ({})", dir.display())))
     }
 }
 

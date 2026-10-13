@@ -72,15 +72,18 @@ the same guarantees.
 closest token of the sources on a frozen multilingual encoder, and the 
 answer is summarised by its weakest anchor rather than an average, because 
 one wrong word in a long answer is exactly what an average hides. 
-It needs the base bundle (`groundlens bundle pull base`).
+It is deprecated: it runs only when a call names a bundle
+(`bundle="base"`), and it leaves the default build in the next release.
 
 ## 5. Which other metrics can I use?
 
-Today: numeric, rules and lexical, as above. Next, in this order:
-entailment (NLI) and semantic similarity on the same model host, the
-geometric SGI and DGI indices from our research, and LLM-as-a-judge as an
-additional. Every one of them fits the same contract: input
-in, evidence out, never a verdict.
+Today, in the default path: numeric, scope and rules, with no model. The
+lexical, entailment (NLI) and semantic similarity channels still run when a
+call names a bundle, but they are deprecated: on real answers they checked
+that words were present, not that a figure was bound to the right company,
+year or clause. Next: exact arithmetic and units, an intent check, and the
+judge you connect (your own model) as a verifier. Every one of them fits the
+same contract: input in, evidence out, never a verdict.
 
 > The list is open. A verifier is a small interface; the ones we ship are the first set, not the only set.
 

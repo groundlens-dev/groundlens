@@ -14,13 +14,13 @@ id: my_policy_v1
 version: 1.0.0
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.rules.*]
-  optional: [groundlens.lexical, groundlens.nli]
+  recommended: [groundlens.scope, groundlens.rules.*]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
-  any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
+  any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
+  unsupported_from: [groundlens.scope]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -35,10 +35,11 @@ decision:
   which claim kinds you `tolerate_unresolved_kinds`.
 - A scored verifier decides through `thresholds`, not contradictions.
 
-## Add a scored channel with a guard band
+## Add a scored channel with a guard band (deprecated)
 
-If you install a bundle and want the lexical or entailment channel to influence
-the decision, give it a threshold and a guard band:
+The lexical and entailment channels are deprecated and run only when a request
+names a bundle. If you still run them and want them to influence the decision,
+give them a threshold and a guard band:
 
 ```{code-block} yaml
 thresholds:

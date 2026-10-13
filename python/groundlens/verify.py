@@ -15,12 +15,13 @@
 from __future__ import annotations
 
 import json
+import warnings
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from groundlens import _engine
 from groundlens._request import EvidenceArg, build_request
-from groundlens.bundle import Bundle
+from groundlens.bundle import MODEL_CHANNELS_DEPRECATED, Bundle
 from groundlens.policy import Policy
 from groundlens.record import Record
 
@@ -56,11 +57,12 @@ def verify(
             it are noted.
         locale: how the documents write numbers: ``"und"``, ``"en"``, ``"es"``...
         rules: rule sets (YAML/JSON paths or dicts) run as symbolic verifiers.
-        bundle: a :class:`Bundle`, a bundle directory, or a bundle name.
-            ``None`` uses the installed ``base`` bundle when there is one
-            (``groundlens bundle pull base``). The bundle hash goes into the
-            record and its encoder runs the lexical channel.
-        lexical: run the lexical channel when an encoder is available.
+        bundle: deprecated. A :class:`Bundle`, a bundle directory, or the
+            name of an installed bundle (``"base"``). Its models run the
+            lexical, entailment and similarity channels and its hash goes into
+            the record. ``None`` runs no model, even when a bundle is
+            installed. Naming one raises a ``DeprecationWarning``.
+        lexical: with a bundle named, run its channels. ``False`` skips them.
         signing_key: 32-byte hex Ed25519 seed. An ephemeral key is used if absent.
         previous: the previous record (or its ``record_hash``) to chain to.
         log: an append-only JSON Lines file; the record is appended and the
@@ -82,6 +84,8 @@ def verify(
         ``record.evidence`` is what each verifier said; ``record.reasons``
         is what a reviewer should read first.
     """
+    if bundle is not None:
+        warnings.warn(MODEL_CHANNELS_DEPRECATED, DeprecationWarning, stacklevel=2)
     pol = Policy.coerce(policy)
     previous_hash: str | None
     if isinstance(previous, Record):

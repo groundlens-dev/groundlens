@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -154,3 +155,19 @@ def test_provenance_accepts_dicts_and_missing_provenance_goes_to_review():
         lexical=False,
     )
     assert ok.decision == "PASS"
+
+
+def test_naming_a_bundle_is_deprecated_and_no_bundle_runs_no_model():
+    import warnings
+
+    tiny = Path(__file__).resolve().parents[2] / "crates" / "gl-onnx" / "testdata" / "tiny-bundle"
+    sources = [("s", "The total amount due is 10,000 dollars.")]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        plain = verify("The invoice total is 1,000 dollars.", sources, locale="en")
+    assert plain.bundle_hash == "sha256:unbundled"
+    assert {e.verifier_id for e in plain.evidence} == {"groundlens.numeric"}
+
+    with pytest.warns(DeprecationWarning, match="model channels"):
+        modelled = verify("The invoice total is 1,000 dollars.", sources, locale="en", bundle=tiny)
+    assert any(e.verifier_id == "groundlens.lexical" for e in modelled.evidence)

@@ -27,19 +27,19 @@ pub use run::{verify_run, RunVerifyRequest};
 
 /// A policy that ships inside every build: numeric contradictions fail, a
 /// figure taken from outside the request's scope fails, anything unresolved
-/// goes to review, no generative verifier decides.
+/// goes to review, no generative verifier decides. It names no model
+/// channel: the default path runs without a model.
 pub const DEFAULT_POLICY_ID: &str = "groundlens_default_v1";
 pub const DEFAULT_POLICY_YAML: &str = r#"id: groundlens_default_v1
-version: 1.1.0
+version: 1.2.0
 description: >
   Numeric claims must be exactly supported by the sources. A numeric
   contradiction fails the answer, and so does a figure taken from a passage
   outside the request's scope. Claims no deterministic verifier can resolve
-  go to review. No generative verifier decides.
+  go to review. No model is needed and no generative verifier decides.
 verifiers:
   required: [groundlens.numeric]
   recommended: [groundlens.scope, groundlens.rules.*]
-  optional: [groundlens.lexical, groundlens.nli, semantic.*, sgi, dgi]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
@@ -75,11 +75,14 @@ pub struct VerifyRequest {
     /// Recorded when no bundle is loaded (`sha256:unbundled` otherwise).
     #[serde(default)]
     pub bundle_hash: Option<String>,
-    /// A bundle directory, or the name of a known bundle (`base`). `None`
-    /// uses the installed `base` bundle when there is one.
+    /// A bundle directory, or the name of an installed bundle (`base`). The
+    /// model channels (lexical, entailment, similarity) run only when this
+    /// names a bundle; `None` runs none of them, even when a bundle is
+    /// installed. Deprecated: the model channels leave the default build in
+    /// the next release.
     #[serde(default)]
     pub bundle: Option<String>,
-    /// Run the lexical channel when an encoder is available.
+    /// With a bundle named, run its channels. `false` skips them.
     #[serde(default = "default_true")]
     pub lexical: bool,
     #[serde(default)]
@@ -312,6 +315,37 @@ mod tests {
         assert_eq!(record.content_hash, again.content_hash);
     }
 
+    #[test]
+    fn the_default_path_runs_no_model_channel() {
+        let req = VerifyRequest::new(
+            "The invoice total is 1,000 dollars.",
+            vec![Source {
+                id: "s".into(),
+                text: "The total amount due is 10,000 dollars.".into(),
+                locator: None,
+                provenance: Default::default(),
+            }],
+        );
+        // Whatever is installed on this machine, no bundle is named, so no
+        // model is loaded and the record says so.
+        let record = verify(&req).unwrap();
+        assert_eq!(record.content.bundle_hash, "sha256:unbundled");
+        let ids: Vec<&str> = record.content.graph.verifiers.iter().map(|v| v.id.as_str()).collect();
+        assert_eq!(ids, ["groundlens.numeric"]);
+        let policy = Policy::from_yaml(DEFAULT_POLICY_YAML).unwrap();
+        let named: Vec<&String> = policy
+            .verifiers
+            .required
+            .iter()
+            .chain(&policy.verifiers.recommended)
+            .chain(&policy.verifiers.optional)
+            .chain(policy.thresholds.keys())
+            .collect();
+        for model in [gl_verifiers::LEXICAL_ID, "groundlens.nli", "semantic.cosine"] {
+            assert!(!named.iter().any(|n| n.as_str() == model), "the default policy names {model}");
+        }
+    }
+
     #[cfg(feature = "lexical")]
     #[test]
     fn lexical_channel_runs_from_a_bundle_and_is_hashed_into_the_record() {
@@ -345,9 +379,7 @@ verifiers:
   required: [groundlens.numeric, groundlens.lexical]
 "
         .into();
-        if gl_bundle::open_installed("base").unwrap().is_none() {
-            let err = verify(&strict).unwrap_err().to_string();
-            assert!(err.contains("bundle pull base"), "{err}");
-        }
+        let err = verify(&strict).unwrap_err().to_string();
+        assert!(err.contains("--bundle base"), "{err}");
     }
 }
