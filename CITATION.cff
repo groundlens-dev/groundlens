@@ -11,12 +11,12 @@ authors:
 repository-code: https://github.com/groundlens-dev/groundlens
 url: https://groundlens.dev
 abstract: >-
-  groundlens reports which words in a generated answer its retrieved sources
-  least support, pairing each with the closest matching span in the source.
-  Numerals are verified by exact value comparison after format normalisation
-  rather than by embedding similarity; other words are matched by maximum cosine
-  similarity against the source. The answer-level figure is the floor: the mean of the k
-  weakest anchors rather than the mean of all of them. It reports no verdict and ships no threshold.
+  GroundLens is an execution verification runtime for agentic AI systems. It
+  checks an answer or a whole agent run against its sources: exact checks for
+  figures, arithmetic, scope and the kind of answer asked for, and optionally a
+  judge that is the user's own model and can only escalate. A versioned policy
+  turns the evidence into PASS, REVIEW or FAIL, and every decision is sealed in
+  a signed, hash-chained record that anyone can verify offline.
 license: Apache-2.0
 version: 5.3.0
 date-released: '2026-09-22'

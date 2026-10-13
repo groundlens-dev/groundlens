@@ -71,7 +71,7 @@ FAIL tied to, for example, Article 15(1). See
 groundlens report records.jsonl --out evidence-package
 ```
 
-It writes `report.md` (decisions, reasons, verifiers, policy and bundle hashes),
+It writes `report.md` (decisions, reasons, verifiers, policy hashes),
 `report.json` (the same, for tooling), a copy of `records.jsonl`, and
 `README-auditor.md`, a one-page explanation of how to verify the package
 independently.
@@ -81,8 +81,9 @@ independently.
 - **Integrity** — any change to a record, or to the order of the log, is
   detected offline by anyone with the file.
 - **Attribution** — each record is signed; the public key is inside it.
-- **Reproducibility** — the same input, policy and bundle give the same content
-  hash on any machine; exact verifiers are bit-identical, statistical verifiers
-  run pinned models with declared tolerances and guard bands.
+- **Reproducibility** — the same input and policy give the same content hash on
+  any machine; the exact checks are bit-identical. A judge's reply is not
+  repeatable, so the record keeps the model that answered, the hash of the
+  exact prompt and the hash of the reply.
 - **Separation of duties** — the engine measured, the policy decided, and the
   policy is named and hashed in every record.

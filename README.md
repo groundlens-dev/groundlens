@@ -70,8 +70,6 @@ parts, none of them a single "trust score".
 - **Interoperability** — the same record verified by the Python API, the command line
   and an independent from-scratch verifier; a tampered record rejected by all three:
   `python suite/interoperability.py`
-- **Verifier evaluation** — detection metrics for the individual verifiers, which are
-  swappable. This measures the verifiers, not the infrastructure.
 
 Every check traces to a public standard, RFC or regulation (Ed25519, SHA-256, canonical
 JSON, append-only logs, SLSA, C2PA, W3C Verifiable Credentials, EU AI Act Art. 12 and

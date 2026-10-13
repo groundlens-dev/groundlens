@@ -8,10 +8,10 @@ kind decides which verifiers apply to it.
 
 - **Numeric** claims are quantities found in the answer (amounts, percentages,
   measurements). The numeric verifier checks them.
-- **Word** claims are content words, each with its span in the answer. The
-  lexical verifier anchors them to the sources.
-- **Statement** claims are sentences. The entailment verifier checks each one
-  against its sources.
+- **Statement** claims are sentences. The [judge](../guides/use-a-judge.md)
+  labels each one against its sources.
+- **Word** claims are content words, each with its span in the answer. Only
+  the deprecated lexical channel reads them, when a request names a bundle.
 
 Claim extraction is deterministic and locale-aware. A claim that echoes the
 question rather than asserting something new is noted, so it does not count

@@ -138,16 +138,14 @@ for e in r.evidence:
     md("""
 Each row is one verifier speaking about one claim. The numeric verifier names the source figure each number was compared to, so a reviewer sees the wrong figure next to the right one. No model is involved: the same rows come out on any machine.
 
-The 3.x API, `proofread()`, gives the same information as **receipts**: the weakest anchors first, each next to the source word it lost to.
+A check that reads meaning, not figures, is the **judge**: the model you already use, asked a fixed question per sentence. GroundLens never calls a model itself; this is the exact prompt it would send yours, and its hash goes into the record.
 """),
     code("""
-from groundlens import proofread
+from groundlens import Verifier
 
-marks = proofread(CASES["fr"]["answer"], [("facture", CASES["fr"]["source"])], locale="fr", question=CASES["fr"]["question"], k=3)
-print("floor:", round(marks.floor, 3), "| encoder:", marks.encoder_id)
-print(marks.report())
-for w in marks.warnings:
-    print("warning:", w)
+prompt = Verifier().judge_prompt(answer=CASES["fr"]["answer"], passages=[("facture", CASES["fr"]["source"])], question=CASES["fr"]["question"])
+print(prompt["template_id"], prompt["prompt_hash"][:23] + "…")
+print(prompt["user"][:600])
 """),
     md("""
 ## 4. A correct answer, and a paraphrase
@@ -199,7 +197,7 @@ print("same evidence?", [e.result for e in strict.evidence] == [e.result for e i
     md("""
 ## 6. The record
 
-Every verification is sealed in a record: input hashes, the verifiers and model hashes that ran, the evidence, the policy and its hash, the decision, the regulatory mapping, an Ed25519 signature. `content_hash` covers everything that is a function of input, policy and bundle, so two runs of the same check give the same hash on any machine; the record id and timestamp stay outside it.
+Every verification is sealed in a record: input hashes, the verifiers that ran, the evidence, the policy and its hash, the decision, the regulatory mapping, an Ed25519 signature. `content_hash` covers everything that is a function of input and policy, so two runs of the same check give the same hash on any machine; the record id and timestamp stay outside it.
 """),
     code("""
 again = verify(CASES["en"]["answer"], [("invoice.pdf#p1", CASES["en"]["source"])], question=CASES["en"]["question"], locale="en")
@@ -207,7 +205,6 @@ print("content_hash  ", records["en"].content_hash)
 print("second run    ", again.content_hash, "(same)" if again.content_hash == records["en"].content_hash else "(different!)")
 print("record ids    ", records["en"].record_id, again.record_id)
 print("policy        ", records["en"].policy_id, records["en"].policy_hash[:23] + "…")
-print("bundle        ", records["en"].bundle_hash)
 records["en"].verify()   # recomputes every hash and the signature, offline; raises if anything was altered
 print("signature verifies")
 """),
@@ -353,7 +350,7 @@ print("policy:", records[0].policy_id, records[0].policy_hash)
     md("""
 ## 5. The report
 
-`groundlens report` turns a log into the files an auditor actually reads: `report.md` (decisions, reasons, verifiers, policy and bundle hashes), `report.json` (the same, for tooling), the `records.jsonl` copy it was built from, and `README-auditor.md`, a one-page explanation of how to verify the package independently.
+`groundlens report` turns a log into the files an auditor actually reads: `report.md` (decisions, reasons, verifiers, policy hashes), `report.json` (the same, for tooling), the `records.jsonl` copy it was built from, and `README-auditor.md`, a one-page explanation of how to verify the package independently.
 """),
     code("""
 !groundlens report records.jsonl --out evidence-package
@@ -367,7 +364,7 @@ print(open("evidence-package/README-auditor.md", encoding="utf-8").read())
 
 * **Integrity**: any change to a record, or to the order of the log, is detected offline by anyone with the file.
 * **Attribution**: each record is signed; the public key is in the record.
-* **Reproducibility**: the same input, policy and bundle give the same content hash on any machine. Exact verifiers are bit-identical; statistical verifiers run pinned models with declared tolerances and guard bands, so a platform difference can never flip a decision.
+* **Reproducibility**: the same input and policy give the same content hash on any machine; the exact checks are bit-identical. A judge's reply is not repeatable, so its record keeps the model that answered and the hashes of the prompt and the reply.
 * **Separation of duties**: the engine measured, the policy decided, and the policy is named and hashed in every record. Whoever wrote the policy owns the decision rule.
 
 Source and documentation: [github.com/groundlens-dev/groundlens](https://github.com/groundlens-dev/groundlens).

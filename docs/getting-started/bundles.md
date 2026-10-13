@@ -1,4 +1,4 @@
-# Bundles
+# Bundles (deprecated)
 
 A **bundle** is how GroundLens distributes models: a directory with a
 `manifest.json` and, under it, the ONNX graphs, tokenizers, rule sets and
@@ -44,7 +44,7 @@ whatever its name — handy for containers and air-gapped machines.
 
 ```{code-block} bash
 export GROUNDLENS_BUNDLE_DIR=/opt/groundlens/base
-groundlens verify --answer a.txt --source s=s.txt
+groundlens verify --answer a.txt --source s=s.txt --bundle base
 ```
 
 ## Running offline

@@ -77,13 +77,14 @@ It is deprecated: it runs only when a call names a bundle
 
 ## 5. Which other metrics can I use?
 
-Today, in the default path: numeric, scope and rules, with no model. The
-lexical, entailment (NLI) and semantic similarity channels still run when a
-call names a bundle, but they are deprecated: on real answers they checked
-that words were present, not that a figure was bound to the right company,
-year or clause. Next: exact arithmetic and units, an intent check, and the
-judge you connect (your own model) as a verifier. Every one of them fits the
-same contract: input in, evidence out, never a verdict.
+In the default path, with no model: numeric (with exact arithmetic for
+figures the answer computed), scope, intent and units, and your rules. On top,
+the judge: the model you already use, asked a fixed question per sentence,
+which can only send an answer to review. The lexical, entailment (NLI) and
+semantic similarity channels still run when a call names a bundle, but they
+are deprecated: on real answers they checked that words were present, not that
+a figure was bound to the right company, year or clause. Every one of them fits
+the same contract: input in, evidence out, never a verdict.
 
 > The list is open. A verifier is a small interface; the ones we ship are the first set, not the only set.
 
@@ -94,20 +95,18 @@ same contract: input in, evidence out, never a verdict.
 If the risk is a wrong figure (finance, contracts, tables, dates), the
 numeric verifier is the one that matters and it should be `required`; it
 has no false positives to speak of, because a number is equal or it is not.
-If the risk is a claim that is not in the documents (support, legal,
-policy assistants), the lexical verifier finds unanchored words and NLI, when
-it arrives, judges whole statements; those produce scores, so they need a
-threshold, and the threshold needs to come from your data.
+If the risk is a real fact taken from the wrong place (another company, year,
+row or clause), state the scope of every request and give every passage its
+provenance: the scope check fails such a figure. If the risk is a sentence that
+says something the documents never said (support, legal, policy assistants),
+add a judge.
 
-That is what `groundlens.calibrate` is for: give it a few hundred labelled
-answers from your own system and it returns the threshold for a target
-recall together with the false positive rate you will pay for it. Read that
-rate before deploying. Our benchmark work reports false positive rate at
-95 % recall for exactly this reason: at the recall a regulated use needs,
-most published methods escalate most correct answers, and a threshold
-chosen without looking at that number is a review queue nobody staffed.
+Then measure what gets through. `groundlens measure` takes about fifty answers
+your team labels without seeing the verdict and tells you, with an interval,
+how many wrong answers your policy passed and what that costs. Before changing
+the policy, `groundlens replay` shows how many past decisions would change.
 
-Whatever you choose, write it in the polic file. The policy is where "which
+Whatever you choose, write it in the policy file. The policy is where "which
 verifiers, which thresholds, what happens when they disagree" lives, with a
 version and a hash, so the answer to "why did this fail" is always "this
 policy, this evidence".
@@ -130,11 +129,12 @@ Two bundled policies ship with the package. Write your own with `Policy.from_yam
 ## 8. What is in an evidence record, and who can verify it?
 
 Hashes of the input (never the text itself, unless you choose to attach
-it), the engine version, the bundle hash, every verifier that ran with its
+it), the engine version, every verifier that ran with its
 version and model hash, every piece of evidence with its score, confidence,
 determinism class and receipt (source id, span and text), the policy id,
 version and hash, the decision and its reasons, the regulatory mapping, the
-hash of the previous record, and an Ed25519 signature.
+hash of the previous record, and a signature: Ed25519 by default, or ECDSA
+P-256 from AWS KMS, Azure Key Vault or an HSM.
 
 Anyone with the file and `pip install groundlens` can verify it, offline:
 `groundlens record verify records.jsonl` recomputes every hash, every link
@@ -144,57 +144,53 @@ and every signature. The public key travels inside the record.
 
 No. The engine makes no network calls, has no telemetry and no runtime
 dependencies, and a CI job fails the build if an HTTP or TLS library ever
-reaches an engine crate. The single command that downloads anything is
-`groundlens bundle pull`, which you run explicitly, and it refuses any file
-whose hash does not match the one pinned in the engine. In an isolated
-environment, copy the bundle directory by hand.
+reaches an engine crate. If you add a judge, the prompt goes to the client you
+pass, to your own model, wherever you run it (vLLM or Ollama on your servers
+keeps it inside). Signers and stores use the clients you pass too.
 
 ## 10. Which languages does it handle?
 
 Numbers: English, Spanish, Catalan, German, French, Italian, Portuguese,
 Dutch and Swiss formats, with short and long scale words (`billion` versus
 `billón`). An ambiguous numeral such as `1.234` under an unknown locale
-keeps both readings rather than guessing. Words: the base bundle's encoder
-covers about a hundred languages, and function words are skipped per
-locale. Scripts without spaces (CJK, Thai) are out of scope for the
-lexical channel and the result says so.
+keeps both readings rather than guessing. The intent check reads questions in
+English and Spanish. A judge reads whatever languages your model reads.
 
 ## 11. Can I add my own verifier?
 
 The engine is built around that. A verifier implements one trait
 (`input → evidence`) and declares its determinism class; the policy then
-treats it like any built-in one. Rules in YAML are the first way to do this
-without writing Rust; Python and WASM plugins are on the roadmap.
+treats it like any built-in one. Rules in YAML are the way to do this today
+without writing Rust; custom checks in Python are in the design.
 
 ## 12. Should I use an LLM-as-a-judge?
 
-It is upported as a verifier, not as an oracle. A judge produces evidence with
-its model, prompt hash and settings recorded, is classed as non-deterministic, 
-and decides only if a policy explicitly admits that class. The default policies forbid it. 
+Yes, as a verifier, not as an oracle. In our measurements a strong judge was
+the only general checker that caught a correct-looking figure from the wrong
+row or clause. GroundLens sends your own model a fixed, versioned prompt with
+the policy, the scope and the provenance of every passage, and records the
+model that answered and the hashes of the prompt and the reply. Its agreement
+resolves nothing; its doubts send the answer to review, or to fail if the
+policy says so. The shipped policies forbid it; a policy that wants it says so.
 A deployment that wants a fully reproducible chain simply never enables it.
 
-## 13. Witch latency has?
+## 13. How fast is it?
 
-The exact verifiers are microseconds. The lexical verifier runs a small
-transformer on CPU through a pure-Rust engine.Loading the base bundle takes
-a few seconds once per process, and a typical answer with its sources is
-well under a second after that. There is no GPU path in the reference
-profile, on purpose: `cpu-f32` is what makes the scores reproducible across
-machines.
+The exact checks take microseconds to milliseconds per answer, on CPU, with no
+model to load. With a judge, the time is your model's.
 
 ## 14. Is groundlens 3.x still supported?
 
-`proofread()` from 3.x is kept in 4.0 with the same types and semantics,
-checked against golden files produced by 3.1 itself. The 3.x tree stays at
-tag `v3.1.0` for reproducibility of published numbers; new work happens in
-4.x.
+`proofread()` from 3.x is still in the package, with the same types and
+semantics, checked against golden files produced by 3.1 itself. The 3.x tree
+stays at tag `v3.1.0` for reproducibility of published numbers.
 
 ## 15. What is open source in this project?
 
 The engine, the verifiers, the policy language, the record format and the
 command line are Apache-2.0, and will stay so: the open-source engine is
 how anyone can check our claims and how the record format earns trust. 
-Verification at production scale is a commercial service: calibration on
+Verification at production scale is a commercial service: measurement on
 your data, evidence packages for procurement and conformity files, policy
 and regulatory mappings maintained for you, private deployment and
 specialised verifiers implemented. It is built on this engine, not instead of it.

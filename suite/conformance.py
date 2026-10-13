@@ -34,11 +34,10 @@ from groundlens.record import IntegrityError
 
 # A fixed 32-byte Ed25519 seed, so signatures are reproducible in the tests.
 SEED = "00" * 31 + "01"
-NO_LEX = dict(lexical=False)  # deterministic core only; no model bundle needed
 
 
 def _checks_evidence():
-    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], **NO_LEX)
+    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")])
     ev = r.evidence
     numeric = [e for e in ev if e.verifier_id == "groundlens.numeric"]
     spanned = [e for e in ev if isinstance(e.source_span, tuple) and len(e.source_span) == 2]
@@ -49,28 +48,28 @@ def _checks_evidence():
 
 
 def _checks_policy():
-    default = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], **NO_LEX)
+    default = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")])
     permissive = Policy.from_yaml(
         "id: permissive\nversion: 1\nverifiers:\n  required: [groundlens.numeric]\n"
         "decision:\n  any_contradiction_from: []\n  unresolved_claims: REVIEW\n  tolerate_unresolved_kinds: [word]\n"
     )
-    perm = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], policy=permissive, **NO_LEX)
+    perm = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], policy=permissive)
     same_ev = [e.result for e in default.evidence] == [e.result for e in perm.evidence]
     yield "policy decides, not the verifier", same_ev and default.decision != perm.decision, f"same evidence -> {default.decision} vs {perm.decision}"
     yield "policy id + hash recorded", default.policy_id == "groundlens_default_v1" and bool(default.policy_hash), f"{default.policy_id} #{default.policy_hash[:12]}"
     eu = verify(
         "The invoice total is 1,000 dollars, due in 30 days.",
         [("invoice.pdf#p1", "The total amount due is 10,000 dollars, payable within 30 days.")],
-        policy="eu_ai_act_high_risk_v1", question="What is the invoice total?", **NO_LEX)
+        policy="eu_ai_act_high_risk_v1", question="What is the invoice total?")
     arts = [m.get("article") for m in eu.regulatory_mapping]
     yield "regulation mapped (EU AI Act)", eu.decision == "FAIL" and bool(arts) and all(arts), f"articles {arts}"
 
 
 def _checks_determinism():
-    a = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], **NO_LEX)
-    b = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], **NO_LEX)
-    k1 = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], signing_key=SEED, **NO_LEX)
-    k2 = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], signing_key=SEED, **NO_LEX)
+    a = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")])
+    b = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")])
+    k1 = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], signing_key=SEED)
+    k2 = verify("Total 1,000 dollars.", [("s", "Total 10,000 dollars.")], signing_key=SEED)
     # The content hash excludes the timestamp, so it is reproducible; the record hash
     # and signature include a fresh timestamp per record, so they are not, by design.
     # A fixed key gives a fixed signer identity, and both records verify.
@@ -89,15 +88,15 @@ def _checks_determinism():
 
 
 def _checks_integrity():
-    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED, **NO_LEX)
+    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED)
     ok_fresh = True
     try:
         r.verify()
     except IntegrityError:
         ok_fresh = False
     present = all([r.content_hash, r.record_hash, r.signature, r.signer_public_key])
-    first = verify("A is 1.", [("s", "A is 1.")], signing_key=SEED, **NO_LEX)
-    second = verify("B is 2.", [("s", "B is 2.")], signing_key=SEED, previous=first, **NO_LEX)
+    first = verify("A is 1.", [("s", "A is 1.")], signing_key=SEED)
+    second = verify("B is 2.", [("s", "B is 2.")], signing_key=SEED, previous=first)
     linked = second.previous_record_hash == first.record_hash
     try:
         n = Record.verify_chain([first, second])
@@ -120,7 +119,7 @@ def _tamper(r, mutate):
 
 
 def _checks_tamper():
-    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED, **NO_LEX)
+    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED)
 
     def flip_decision(d):
         d["content"]["outcome"]["decision"] = "PASS"
@@ -138,7 +137,7 @@ def _checks_tamper():
 
 
 def _checks_offline():
-    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED, **NO_LEX)
+    r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")], signing_key=SEED)
     saved = socket.socket
 
     def _blocked(*a, **k):
@@ -165,7 +164,7 @@ def _checks_offline():
 def _checks_scope():
     given = {"10k"}
     r = verify("Revenue was EUR 15M.", [("10k", "Revenue was EUR 10M.")],
-               question="What was revenue?", **NO_LEX)
+               question="What was revenue?")
     src = [e.source_id for e in r.evidence if e.source_id is not None]
     only_given = all(s in given for s in src)
     q_not_source = "What was revenue?" not in src

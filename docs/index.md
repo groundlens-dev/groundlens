@@ -4,7 +4,7 @@
 :width: 640px
 ```
 
-# Execution verification runtime for AI systems and agents
+# Execution verification runtime for agentic AI systems
 
 GroundLens turns what an AI system does into evidence that someone else can
 check. It reads an answer or a whole execution, runs a pipeline of verifiers
@@ -66,7 +66,6 @@ record.verify()             # recompute every hash and the signature, offline
 
 getting-started/installation
 getting-started/quickstart
-getting-started/bundles
 ```
 
 ```{toctree}
@@ -96,8 +95,15 @@ guides/sign-and-store
 guides/use-a-judge
 guides/measure-and-replay
 guides/rules
-guides/calibration
 guides/evidence-for-auditors
+```
+
+```{toctree}
+:hidden:
+:caption: Deprecated
+
+getting-started/bundles
+guides/calibration
 ```
 
 ```{toctree}

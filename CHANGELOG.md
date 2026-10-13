@@ -182,6 +182,11 @@ identical in the git tag and on PyPI.
 
 ### Deprecated
 
+- **`calibrate()`** raises a `DeprecationWarning` and leaves with the model
+  channels it calibrates. To know how many wrong answers a policy lets through,
+  use `groundlens measure`. Its guide and the bundles page move to a
+  "Deprecated" section of the docs.
+
 - **The model channels: `groundlens.lexical`, `groundlens.nli` and
   `semantic.cosine`,** and the `bundle` argument that feeds them. On real
   answers from annual reports, contracts and a regulation they did not add
@@ -189,6 +194,18 @@ identical in the git tag and on PyPI.
   right company, year or clause, and they add a model download, weight and
   latency. Naming a bundle prints a warning (`DeprecationWarning` in Python).
   They leave the default build in the next release.
+
+### Removed
+
+- `README.prototype.md`, a positioning draft nothing linked to.
+- `suite/verifier_evaluation/`, the FPR-at-95-%-recall benchmark of the model
+  channels against other detectors. What a deployment lets through is now
+  measured under its own policy with `groundlens measure`.
+- `scripts/workflows/`, `scripts/dependabot.yml` and `scripts/pin_actions.py`:
+  an old copy of the CI workflows that had drifted from `.github/workflows`;
+  running the script would have rolled the live CI back. Dependabot keeps the
+  pinned actions up to date in `.github/` directly.
+- Ten unused images under `docs/assets/`.
 
 ### Fixed
 
