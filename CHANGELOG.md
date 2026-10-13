@@ -209,6 +209,8 @@ identical in the git tag and on PyPI.
 
 ### Fixed
 
+- `bundle pull` extracts with the tar `data` filter where Python has it, the
+  default from Python 3.14, instead of a deprecation warning.
 - **A decimal point no longer ends a sentence.** `$37.35 billion` was split
   into two sentence claims at the point. Only the meaning channels and the
   judge read sentences, so no decision changes, but the claim list, and with

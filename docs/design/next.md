@@ -5,10 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 
 # Design: what changes next, and why
 
-This page describes the next shape of GroundLens before it is built. It is the
-reference that every change in the migration is checked against. Pages under
-**Concepts** and **Guides** describe what is released today; this page
-describes what is coming, and each section says so.
+This page describes the next shape of GroundLens. It was written before the
+work started, and every change in the migration was checked against it.
+
+Steps 1 to 11 of the plan at the end are built and merged; they ship together
+in the next release. Each section below says what was built and where the
+result differs from the plan. What is still not built is listed in
+[Not built yet](#not-built-yet).
 
 ## Why it changes
 
@@ -59,7 +62,7 @@ policy, record), "evidence, never truth", the Rust core without network, the
 Ed25519 hash-chained records, and offline verification with a public key.
 Records written today stay verifiable.
 
-## The public API (planned)
+## The public API
 
 Five names cover the whole surface: `Passage`, `Scope`, `Policy`, `Verifier`
 and `Result`.
@@ -103,7 +106,14 @@ Rules the API follows:
   it cannot be stored. A two-step form exists for batch writers.
 - Results are plain data: they serialise to JSON without help.
 
-## Scope and provenance (planned)
+Built in steps 8 to 11, with differences. `Verifier`, `check()`, `seal()` and
+`store()` exist as written. `check()` returns the signed, stored `Record`, whose
+`decision`, `reasons` and `record_id` are as above; the reasons are sentences,
+and `groundlens.observe.reason_code` turns each into a stable code. Passages
+are `(id, text, provenance)` tuples and the scope is a plain mapping; there are
+no `Passage` or `Scope` classes yet, and no `acheck()`.
+
+## Scope and provenance
 
 Scope says what the request is about: an entity, a contract and its version, a
 customer, a document set. Provenance says where each passage comes from. The
@@ -115,7 +125,9 @@ another scope is `FAIL` by default. A missing scope key is `REVIEW`. Both the
 scope and the provenance of every passage are hashed into the record, so the
 record proves where each figure came from.
 
-## The checks (planned)
+Built in step 3, as written.
+
+## The checks
 
 **Exact arithmetic.** Figures in the answer are matched to figures in the
 passages and recomputed with exact rational arithmetic, under the rounding
@@ -144,6 +156,10 @@ prints the exact prompt for a given input, and its hash is in the record.
 
 **Custom checks.** A decorated function or a small class, with a declared
 determinism class. Its version and the hash of its source go into the record.
+
+Built in steps 5, 6, 7 and 10: exact arithmetic, single-digit figures, intent,
+units and the judge, as written. Custom checks registered from Python are not
+built yet; rule sets (`rules=`) remain the way to add checks without Rust.
 
 ## The policy
 
@@ -184,7 +200,7 @@ mapping to controls keeps the existing `regulatory_mapping` list (framework,
 article, control, requirement, the decisions that trigger it) rather than a
 new `controls` key; your own control ids go in `control`.
 
-## Failure semantics (planned)
+## Failure semantics
 
 | situation | decision |
 |---|---|
@@ -197,11 +213,13 @@ new `controls` key; your own control ids go in `control`.
 | a required check could not run | REVIEW |
 | the record cannot be stored | error: no decision is returned |
 
-The final decision is the worst outcome of all checks.
+The final decision is the worst outcome of all checks. Built in steps 8 and
+9, as written.
 
-## The record (planned)
+## The record
 
-The record schema moves to `groundlens.evidence-record/2`. It adds the scope,
+The plan below was for a schema `groundlens.evidence-record/2`; as built, the
+record stays `/1` (see the two notes after it). The plan: it adds the scope,
 the provenance of every passage, the resolved policy hash, the judge model
 returned by the provider, the template hash and the hash of the judge's raw
 response, and the version and source hash of every custom check. By default it
@@ -233,7 +251,10 @@ the evidence graph, already covered by the content hash. The record stays
 `groundlens.evidence-record/1`. The engine renders the prompt and reads the
 reply; the caller's client is the only thing that talks to a model.
 
-## Measurement (planned)
+Not built: records still keep the passage text each piece of evidence points
+to (`source_text`), so a record is not hashes only.
+
+## Measurement
 
 `groundlens measure` takes a batch of decisions and a small set of labels from
 your own team (about 50, stratified by decision and risk class, labelled
@@ -301,3 +322,13 @@ the documentation it touches in the same pull request.
 11. **Measurement and replay.**
 12. **Regression suite on labelled real answers,** with recorded judge output,
     run in CI without network.
+
+## Not built yet
+
+- Step 12, the regression suite on labelled real answers with recorded judge
+  output.
+- `Passage` and `Scope` classes, and `acheck()`.
+- Custom checks registered from Python, with their source hash in the record.
+- Records that keep hashes only, with text as an opt-in.
+- Removing the lexical, entailment and similarity channels from the default
+  build. They are deprecated now and leave in the release after the next one.
