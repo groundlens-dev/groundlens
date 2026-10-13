@@ -21,17 +21,20 @@ from groundlens import Record, RunRecord, verify, verify_run
 RUN_SCHEMA = "groundlens.run-record/1"
 
 
-def _sources(sources: Sequence[Any]) -> list[tuple[str, str]]:
-    """Accept ``[[id, text], ...]``, ``[{"id":..., "text":...}, ...]`` or ``[text, ...]``."""
-    out: list[tuple[str, str]] = []
+def _sources(sources: Sequence[Any]) -> list[tuple[str, str, dict[str, str]]]:
+    """Accept ``[[id, text], ...]``, ``[[id, text, provenance], ...]``,
+    ``[{"id":..., "text":..., "provenance": {...}}, ...]`` or ``[text, ...]``."""
+    out: list[tuple[str, str, dict[str, str]]] = []
     for i, s in enumerate(sources):
         if isinstance(s, Mapping):
-            out.append((str(s.get("id", f"source_{i + 1}")), str(s["text"])))
+            prov = s.get("provenance") or {}
+            out.append((str(s.get("id", f"source_{i + 1}")), str(s["text"]), {str(k): str(v) for k, v in prov.items()}))
         elif isinstance(s, (list, tuple)):
-            sid, text = s
-            out.append((str(sid), str(text)))
+            sid, text, *rest = s
+            prov = rest[0] if rest and isinstance(rest[0], Mapping) else {}
+            out.append((str(sid), str(text), {str(k): str(v) for k, v in prov.items()}))
         else:
-            out.append((f"source_{i + 1}", str(s)))
+            out.append((f"source_{i + 1}", str(s), {}))
     return out
 
 
@@ -41,6 +44,8 @@ def verify_answer(
     question: str | None = None,
     locale: str = "und",
     policy: str | None = None,
+    scope: Mapping[str, str] | None = None,
+    risk_class: str | None = None,
 ) -> dict[str, Any]:
     """Verify an answer against its sources under a policy; return the sealed record.
 
@@ -52,8 +57,13 @@ def verify_answer(
         locale: how the documents write numbers (``"en"``, ``"es"``, ...). Default ``"und"``.
         policy: a built-in policy name (``"eu_ai_act_high_risk_v1"``), a path, or YAML.
             ``None`` uses ``groundlens_default_v1``.
+        scope: what the request is about, e.g. ``{"entity": "UPS"}``. Give each
+            source a ``provenance`` so the scope check can tell where a figure came from.
+        risk_class: the request's risk class, when the policy defines them.
     """
-    record = verify(answer, _sources(sources), question=question, locale=locale, policy=policy)
+    record = verify(
+        answer, _sources(sources), question=question, locale=locale, policy=policy, scope=scope, risk_class=risk_class
+    )
     return {
         "decision": record.decision,
         "policy_id": record.policy_id,
@@ -62,6 +72,7 @@ def verify_answer(
         "record_hash": record.record_hash,
         "report": record.report(),
         "regulatory_mapping": list(record.regulatory_mapping),
+        "reasons": record.reasons,
         "evidence": [
             {
                 "verifier_id": e.verifier_id,

@@ -45,15 +45,22 @@ def build_server() -> "MCPServer":
         question: str | None = None,
         locale: str = "und",
         policy: str | None = None,
+        scope: dict[str, str] | None = None,
+        risk_class: str | None = None,
     ) -> dict[str, Any]:
         """Verify an answer against its sources under a policy and return the sealed record.
 
-        sources: (id, text) pairs, {"id","text"} dicts, or bare strings.
+        sources: (id, text) pairs, {"id","text","provenance"} dicts, or bare strings.
         policy: a built-in name (e.g. "eu_ai_act_high_risk_v1"), a path, or YAML.
+        scope: what the request is about, e.g. {"entity": "UPS"}; a figure taken
+        from a source whose provenance is another entity fails.
+        risk_class: the request's risk class, when the policy defines them.
         Returns the decision (PASS/REVIEW/FAIL), the evidence, the regulatory
         mapping and the record with its content hash.
         """
-        return tools.verify_answer(answer, sources, question=question, locale=locale, policy=policy)
+        return tools.verify_answer(
+            answer, sources, question=question, locale=locale, policy=policy, scope=scope, risk_class=risk_class
+        )
 
     @server.tool(name="verify_run")
     def verify_run(

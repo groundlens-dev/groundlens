@@ -99,3 +99,15 @@ def test_server_registers_the_three_tools():
     server = build_server()
     names = {t.name for t in asyncio.run(server.list_tools())}
     assert {"verify_answer", "verify_run", "verify_records"} <= names
+
+
+def test_verify_answer_checks_the_scope_from_provenance():
+    sources = [
+        {"id": "ups#p1", "text": "UPS revenue was $91.0 billion.", "provenance": {"entity": "UPS"}},
+        ["fdx#p1", "FedEx revenue was $87.7 billion.", {"entity": "FDX"}],
+    ]
+    out = tools.verify_answer("UPS revenue was $87.7 billion.", sources, locale="en", scope={"entity": "UPS"})
+    assert out["decision"] == "FAIL"
+    assert any("outside the request scope" in r for r in out["reasons"])
+    ok = tools.verify_answer("UPS revenue was $91.0 billion.", sources, locale="en", scope={"entity": "UPS"})
+    assert ok["decision"] == "PASS"

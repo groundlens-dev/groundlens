@@ -31,8 +31,10 @@ groundlens-mcp            # runs the server over stdio
 * - `verify_answer`
   - Verify an answer against its sources under a policy. Returns the decision
     (`PASS` / `REVIEW` / `FAIL`), the evidence, the regulatory mapping and the
-    signed record. Sources are `(id, text)` pairs, `{"id","text"}` dicts, or
-    bare strings.
+    signed record. Sources are `(id, text)` or `(id, text, provenance)`
+    tuples, `{"id","text","provenance"}` dicts, or bare strings. Pass `scope`
+    (`{"entity": "UPS"}`) to turn on the scope check, and `risk_class` when the
+    policy defines risk classes.
 * - `verify_run`
   - Gate an MCP execution trace under an execution policy. Returns the gate
     (`ALLOW` / `REVIEW` / `DENY`), any breaches, and the signed run record.
