@@ -1,0 +1,21 @@
+id: groundlens_default_v1
+version: 1.3.0
+description: >
+  Numeric claims must be exactly supported by the sources. A numeric
+  contradiction fails the answer, and so does a figure taken from a passage
+  outside the request's scope. An answer whose figure is not the kind or
+  unit the question asked for goes to review, and so do claims no
+  deterministic verifier can resolve. No model is needed and no generative
+  verifier decides.
+verifiers:
+  required: [groundlens.numeric]
+  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
+  forbidden: [llm_judge.*]
+determinism:
+  minimum_to_decide: reproducible
+decision:
+  any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
+  unsupported_from: [groundlens.scope, groundlens.intent]
+  unresolved_claims: REVIEW
+  conflicts: REVIEW
+  tolerate_unresolved_kinds: [word, statement]

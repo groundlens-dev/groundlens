@@ -36,6 +36,29 @@ def _source(spec: str) -> tuple[str, str]:
     return ident, _read(path)
 
 
+def _scope(pairs: list[str]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for pair in pairs:
+        if "=" not in pair:
+            raise ValueError("--scope expects key=value")
+        key, value = pair.split("=", 1)
+        out[key] = value
+    return out
+
+
+def _with_provenance(sources: list[tuple[str, str]], specs: list[str]) -> list[tuple[str, str, dict[str, str]]]:
+    provenance: dict[str, dict[str, str]] = {ident: {} for ident, _ in sources}
+    for spec in specs:
+        ident, sep, pair = spec.rpartition(":")
+        if not sep or "=" not in pair:
+            raise ValueError("--provenance expects id:key=value")
+        if ident not in provenance:
+            raise ValueError(f"--provenance names an unknown source id {ident!r}")
+        key, value = pair.split("=", 1)
+        provenance[ident][key] = value
+    return [(ident, text, provenance[ident]) for ident, text in sources]
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="groundlens", description="GroundLens: the verification and evidence layer for AI.")
     p.add_argument("--version", action="version", version=f"groundlens {__version__} (GLV engine {ENGINE_VERSION})")
@@ -55,6 +78,9 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
     v.add_argument("--rounding", default="half_up", choices=["half_up", "half_even", "within_last_digit"], help="how a recomputed figure may differ from the one written")
     v.add_argument("--no-derive", action="store_true", help="do not recompute figures from the answer's own supported figures")
+    v.add_argument("--scope", action="append", default=[], help="what the request is about, key=value, repeatable")
+    v.add_argument("--provenance", action="append", default=[], help="provenance of a source, id:key=value, repeatable")
+    v.add_argument("--risk-class", help="the risk class of this request, when the policy defines them")
     v.add_argument("--json", action="store_true", help="print the full record instead of the summary")
 
     r = sub.add_parser("report", help="build a verification report from a records log")
@@ -68,6 +94,9 @@ def build_parser() -> argparse.ArgumentParser:
     pol = sub.add_parser("policy", help="policy tools").add_subparsers(dest="sub", required=True)
     pl = pol.add_parser("lint", help="check a policy")
     pl.add_argument("policy")
+    ps = pol.add_parser("show", help="print a policy; --resolved merges extends and writes every default")
+    ps.add_argument("policy")
+    ps.add_argument("--resolved", action="store_true")
 
     b = sub.add_parser("bundle", help="bundle tools").add_subparsers(dest="sub", required=True)
     bb = b.add_parser("build", help="write manifest.json for a bundle directory")
@@ -116,7 +145,7 @@ def _run(args: argparse.Namespace) -> int:
             warnings.simplefilter("ignore", DeprecationWarning)
             record = verify(
                 _read(args.answer),
-                args.source,
+                _with_provenance(args.source, args.provenance),
                 policy=args.policy,
                 question=_read(args.question) if args.question else None,
                 locale=args.locale,
@@ -128,6 +157,8 @@ def _run(args: argparse.Namespace) -> int:
                 units=not args.no_units,
                 derive=not args.no_derive,
                 rounding=args.rounding,
+                scope=_scope(args.scope),
+                risk_class=args.risk_class,
             )
         print(record.to_json(indent=2) if args.json else record.report())
         return EXIT[record.decision]
@@ -141,6 +172,9 @@ def _run(args: argparse.Namespace) -> int:
         return 0
     if args.cmd == "policy":
         policy = Policy.coerce(args.policy)
+        if args.sub == "show":
+            print(policy.resolved_yaml if args.resolved else policy.yaml, end="")
+            return 0
         print(f"ok  {policy.id} v{policy.version}  {policy.hash}")
         return 0
     if args.cmd == "bundle":

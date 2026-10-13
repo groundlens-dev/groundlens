@@ -7,6 +7,7 @@
 //! ```text
 //! glv verify --answer a.txt --source invoice.pdf#p1=invoice.txt --policy p.yaml [--rules r.yaml] [--question q.txt] [--log records.jsonl]
 //! glv policy lint p.yaml
+//! glv policy show p.yaml --resolved
 //! glv record verify records.jsonl
 //! glv bundle build ./bundle --name acme-verification --version 1.0.0
 //! glv bundle verify ./bundle
@@ -14,11 +15,10 @@
 //! ```
 
 use clap::{Parser, Subcommand};
-use gl_core::{Source, Verifier};
+use gl_core::Source;
 use gl_engine::VerifyRequest;
 use gl_policy::Policy;
 use gl_record::RecordSigner;
-use gl_verifiers::NumericVerifier;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -40,8 +40,10 @@ enum Command {
         sources: Vec<String>,
         #[arg(long)]
         question: Option<PathBuf>,
+        /// A policy file, or the id of a shipped policy
+        /// (`groundlens_default_v1`, `eu_ai_act_high_risk_v1`).
         #[arg(long)]
-        policy: PathBuf,
+        policy: String,
         /// Rule set, YAML or JSON. Repeatable.
         #[arg(long = "rules")]
         rules: Vec<PathBuf>,
@@ -76,6 +78,9 @@ enum Command {
         /// (`--provenance 10k#p114:entity=UPS`).
         #[arg(long = "provenance")]
         provenance: Vec<String>,
+        /// The risk class of this request, when the policy defines them.
+        #[arg(long = "risk-class")]
+        risk_class: Option<String>,
     },
     /// Policy tools.
     Policy {
@@ -135,7 +140,19 @@ enum RunCmd {
 
 #[derive(Subcommand)]
 enum PolicyCmd {
-    Lint { path: PathBuf },
+    /// Check a policy: schema, extends, thresholds, rounding rule.
+    Lint {
+        /// A policy file, or the id of a shipped policy.
+        policy: String,
+    },
+    /// Print a policy. With --resolved: `extends` merged in and every
+    /// default written out, headed by the hash that goes into records.
+    Show {
+        /// A policy file, or the id of a shipped policy.
+        policy: String,
+        #[arg(long)]
+        resolved: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -177,6 +194,18 @@ enum BundleCmd {
 
 fn read(path: &PathBuf) -> anyhow_lite::Result<String> {
     std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()).into())
+}
+
+/// A policy argument: a file, or the id of a shipped policy.
+fn read_policy(arg: &str) -> anyhow_lite::Result<String> {
+    let path = PathBuf::from(arg);
+    if path.is_file() {
+        return read(&path);
+    }
+    match gl_policy::builtin(arg) {
+        Some(text) => Ok(text.to_string()),
+        None => Err(format!("{arg}: no such file, and not a shipped policy").into()),
+    }
 }
 
 mod anyhow_lite {
@@ -302,6 +331,7 @@ fn run() -> anyhow_lite::Result<()> {
             no_derive,
             scope,
             provenance,
+            risk_class,
         } => {
             let mut srcs = Vec::new();
             for s in sources {
@@ -327,7 +357,8 @@ fn run() -> anyhow_lite::Result<()> {
             }
             req.question = question.map(|p| read(&p)).transpose()?;
             req.locale = locale;
-            req.policy_yaml = read(&policy)?;
+            req.policy_yaml = read_policy(&policy)?;
+            req.risk_class = risk_class;
             for r in &rules {
                 req.rule_sets_json.push(load_rules_json(r)?);
             }
@@ -363,17 +394,25 @@ fn run() -> anyhow_lite::Result<()> {
                 gl_policy::Decision::Pass => {}
             }
         }
-        Command::Policy { cmd: PolicyCmd::Lint { path } } => {
-            let policy = Policy::from_yaml(&read(&path)?)?;
-            let known = [NumericVerifier::default().info().clone()];
-            let problems = policy.lint(&known);
+        Command::Policy { cmd: PolicyCmd::Lint { policy } } => {
+            let text = read_policy(&policy)?;
+            let (hash, problems) = gl_engine::policy_lint(&text)?;
+            let policy = Policy::from_yaml(&text)?;
             if problems.is_empty() {
-                println!("ok  {} v{}  {}", policy.id, policy.version, policy.hash()?);
+                println!("ok  {} v{}  {}", policy.id, policy.version, hash);
             } else {
                 for p in problems {
                     println!("problem  {p}");
                 }
                 std::process::exit(1);
+            }
+        }
+        Command::Policy { cmd: PolicyCmd::Show { policy, resolved } } => {
+            let text = read_policy(&policy)?;
+            if resolved {
+                print!("{}", gl_engine::policy_resolve(&text)?);
+            } else {
+                print!("{text}");
             }
         }
         Command::Record { cmd: RecordCmd::Verify { path } } => {

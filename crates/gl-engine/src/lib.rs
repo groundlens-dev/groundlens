@@ -32,28 +32,7 @@ pub use run::{verify_run, RunVerifyRequest};
 /// goes to review, no generative verifier decides. It names no model
 /// channel: the default path runs without a model.
 pub const DEFAULT_POLICY_ID: &str = "groundlens_default_v1";
-pub const DEFAULT_POLICY_YAML: &str = r#"id: groundlens_default_v1
-version: 1.3.0
-description: >
-  Numeric claims must be exactly supported by the sources. A numeric
-  contradiction fails the answer, and so does a figure taken from a passage
-  outside the request's scope. An answer whose figure is not the kind or
-  unit the question asked for goes to review, and so do claims no
-  deterministic verifier can resolve. No model is needed and no generative
-  verifier decides.
-verifiers:
-  required: [groundlens.numeric]
-  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
-  forbidden: [llm_judge.*]
-determinism:
-  minimum_to_decide: reproducible
-decision:
-  any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope, groundlens.intent]
-  unresolved_claims: REVIEW
-  conflicts: REVIEW
-  tolerate_unresolved_kinds: [word, statement]
-"#;
+pub const DEFAULT_POLICY_YAML: &str = gl_policy::GROUNDLENS_DEFAULT_V1;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VerifyRequest {
@@ -96,6 +75,10 @@ pub struct VerifyRequest {
     /// inside this scope. Hashed into the record's `input_hash`.
     #[serde(default)]
     pub scope: BTreeMap<String, String>,
+    /// The risk class of the request, when the policy defines risk classes.
+    /// `None` means the policy's default class.
+    #[serde(default)]
+    pub risk_class: Option<String>,
 }
 
 fn default_true() -> bool {
@@ -123,13 +106,38 @@ impl VerifyRequest {
             lexical: true,
             metadata: BTreeMap::new(),
             scope: BTreeMap::new(),
+            risk_class: None,
         }
     }
+}
+
+/// The policy a request runs under: its own YAML, or the default.
+fn request_policy(req: &VerifyRequest) -> Result<Policy> {
+    let policy_yaml = if req.policy_yaml.trim().is_empty() { DEFAULT_POLICY_YAML } else { &req.policy_yaml };
+    Policy::from_yaml(policy_yaml)
+}
+
+/// Apply what the policy fixes over what the request asked for. The policy
+/// wins: a locale or rounding rule written in the policy is the one used,
+/// whatever the request says, so the same policy hash always means the same
+/// reading of the numbers.
+fn apply_policy(req: &VerifyRequest, policy: &Policy) -> Result<VerifyRequest> {
+    let mut req = req.clone();
+    if let Some(locale) = &policy.locale {
+        req.locale = locale.clone();
+    }
+    if let Some(rule) = policy.rounding() {
+        req.numeric.rounding = serde_json::from_value(serde_json::Value::String(rule.to_string()))
+            .map_err(|_| gl_core::Error::InvalidInput(format!("policy: unknown rounding rule {rule:?}")))?;
+    }
+    Ok(req)
 }
 
 /// Normalise, extract claims, run every admitted verifier, evaluate the
 /// policy and seal a signed record.
 pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
+    let policy = request_policy(req)?;
+    let req = &apply_policy(req, &policy)?;
     let answer = gl_text::normalise(&req.answer);
     let question = req.question.as_deref().map(gl_text::normalise);
     let sources: Vec<Source> = req
@@ -151,9 +159,6 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
         req.scope.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
     let input =
         VerificationInput { question, answer, sources, claims, locale: req.locale.clone(), metadata, scope };
-
-    let policy_yaml = if req.policy_yaml.trim().is_empty() { DEFAULT_POLICY_YAML } else { &req.policy_yaml };
-    let policy = Policy::from_yaml(policy_yaml)?;
 
     let mut verifiers: Vec<Box<dyn Verifier>> = vec![Box::new(NumericVerifier::new(req.numeric.clone()))];
     // The scope channel runs only when the request states a scope, so a
@@ -215,7 +220,11 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
     }
     let kinds: BTreeMap<String, gl_core::ClaimKind> =
         input.claims.iter().map(|c| (c.id.clone(), c.kind)).collect();
-    let outcome = gl_policy::evaluate(&policy, &graph, &kinds)?;
+    let facts = gl_policy::RequestFacts {
+        scope_keys: input.scope.keys().cloned().collect(),
+        risk_class: req.risk_class.clone(),
+    };
+    let outcome = gl_policy::evaluate_request(&policy, &graph, &kinds, &facts)?;
 
     let content = RecordContent {
         schema: RECORD_SCHEMA.into(),
@@ -251,6 +260,10 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
 /// The verification input the engine would build for a request, without
 /// running anything. Used by the `proofread()` facade to list claims.
 pub fn prepare(req: &VerifyRequest) -> VerificationInput {
+    // The locale a policy fixes changes how claims are read, so honour it
+    // here too; an invalid policy is reported by `verify`, not here.
+    let applied = request_policy(req).and_then(|p| apply_policy(req, &p)).ok();
+    let req = applied.as_ref().unwrap_or(req);
     let answer = gl_text::normalise(&req.answer);
     let claims = extract_claims_with(&answer, &req.locale, req.numeric.units);
     VerificationInput {
@@ -273,10 +286,28 @@ pub fn prepare(req: &VerifyRequest) -> VerificationInput {
     }
 }
 
+/// Load a policy from YAML text or, when the text is a single word naming a
+/// shipped policy, from the build.
+pub fn load_policy(yaml_or_name: &str) -> Result<Policy> {
+    let trimmed = yaml_or_name.trim();
+    match gl_policy::builtin(trimmed) {
+        Some(text) => Policy::from_yaml(text),
+        None => Policy::from_yaml(yaml_or_name),
+    }
+}
+
+/// `(resolved policy hash, lint problems)`.
 pub fn policy_lint(yaml: &str) -> Result<(String, Vec<String>)> {
-    let policy = Policy::from_yaml(yaml)?;
+    let policy = load_policy(yaml)?;
     let known = known_verifiers();
     Ok((policy.hash()?, policy.lint(&known)))
+}
+
+/// The resolved policy as YAML, headed by its id, version and hash. Loading
+/// the YAML gives the same hash.
+pub fn policy_resolve(yaml: &str) -> Result<String> {
+    let policy = load_policy(yaml)?;
+    Ok(format!("# {} v{}\n# hash: {}\n{}", policy.id, policy.version, policy.hash()?, policy.to_yaml()?))
 }
 
 /// Declarations of every built-in verifier, model or no model.
@@ -356,6 +387,79 @@ mod tests {
             .collect();
         for model in [gl_verifiers::LEXICAL_ID, "groundlens.nli", "semantic.cosine"] {
             assert!(!named.iter().any(|n| n.as_str() == model), "the default policy names {model}");
+        }
+    }
+
+    fn src(text: &str) -> Source {
+        Source { id: "s".into(), text: text.into(), locator: None, provenance: Default::default() }
+    }
+
+    #[test]
+    fn the_policy_rounding_rule_wins_over_the_request() {
+        // 2,345 / 1,000 = 2.345 exactly: 2.35 half up, 2.34 half even.
+        let mut req = VerifyRequest::new(
+            "Revenue was 2,345 against costs of 1,000, a ratio of 2.35.",
+            vec![src("Revenue was 2,345. Costs were 1,000.")],
+        );
+        let half_up = verify(&req).unwrap();
+        req.policy_yaml =
+            "id: banker\nversion: 1.0.0\nextends: groundlens_default_v1\nrounding: half_even\n".into();
+        let half_even = verify(&req).unwrap();
+        assert_ne!(
+            canonical(&half_up.content.graph),
+            canonical(&half_even.content.graph),
+            "the policy rule must change how 2.35 is read"
+        );
+        // The request asks for half up; the policy says half even and wins.
+        req.numeric.rounding = gl_numeric_rounding("half_up");
+        let still_even = verify(&req).unwrap();
+        assert_eq!(canonical(&half_even.content.graph), canonical(&still_even.content.graph));
+        assert_eq!(half_even.content.outcome.policy_id, "banker");
+    }
+
+    fn canonical<T: Serialize>(value: &T) -> String {
+        gl_core::canonical::canonical_json(value).unwrap()
+    }
+
+    fn gl_numeric_rounding(name: &str) -> gl_numeric::arith::Rounding {
+        serde_json::from_value(serde_json::Value::String(name.into())).unwrap()
+    }
+
+    #[test]
+    fn a_required_scope_key_and_a_mandatory_risk_class_reach_the_record() {
+        let mut req = VerifyRequest::new("Revenue was €10M.", vec![src("Revenue was €10M.")]);
+        req.policy_yaml = "id: desk\nversion: 1.0.0\nextends: eu_ai_act_high_risk_v1\n\
+                           pass_means: may be shown to the analyst\n\
+                           scope:\n  required: [entity]\n\
+                           risk_classes:\n  default: routine\n  mandatory_review: [recommendation]\n"
+            .into();
+        let missing = verify(&req).unwrap();
+        assert_eq!(missing.content.outcome.decision, Decision::Review);
+        assert!(missing.content.outcome.reasons[0].starts_with("missing_scope"));
+        assert_eq!(missing.content.outcome.pass_means.as_deref(), Some("may be shown to the analyst"));
+        gl_record::verify_record(&missing).unwrap();
+
+        req.scope.insert("entity".into(), "ACME".into());
+        req.sources[0].provenance.insert("entity".into(), "ACME".into());
+        let ok = verify(&req).unwrap();
+        assert_eq!(ok.content.outcome.decision, Decision::Pass);
+        assert_eq!(ok.content.outcome.risk_class.as_deref(), Some("routine"));
+
+        req.risk_class = Some("recommendation".into());
+        assert_eq!(verify(&req).unwrap().content.outcome.decision, Decision::Review);
+        req.risk_class = Some("nonsense".into());
+        assert!(verify(&req).unwrap_err().to_string().contains("no risk class"));
+    }
+
+    #[test]
+    fn shipped_policies_load_by_name_and_resolve_to_their_own_hash() {
+        for (id, text) in gl_policy::BUILTIN {
+            let (hash, problems) = policy_lint(id).unwrap();
+            assert!(problems.is_empty(), "{id}: {problems:?}");
+            assert_eq!(hash, Policy::from_yaml(text).unwrap().hash().unwrap());
+            let resolved = policy_resolve(id).unwrap();
+            assert!(resolved.contains(&hash));
+            assert_eq!(policy_lint(&resolved).unwrap().0, hash);
         }
     }
 

@@ -223,6 +223,9 @@ mod tests {
                 missing_required: vec![],
                 excluded_verifiers: vec![],
                 regulatory_mapping: vec![],
+                reasons: vec![],
+                risk_class: None,
+                pass_means: None,
             },
         }
     }

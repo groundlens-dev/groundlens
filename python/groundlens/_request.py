@@ -95,6 +95,7 @@ def build_request(
     lexical: bool = True,
     metadata: Mapping[str, str] | None = None,
     scope: Mapping[str, str] | None = None,
+    risk_class: str | None = None,
 ) -> str:
     request = {
         "answer": answer,
@@ -119,5 +120,6 @@ def build_request(
         "lexical": lexical,
         "metadata": dict(metadata or {}),
         "scope": {str(k): str(v) for k, v in (scope or {}).items()},
+        "risk_class": risk_class,
     }
     return json.dumps(request, ensure_ascii=False)

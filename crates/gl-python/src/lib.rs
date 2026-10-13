@@ -67,6 +67,18 @@ fn default_policy_yaml() -> String {
     gl_engine::DEFAULT_POLICY_YAML.to_string()
 }
 
+/// The YAML of a shipped policy, by id; `None` when no such policy ships.
+#[pyfunction]
+fn builtin_policy_yaml(name: &str) -> Option<String> {
+    gl_engine::gl_policy::builtin(name).map(str::to_string)
+}
+
+/// The resolved policy as YAML, headed by its id, version and hash.
+#[pyfunction]
+fn policy_resolve(yaml: &str) -> PyResult<String> {
+    gl_engine::policy_resolve(yaml).map_err(err)
+}
+
 #[pyfunction]
 fn keygen() -> String {
     gl_engine::keygen_hex()
@@ -150,6 +162,8 @@ fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(record_verify, m)?)?;
     m.add_function(wrap_pyfunction!(policy_lint, m)?)?;
     m.add_function(wrap_pyfunction!(default_policy_yaml, m)?)?;
+    m.add_function(wrap_pyfunction!(builtin_policy_yaml, m)?)?;
+    m.add_function(wrap_pyfunction!(policy_resolve, m)?)?;
     m.add_function(wrap_pyfunction!(keygen, m)?)?;
     m.add_function(wrap_pyfunction!(engine_version, m)?)?;
     m.add_function(wrap_pyfunction!(normalise, m)?)?;

@@ -124,8 +124,23 @@ class Record:
 
     @property
     def reasons(self) -> list[str]:
-        """Every non-PASS claim, as ``'<claim>: <reason>'`` lines."""
-        return [f"{c.claim_id}: {r}" for c in self.claims if c.decision != "PASS" for r in c.reasons]
+        """What a reviewer should read first: the reasons that concern the
+        whole request (a missing scope key, a verifier that could not run, a
+        risk class that requires review), then every non-PASS claim as
+        ``'<claim>: <reason>'`` lines."""
+        outcome = self.raw["content"]["outcome"]
+        request = list(outcome.get("reasons", []))
+        return request + [f"{c.claim_id}: {r}" for c in self.claims if c.decision != "PASS" for r in c.reasons]
+
+    @property
+    def risk_class(self) -> str | None:
+        """The risk class the request was decided under, when the policy has them."""
+        return self.raw["content"]["outcome"].get("risk_class")
+
+    @property
+    def pass_means(self) -> str | None:
+        """What PASS means for this application, as the policy says."""
+        return self.raw["content"]["outcome"].get("pass_means")
 
     @property
     def evidence(self) -> tuple[EvidenceItem, ...]:

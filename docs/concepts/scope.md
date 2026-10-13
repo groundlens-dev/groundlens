@@ -66,6 +66,19 @@ numeric verifier's question; where it comes from is this one's.
 The receipt names the passage the figure came from, so a reviewer opens the
 right page.
 
+## Requiring a scope
+
+The scope check runs only when a request states a scope. If every request in
+your application must say what it is about, put that in the policy:
+
+```{code-block} yaml
+scope:
+  required: [entity]
+```
+
+A request without `entity` then goes to review (`missing_scope`), instead of
+skipping the check. See [Policies](policies.md#scope).
+
 ## What it does not do
 
 - It does not replace access control. Your retrieval layer should only return
