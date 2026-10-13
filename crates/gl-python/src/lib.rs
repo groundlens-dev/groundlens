@@ -39,6 +39,27 @@ fn judge_prompt_json(request_json: &str) -> PyResult<String> {
     serde_json::to_string(&gl_engine::judge_prompt(&req).map_err(err)?).map_err(err)
 }
 
+/// Sign a document (a measurement or replay report) with a local Ed25519
+/// seed. `content_json` is any JSON value; the result is a signed document.
+#[pyfunction]
+fn sign_document_json(kind: &str, content_json: &str, seed_hex: &str) -> PyResult<String> {
+    let content: serde_json::Value = serde_json::from_str(content_json).map_err(err)?;
+    let bytes: [u8; 32] = hex::decode(seed_hex)
+        .ok()
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| PyValueError::new_err("signing key must be 32 bytes hex"))?;
+    let doc =
+        gl_record::sign_document(kind, content, &gl_record::RecordSigner::from_bytes(&bytes)).map_err(err)?;
+    serde_json::to_string(&doc).map_err(err)
+}
+
+/// Check a signed document. Raises on a changed content or a bad signature.
+#[pyfunction]
+fn verify_document_json(doc_json: &str) -> PyResult<()> {
+    let doc: gl_record::SignedDocument = serde_json::from_str(doc_json).map_err(err)?;
+    gl_record::verify_document(&doc).map_err(|e| PyRuntimeError::new_err(e.to_string()))
+}
+
 /// Attach a key service's signature (hex) and public key (hex) to an unsigned
 /// record. The signature is checked first; the result is a sealed record.
 #[pyfunction]
@@ -201,6 +222,8 @@ fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run_verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(verify_unsigned_json, m)?)?;
     m.add_function(wrap_pyfunction!(judge_prompt_json, m)?)?;
+    m.add_function(wrap_pyfunction!(sign_document_json, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_document_json, m)?)?;
     m.add_function(wrap_pyfunction!(attach_signature_json, m)?)?;
     m.add_function(wrap_pyfunction!(record_verify_chains, m)?)?;
     m.add_function(wrap_pyfunction!(run_record_verify, m)?)?;

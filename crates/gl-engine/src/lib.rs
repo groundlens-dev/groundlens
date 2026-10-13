@@ -84,6 +84,11 @@ pub struct VerifyRequest {
     /// The engine never calls a model; the caller does, and passes the reply.
     #[serde(default)]
     pub judge: Option<judge::JudgeReply>,
+    /// For replay: the judge's evidence from an earlier record of the same
+    /// input, used instead of asking again. Accepted only if it was produced
+    /// by the same prompt.
+    #[serde(default)]
+    pub judge_evidence: Option<judge::StoredJudge>,
 }
 
 fn default_true() -> bool {
@@ -113,6 +118,7 @@ impl VerifyRequest {
             scope: BTreeMap::new(),
             risk_class: None,
             judge: None,
+            judge_evidence: None,
         }
     }
 }
@@ -222,6 +228,20 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
         match v.verify(&input) {
             Ok(ev) => graph.push_verifier(v.info().clone(), ev),
             Err(e) => graph.push_failure(&v.info().id, &e.to_string()),
+        }
+    }
+    if req.judge.is_some() && req.judge_evidence.is_some() {
+        return Err(gl_core::Error::InvalidInput(
+            "pass a judge reply or stored judge evidence, not both".into(),
+        ));
+    }
+    if let Some(stored) = &req.judge_evidence {
+        let rendered = judge::render(&input, &policy);
+        let (info, evidence, failure) = judge::reuse(&rendered, stored)?;
+        let id = info.id.clone();
+        graph.push_verifier(info, evidence);
+        if let Some(message) = failure {
+            graph.push_failure(&id, &message);
         }
     }
     if let Some(reply) = &req.judge {
@@ -499,6 +519,43 @@ mod tests {
         assert_eq!(verify(&req).unwrap().content.outcome.decision, Decision::Review);
         req.risk_class = Some("nonsense".into());
         assert!(verify(&req).unwrap_err().to_string().contains("no risk class"));
+    }
+
+    #[test]
+    fn stored_judge_evidence_replays_only_for_the_same_prompt() {
+        let policy =
+            "id: j\nversion: 1\nextends: groundlens_default_v1\nverifiers:\n  forbidden: []\njudge: {}\n";
+        let mut req = VerifyRequest::new("Revenue was €10M.", vec![src("Revenue was €10M.")]);
+        req.policy_yaml = policy.into();
+        let prompt = judge_prompt(&req).unwrap();
+        let reply =
+            format!("{{\"claims\": [{{\"id\": \"{}\", \"label\": \"unsupported\"}}]}}", prompt.claims[0].0);
+        req.judge = Some(judge::JudgeReply {
+            adapter: "test".into(),
+            model: "m".into(),
+            response: Some(reply),
+            error: None,
+        });
+        let first = verify(&req).unwrap();
+        assert_eq!(first.content.outcome.decision, Decision::Review);
+
+        let info = first.content.graph.verifiers.iter().find(|v| v.id == "llm_judge.test").unwrap().clone();
+        let evidence: Vec<_> =
+            first.content.graph.evidence.iter().filter(|e| e.verifier_id == info.id).cloned().collect();
+        let stored = judge::StoredJudge { info, evidence, failure: None };
+        let mut replay = req.clone();
+        replay.judge = None;
+        replay.judge_evidence = Some(stored.clone());
+        let again = verify(&replay).unwrap();
+        assert_eq!(
+            canonical(&again.content),
+            canonical(&first.content),
+            "the same evidence, the same record content"
+        );
+
+        // Under a policy that changes the prompt, the old answer is refused.
+        replay.policy_yaml = format!("{policy}pass_means: shown to clients\n");
+        assert!(verify(&replay).unwrap_err().to_string().contains("another prompt"));
     }
 
     #[test]

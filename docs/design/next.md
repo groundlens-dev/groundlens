@@ -250,6 +250,11 @@ The report is signed. If the interval is wide, the report says so.
 `groundlens replay` re-runs past traffic under a new policy, reusing the
 stored judge evidence, and reports how many decisions would change.
 
+Built in step 11. Replay needs the requests as sent, since a record keeps
+hashes, not text; the judge's evidence is reused only when the prompt hash in
+the old record matches the prompt the new policy would send. For that the
+prompt carries what PASS means but not the policy's name or version.
+
 ## What this design does not do
 
 - It does not bundle a model, and it does not require one.

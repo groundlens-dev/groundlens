@@ -322,6 +322,62 @@ pub fn verify_chain(records: &[EvidenceRecord]) -> Result<()> {
     Ok(())
 }
 
+/// A signed document that is not a verification: a measurement report, a
+/// replay report. Same hashing and Ed25519 signature as a record, without the
+/// chain. `kind` names the document schema.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SignedDocument {
+    pub kind: String,
+    pub content: serde_json::Value,
+    /// `sha256:` of the canonical JSON of `kind` and `content`.
+    pub content_hash: String,
+    /// Ed25519 over the bytes of `content_hash`, hex.
+    pub signature: String,
+    pub signer_public_key: String,
+}
+
+#[derive(Serialize)]
+struct DocumentBody<'a> {
+    kind: &'a str,
+    content: &'a serde_json::Value,
+}
+
+/// Sign a document with a local key.
+pub fn sign_document(
+    kind: &str,
+    content: serde_json::Value,
+    signer: &RecordSigner,
+) -> Result<SignedDocument> {
+    let content_hash = content_hash(&DocumentBody { kind, content: &content })?;
+    let signature = hex::encode(signer.key.sign(content_hash.as_bytes()).to_bytes());
+    Ok(SignedDocument {
+        kind: kind.to_string(),
+        content,
+        content_hash,
+        signature,
+        signer_public_key: signer.public_key_hex(),
+    })
+}
+
+/// Recompute the hash of a signed document and check its signature.
+pub fn verify_document(doc: &SignedDocument) -> Result<()> {
+    let recomputed = content_hash(&DocumentBody { kind: &doc.kind, content: &doc.content })?;
+    if recomputed != doc.content_hash {
+        return Err(Error::Integrity(format!("{}: content hash mismatch", doc.kind)));
+    }
+    let pk_bytes: [u8; 32] = hex::decode(&doc.signer_public_key)
+        .ok()
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| Error::Integrity("bad public key".into()))?;
+    let pk = VerifyingKey::from_bytes(&pk_bytes).map_err(|e| Error::Integrity(e.to_string()))?;
+    let sig_bytes: [u8; 64] = hex::decode(&doc.signature)
+        .ok()
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| Error::Integrity("bad signature encoding".into()))?;
+    pk.verify(doc.content_hash.as_bytes(), &Signature::from_bytes(&sig_bytes))
+        .map_err(|_| Error::Integrity(format!("{}: signature does not verify", doc.kind)))
+}
+
 /// Verify a set of chains, each one a log written by one writer. Many
 /// processes may each keep their own chain; every chain must verify on its
 /// own, and no record may appear in two of them. Returns the record count.
@@ -445,6 +501,19 @@ mod tests {
         let mut relabelled = record.clone();
         relabelled.signature_algorithm = None;
         assert!(verify_record(&relabelled).is_err());
+    }
+
+    #[test]
+    fn a_signed_document_verifies_and_any_change_is_caught() {
+        let signer = RecordSigner::generate();
+        let doc = sign_document("groundlens.measurement/1", serde_json::json!({"n": 50}), &signer).unwrap();
+        verify_document(&doc).unwrap();
+        let mut changed = doc.clone();
+        changed.content = serde_json::json!({"n": 51});
+        assert!(verify_document(&changed).is_err());
+        let mut relabelled = doc;
+        relabelled.kind = "groundlens.replay/1".into();
+        assert!(verify_document(&relabelled).is_err());
     }
 
     #[test]
