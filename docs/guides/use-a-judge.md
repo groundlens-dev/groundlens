@@ -50,9 +50,10 @@ method returning `(text, model)` works too.
 ## What the judge is asked
 
 One prompt per answer, from a fixed template (`groundlens.judge/1`). It
-contains the policy id and what `PASS` means, the scope, the question, the
-answer, every passage with its id and provenance, and the sentences of the
-answer to label. For each sentence the judge answers `supported`,
+contains what `PASS` means for your application, the scope, the question,
+the answer, every passage with its id and provenance, and the sentences of
+the answer to label. It does not contain the policy's name or version, so a
+reply stays valid when the same input is replayed under a renamed policy. For each sentence the judge answers `supported`,
 `unsupported`, `contradicted` or `uncertain`, with the passages it relied on.
 A sentence is supported only if a passage about the stated scope says it, or
 it follows by simple arithmetic or logic.

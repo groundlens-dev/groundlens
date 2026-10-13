@@ -114,6 +114,36 @@ groundlens bundle build path/ --name base --bundle-version 1
 | `bundle verify ROOT` | Re-hash every artefact of a bundle directory. |
 | `bundle build ROOT` | Write `manifest.json`. `--name`, `--bundle-version` required. |
 
+## measure
+
+Estimate the share of wrong answers among those that passed, from labels your
+team puts on a sample. See [Measure and replay](../guides/measure-and-replay.md).
+
+```{code-block} bash
+groundlens measure records/ --sample 50 --seed 7          # the ids to label, no verdicts
+groundlens measure records/ --labels labels.csv --seed 7 --out measurement.json
+```
+
+| Option | Meaning |
+| --- | --- |
+| `records` | Records logs or directories. Every chain is verified first. |
+| `--sample N` | Print N record ids to label, drawn per decision and risk class. |
+| `--seed N` | Seed for the sample, recorded in the report. |
+| `--labels PATH` | CSV `record_id,label[,prediction]` or JSON Lines; `label` is `wrong` or `correct`. |
+| `--review-minutes`, `--review-cost-per-hour`, `--error-cost` | Turn on the cost section. |
+| `--signing-key HEX` | Seed for the report signature (or `GROUNDLENS_SIGNING_KEY`). |
+| `--out PATH` | Write the signed report; default prints it. |
+
+## replay
+
+Check past traffic again under another policy and count the decisions that
+would change. The judge's stored evidence is reused when it answered the same
+prompt.
+
+```{code-block} bash
+groundlens replay --traffic traffic.jsonl --records records/ --policy new.yaml --out replay.json
+```
+
 ## judge show-template
 
 Print the exact prompt a [judge](../guides/use-a-judge.md) is sent for an

@@ -100,8 +100,10 @@ pub fn judged_claims(input: &VerificationInput) -> Vec<(String, String)> {
 
 /// Render the prompt for this input under this policy.
 pub fn render(input: &VerificationInput, policy: &Policy) -> Rendered {
+    // The policy's id and version are left out on purpose: they do not
+    // change what the judge is asked, so a judge reply stays reusable when a
+    // policy is replayed under a new name. What PASS means does change it.
     let mut user = String::new();
-    user.push_str(&format!("POLICY: {} v{}\n", data(&policy.id), data(&policy.version)));
     if let Some(p) = &policy.pass_means {
         user.push_str(&format!("PASS MEANS: {}\n", data(p)));
     }
@@ -169,6 +171,38 @@ pub fn verifier_id(adapter: &str) -> String {
     let clean: String =
         adapter.chars().map(|c| if c.is_ascii_alphanumeric() || c == '_' { c } else { '_' }).collect();
     format!("{JUDGE_PREFIX}{}", if clean.is_empty() { "judge".into() } else { clean })
+}
+
+/// The judge's part of an earlier record: its declaration, its evidence and
+/// any failure. Replay feeds it back instead of asking the model again.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StoredJudge {
+    pub info: VerifierInfo,
+    pub evidence: Vec<Evidence>,
+    #[serde(default)]
+    pub failure: Option<String>,
+}
+
+/// Check that stored judge evidence answers this exact prompt, and return it
+/// for the graph. Evidence from another prompt (the policy, the scope, a
+/// passage or the answer changed) is refused: it answered another question.
+pub fn reuse(
+    rendered: &Rendered,
+    stored: &StoredJudge,
+) -> gl_core::Result<(VerifierInfo, Vec<Evidence>, Option<String>)> {
+    if !stored.info.id.starts_with(JUDGE_PREFIX) {
+        return Err(gl_core::Error::InvalidInput(format!("{} is not a judge", stored.info.id)));
+    }
+    let prompt = stored.info.artefacts.iter().find(|(k, _)| k == "prompt").map(|(_, v)| v.as_str());
+    if prompt != Some(rendered.prompt_hash.as_str()) {
+        return Err(gl_core::Error::InvalidInput(
+            "stored judge evidence answered another prompt; it cannot be reused".into(),
+        ));
+    }
+    if stored.evidence.iter().any(|e| e.verifier_id != stored.info.id) {
+        return Err(gl_core::Error::InvalidInput("stored judge evidence names another verifier".into()));
+    }
+    Ok((stored.info.clone(), stored.evidence.clone(), stored.failure.clone()))
 }
 
 #[derive(Deserialize)]

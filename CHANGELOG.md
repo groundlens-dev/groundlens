@@ -84,8 +84,9 @@ identical in the git tag and on PyPI.
   `openai_compatible` (OpenAI, vLLM, Ollama, any compatible gateway),
   `azure_openai` or `bedrock`, passed as `Verifier(judge=...)`. GroundLens
   ships no model and the engine never calls one: it renders a fixed prompt
-  (`groundlens.judge/1`) with the policy, the scope and the provenance of
-  every passage, the caller's client answers, and the engine reads the reply
+  (`groundlens.judge/1`) with what PASS means, the scope and the provenance
+  of every passage (not the policy's name, so a reply stays reusable on
+  replay), the caller's client answers, and the engine reads the reply
   into evidence per sentence under `llm_judge.<adapter>`. The record keeps the
   template id and hash, the prompt hash, the model the provider says answered
   and the hash of the raw reply, not the reply.
@@ -94,6 +95,19 @@ identical in the git tag and on PyPI.
   judge's `supported` resolves nothing, so a judge cannot pass an answer the
   exact checks fail. A timeout, an error or a reply that is not the JSON asked
   for is `REVIEW`.
+- **`groundlens measure`**: the share of wrong answers among those that
+  passed, with a 95 % interval, per risk class, and the cost per decision
+  (review minutes, expected cost of a wrong answer that got through), from a
+  sample your team labels without seeing the verdict. `--sample N` draws the
+  sample per decision and risk class. Agresti-Coull within each stratum, or
+  prediction-powered when every record has a prediction. The report is
+  signed (`groundlens.measurement/1`) and says how it was computed.
+- **`groundlens replay`**: past traffic checked again under another policy,
+  with the count and list of decisions that would change. The judge's stored
+  evidence is reused when it answered the same prompt. Signed
+  (`groundlens.replay/1`).
+- `gl_record::SignedDocument`, `sign_document`, `verify_document` for signed
+  reports; `VerifyRequest::judge_evidence` to replay a judge's stored evidence.
 - **`groundlens judge show-template`** (and `glv judge show-template`) prints
   the exact prompt for an input, with its hash. `Verifier.judge_prompt()` in
   Python.

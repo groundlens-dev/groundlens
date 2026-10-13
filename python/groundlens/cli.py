@@ -36,6 +36,29 @@ def _source(spec: str) -> tuple[str, str]:
     return ident, _read(path)
 
 
+def _chains(names: list[str]) -> list[list[Record]]:
+    """Read chains: each file is one; a directory means every .jsonl in it.
+    Every chain is verified before anything is computed from it."""
+    files: list[Path] = []
+    for name in names:
+        path = Path(name)
+        files.extend(sorted(path.glob("*.jsonl")) if path.is_dir() else [path])
+    if not files:
+        raise ValueError("no .jsonl files to verify")
+    chains = [Record.read_log(f) for f in files]
+    Record.verify_chains(chains)
+    return chains
+
+
+def _emit(doc: dict, out: str | None) -> None:
+    text = json.dumps(doc, ensure_ascii=False, indent=2)
+    if out:
+        Path(out).write_text(text + "\n", encoding="utf-8")
+        print(f"ok  signed {doc['kind']} written to {out}")
+    else:
+        print(text)
+
+
 def _scope(pairs: list[str]) -> dict[str, str]:
     out: dict[str, str] = {}
     for pair in pairs:
@@ -114,6 +137,25 @@ def build_parser() -> argparse.ArgumentParser:
     bp.add_argument("--sha256", help="expected archive hash for a bundle this build does not know")
     bp.add_argument("--trust-unpinned", action="store_true", help="accept a bundle this build has no pinned hash for (development)")
 
+    m = sub.add_parser("measure", help="estimate the share of wrong answers among those that passed, from labels on a sample")
+    m.add_argument("records", nargs="+", help="records logs or directories")
+    m.add_argument("--sample", type=int, metavar="N", help="print N record ids to label, drawn per decision and risk class, without verdicts")
+    m.add_argument("--seed", type=int, default=0, help="seed for --sample, recorded in the report")
+    m.add_argument("--labels", help="CSV (record_id,label[,prediction]) or JSON Lines with your team's labels")
+    m.add_argument("--review-minutes", type=float, help="minutes a person spends on one REVIEW")
+    m.add_argument("--review-cost-per-hour", type=float, help="what an hour of review costs")
+    m.add_argument("--error-cost", type=float, help="what one wrong answer that gets through costs")
+    m.add_argument("--signing-key", help="32-byte hex Ed25519 seed for the report (or GROUNDLENS_SIGNING_KEY)")
+    m.add_argument("--out", help="write the signed report here (JSON); default: print it")
+
+    rp = sub.add_parser("replay", help="check past traffic under another policy and count the decisions that would change")
+    rp.add_argument("--traffic", required=True, help="JSON Lines: answer, passages, question, scope, risk_class, record_id")
+    rp.add_argument("--records", nargs="+", default=[], help="records logs or directories, to reuse the judge's evidence")
+    rp.add_argument("--policy", required=True, help="the policy to replay under")
+    rp.add_argument("--locale", default="und")
+    rp.add_argument("--signing-key", help="32-byte hex Ed25519 seed for the report (or GROUNDLENS_SIGNING_KEY)")
+    rp.add_argument("--out", help="write the signed report here (JSON); default: print it")
+
     j = sub.add_parser("judge", help="the judge").add_subparsers(dest="sub", required=True)
     jt = j.add_parser("show-template", help="print the exact prompt a judge is sent for this input")
     jt.add_argument("--answer", required=True)
@@ -177,14 +219,39 @@ def _run(args: argparse.Namespace) -> int:
         summary = write_report(args.log, args.out)
         print(f"ok  {summary['records']} records written to {args.out}: report.md, report.json, records.jsonl, README-auditor.md")
         return 0
+    if args.cmd == "measure":
+        from groundlens import measure as gm  # noqa: PLC0415
+
+        records = [r for chain in _chains(args.records) for r in chain]
+        if args.sample:
+            for rid in gm.sample(records, args.sample, args.seed):
+                print(rid)
+            return 0
+        if not args.labels:
+            raise ValueError("pass --labels, or --sample N to draw the records to label")
+        labels, predictions = gm.read_labels(args.labels)
+        content = gm.measure(
+            records,
+            labels,
+            predictions=predictions,
+            review_minutes=args.review_minutes,
+            review_cost_per_hour=args.review_cost_per_hour,
+            error_cost=args.error_cost,
+            sample_seed=args.seed,
+        )
+        _emit(gm.sign("groundlens.measurement/1", content, args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY")), args.out)
+        return 0
+    if args.cmd == "replay":
+        from groundlens import measure as gm  # noqa: PLC0415
+        from groundlens.verifier import Verifier  # noqa: PLC0415
+
+        records = [r for chain in _chains(args.records) for r in chain] if args.records else []
+        traffic = [json.loads(line) for line in _read(args.traffic).splitlines() if line.strip()]
+        content = gm.replay(traffic, records, Verifier(args.policy, locale=args.locale))
+        _emit(gm.sign("groundlens.replay/1", content, args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY")), args.out)
+        return 0
     if args.cmd == "record":
-        files: list[Path] = []
-        for name in args.logs:
-            path = Path(name)
-            files.extend(sorted(path.glob("*.jsonl")) if path.is_dir() else [path])
-        if not files:
-            raise ValueError("no .jsonl files to verify")
-        chains = [Record.read_log(f) for f in files]
+        chains = _chains(args.logs)
         n = Record.verify_chains(chains)
         if len(chains) == 1:
             print(f"ok  {n} records, chain intact, all signatures verify")

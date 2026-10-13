@@ -60,6 +60,13 @@ installed version.
    :members: openai_compatible, azure_openai, bedrock, Judge
 ```
 
+## Measurement and replay
+
+```{eval-rst}
+.. automodule:: groundlens.measure
+   :members: sample, read_labels, measure, replay, sign, verify_signed
+```
+
 ## Signers
 
 ```{eval-rst}
