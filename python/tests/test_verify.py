@@ -196,3 +196,54 @@ def test_a_figure_of_another_kind_than_the_question_asked_goes_to_review():
     assert any("intent_mismatch" in e.notes for e in amount.evidence if e.verifier_id == "groundlens.intent")
     share = verify("It is 1,246 of 5,424, or 22.97%.", sources, question=question, locale="en")
     assert share.decision == "PASS"
+
+
+DESK = (
+    "id: desk\nversion: 2\nextends: eu_ai_act_high_risk_v1\n"
+    "pass_means: may be shown to the analyst\n"
+    "scope:\n  required: [entity]\n"
+    "risk_classes:\n  default: routine\n  mandatory_review: [recommendation]\n"
+)
+
+
+def test_a_policy_extends_a_shipped_one_and_hashes_the_resolved_policy():
+    desk = Policy.from_yaml(DESK)
+    assert (desk.id, desk.version) == ("desk", "2")
+    resolved = desk.resolved_yaml
+    assert desk.hash in resolved.splitlines()[1]
+    assert "regulatory_mapping" in resolved
+    assert Policy.from_yaml(resolved).hash == desk.hash
+    assert Policy.builtin("eu_ai_act_high_risk_v1").hash != desk.hash
+
+
+def test_an_unknown_policy_key_is_an_error():
+    with pytest.raises(ValueError, match="unknown field"):
+        Policy.from_yaml("id: x\nversion: 1\nrouding: half_even\n")
+
+
+def test_required_scope_risk_class_and_pass_means_reach_the_record():
+    source = ("10k", "Revenue was €10M.", {"entity": "ACME"})
+    missing = verify("Revenue was €10M.", [source], policy=DESK)
+    assert missing.decision == "REVIEW"
+    assert missing.reasons[0].startswith("missing_scope")
+    assert (missing.risk_class, missing.pass_means) == ("routine", "may be shown to the analyst")
+    missing.verify()
+
+    ok = verify("Revenue was €10M.", [source], policy=DESK, scope={"entity": "ACME"})
+    assert ok.decision == "PASS"
+    reviewed = verify("Revenue was €10M.", [source], policy=DESK, scope={"entity": "ACME"}, risk_class="recommendation")
+    assert reviewed.decision == "REVIEW"
+    assert reviewed.reasons[0].startswith("mandatory_review")
+    with pytest.raises(ValueError, match="no risk class"):
+        verify("Revenue was €10M.", [source], policy=DESK, scope={"entity": "ACME"}, risk_class="recomendation")
+
+
+def test_a_rounding_rule_in_the_policy_wins_over_the_request():
+    answer = "Revenue was 2,345 against costs of 1,000, a ratio of 2.35."
+    sources = [("s", "Revenue was 2,345. Costs were 1,000.")]
+    banker = "id: banker\nversion: 1\nextends: groundlens_default_v1\nrounding: half_even\n"
+    by_policy = verify(answer, sources, policy=banker)
+    by_both = verify(answer, sources, policy=banker, rounding="half_up")
+    plain = verify(answer, sources)
+    assert [e.result for e in by_policy.evidence] == [e.result for e in by_both.evidence]
+    assert [e.result for e in by_policy.evidence] != [e.result for e in plain.evidence]

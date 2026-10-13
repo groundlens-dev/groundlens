@@ -145,22 +145,21 @@ prints the exact prompt for a given input, and its hash is in the record.
 **Custom checks.** A decorated function or a small class, with a declared
 determinism class. Its version and the hash of its source go into the record.
 
-## The policy (planned)
+## The policy
 
-YAML, validated against a published schema. Unknown keys are errors. A policy
-can `extend` a shipped baseline and write only what differs. Decision rules
-are a fixed vocabulary evaluated in order; there is no expression language.
+YAML, checked against the schema. Unknown keys are errors. A policy can
+`extends` a shipped baseline and write only what differs. Decision rules are a
+fixed vocabulary evaluated in order; there is no expression language.
 
 ```yaml
-policy: credit_desk
-version: 3
-extends: groundlens/finance-rag
+id: credit_desk
+version: 3.0.0
+extends: eu_ai_act_high_risk_v1
 locale: es-ES
 rounding: half_even
 
 scope:
   required: [entity]
-  passage_outside_scope: FAIL
   missing_scope: REVIEW
 
 risk_classes:
@@ -168,10 +167,6 @@ risk_classes:
   mandatory_review: [recommendation]
 
 pass_means: "may be shown to the analyst as an evidence summary"
-
-controls:
-  - id: CTRL-AI-014
-    maps_to: ["EU AI Act Art. 12", "EU AI Act Art. 15"]
 ```
 
 `groundlens policy show --resolved` prints the policy with every default
@@ -181,6 +176,13 @@ the record.
 A decision of the verifier is not a decision to publish. The policy says what
 PASS means for the application, and a risk class can require human review even
 when every check passes.
+
+Two choices made while building it. A passage outside the scope stays a
+decision rule (`groundlens.scope` in `decision.any_contradiction_from`), not a
+second key under `scope`, so there is one place that says what fails. The
+mapping to controls keeps the existing `regulatory_mapping` list (framework,
+article, control, requirement, the decisions that trigger it) rather than a
+new `controls` key; your own control ids go in `control`.
 
 ## Failure semantics (planned)
 

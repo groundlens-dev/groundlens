@@ -40,10 +40,19 @@ class Policy:
 
     @classmethod
     def from_yaml(cls, text: str) -> Policy:
+        """Load a policy from YAML. Unknown keys are errors; ``extends`` is
+        resolved against the shipped policies; ``hash`` is the hash of the
+        resolved policy, the value every record carries."""
         policy_hash, problems = _engine.policy_lint(text)
         if problems:
             raise PolicyError(problems)
         return cls(yaml=text, id=_field(text, "id"), version=_field(text, "version"), hash=policy_hash)
+
+    @property
+    def resolved_yaml(self) -> str:
+        """The policy with ``extends`` merged in and every default written
+        out, headed by its hash. Loading it gives the same hash."""
+        return _engine.policy_resolve(self.yaml)
 
     @classmethod
     def load(cls, path: str | Path) -> Policy:
@@ -60,7 +69,9 @@ class Policy:
         """A policy shipped inside the package, e.g. ``eu_ai_act_high_risk_v1``."""
         if name == "groundlens_default_v1":
             return cls.default()
-        text = resources.files("groundlens").joinpath("policies", f"{name}.yaml").read_text(encoding="utf-8")
+        text = _engine.builtin_policy_yaml(name)
+        if text is None:
+            text = resources.files("groundlens").joinpath("policies", f"{name}.yaml").read_text(encoding="utf-8")
         return cls.from_yaml(text)
 
     @classmethod

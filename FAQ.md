@@ -122,9 +122,10 @@ Information provided in a YAML file. It names:
     - the minimum determinism class allowed to decide, 
     - thresholds and guard bands for verifiers that produce scores,
     - how a contradiction, an unresolved claim or a disagreement between verifiers maps to `PASS`, `REVIEW` or `FAIL`, and, optionally, 
-    - which regulatory control each outcome concerns. 
+    - which regulatory control each outcome concerns,
+    - and, if you want, the scope keys every request must carry, risk classes that always go to a person, how numbers are written and rounded, and one sentence on what `PASS` means for your application.
 
-Two bundled policies ship with the package; write your own with `Policy.from_yaml()`. The engine has no opinion about which policy is right, and it never decides without one.
+Two bundled policies ship with the package. Write your own with `Policy.from_yaml()`, from scratch or on top of a shipped one with `extends`, and print what it resolves to with `groundlens policy show my-policy.yaml --resolved`. The engine has no opinion about which policy is right, and it never decides without one.
 
 ## 8. What is in an evidence record, and who can verify it?
 

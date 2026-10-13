@@ -83,8 +83,11 @@ decides what a conflict means.
 are required, recommended, optional, fallback or forbidden; the minimum
 determinism class it will decide on; thresholds with guard bands; the decision
 rules (what fails, what reviews, what is tolerated); and a regulatory mapping.
-A policy has a version and a hash, and the hash goes into every record it
-decides.
+It can also fix the locale and rounding rule, require scope keys, define risk
+classes that always go to review, and say what `PASS` means. A policy may
+`extends` a shipped one and write only what differs; unknown keys are errors.
+A policy has a version and a hash, the hash of the resolved policy, and the
+hash goes into every record it decides.
 
 **Record.** The sealed result: input hashes, engine and bundle hashes, the
 evidence graph, the policy id and hash, the decision and its reasons, the

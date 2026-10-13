@@ -6,6 +6,10 @@ could resolve. The engine holds no judgement of its own; the policy holds all
 of it. The same evidence under two policies can produce two decisions, and both
 are correct.
 
+Every key is checked. A key the schema does not know is an error, not a
+silent no-op, so a typo such as `rouding:` cannot switch a rule off without
+anyone noticing.
+
 ## Anatomy of a policy
 
 ```{code-block} yaml
@@ -32,6 +36,82 @@ regulatory_mapping:
     control: accuracy-of-outputs
     triggered_by: [FAIL, REVIEW]
 ```
+
+### id, version and description
+
+`id` and `version` name the policy in every record it decides. `description`
+says in plain words what the policy enforces.
+
+### extends
+
+A policy can be written on top of a shipped one and say only what differs:
+
+```{code-block} yaml
+id: credit_desk
+version: 3.0.0
+extends: eu_ai_act_high_risk_v1
+rounding: half_even
+scope:
+  required: [entity]
+```
+
+Maps merge key by key: the `decision` keys you do not write come from the
+baseline. Lists and single values replace: a `required` list you write is the
+whole list. A policy that extends another must set its own `id` and
+`version`, so its records are never mistaken for the baseline's. `extends`
+names a shipped policy (`groundlens_default_v1` or `eu_ai_act_high_risk_v1`);
+it does not read other files, so the same policy text always resolves to the
+same policy.
+
+The policy that decides is the **resolved** one: the baseline with your
+changes merged in and every default written out. Its hash is the one in every
+record. `groundlens policy show my-policy.yaml --resolved` prints it, headed
+by that hash.
+
+### pass_means
+
+One sentence on what `PASS` means for your application, for example
+`"may be shown to the analyst as an evidence summary"`. A decision of the
+verifier is not a decision to publish; this says which one it is. It travels
+in the policy and in the decision of every record.
+
+### locale and rounding
+
+`locale` says how your documents write numbers (`es-ES`, `en`, `de`...).
+`rounding` says how a figure the answer computed may differ from the exact
+result at the precision written: `half_up`, `half_even` or
+`within_last_digit`. When the policy sets either one, **the policy wins** over
+the request: a `locale` or `rounding` passed with a request is ignored. The
+same policy hash then always means the same reading of the numbers.
+
+### scope
+
+```{code-block} yaml
+scope:
+  required: [entity]
+  missing_scope: REVIEW
+```
+
+`required` lists the [scope](scope.md) keys every request must carry. A
+request without one of them goes to `missing_scope`, which is `REVIEW` by
+default and may be `FAIL`, never `PASS`. The reason (`missing_scope: the
+request does not say its entity`) is in the record.
+
+### risk_classes
+
+```{code-block} yaml
+risk_classes:
+  default: routine
+  routine: [lookup]
+  mandatory_review: [recommendation]
+```
+
+A risk class sorts requests by what an error would cost. A request names its
+class (`risk_class="recommendation"`, `--risk-class recommendation`); a
+request that names none gets `default`. A class listed under
+`mandatory_review` goes to `REVIEW` even when every check passes. A class the
+policy does not list is an error, so a typo cannot route a request around
+review. The class is written into the record.
 
 ### verifiers
 
@@ -92,6 +172,21 @@ the decisions that trigger it. The mapping travels inside the record, so a
 decision arrives already tied to the rule it concerns. See
 [EU AI Act mapping](eu-ai-act.md).
 
+## When something goes wrong
+
+Nothing that went wrong can pass:
+
+| situation | decision |
+| --- | --- |
+| a required verifier did not run | REVIEW |
+| a verifier could not run at all | REVIEW (ignored if the policy forbids that verifier) |
+| a verifier errored on a claim that needs a verdict | REVIEW |
+| a required scope key is missing | `missing_scope` (REVIEW by default) |
+| the request's risk class requires review | REVIEW |
+| the request names a risk class the policy does not list | error, no record |
+
+The final decision is the worst of all of these and of every claim.
+
 ## The shipped policies
 
 - **`groundlens_default_v1`** (version 1.3.0) — numbers must be exactly
@@ -122,9 +217,11 @@ record = verify(answer, sources, policy=custom)
 
 ```{code-block} bash
 groundlens policy lint my-policy.yaml
+groundlens policy show my-policy.yaml --resolved
 ```
 
-`policy lint` rejects thresholds on exact verifiers (a threshold on an exact
+`policy lint` rejects unknown keys, unknown rounding rules, a `missing_scope`
+of `PASS`, a risk class listed twice, thresholds on exact verifiers (a threshold on an exact
 score is meaningless), guard bands narrower than twice the verifier tolerance,
 and unknown verifier ids. See [Writing policies](../guides/writing-policies.md)
 for a step-by-step build and {class}`groundlens.Policy` for the API.

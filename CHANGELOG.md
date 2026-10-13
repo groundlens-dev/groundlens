@@ -39,6 +39,32 @@ identical in the git tag and on PyPI.
 - **`decision.unsupported_from`** in policies: an `unsupported` from a listed
   verifier sends the claim to review. Left out of the policy hash when empty,
   so existing policies keep their hash.
+- **`extends`** in policies. A policy can be written on top of
+  `groundlens_default_v1` or `eu_ai_act_high_risk_v1` and say only what
+  differs: maps merge key by key, lists and single values replace. It must set
+  its own `id` and `version`. The hash in every record is the hash of the
+  resolved policy.
+- **`groundlens policy show POLICY --resolved`** (and `glv policy show`)
+  prints a policy with `extends` merged in and every default written out,
+  headed by its hash. `policy lint` and `--policy` also accept the id of a
+  shipped policy.
+- **`scope.required`** in policies: a request without a required scope key
+  goes to `missing_scope` (`REVIEW` by default, `FAIL` allowed, never
+  `PASS`).
+- **`risk_classes`** in policies, and `risk_class=` / `--risk-class` on a
+  request. A class under `mandatory_review` goes to review even when every
+  check passes; a class the policy does not list is an error. The class is
+  written into the decision.
+- **`pass_means`**: one sentence on what `PASS` means for the application. It
+  travels in the policy and in the decision of every record.
+- **`locale` and `rounding`** in policies. When a policy sets them they win
+  over the request.
+- The Python command line accepts `--scope`, `--provenance` and
+  `--risk-class`, like `glv`.
+- Request-level reasons in the decision (`outcome.reasons`): a missing scope
+  key, a verifier that could not run, a risk class that requires review.
+  Omitted when empty, like the new `risk_class` and `pass_means` fields, so
+  records that use none of them keep their hash.
 
 ### Changed
 
@@ -87,6 +113,18 @@ identical in the git tag and on PyPI.
   `cargo clippy --workspace --all-targets -- -D warnings` with the new
   version. The MSRV job keeps checking `1.91`, and the fuzz job keeps
   `nightly`.
+- **Unknown keys in a policy are errors.** Before, a misspelt key was ignored,
+  so a typo could switch a rule off without anyone noticing. The shipped
+  policies have no unknown keys and keep their hashes.
+- **Nothing that went wrong can pass.** A verifier that could not run at all
+  sends the request to review (unless the policy forbids that verifier), and
+  a verifier error on a claim that needs a verdict sends the claim to review.
+  Before, both were skipped. Claim kinds the policy tolerates without a verdict
+  (`word`, `statement` in the shipped policies) are unchanged.
+- **The shipped policies live in the `gl-policy` crate**
+  (`crates/gl-policy/policies/`), so the engine, the command lines and
+  `extends` read one source. The copies under `policies/` and in the Python
+  package stay, and a test checks they are identical.
 
 ### Deprecated
 

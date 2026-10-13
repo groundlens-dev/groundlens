@@ -36,14 +36,17 @@ groundlens verify \
 | `--question PATH` | File with the question. Never a source. |
 | `--policy NAME\|PATH\|YAML` | A built-in name, a file, or YAML. Default `groundlens_default_v1`. |
 | `--rules PATH` | A rule set (JSON/YAML), repeatable. |
-| `--locale CODE` | How the documents write numbers (`en`, `es`, `de`, …). Default `und`. |
+| `--locale CODE` | How the documents write numbers (`en`, `es`, `de`, …). Default `und`. A `locale` in the policy wins. |
 | `--bundle DIR\|NAME` | Deprecated. Run the lexical, entailment and similarity channels from this bundle. Without it no model runs, even when a bundle is installed. |
 | `--no-lexical` | With `--bundle`, skip its channels. |
 | `--log PATH` | Append the signed record to this JSON Lines log. |
 | `--signing-key HEX` | 32-byte hex Ed25519 seed (or `GROUNDLENS_SIGNING_KEY`). |
 | `--no-units` | GroundLens 3.x bare-number semantics. |
-| `--rounding RULE` | How a recomputed figure may differ from the one written: `half_up` (default), `half_even`, `within_last_digit`. |
+| `--rounding RULE` | How a recomputed figure may differ from the one written: `half_up` (default), `half_even`, `within_last_digit`. A `rounding` in the policy wins. |
 | `--no-derive` | Do not recompute figures from the answer's own supported figures. |
+| `--scope key=value` | What the request is about (`--scope entity=UPS`), repeatable. Turns on the scope check. |
+| `--provenance id:key=value` | Where a source comes from (`--provenance 10k#p114:entity=UPS`), repeatable. |
+| `--risk-class NAME` | The risk class of the request, when the policy defines `risk_classes`. |
 | `--json` | Print the full record instead of the summary. |
 
 ## report
@@ -71,11 +74,23 @@ groundlens record verify records.jsonl
 
 ## policy lint
 
-Check a policy: reject thresholds on exact verifiers, guard bands narrower than
-twice the verifier tolerance, and unknown verifier ids.
+Check a policy: reject unknown keys, thresholds on exact verifiers, guard bands
+narrower than twice the verifier tolerance, unknown rounding rules and unknown
+verifier ids. Prints the hash of the resolved policy.
 
 ```{code-block} bash
 groundlens policy lint my-policy.yaml
+groundlens policy lint eu_ai_act_high_risk_v1
+```
+
+## policy show
+
+Print a policy. With `--resolved`, print it with `extends` merged in and every
+default written out, headed by the hash that goes into every record. Loading
+the resolved text gives the same hash.
+
+```{code-block} bash
+groundlens policy show my-policy.yaml --resolved
 ```
 
 ## bundle

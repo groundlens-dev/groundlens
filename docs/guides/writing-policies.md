@@ -6,8 +6,25 @@ from the default, then tightens it. The full schema is in
 
 ## Start from a shipped policy
 
-The fastest start is to copy `groundlens_default_v1` or
-`eu_ai_act_high_risk_v1` and edit. The default is:
+The fastest start is to extend `groundlens_default_v1` or
+`eu_ai_act_high_risk_v1` and write only what differs:
+
+```{code-block} yaml
+id: my_policy_v1
+version: 1.0.0
+extends: eu_ai_act_high_risk_v1
+pass_means: "may be shown to the analyst as an evidence summary"
+```
+
+That is a complete policy. To see everything it inherited, print it resolved:
+
+```{code-block} bash
+groundlens policy show my_policy_v1.yaml --resolved
+```
+
+The first lines are the id, the version and the hash every record will carry.
+If you prefer to own every line, write the whole policy without `extends`.
+The default policy, under a new id, reads:
 
 ```{code-block} yaml
 id: my_policy_v1
@@ -24,6 +41,40 @@ decision:
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
+```
+
+## Say what each request must carry
+
+If every request must say which company or contract it is about, require it.
+A request without the key goes to review, and the record says why:
+
+```{code-block} yaml
+scope:
+  required: [entity]
+```
+
+## Make some requests always go to a person
+
+Some answers are cheap to get wrong and some are not. Give the expensive kind
+a risk class that always goes to review, whatever the checks say:
+
+```{code-block} yaml
+risk_classes:
+  default: routine
+  mandatory_review: [recommendation]
+```
+
+Then pass the class with each request (`risk_class="recommendation"` in
+Python, `--risk-class recommendation` on the command line).
+
+## Fix how numbers are read
+
+If your documents use a fixed number format and a fixed rounding convention,
+write them in the policy. They then win over whatever a request passes:
+
+```{code-block} yaml
+locale: es-ES
+rounding: half_even
 ```
 
 ## Decide what fails, what reviews, what passes
@@ -70,7 +121,7 @@ policy = Policy.from_yaml(open("my_policy_v1.yaml").read())
 record = verify(answer, sources, policy=policy)
 ```
 
-`policy lint` catches thresholds on exact verifiers, guard bands that are too
-narrow, and unknown verifier ids before they ever reach a decision. To pick a
-threshold from your own data rather than guessing, see
+`policy lint` catches unknown keys, thresholds on exact verifiers, guard bands
+that are too narrow, and unknown verifier ids before they ever reach a
+decision. To pick a threshold from your own data rather than guessing, see
 [Calibration](calibration.md).

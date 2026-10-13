@@ -46,6 +46,7 @@ def verify(
     rounding: str = "half_up",
     metadata: Mapping[str, str] | None = None,
     scope: Mapping[str, str] | None = None,
+    risk_class: str | None = None,
 ) -> Record:
     """Verify ``answer`` against ``evidence`` under ``policy`` and seal a record.
 
@@ -58,6 +59,7 @@ def verify(
         question: what the model was asked. Never a source; claims that echo
             it are noted.
         locale: how the documents write numbers: ``"und"``, ``"en"``, ``"es"``...
+            A ``locale`` written in the policy wins over this argument.
         rules: rule sets (YAML/JSON paths or dicts) run as symbolic verifiers.
         bundle: deprecated. A :class:`Bundle`, a bundle directory, or the
             name of an installed bundle (``"base"``). Its models run the
@@ -80,14 +82,22 @@ def verify(
             gives the 5.3 behaviour.
         rounding: how a recomputed figure may differ from the figure written, at
             the precision written: ``"half_up"`` (default), ``"half_even"`` or
-            ``"within_last_digit"`` (rounded or truncated).
+            ``"within_last_digit"`` (rounded or truncated). A ``rounding`` rule
+            written in the policy wins over this argument.
         metadata: free-form strings (tenant, trace id) hashed into the record.
         scope: what the request is about, e.g. ``{"entity": "UPS"}``. When
             given, every figure in the answer must come from a passage whose
             provenance matches: a figure found only in a passage of another
             scope fails, and one found only in passages that do not state their
             provenance goes to review. Pass provenance with each source as a
-            third tuple element or a ``provenance`` key.
+            third tuple element or a ``provenance`` key. A policy can make
+            scope keys required (``scope: {required: [entity]}``); a request
+            without them goes to review.
+        risk_class: the risk class of this request, when the policy defines
+            ``risk_classes``. ``None`` means the policy's default class. A class
+            the policy lists under ``mandatory_review`` goes to review even
+            when every check passes; a class the policy does not list is an
+            error.
 
     Returns:
         A :class:`Record`. ``record.decision`` is the policy's decision;
@@ -129,6 +139,7 @@ def verify(
         lexical=lexical,
         metadata=metadata,
         scope=scope,
+        risk_class=risk_class,
     )
     record = Record.from_json(_engine.verify_json(request))
     if log is not None:

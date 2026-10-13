@@ -77,6 +77,19 @@ def test_cli_policy_lint_and_keygen():
     assert len(key) == 64 and int(key, 16) >= 0
 
 
+def test_cli_policy_show_resolved(tmp_path):
+    child = tmp_path / "desk.yaml"
+    child.write_text("id: desk\nversion: 1.0.0\nextends: eu_ai_act_high_risk_v1\nrounding: half_even\n", encoding="utf-8")
+    plain = run("policy", "show", str(child))
+    assert plain.returncode == 0 and plain.stdout.startswith("id: desk")
+    resolved = run("policy", "show", str(child), "--resolved")
+    assert resolved.returncode == 0
+    assert resolved.stdout.startswith("# desk v1.0.0\n# hash: sha256:")
+    assert "rounding: half_even" in resolved.stdout and "regulatory_mapping" in resolved.stdout
+    lint = run("policy", "lint", str(child))
+    assert lint.returncode == 0 and lint.stdout.split()[-1] in resolved.stdout
+
+
 def test_cli_bundle_build_and_verify(tmp_path):
     (tmp_path / "policies").mkdir()
     (tmp_path / "policies" / "p.yaml").write_text("id: p\nversion: 1\n")
