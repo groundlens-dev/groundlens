@@ -16,11 +16,13 @@
 //! percent-as-fraction reading are *named* relaxations a policy switches on,
 //! and every relaxed match carries a note saying which one applied.
 
+pub mod arith;
 pub mod locale;
 pub mod numeral;
 pub mod quantity;
 pub mod units;
 
+pub use arith::{rounds_to, Ratio, Rounding};
 pub use locale::{locale, LocaleProfile};
 pub use numeral::{find_numerals, Numeral};
 pub use quantity::{compare, find_bare_numerals, find_quantities, Match, MatchOptions, Quantity};

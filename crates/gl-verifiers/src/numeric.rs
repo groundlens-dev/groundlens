@@ -7,16 +7,35 @@
 //! percentages and physical units are compared in a canonical base unit, and
 //! two named relaxations can be switched on by configuration (and therefore
 //! by policy), each one leaving a note on the receipt.
+//!
+//! Since 1.1.0 the verifier also recomputes. Answers show their work: "from
+//! $77 million to $75 million, a decline of $2 million, or 2.60 %". The
+//! decline and the percentage are in no source, and they are right. A figure
+//! that no source contains is checked against the other figures of the same
+//! answer that the sources do support: their sum, difference, ratio or
+//! percentage change, computed as exact fractions and compared under the
+//! rounding rule at the precision the answer wrote. A match is `supported`
+//! with the formula in the rationale and the note `derived`; no match leaves
+//! the figure `contradicted`, as before. Only the answer's own supported
+//! figures are operands, never arbitrary pairs of source figures: with a
+//! table of forty numbers some pair matches almost anything.
+//!
+//! A bare four-digit year that no source contains (`in 2015`) is
+//! `unsupported` with the note `year_not_in_sources`, not `contradicted`: a
+//! year is a label, and its absence from a passage is not a wrong figure.
 
 use gl_core::{
     ClaimKind, Determinism, Evidence, EvidenceResult, Receipt, Result, Score, Span, VerificationInput,
     Verifier, VerifierInfo, VerifierKind,
 };
-use gl_numeric::{compare, find_bare_numerals, find_quantities, locale, Match, MatchOptions, Quantity};
+use gl_numeric::{
+    compare, find_bare_numerals, find_quantities, locale, rounds_to, Dimension, Match, MatchOptions,
+    Quantity, Ratio, Rounding,
+};
 use serde::{Deserialize, Serialize};
 
 pub const ID: &str = "groundlens.numeric";
-pub const VERSION: &str = "1.0.0";
+pub const VERSION: &str = "1.1.0";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NumericConfig {
@@ -26,6 +45,14 @@ pub struct NumericConfig {
     /// in base units. `false` gives groundlens 3.x semantics (bare numbers).
     #[serde(default = "default_true")]
     pub units: bool,
+    /// Recompute figures that no source contains from the answer's own
+    /// supported figures. `false` gives 1.0.0 behaviour.
+    #[serde(default = "default_true")]
+    pub derive: bool,
+    /// How a recomputed value may differ from the figure written, at the
+    /// precision written.
+    #[serde(default)]
+    pub rounding: Rounding,
 }
 
 fn default_true() -> bool {
@@ -34,7 +61,12 @@ fn default_true() -> bool {
 
 impl Default for NumericConfig {
     fn default() -> Self {
-        NumericConfig { matching: MatchOptions::default(), units: true }
+        NumericConfig {
+            matching: MatchOptions::default(),
+            units: true,
+            derive: true,
+            rounding: Rounding::default(),
+        }
     }
 }
 
@@ -97,7 +129,7 @@ impl Verifier for NumericVerifier {
 
         let question_quantities: Vec<Quantity> = input.question.as_deref().map(find).unwrap_or_default();
 
-        let mut out = Vec::new();
+        let mut rows: Vec<Row> = Vec::new();
         for claim in input.claims.iter().filter(|c| c.kind == ClaimKind::Numeric) {
             let Some(answer_q) = find(&claim.text).into_iter().next() else {
                 continue;
@@ -129,7 +161,7 @@ impl Verifier for NumericVerifier {
                 notes.push("echoes_question".into());
             }
 
-            let (result, score, rationale, receipt) = match best {
+            let (mut result, mut score, mut rationale, mut receipt) = match best {
                 None => (
                     EvidenceResult::Unsupported,
                     0.0,
@@ -211,22 +243,288 @@ impl Verifier for NumericVerifier {
                 }
             };
 
-            out.push(Evidence {
-                verifier_id: ID.to_string(),
-                verifier_version: VERSION.to_string(),
+            // A table cell often carries the number and leaves the unit to a
+            // header we could not read: the answer says "$5,312 million", the
+            // cell says "5,312". The same written number with a unit on one
+            // side only is support, with a note; with three or more
+            // significant digits a coincidence is unlikely.
+            if result != EvidenceResult::Supported
+                && answer_q.numeral.significant_digits >= MIN_DIGITS_UNIT_ON_ONE_SIDE
+            {
+                if let Some(sq) =
+                    source_quantities.iter().find(|sq| unit_on_one_side(&answer_q, &sq.quantity))
+                {
+                    let span = Span::new(sq.quantity.span.start, sq.quantity.span.end);
+                    let shown = input_source_text(input, sq.source_id, sq.quantity.span);
+                    result = EvidenceResult::Supported;
+                    score = 1.0;
+                    rationale = format!(
+                        "{} = {} in {}; the unit or scale is stated on one side only",
+                        claim.text, shown, sq.source_id
+                    );
+                    receipt = Receipt {
+                        source_id: Some(sq.source_id.to_string()),
+                        source_span: Some(span),
+                        source_text: Some(shown),
+                        notes: notes
+                            .iter()
+                            .cloned()
+                            .chain(["unit_or_scale_on_one_side".to_string()])
+                            .collect(),
+                    };
+                }
+            }
+            rows.push(Row {
                 claim_id: claim.id.clone(),
+                text: claim.text.clone(),
+                quantity: answer_q,
                 result,
-                score: Score(score),
-                confidence: Score(1.0),
-                determinism: Determinism::Exact,
+                score,
                 rationale,
                 receipt,
-                model_hash: None,
-                calibration_id: None,
             });
         }
+
+        for row in rows.iter_mut() {
+            if row.result != EvidenceResult::Supported && is_year(&row.quantity) {
+                row.result = EvidenceResult::Unsupported;
+                row.score = 0.0;
+                row.rationale = format!("{} reads as a year and appears in no source", row.text);
+                row.receipt.notes.push("year_not_in_sources".into());
+            }
+        }
+        if self.config.derive {
+            derive(&mut rows, self.config.rounding);
+        }
+
+        let mut out: Vec<Evidence> = rows
+            .into_iter()
+            .map(|row| Evidence {
+                verifier_id: ID.to_string(),
+                verifier_version: VERSION.to_string(),
+                claim_id: row.claim_id,
+                result: row.result,
+                score: Score(row.score),
+                confidence: Score(1.0),
+                determinism: Determinism::Exact,
+                rationale: row.rationale,
+                receipt: row.receipt,
+                model_hash: None,
+                calibration_id: None,
+            })
+            .collect();
         out.sort_by_key(|e| e.sort_key());
         Ok(out)
+    }
+}
+
+/// One numeric claim on its way to becoming evidence.
+struct Row {
+    claim_id: String,
+    text: String,
+    quantity: Quantity,
+    result: EvidenceResult,
+    score: f64,
+    rationale: String,
+    receipt: Receipt,
+}
+
+const MIN_DIGITS_UNIT_ON_ONE_SIDE: u32 = 3;
+
+/// The same written number, where the unit or the scale is stated on one
+/// side only: `$31.9 million` against a cell `$ 31.9`, `$5,312 million`
+/// against `5312`. Two different units (`EUR` against `USD`) or two
+/// different scales (`thousand` against `million`) are not this case: that
+/// is a different figure.
+fn unit_on_one_side(answer: &Quantity, source: &Quantity) -> bool {
+    let (da, ds) = (answer.dimension(), source.dimension());
+    let dims_agree = da == ds || *da == Dimension::Dimensionless || *ds == Dimension::Dimensionless;
+    let (ea, es) = (answer.scale_exponent, source.scale_exponent);
+    let scales_agree = ea == es || ea == 0 || es == 0;
+    let something_missing = da != ds || ea != es;
+    dims_agree
+        && scales_agree
+        && something_missing
+        && answer.numeral.readings.iter().any(|a| source.numeral.readings.iter().any(|s| a == s))
+}
+
+/// A bare four-digit year: `2015`, `(2011)`. No separator, no decimals, no
+/// unit, no scale, between 1900 and 2100.
+fn is_year(q: &Quantity) -> bool {
+    let digits = q.numeral.text.chars().filter(char::is_ascii_digit).count();
+    // `(2011)` and the second half of `2022-2023` are years too.
+    let only_digits =
+        q.numeral.text.chars().all(|c| c.is_ascii_digit() || matches!(c, '(' | ')' | '-' | '−' | '–'));
+    only_digits
+        && digits == 4
+        && q.scale_exponent == 0
+        && *q.dimension() == Dimension::Dimensionless
+        && q.numeral.readings.len() == 1
+        && q.numeral.readings[0].scale() == 0
+        && q.numeral.readings[0].abs() >= 1900.into()
+        && q.numeral.readings[0].abs() <= 2100.into()
+}
+
+/// A figure the answer states and the sources (or an earlier derivation)
+/// support: an operand for recomputing the others.
+struct Operand {
+    claim_id: String,
+    text: String,
+    dimension: Dimension,
+    base: Ratio,
+    written: Ratio,
+}
+
+impl Operand {
+    fn of(row: &Row) -> Option<Operand> {
+        Some(Operand {
+            claim_id: row.claim_id.clone(),
+            text: row.text.clone(),
+            dimension: row.quantity.dimension().clone(),
+            base: row.quantity.base_ratio(0)?,
+            written: row.quantity.written_ratio(0)?,
+        })
+    }
+}
+
+/// A recomputed value: what it is, in which dimension, and how it was made.
+struct Candidate {
+    value: Ratio,
+    dimension: Dimension,
+    formula: String,
+    from: Vec<String>,
+}
+
+fn candidates(ops: &[Operand]) -> Vec<Candidate> {
+    let hundred = Ratio::from_int(100);
+    let mut out = Vec::new();
+    for (i, a) in ops.iter().enumerate() {
+        for (j, b) in ops.iter().enumerate() {
+            if i == j || a.dimension != b.dimension {
+                continue;
+            }
+            let from = vec![a.claim_id.clone(), b.claim_id.clone()];
+            let mut push = |value: Option<Ratio>, dimension: Dimension, formula: String| {
+                if let Some(value) = value {
+                    out.push(Candidate { value, dimension, formula, from: from.clone() });
+                }
+            };
+            let (at, bt) = (&a.text, &b.text);
+            if i < j {
+                push(a.base.checked_add(b.base), a.dimension.clone(), format!("{at} + {bt}"));
+            }
+            let diff = a.base.checked_sub(b.base);
+            push(diff, a.dimension.clone(), format!("{at} − {bt}"));
+            if i < j {
+                push(diff.and_then(Ratio::checked_abs), a.dimension.clone(), format!("|{at} − {bt}|"));
+            }
+            if !b.base.is_zero() {
+                let ratio = a.base.checked_div(b.base);
+                push(ratio, Dimension::Dimensionless, format!("{at} / {bt}"));
+                push(
+                    ratio.and_then(|r| r.checked_mul(hundred)),
+                    Dimension::Percent,
+                    format!("{at} / {bt} × 100"),
+                );
+                let change = diff.and_then(|d| d.checked_div(b.base)).and_then(|r| r.checked_mul(hundred));
+                push(change, Dimension::Percent, format!("({at} − {bt}) / {bt} × 100"));
+                push(
+                    change.and_then(Ratio::checked_abs),
+                    Dimension::Percent,
+                    format!("|({at} − {bt}) / {bt}| × 100"),
+                );
+            }
+        }
+    }
+    out
+}
+
+/// Turn figures no source contains into `supported` when they restate or
+/// recompute the answer's own supported figures. Runs to a fixed point (at
+/// most three rounds), so a derived figure can feed the next one: the
+/// decline of $2 million, then 2.60 % of $77 million.
+fn derive(rows: &mut [Row], rounding: Rounding) {
+    for _ in 0..3 {
+        // A year is a label, not an amount: never an operand.
+        let ops: Vec<Operand> = rows
+            .iter()
+            .filter(|r| r.result == EvidenceResult::Supported && !is_year(&r.quantity))
+            .filter_map(Operand::of)
+            .collect();
+        if ops.is_empty() {
+            return;
+        }
+        let cands = candidates(&ops);
+        let mut changed = false;
+        for row in rows.iter_mut() {
+            if row.result == EvidenceResult::Supported || is_year(&row.quantity) {
+                continue;
+            }
+            let (Some(base), Some(written), Some(step)) =
+                (row.quantity.base_ratio(0), row.quantity.written_ratio(0), row.quantity.step_ratio(0))
+            else {
+                continue;
+            };
+            let dimension = row.quantity.dimension().clone();
+            let bare = dimension == Dimension::Dimensionless;
+
+            // A restatement: the same figure written again, often bare inside
+            // a formula ("24.0" for "24.0 %").
+            if let Some(op) = ops.iter().find(|op| {
+                op.claim_id != row.claim_id
+                    && ((op.dimension == dimension && op.base == base) || (bare && op.written == written))
+            }) {
+                row.result = EvidenceResult::Supported;
+                row.score = 1.0;
+                row.rationale =
+                    format!("{} restates {} ({}), which the sources support", row.text, op.text, op.claim_id);
+                row.receipt.notes.push("restates_answer_figure".into());
+                changed = true;
+                continue;
+            }
+
+            // A recomputation. An exact result needs no rounding and is
+            // accepted at any precision; a rounded one needs at least two
+            // significant digits written, so "5 %" is not "explained" by
+            // whatever happens to round to it.
+            let rounded_ok = row.quantity.numeral.significant_digits >= 2;
+            let found = cands.iter().find(|c| {
+                if c.from.contains(&row.claim_id) {
+                    return false;
+                }
+                let comparable = c.dimension == dimension || (bare && c.dimension == Dimension::Percent);
+                comparable && (c.value == base || (rounded_ok && rounds_to(c.value, base, step, rounding)))
+            });
+            if let Some(c) = found {
+                let exact = c.value == base;
+                row.result = EvidenceResult::Supported;
+                row.score = 1.0;
+                row.rationale = format!(
+                    "{} = {} = {}{}",
+                    row.text,
+                    c.formula,
+                    c.value.display(),
+                    if exact { String::new() } else { format!(", rounded {}", rounding_name(rounding)) }
+                );
+                row.receipt.notes.push("derived".into());
+                row.receipt.notes.push(format!("derived_from:{}", c.from.join(",")));
+                if !exact {
+                    row.receipt.notes.push(format!("rounding:{}", rounding_name(rounding)));
+                }
+                changed = true;
+            }
+        }
+        if !changed {
+            return;
+        }
+    }
+}
+
+fn rounding_name(r: Rounding) -> &'static str {
+    match r {
+        Rounding::HalfUp => "half_up",
+        Rounding::HalfEven => "half_even",
+        Rounding::WithinLastDigit => "within_last_digit",
     }
 }
 
@@ -296,6 +594,113 @@ mod tests {
         assert_eq!(wrong.score.0, 0.0);
         assert_eq!(wrong.receipt.source_text.as_deref(), Some("10,000 dollars"));
         assert_eq!(ev[1].result, EvidenceResult::Supported);
+    }
+
+    fn results(
+        answer: &str,
+        source: &str,
+        config: NumericConfig,
+    ) -> Vec<(String, EvidenceResult, Vec<String>)> {
+        let mut i = input(answer, source, None);
+        i.claims = crate::extract_claims(&i.answer, "en");
+        NumericVerifier::new(config)
+            .verify(&i)
+            .unwrap()
+            .into_iter()
+            .map(|e| {
+                let text = i.claims.iter().find(|c| c.id == e.claim_id).unwrap().text.clone();
+                (text, e.result, e.receipt.notes)
+            })
+            .collect()
+    }
+
+    fn result_of(rows: &[(String, EvidenceResult, Vec<String>)], text: &str) -> EvidenceResult {
+        rows.iter().find(|r| r.0 == text).unwrap_or_else(|| panic!("no claim {text:?} in {rows:?}")).1
+    }
+
+    #[test]
+    fn a_difference_and_a_percentage_the_answer_computed_are_recomputed() {
+        let rows = results(
+            "Expense was $77 million in 2016 and $65 million in 2017, a decline of $12 million, or 15.58%.",
+            "amortization expense: $77 million (2016), $65 million (2017)",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$12 million"), EvidenceResult::Supported);
+        assert_eq!(result_of(&rows, "15.58%"), EvidenceResult::Supported, "12/77 = 15.584…");
+        let pct = rows.iter().find(|r| r.0 == "15.58%").unwrap();
+        assert!(pct.2.iter().any(|n| n == "derived"));
+        assert!(pct.2.iter().any(|n| n == "rounding:half_up"));
+    }
+
+    #[test]
+    fn wrong_arithmetic_is_still_a_contradiction() {
+        let rows = results(
+            "It fell from 24.0% to 22.1%, a change of -7.5%.",
+            "expected volatility 24.0 % (2012) and 22.1 % (2013)",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "-7.5%"), EvidenceResult::Contradicted);
+        let rows = results(
+            "It fell from 24.0% to 22.1%, a change of -7.92%.",
+            "expected volatility 24.0 % (2012) and 22.1 % (2013)",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "-7.92%"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn the_rounding_rule_decides_truncated_figures() {
+        let answer = "Cash flow was $957.4 million of $1,410.5 million, or 67.8%.";
+        let source = "net cash provided $1,410.5 million; cash flow $957.4 million";
+        let half_up = results(answer, source, NumericConfig::default());
+        assert_ne!(result_of(&half_up, "67.8%"), EvidenceResult::Supported, "67.876… rounds to 67.9");
+        let lenient = results(
+            answer,
+            source,
+            NumericConfig { rounding: Rounding::WithinLastDigit, ..Default::default() },
+        );
+        assert_eq!(result_of(&lenient, "67.8%"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn operands_come_from_the_answer_never_from_pairs_of_source_figures() {
+        // 30 - 20 = 10 in the source, but the answer does not state 30 or 20.
+        let rows =
+            results("The gap is 10 million.", "units: 30 million and 20 million", NumericConfig::default());
+        assert_eq!(result_of(&rows, "10 million"), EvidenceResult::Contradicted);
+    }
+
+    #[test]
+    fn derive_false_keeps_the_previous_behaviour() {
+        let rows = results(
+            "From $77 million to $65 million, a decline of $12 million.",
+            "$77 million and $65 million",
+            NumericConfig { derive: false, ..Default::default() },
+        );
+        assert_eq!(result_of(&rows, "$12 million"), EvidenceResult::Contradicted);
+    }
+
+    #[test]
+    fn a_year_missing_from_the_sources_is_not_a_wrong_figure() {
+        let rows =
+            results("In 2015 revenue was $10 million.", "revenue: $10 million", NumericConfig::default());
+        assert_eq!(result_of(&rows, "2015"), EvidenceResult::Unsupported);
+        assert_eq!(result_of(&rows, "$10 million"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn a_unit_or_scale_stated_on_one_side_only_is_support_with_a_note() {
+        let rows =
+            results("Leases were $5,312 million.", "operating leases | 5312 | 576", NumericConfig::default());
+        assert_eq!(result_of(&rows, "$5,312 million"), EvidenceResult::Supported);
+        assert!(rows[0].2.iter().any(|n| n == "unit_or_scale_on_one_side"));
+        // Two different scales are a different figure.
+        let rows = results(
+            "Leases were $5,312 million.",
+            "operating leases $5,312 thousand",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$5,312 million"), EvidenceResult::Contradicted);
     }
 
     #[test]

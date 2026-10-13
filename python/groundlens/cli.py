@@ -53,6 +53,8 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--log", help="append the signed record to this JSON Lines file")
     v.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
+    v.add_argument("--rounding", default="half_up", choices=["half_up", "half_even", "within_last_digit"], help="how a recomputed figure may differ from the one written")
+    v.add_argument("--no-derive", action="store_true", help="do not recompute figures from the answer's own supported figures")
     v.add_argument("--json", action="store_true", help="print the full record instead of the summary")
 
     r = sub.add_parser("report", help="build a verification report from a records log")
@@ -124,6 +126,8 @@ def _run(args: argparse.Namespace) -> int:
                 signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
                 log=args.log,
                 units=not args.no_units,
+                derive=not args.no_derive,
+                rounding=args.rounding,
             )
         print(record.to_json(indent=2) if args.json else record.report())
         return EXIT[record.decision]

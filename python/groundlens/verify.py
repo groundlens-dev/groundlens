@@ -42,6 +42,8 @@ def verify(
     units: bool = True,
     declared_precision: bool = False,
     percent_as_fraction: bool = False,
+    derive: bool = True,
+    rounding: str = "half_up",
     metadata: Mapping[str, str] | None = None,
     scope: Mapping[str, str] | None = None,
 ) -> Record:
@@ -71,6 +73,14 @@ def verify(
             physical units). ``False`` gives groundlens 3.x bare-number semantics.
         declared_precision, percent_as_fraction: named relaxations of numeric
             equality, off by default; every relaxed match is noted in the receipt.
+        derive: recompute a figure no source contains from the other figures of
+            the same answer that the sources support (sum, difference, ratio,
+            percentage change), with exact fractions. A match is supported with
+            the note ``derived`` and the formula in the rationale. ``False``
+            gives the 5.3 behaviour.
+        rounding: how a recomputed figure may differ from the figure written, at
+            the precision written: ``"half_up"`` (default), ``"half_even"`` or
+            ``"within_last_digit"`` (rounded or truncated).
         metadata: free-form strings (tenant, trace id) hashed into the record.
         scope: what the request is about, e.g. ``{"entity": "UPS"}``. When
             given, every figure in the answer must come from a passage whose
@@ -84,6 +94,8 @@ def verify(
         ``record.evidence`` is what each verifier said; ``record.reasons``
         is what a reviewer should read first.
     """
+    if rounding not in ("half_up", "half_even", "within_last_digit"):
+        raise ValueError(f"rounding must be half_up, half_even or within_last_digit, not {rounding!r}")
     if bundle is not None:
         warnings.warn(MODEL_CHANNELS_DEPRECATED, DeprecationWarning, stacklevel=2)
     pol = Policy.coerce(policy)
@@ -109,6 +121,8 @@ def verify(
         units=units,
         declared_precision=declared_precision,
         percent_as_fraction=percent_as_fraction,
+        derive=derive,
+        rounding=rounding,
         signing_key=signing_key,
         previous_record_hash=previous_hash,
         bundle=str(bundle.root) if isinstance(bundle, Bundle) else (str(bundle) if bundle else None),

@@ -128,7 +128,8 @@ when a percentage was asked, an amount when an amount was asked. Deterministic.
 Emits `REVIEW`, never `FAIL`, because it is a heuristic.
 
 **Units.** A figure without the unit the question requires, or with a
-different one, is `REVIEW`.
+different one, is `REVIEW`. It reads the question, like the intent check, and
+ships with it.
 
 **The judge.** GroundLens does not ship a model. You pass the client you
 already use (AWS Bedrock, Azure OpenAI, or any OpenAI-compatible endpoint,
@@ -261,9 +262,13 @@ the documentation it touches in the same pull request.
    policies, and are deprecated with a warning. Their code leaves the default
    build in the next release, behind an opt-in feature and Python extra; one
    release of warning first, because removing it is not reversible for users.
-5. **Exact arithmetic recompute** with policy rounding, and the **units**
-   check.
-6. **Intent check.**
+5. **Exact arithmetic recompute** with a rounding rule. Figures the answer
+   computed are recomputed from its own supported figures as exact fractions;
+   years and formula constants stop counting as wrong figures; a unit or scale
+   stated on one side only is support with a note. The rounding rule is a
+   request option until step 7 moves it into the policy.
+6. **Intent check,** and the **units** check that reads the question: both
+   compare the answer with what was asked.
 7. **Policy schema:** `extends`, strict keys, risk classes, `pass_means`,
    `policy show --resolved`, failure semantics.
 8. **Signer and sink interfaces;** `check()` stores before it returns.

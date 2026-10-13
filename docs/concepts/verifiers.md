@@ -49,6 +49,70 @@ way each language writes them and compares them as quantities, not strings:
 A numeric mismatch is a **contradiction**, the strongest signal in the system,
 and most policies map it straight to FAIL.
 
+### Figures the answer computed
+
+Answers show their work. "Expense fell from $77 million to $65 million, a
+decline of $12 million, or 15.58 %." The decline and the percentage are in no
+source, and they are right. The verifier recomputes them.
+
+A figure that no source contains is checked against the other figures of the
+same answer that the sources do support: their sum, their difference, their
+ratio, and their percentage change. Each is computed as an exact fraction, with
+no floating point, and compared with the figure the answer wrote at the
+precision it wrote it. `15.58 %` has two decimals, so the exact value
+`15.5844…` must round to `15.58`. A match is `supported`, with the note
+`derived` and the formula in the rationale:
+
+```{code-block} text
+15.58% = |($65 million − $77 million) / $77 million| × 100 = 15.584415, rounded half_up
+```
+
+A figure that matches nothing stays a contradiction, so wrong arithmetic still
+fails. A derived figure can feed the next one: the decline, then the decline as
+a share of the first year.
+
+Only the answer's own supported figures are operands, never two figures picked
+from the sources. A table holds dozens of numbers, and some pair of them
+matches almost any figure by chance.
+
+The **rounding rule** says how a computed value may differ from the figure
+written:
+
+| rule | what it accepts | example, exact value `67.876…` |
+|---|---|---|
+| `half_up` (default) | round to nearest, ties away from zero | `67.9` |
+| `half_even` | round to nearest, ties to the even digit | `67.9` |
+| `within_last_digit` | rounded or truncated | `67.8` or `67.9` |
+
+Set it with `rounding=` in Python or `--rounding` on the command line; turn
+recomputation off with `derive=False` or `--no-derive`. A rounded match needs
+at least two significant digits written, so `5 %` is never explained by
+whatever happens to round to it; an exact match is accepted at any precision.
+
+### What is not a wrong figure
+
+- **Years.** A bare year that no source contains (`in 2015`, `(2011)`) is
+  `unsupported` with the note `year_not_in_sources`, not a contradiction. A
+  year is a label; its absence from a passage is not a wrong amount. A year is
+  never an operand.
+- **Formula constants.** The `100` of `× 100` and the divisor of an average,
+  `(47 + 47) / 2`, are not claims.
+- **A unit or scale stated on one side only.** A table cell says `5312` under a
+  header the parser could not read, and the answer says `$5,312 million`. The
+  same written number, with the unit or the scale on one side only, is
+  `supported` with the note `unit_or_scale_on_one_side`, when it has at least
+  three significant digits. Two different units (`EUR` and `USD`) or two
+  different scales (`thousand` and `million`) are a different figure.
+
+On 192 answers from a retrieval system over annual reports (FinQA questions,
+labelled by hand or by exact comparison with the gold answer), these changes
+moved the share of correct answers that failed from 90 % to 32 %. The share of
+wrong answers flagged fell from 75 % to 38 %. Every one of those wrong answers
+we looked at had correct arithmetic on figures that are in the sources; they
+were wrong because the figures came from the wrong row, year or company, which
+is not something a numeric check can see. The [scope check](scope.md) and a
+judge are for that.
+
 ## Writing your own
 
 A user-defined verifier is on the roadmap (5.2): a small interface, a declared
