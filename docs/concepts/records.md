@@ -11,8 +11,9 @@ machine, without calling GroundLens back.
 - the full evidence graph — every verifier's evidence for every claim;
 - the policy id and the policy hash;
 - the decision, its reasons, and the regulatory mapping;
-- a content hash, a record hash, the previous record's hash, and an Ed25519
-  signature with the signer's public key.
+- a content hash, a record hash, the previous record's hash, and a signature
+  with the signer's public key: Ed25519 by default, or ECDSA on P-256 when a
+  key service signs (`signature_algorithm: ecdsa-p256-sha256`).
 
 See {class}`groundlens.Record` and {class}`groundlens.RunRecord` for the fields.
 
@@ -52,9 +53,11 @@ print(Record.verify_chain(records), "records, chain intact")
 
 ## Signing and attribution
 
-Records are signed with Ed25519. Set a stable key so records can be attributed
-to your application; the public key travels inside every record, so a verifier
-needs no key material from you.
+Records are signed with Ed25519 by default. Set a stable key so records can be
+attributed to your application; the public key travels inside every record, so
+a verifier needs no key material from you. In production, sign with a key that
+never leaves AWS KMS, Azure Key Vault or an HSM; see
+[Sign and store records](../guides/sign-and-store.md).
 
 ```{code-block} bash
 export GROUNDLENS_SIGNING_KEY="$(groundlens keygen)"
@@ -73,6 +76,7 @@ Record.verify_chain(records)        # every hash, every link, every signature
 
 ```{code-block} bash
 groundlens record verify records.jsonl
+groundlens record verify records/            # several chains: every .jsonl in it
 ```
 
 What an auditor can rely on: **integrity** (any change or reordering is detected

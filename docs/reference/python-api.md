@@ -12,6 +12,9 @@ installed version.
 ## Verifying
 
 ```{eval-rst}
+.. autoclass:: groundlens.Verifier
+   :members: check, seal, store
+
 .. autofunction:: groundlens.verify
 .. autofunction:: groundlens.verify_run
 .. autofunction:: groundlens.proofread
@@ -48,6 +51,20 @@ installed version.
    :members:
 
 .. autofunction:: groundlens.as_evidence
+```
+
+## Signers
+
+```{eval-rst}
+.. automodule:: groundlens.signers
+   :members: local_key, aws_kms, azure_key_vault, pkcs11, Signer
+```
+
+## Sinks
+
+```{eval-rst}
+.. automodule:: groundlens.sinks
+   :members: jsonl, s3_object_lock, azure_blob, postgres, Sink, StoreError, ChainConflict
 ```
 
 ## Policies

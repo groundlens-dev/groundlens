@@ -104,11 +104,8 @@ def verify(
         ``record.evidence`` is what each verifier said; ``record.reasons``
         is what a reviewer should read first.
     """
-    if rounding not in ("half_up", "half_even", "within_last_digit"):
-        raise ValueError(f"rounding must be half_up, half_even or within_last_digit, not {rounding!r}")
     if bundle is not None:
         warnings.warn(MODEL_CHANNELS_DEPRECATED, DeprecationWarning, stacklevel=2)
-    pol = Policy.coerce(policy)
     previous_hash: str | None
     if isinstance(previous, Record):
         previous_hash = previous.record_hash
@@ -121,7 +118,58 @@ def verify(
             if existing:
                 previous_hash = existing[-1].record_hash
 
-    request = build_request(
+    request = _request(
+        answer=answer,
+        evidence=evidence,
+        policy=policy,
+        question=question,
+        locale=locale,
+        rules=rules,
+        bundle=bundle,
+        lexical=lexical,
+        signing_key=signing_key,
+        previous_hash=previous_hash,
+        units=units,
+        declared_precision=declared_precision,
+        percent_as_fraction=percent_as_fraction,
+        derive=derive,
+        rounding=rounding,
+        metadata=metadata,
+        scope=scope,
+        risk_class=risk_class,
+    )
+    record = Record.from_json(_engine.verify_json(request))
+    if log is not None:
+        record.append_to(log)
+    return record
+
+
+def _request(
+    *,
+    answer: str,
+    evidence: EvidenceArg,
+    policy: Policy | str | Path | None,
+    question: str | None,
+    locale: str,
+    rules: Sequence[str | Path | Mapping],
+    bundle: Bundle | str | Path | None,
+    lexical: bool,
+    signing_key: str | None,
+    previous_hash: str | None,
+    units: bool,
+    declared_precision: bool,
+    percent_as_fraction: bool,
+    derive: bool,
+    rounding: str,
+    metadata: Mapping[str, str] | None,
+    scope: Mapping[str, str] | None,
+    risk_class: str | None,
+) -> str:
+    """The engine request, as JSON. One builder for ``verify`` and ``Verifier``."""
+    if rounding not in ("half_up", "half_even", "within_last_digit"):
+        raise ValueError(f"rounding must be half_up, half_even or within_last_digit, not {rounding!r}")
+    pol = Policy.coerce(policy)
+    return build_request(
         answer=answer,
         evidence=evidence,
         question=question,
@@ -141,10 +189,6 @@ def verify(
         scope=scope,
         risk_class=risk_class,
     )
-    record = Record.from_json(_engine.verify_json(request))
-    if log is not None:
-        record.append_to(log)
-    return record
 
 
 def _rules_json(value: str | Path | Mapping) -> str:

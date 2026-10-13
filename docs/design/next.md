@@ -216,7 +216,15 @@ Signing goes through a small interface with adapters for AWS KMS, Azure Key
 Vault and PKCS#11; a local key file is for development only. Storage goes
 through a sink interface with adapters for JSONL files, S3 Object Lock, Azure
 Blob with immutability and Postgres. Many processes may write many chains;
-`groundlens records verify` accepts a set of chains.
+`groundlens record verify` accepts a set of chains.
+
+Built in step 9, with two choices. The key services sign with ECDSA on P-256,
+not Ed25519, so the record envelope gained an optional `signature_algorithm`;
+absent means Ed25519, so no existing record changes. The adapters take the
+client the user already has (`boto3`, the Azure SDKs, a DB-API connection,
+`python-pkcs11`), so the package keeps zero runtime dependencies. The move to
+schema `/2` waits for the judge, which is what adds new content to the
+record.
 
 ## Measurement (planned)
 

@@ -65,11 +65,14 @@ groundlens report records.jsonl --out evidence-package
 
 ## record verify
 
-Recompute every content hash, record hash, chain link and signature in a log,
-offline.
+Recompute every content hash, record hash, chain link and signature, offline.
+Each file is one chain; a directory means every `.jsonl` file in it. With
+several chains, every chain must verify and no record may be in two of them.
 
 ```{code-block} bash
 groundlens record verify records.jsonl
+groundlens record verify records/
+groundlens record verify worker-1.jsonl worker-2.jsonl
 ```
 
 ## policy lint

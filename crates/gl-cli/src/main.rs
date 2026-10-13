@@ -8,7 +8,7 @@
 //! glv verify --answer a.txt --source invoice.pdf#p1=invoice.txt --policy p.yaml [--rules r.yaml] [--question q.txt] [--log records.jsonl]
 //! glv policy lint p.yaml
 //! glv policy show p.yaml --resolved
-//! glv record verify records.jsonl
+//! glv record verify records.jsonl [more.jsonl | records/ ...]
 //! glv bundle build ./bundle --name acme-verification --version 1.0.0
 //! glv bundle verify ./bundle
 //! glv keygen > signer.key
@@ -157,7 +157,12 @@ enum PolicyCmd {
 
 #[derive(Subcommand)]
 enum RecordCmd {
-    Verify { path: PathBuf },
+    /// Verify one or more chains: every hash, link and signature. Each file
+    /// is one chain; a directory means every `.jsonl` file in it.
+    Verify {
+        #[arg(required = true)]
+        paths: Vec<PathBuf>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -415,10 +420,36 @@ fn run() -> anyhow_lite::Result<()> {
                 print!("{text}");
             }
         }
-        Command::Record { cmd: RecordCmd::Verify { path } } => {
-            let records = gl_record::from_jsonl(&read(&path)?)?;
-            gl_record::verify_chain(&records)?;
-            println!("ok  {} records, chain intact, all signatures verify", records.len());
+        Command::Record { cmd: RecordCmd::Verify { paths } } => {
+            let mut files = Vec::new();
+            for p in paths {
+                if p.is_dir() {
+                    let mut inside: Vec<PathBuf> = std::fs::read_dir(&p)?
+                        .filter_map(|e| e.ok().map(|e| e.path()))
+                        .filter(|f| f.extension().is_some_and(|x| x == "jsonl"))
+                        .collect();
+                    inside.sort();
+                    files.extend(inside);
+                } else {
+                    files.push(p);
+                }
+            }
+            if files.is_empty() {
+                return Err("no .jsonl files to verify".into());
+            }
+            let mut chains = Vec::new();
+            for f in &files {
+                chains.push(gl_record::from_jsonl(&read(f)?)?);
+            }
+            let n = gl_record::verify_chains(&chains)?;
+            if chains.len() == 1 {
+                println!("ok  {n} records, chain intact, all signatures verify");
+            } else {
+                println!(
+                    "ok  {n} records in {} chains, every chain intact, all signatures verify",
+                    chains.len()
+                );
+            }
         }
         Command::Bundle { cmd: BundleCmd::Build { root, name, version } } => {
             let manifest = gl_bundle::build_manifest(&root, &name, &version, gl_core::ENGINE_VERSION)?;
