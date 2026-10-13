@@ -88,8 +88,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--out", default="report", help="output directory")
 
     rec = sub.add_parser("record", help="record tools").add_subparsers(dest="sub", required=True)
-    rv = rec.add_parser("verify", help="recompute hashes, links and signatures of a log")
-    rv.add_argument("log")
+    rv = rec.add_parser("verify", help="recompute hashes, links and signatures of one or more chains")
+    rv.add_argument("logs", nargs="+", help="JSON Lines logs, one chain each; a directory means every .jsonl in it")
 
     pol = sub.add_parser("policy", help="policy tools").add_subparsers(dest="sub", required=True)
     pl = pol.add_parser("lint", help="check a policy")
@@ -167,8 +167,18 @@ def _run(args: argparse.Namespace) -> int:
         print(f"ok  {summary['records']} records written to {args.out}: report.md, report.json, records.jsonl, README-auditor.md")
         return 0
     if args.cmd == "record":
-        n = Record.verify_chain(Record.read_log(args.log))
-        print(f"ok  {n} records, chain intact, all signatures verify")
+        files: list[Path] = []
+        for name in args.logs:
+            path = Path(name)
+            files.extend(sorted(path.glob("*.jsonl")) if path.is_dir() else [path])
+        if not files:
+            raise ValueError("no .jsonl files to verify")
+        chains = [Record.read_log(f) for f in files]
+        n = Record.verify_chains(chains)
+        if len(chains) == 1:
+            print(f"ok  {n} records, chain intact, all signatures verify")
+        else:
+            print(f"ok  {n} records in {len(chains)} chains, every chain intact, all signatures verify")
         return 0
     if args.cmd == "policy":
         policy = Policy.coerce(args.policy)

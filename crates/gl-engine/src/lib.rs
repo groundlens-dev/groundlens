@@ -8,7 +8,7 @@
 
 use gl_core::{EvidenceGraph, Result, Source, VerificationInput, Verifier};
 use gl_policy::Policy;
-use gl_record::{seal, EvidenceRecord, RecordContent, RecordSigner, RECORD_SCHEMA};
+use gl_record::{seal, EvidenceRecord, RecordContent, RecordSigner, UnsignedRecord, RECORD_SCHEMA};
 use gl_verifiers::{
     extract_claims_with, IntentVerifier, NumericConfig, NumericVerifier, RuleSet, ScopeVerifier,
 };
@@ -246,15 +246,39 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
         }
         None => RecordSigner::generate(),
     };
+    let (record_id, timestamp) = record_id_and_time(&content)?;
+    seal(content, req.previous_record_hash.clone(), record_id, timestamp, &signer)
+}
+
+/// The id is outside the content hash on purpose: two verifications of the
+/// same input are two records. Content prefix for readability, random suffix
+/// for uniqueness.
+fn record_id_and_time(content: &RecordContent) -> Result<(String, String)> {
     let timestamp = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
-    // The id is outside the content hash on purpose: two verifications of
-    // the same input are two records. Content prefix for readability, random
-    // suffix for uniqueness.
-    let content_hash = gl_core::canonical::content_hash(&content)?;
+    let content_hash = gl_core::canonical::content_hash(content)?;
     let mut nonce = [0u8; 6];
     rand_core::RngCore::fill_bytes(&mut rand_core::OsRng, &mut nonce);
-    let record_id = format!("rec_{}_{}", &content_hash[7..19], hex::encode(nonce));
-    seal(content, req.previous_record_hash.clone(), record_id, timestamp, &signer)
+    Ok((format!("rec_{}_{}", &content_hash[7..19], hex::encode(nonce)), timestamp))
+}
+
+/// Verify like [`verify`], but leave the signature to a key service: the
+/// result carries every hash and no signature. Sign the bytes of its
+/// `record_hash` and pass the signature to [`gl_record::attach_signature`].
+/// `signing_key_hex` in the request is ignored.
+pub fn verify_unsigned(req: &VerifyRequest) -> Result<UnsignedRecord> {
+    let mut local = req.clone();
+    // Seal with a throwaway key, then drop the signature: one pipeline, so an
+    // unsigned record is exactly what a signed one would have been.
+    local.signing_key_hex = None;
+    let sealed = verify(&local)?;
+    Ok(UnsignedRecord {
+        record_id: sealed.record_id,
+        timestamp: sealed.timestamp,
+        content: sealed.content,
+        content_hash: sealed.content_hash,
+        previous_record_hash: sealed.previous_record_hash,
+        record_hash: sealed.record_hash,
+    })
 }
 
 /// The verification input the engine would build for a request, without

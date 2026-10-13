@@ -22,6 +22,40 @@ fn verify_json(request_json: &str) -> PyResult<String> {
     serde_json::to_string(&record).map_err(err)
 }
 
+/// Verify like `verify_json`, without signing: an `UnsignedRecord` as JSON.
+/// A key service signs the UTF-8 bytes of its `record_hash`.
+#[pyfunction]
+fn verify_unsigned_json(request_json: &str) -> PyResult<String> {
+    let req: gl_engine::VerifyRequest = serde_json::from_str(request_json).map_err(err)?;
+    let unsigned = gl_engine::verify_unsigned(&req).map_err(err)?;
+    serde_json::to_string(&unsigned).map_err(err)
+}
+
+/// Attach a key service's signature (hex) and public key (hex) to an unsigned
+/// record. The signature is checked first; the result is a sealed record.
+#[pyfunction]
+fn attach_signature_json(
+    unsigned_json: &str,
+    algorithm: &str,
+    public_key_hex: &str,
+    signature_hex: &str,
+) -> PyResult<String> {
+    let unsigned: gl_record::UnsignedRecord = serde_json::from_str(unsigned_json).map_err(err)?;
+    let public_key = hex::decode(public_key_hex).map_err(err)?;
+    let signature = hex::decode(signature_hex).map_err(err)?;
+    let record = gl_record::attach_signature(unsigned, algorithm, &public_key, &signature).map_err(err)?;
+    serde_json::to_string(&record).map_err(err)
+}
+
+/// Verify several chains, each a JSON Lines text. Returns the record count;
+/// raises on the first broken record or link, or a record in two chains.
+#[pyfunction]
+fn record_verify_chains(chains: Vec<String>) -> PyResult<usize> {
+    let parsed: Vec<Vec<gl_record::EvidenceRecord>> =
+        chains.iter().map(|c| gl_record::from_jsonl(c)).collect::<Result<_, _>>().map_err(err)?;
+    gl_record::verify_chains(&parsed).map_err(|e| PyRuntimeError::new_err(e.to_string()))
+}
+
 /// Verify a whole MCP execution. `request_json` is a `RunVerifyRequest`; the
 /// result is a sealed `RunRecord` as JSON. Its `content.gate` is the decision.
 #[pyfunction]
@@ -157,6 +191,9 @@ fn yaml_to_json(text: &str) -> PyResult<String> {
 fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_verify_json, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_unsigned_json, m)?)?;
+    m.add_function(wrap_pyfunction!(attach_signature_json, m)?)?;
+    m.add_function(wrap_pyfunction!(record_verify_chains, m)?)?;
     m.add_function(wrap_pyfunction!(run_record_verify, m)?)?;
     m.add_function(wrap_pyfunction!(prepare_json, m)?)?;
     m.add_function(wrap_pyfunction!(record_verify, m)?)?;

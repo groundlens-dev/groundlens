@@ -134,6 +134,7 @@ pub fn verify_run_record(record: &RunRecord) -> Result<()> {
         &record.record_hash,
         &record.signature,
         &record.signer_public_key,
+        None,
     )
 }
 

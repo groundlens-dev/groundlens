@@ -82,6 +82,12 @@ class Record:
         return self.raw.get("previous_record_hash")
 
     @property
+    def signature_algorithm(self) -> str:
+        """``ed25519`` (the default, also for every older record) or
+        ``ecdsa-p256-sha256`` for a record signed by a key service."""
+        return self.raw.get("signature_algorithm") or "ed25519"
+
+    @property
     def signature(self) -> str:
         return self.raw["signature"]
 
@@ -198,7 +204,7 @@ class Record:
 
     # ---- verification ------------------------------------------------------------
     def verify(self) -> None:
-        """Recompute content hash, record hash and Ed25519 signature. Offline."""
+        """Recompute content hash, record hash and signature. Offline."""
         Record.verify_chain([self])
 
     @staticmethod
@@ -207,6 +213,16 @@ class Record:
         text = "\n".join(r.to_json() for r in records)
         try:
             return _engine.record_verify(text)
+        except RuntimeError as e:
+            raise IntegrityError(str(e)) from None
+
+    @staticmethod
+    def verify_chains(chains: Iterable[Iterable[Record]]) -> int:
+        """Verify several chains, one per writer. Every chain must verify on
+        its own and no record may be in two. Returns the count."""
+        texts = ["\n".join(r.to_json() for r in chain) for chain in chains]
+        try:
+            return _engine.record_verify_chains(texts)
         except RuntimeError as e:
             raise IntegrityError(str(e)) from None
 

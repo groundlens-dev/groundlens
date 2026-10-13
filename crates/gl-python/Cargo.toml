@@ -20,5 +20,6 @@ gl-text.workspace = true
 gl-record.workspace = true
 gl-bundle.workspace = true
 serde_json.workspace = true
+hex.workspace = true
 serde_yaml.workspace = true
 pyo3 = { version = "0.29", features = ["extension-module", "abi3-py310"] }

@@ -12,6 +12,17 @@
 //! removed afterwards. The timestamp and the record id are *outside* the
 //! content hash, so two runs of the same input on two machines produce the
 //! same `content_hash` while still being two distinct records.
+//!
+//! ## Who signs
+//!
+//! A record is signed with Ed25519 by default, from a key the engine holds.
+//! A key that must never leave a key service (AWS KMS, Azure Key Vault, an
+//! HSM through PKCS#11) signs from outside the engine instead: the engine
+//! builds an [`UnsignedRecord`], the key service signs its `record_hash`, and
+//! [`attach_signature`] checks that signature before it accepts the record.
+//! Those services sign with ECDSA on P-256, so a record carries a
+//! `signature_algorithm`; a record without one is Ed25519, as every record
+//! written before the field existed.
 
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier as _, VerifyingKey};
 use gl_core::canonical::{canonical_json, content_hash, sha256_hex};
@@ -26,6 +37,13 @@ pub use run::{
 };
 
 pub const RECORD_SCHEMA: &str = "groundlens.evidence-record/1";
+
+/// The default signature: Ed25519 over the bytes of `record_hash`.
+pub const ED25519: &str = "ed25519";
+/// ECDSA on P-256 with SHA-256 over the bytes of `record_hash`. The public key
+/// is stored as an uncompressed SEC1 point and the signature as `r || s`,
+/// both hex.
+pub const ECDSA_P256_SHA256: &str = "ecdsa-p256-sha256";
 
 /// Everything that is a function of the input, the bundle and the policy.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,9 +67,26 @@ pub struct EvidenceRecord {
     pub previous_record_hash: Option<String>,
     /// `sha256:` over `content_hash || previous_record_hash || record_id || timestamp`.
     pub record_hash: String,
-    /// Ed25519 over `record_hash`, hex.
+    /// Over the bytes of `record_hash`, hex, under `signature_algorithm`.
     pub signature: String,
     pub signer_public_key: String,
+    /// `ecdsa-p256-sha256` for a record signed by a key service. Absent means
+    /// Ed25519, so records written before this field keep verifying and keep
+    /// their exact bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signature_algorithm: Option<String>,
+}
+
+/// A record with every hash computed and no signature yet: what a key
+/// service is asked to sign. Sign the UTF-8 bytes of `record_hash`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UnsignedRecord {
+    pub record_id: String,
+    pub timestamp: String,
+    pub content: RecordContent,
+    pub content_hash: String,
+    pub previous_record_hash: Option<String>,
+    pub record_hash: String,
 }
 
 pub struct RecordSigner {
@@ -118,6 +153,7 @@ pub(crate) fn verify_envelope(
     stored_record_hash: &str,
     signature_hex: &str,
     signer_public_key: &str,
+    algorithm: Option<&str>,
 ) -> Result<()> {
     if recomputed_content_hash != stored_content_hash {
         return Err(Error::Integrity(format!("{record_id}: content hash mismatch")));
@@ -125,6 +161,14 @@ pub(crate) fn verify_envelope(
     let expected = chain_hash(stored_content_hash, previous, record_id, timestamp);
     if expected != stored_record_hash {
         return Err(Error::Integrity(format!("{record_id}: record hash mismatch")));
+    }
+    match algorithm.unwrap_or(ED25519) {
+        ED25519 => {}
+        ECDSA_P256_SHA256 => {
+            return verify_p256(stored_record_hash, signature_hex, signer_public_key)
+                .map_err(|e| Error::Integrity(format!("{record_id}: {e}")));
+        }
+        other => return Err(Error::Integrity(format!("{record_id}: unknown signature algorithm {other:?}"))),
     }
     let pk_bytes: [u8; 32] = hex::decode(signer_public_key)
         .ok()
@@ -138,6 +182,92 @@ pub(crate) fn verify_envelope(
     let sig = Signature::from_bytes(&sig_bytes);
     pk.verify(stored_record_hash.as_bytes(), &sig)
         .map_err(|_| Error::Integrity(format!("{record_id}: signature does not verify")))
+}
+
+fn verify_p256(
+    record_hash: &str,
+    signature_hex: &str,
+    public_key_hex: &str,
+) -> std::result::Result<(), String> {
+    use p256::ecdsa::signature::Verifier as _;
+    let key_bytes = hex::decode(public_key_hex).map_err(|_| "bad public key encoding".to_string())?;
+    let key = p256::ecdsa::VerifyingKey::from_sec1_bytes(&key_bytes)
+        .map_err(|_| "bad P-256 public key".to_string())?;
+    let sig_bytes = hex::decode(signature_hex).map_err(|_| "bad signature encoding".to_string())?;
+    let sig =
+        p256::ecdsa::Signature::from_slice(&sig_bytes).map_err(|_| "bad P-256 signature".to_string())?;
+    key.verify(record_hash.as_bytes(), &sig).map_err(|_| "signature does not verify".to_string())
+}
+
+/// Bring a P-256 public key to the stored form, uncompressed SEC1 hex.
+/// Accepts SEC1 (compressed or not) or a DER SubjectPublicKeyInfo, which is
+/// what AWS KMS `GetPublicKey` returns.
+pub fn normalise_p256_public_key(bytes: &[u8]) -> Result<String> {
+    use p256::pkcs8::DecodePublicKey as _;
+    let key = p256::PublicKey::from_sec1_bytes(bytes)
+        .or_else(|_| p256::PublicKey::from_public_key_der(bytes))
+        .map_err(|_| {
+            Error::InvalidInput("not a P-256 public key (SEC1 or SubjectPublicKeyInfo DER)".into())
+        })?;
+    Ok(hex::encode(p256::EncodedPoint::from(key).as_bytes()))
+}
+
+/// Bring a P-256 signature to the stored form, `r || s` hex with a low `s`.
+/// Accepts `r || s` (Azure Key Vault, PKCS#11) or DER (AWS KMS).
+pub fn normalise_p256_signature(bytes: &[u8]) -> Result<String> {
+    let sig = p256::ecdsa::Signature::from_slice(bytes)
+        .or_else(|_| p256::ecdsa::Signature::from_der(bytes))
+        .map_err(|_| Error::InvalidInput("not a P-256 ECDSA signature (r||s or DER)".into()))?;
+    let sig = sig.normalize_s().unwrap_or(sig);
+    Ok(hex::encode(sig.to_bytes()))
+}
+
+/// Compute every hash of a record and leave the signature to a key service.
+pub fn prepare_unsigned(
+    content: RecordContent,
+    previous_record_hash: Option<String>,
+    record_id: String,
+    timestamp: String,
+) -> Result<UnsignedRecord> {
+    let content_hash = content_hash(&content)?;
+    let record_hash = chain_hash(&content_hash, previous_record_hash.as_deref(), &record_id, &timestamp);
+    Ok(UnsignedRecord { record_id, timestamp, content, content_hash, previous_record_hash, record_hash })
+}
+
+/// Attach a key service's signature to an unsigned record. The signature is
+/// checked before the record is returned, so a record that comes out of here
+/// always verifies. `public_key` and `signature` are raw bytes, in any of the
+/// encodings [`normalise_p256_public_key`] and [`normalise_p256_signature`]
+/// accept for `ecdsa-p256-sha256`, or 32 and 64 bytes for `ed25519`.
+pub fn attach_signature(
+    unsigned: UnsignedRecord,
+    algorithm: &str,
+    public_key: &[u8],
+    signature: &[u8],
+) -> Result<EvidenceRecord> {
+    let (signer_public_key, signature, signature_algorithm) = match algorithm {
+        ED25519 => (hex::encode(public_key), hex::encode(signature), None),
+        ECDSA_P256_SHA256 => (
+            normalise_p256_public_key(public_key)?,
+            normalise_p256_signature(signature)?,
+            Some(ECDSA_P256_SHA256.to_string()),
+        ),
+        other => return Err(Error::InvalidInput(format!("unknown signature algorithm {other:?}"))),
+    };
+    let record = EvidenceRecord {
+        record_id: unsigned.record_id,
+        timestamp: unsigned.timestamp,
+        content: unsigned.content,
+        content_hash: unsigned.content_hash,
+        previous_record_hash: unsigned.previous_record_hash,
+        record_hash: unsigned.record_hash,
+        signature,
+        signer_public_key,
+        signature_algorithm,
+    };
+    verify_record(&record)
+        .map_err(|e| Error::InvalidInput(format!("the key service's signature was refused: {e}")))?;
+    Ok(record)
 }
 
 pub fn seal(
@@ -159,6 +289,7 @@ pub fn seal(
         record_hash,
         signature,
         signer_public_key,
+        signature_algorithm: None,
     })
 }
 
@@ -174,6 +305,7 @@ pub fn verify_record(record: &EvidenceRecord) -> Result<()> {
         &record.record_hash,
         &record.signature,
         &record.signer_public_key,
+        record.signature_algorithm.as_deref(),
     )
 }
 
@@ -188,6 +320,24 @@ pub fn verify_chain(records: &[EvidenceRecord]) -> Result<()> {
         previous = Some(&r.record_hash);
     }
     Ok(())
+}
+
+/// Verify a set of chains, each one a log written by one writer. Many
+/// processes may each keep their own chain; every chain must verify on its
+/// own, and no record may appear in two of them. Returns the record count.
+pub fn verify_chains(chains: &[Vec<EvidenceRecord>]) -> Result<usize> {
+    let mut seen = std::collections::BTreeSet::new();
+    let mut total = 0;
+    for chain in chains {
+        verify_chain(chain)?;
+        for r in chain {
+            if !seen.insert(r.record_hash.clone()) {
+                return Err(Error::Integrity(format!("{}: the same record is in two chains", r.record_id)));
+            }
+        }
+        total += chain.len();
+    }
+    Ok(total)
 }
 
 pub fn to_jsonl_line(record: &EvidenceRecord) -> Result<String> {
@@ -252,6 +402,65 @@ mod tests {
         let line = to_jsonl_line(&r1).unwrap();
         let back = from_jsonl(&line).unwrap();
         verify_record(&back[0]).unwrap();
+    }
+
+    #[test]
+    fn a_key_service_signs_with_p256_and_the_record_verifies() {
+        use p256::ecdsa::signature::Signer as _;
+        use p256::pkcs8::EncodePublicKey as _;
+        let key = p256::ecdsa::SigningKey::from_slice(&[7u8; 32]).unwrap();
+        let unsigned =
+            prepare_unsigned(content(1), None, "k1".into(), "2026-10-13T10:00:00Z".into()).unwrap();
+        // What AWS KMS returns: a DER signature and a DER SubjectPublicKeyInfo.
+        let sig: p256::ecdsa::Signature = key.sign(unsigned.record_hash.as_bytes());
+        let der_sig = sig.to_der();
+        let spki = p256::PublicKey::from(key.verifying_key()).to_public_key_der().unwrap();
+        let record =
+            attach_signature(unsigned.clone(), ECDSA_P256_SHA256, spki.as_bytes(), der_sig.as_bytes())
+                .unwrap();
+        assert_eq!(record.signature_algorithm.as_deref(), Some(ECDSA_P256_SHA256));
+        assert_eq!(record.signature.len(), 128, "r || s, hex");
+        assert_eq!(record.signer_public_key.len(), 130, "uncompressed SEC1, hex");
+        verify_record(&record).unwrap();
+        let back = from_jsonl(&to_jsonl_line(&record).unwrap()).unwrap();
+        verify_record(&back[0]).unwrap();
+
+        // What Azure Key Vault and PKCS#11 return: raw r || s.
+        let raw = attach_signature(
+            unsigned.clone(),
+            ECDSA_P256_SHA256,
+            key.verifying_key().to_encoded_point(true).as_bytes(),
+            &sig.to_bytes(),
+        )
+        .unwrap();
+        assert_eq!(raw.signature, record.signature);
+
+        // A signature over anything else is refused before a record exists.
+        let wrong: p256::ecdsa::Signature = key.sign(b"something else");
+        let e =
+            attach_signature(unsigned, ECDSA_P256_SHA256, spki.as_bytes(), &wrong.to_bytes()).unwrap_err();
+        assert!(e.to_string().contains("refused"), "{e}");
+
+        // A relabelled algorithm does not verify.
+        let mut relabelled = record.clone();
+        relabelled.signature_algorithm = None;
+        assert!(verify_record(&relabelled).is_err());
+    }
+
+    #[test]
+    fn an_ed25519_record_has_no_algorithm_field_and_keeps_its_bytes() {
+        let signer = RecordSigner::generate();
+        let r = seal(content(1), None, "e".into(), "2026-01-01T00:00:00Z".into(), &signer).unwrap();
+        assert!(!to_jsonl_line(&r).unwrap().contains("signature_algorithm"));
+    }
+
+    #[test]
+    fn several_chains_verify_together_and_a_record_in_two_chains_does_not() {
+        let signer = RecordSigner::generate();
+        let a = seal(content(1), None, "a".into(), "2026-01-01T00:00:00Z".into(), &signer).unwrap();
+        let b = seal(content(2), None, "b".into(), "2026-01-01T00:00:00Z".into(), &signer).unwrap();
+        assert_eq!(verify_chains(&[vec![a.clone()], vec![b]]).unwrap(), 2);
+        assert!(verify_chains(&[vec![a.clone()], vec![a]]).is_err());
     }
 
     #[test]

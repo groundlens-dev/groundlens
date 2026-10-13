@@ -28,12 +28,14 @@ from groundlens._types import (
     Span,
     WindowEncoding,
 )
+from groundlens import signers, sinks
 from groundlens.bundle import Bundle
 from groundlens.calibrate import calibrate
 from groundlens.policy import Policy
 from groundlens.proofread import adaptive_k, as_evidence, proofread
 from groundlens.record import Record
 from groundlens.run import RunRecord, verify_run
+from groundlens.verifier import Verifier
 from groundlens.verify import verify
 
 __version__ = "5.3.0"
@@ -52,6 +54,7 @@ __all__ = [
     "Proofread",
     "Record",
     "RunRecord",
+    "Verifier",
     "Span",
     "WindowEncoding",
     "__version__",
@@ -59,6 +62,8 @@ __all__ = [
     "as_evidence",
     "calibrate",
     "proofread",
+    "signers",
+    "sinks",
     "verify",
     "verify_run",
 ]

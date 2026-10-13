@@ -61,6 +61,27 @@ identical in the git tag and on PyPI.
   over the request.
 - The Python command line accepts `--scope`, `--provenance` and
   `--risk-class`, like `glv`.
+- **`groundlens.Verifier`**: a policy, a signer and a sink set once, then
+  `check()` per answer. `check()` returns only after the record is signed and
+  stored; if it cannot be stored it raises `StoreError` and returns no
+  decision. `seal()` and `store()` are the two-step form for batch writers.
+- **Signers** (`groundlens.signers`): `local_key` (Ed25519, development),
+  `aws_kms`, `azure_key_vault` and `pkcs11`. With a key service the key never
+  leaves it: the engine builds the record, the service signs its
+  `record_hash`, and the engine checks the signature before it returns the
+  record. Key services sign with ECDSA on P-256; such a record carries
+  `signature_algorithm: ecdsa-p256-sha256`. A record without the field is
+  Ed25519, so every existing record keeps its bytes and verifies as before.
+- **Sinks** (`groundlens.sinks`): `jsonl` (fsynced), `s3_object_lock`,
+  `azure_blob` and `postgres`. Each keeps one chain and writes each position
+  once; a writer that loses a race is told, and `check()` seals again on the
+  new head. You pass the client you already use; the package keeps zero
+  runtime dependencies.
+- **`record verify` takes several chains**: several files, or a directory
+  with one `.jsonl` per chain. Every chain must verify on its own, and no
+  record may be in two chains. `Record.verify_chains()` in Python.
+- In Rust, `gl_record::prepare_unsigned` and `gl_record::attach_signature`,
+  and `gl_engine::verify_unsigned`.
 - Request-level reasons in the decision (`outcome.reasons`): a missing scope
   key, a verifier that could not run, a risk class that requires review.
   Omitted when empty, like the new `risk_class` and `pass_means` fields, so
