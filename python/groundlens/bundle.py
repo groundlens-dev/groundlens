@@ -145,7 +145,12 @@ def _safe_extract(tar: tarfile.TarFile, dest: Path) -> None:
             raise BundleError(f"archive entry escapes the target directory: {member.name}")
         if member.issym() or member.islnk():
             raise BundleError(f"archive contains a link: {member.name}")
-    tar.extractall(dest)  # noqa: S202 - members checked above
+    # Members are checked above. The "data" filter, where this Python has it,
+    # checks again and is the default from Python 3.14.
+    if hasattr(tarfile, "data_filter"):
+        tar.extractall(dest, filter="data")
+    else:  # pragma: no cover - Python builds without the filter backport
+        tar.extractall(dest)  # noqa: S202
 
 
 def _find_manifest_root(staging: Path) -> Path:
