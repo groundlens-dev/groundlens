@@ -58,6 +58,7 @@ record.verify()             # recompute every hash and the signature, offline
 - **[Python API](reference/python-api.md)** — every public function and class,
   from the docstrings.
 - **[Command line](reference/cli.md)** — the `groundlens` / `glv` commands.
+- **[Design](design/next.md)** — what changes next and why, before it is built.
 
 ```{toctree}
 :hidden:
@@ -102,4 +103,11 @@ guides/evidence-for-auditors
 reference/python-api
 reference/cli
 changelog
+```
+
+```{toctree}
+:hidden:
+:caption: Design
+
+design/next
 ```

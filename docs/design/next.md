@@ -1,0 +1,270 @@
+<!--
+SPDX-FileCopyrightText: 2026 Javier Marín <javier@jmarin.info>
+SPDX-License-Identifier: Apache-2.0
+-->
+
+# Design: what changes next, and why
+
+This page describes the next shape of GroundLens before it is built. It is the
+reference that every change in the migration is checked against. Pages under
+**Concepts** and **Guides** describe what is released today; this page
+describes what is coming, and each section says so.
+
+## Why it changes
+
+Over the last months we measured how verification behaves on real answers from
+real retrieval systems: annual reports (FinQA, 10-K filings), contracts
+(LegalBench) and an EU regulation published after the models were trained, in
+four languages. Five findings drive the design.
+
+1. **Models rarely invent words. They attach real facts to the wrong thing.**
+   The costly error is a correct figure from the wrong year, row, company or
+   clause, or a correct fact that answers a different question. A check that
+   asks "are the words of the answer in the source?" passes those errors,
+   because the words are there.
+2. **What counts as an error is a policy decision.** On the same contract
+   answers the error rate moved from 11 % to 43 % depending only on the written
+   definition of an error.
+3. **A strong LLM judge is the only general checker that works, and it works
+   best when it is told what it needs to know.** Giving the judge the written
+   policy raised its detection from 63 % to 88 % and from 74 % to 98 %. Giving
+   it the scope of the request (which company the question is about, which
+   document each passage comes from) raised it from 68 % to 84 %.
+4. **Judges from different vendors fail on the same answers.** A second judge
+   is not a second opinion. Independent evidence has to fail in a different
+   way: exact arithmetic, scope and intent checks.
+5. **The lexical, entailment and similarity channels did not add value** on
+   these answers. They check presence, not binding, and they add a model
+   download, weight and latency.
+
+We also asked six integrators, from three model families and without access to
+this repository, to write the code they would want to use. They converged on
+the same API and the same defaults. The design below follows them.
+
+## What changes
+
+| | today | next |
+|---|---|---|
+| default install | engine plus an optional model bundle | engine only, a few megabytes, no model, no network |
+| checks in the default path | numeric, rules, lexical, entailment, similarity | scope, exact arithmetic, intent, rules, the judge you connect |
+| lexical, entailment, similarity | in the default policies | optional, behind an extra, deprecated for one release |
+| the judge | planned | a verifier: your model, a versioned template, claim-level evidence |
+| scope and provenance | a passage has an id and a locator | a request has a scope; a passage has document, version, entity, page, hash |
+| decisions | PASS / REVIEW / FAIL | the same, plus a risk class and a declared meaning of PASS |
+| the record | written by the caller | written before the call returns; no record, no PASS |
+| measurement | `calibrate()` per verifier | `measure`: error rate under your policy, with an interval and a cost |
+
+What does not change: the five separations (verifiers, claims, evidence,
+policy, record), "evidence, never truth", the Rust core without network, the
+Ed25519 hash-chained records, and offline verification with a public key.
+Records written today stay verifiable.
+
+## The public API (planned)
+
+Five names cover the whole surface: `Passage`, `Scope`, `Policy`, `Verifier`
+and `Result`.
+
+```python
+import groundlens as gl
+
+verifier = gl.Verifier(
+    policy="policies/credit_desk.yaml",       # what counts as an error, for you
+    judge=gl.judges.openai_compatible(client), # optional: the model you already use
+    signer=gl.signers.aws_kms(key_id),         # optional: a local key in development
+    sink=gl.sinks.jsonl("records/"),           # optional: S3 Object Lock, Blob WORM, Postgres
+)
+
+result = verifier.check(
+    question=question,
+    answer=answer,
+    passages=[
+        gl.Passage(text, doc_id="10-K-2016#p114", entity="UPS",
+                   version="2016", page=114, sha256=digest),
+    ],
+    scope=gl.Scope(entity="UPS"),
+)
+
+result.decision      # PASS / REVIEW / FAIL
+result.reasons       # stable codes with answer spans, worst first
+result.record_id     # already signed and stored when check() returns
+```
+
+Rules the API follows:
+
+- One object built once at start-up, one call per answer. `check()` and
+  `acheck()`.
+- With no policy file, a default policy applies, so a first test needs no
+  configuration.
+- The judge is optional and never required to get a decision from the
+  deterministic checks.
+- Checks are declared once, in the policy. Python only implements custom
+  checks, registered by id.
+- `check()` returns only after the record is signed and stored, and raises if
+  it cannot be stored. A two-step form exists for batch writers.
+- Results are plain data: they serialise to JSON without help.
+
+## Scope and provenance (planned)
+
+Scope says what the request is about: an entity, a contract and its version, a
+customer, a document set. Provenance says where each passage comes from. The
+policy names the scope keys that are required and what happens when they are
+missing or do not match.
+
+The scope check is `exact`. A passage that the answer uses and that belongs to
+another scope is `FAIL` by default. A missing scope key is `REVIEW`. Both the
+scope and the provenance of every passage are hashed into the record, so the
+record proves where each figure came from.
+
+## The checks (planned)
+
+**Exact arithmetic.** Figures in the answer are matched to figures in the
+passages and recomputed with exact rational arithmetic, under the rounding
+rule and locale written in the policy (`1.234,56 €`, `en miles de euros`,
+`1,5 %`). No floating point, no solver. A figure that is neither found nor
+derivable is reported, not guessed.
+
+**Intent.** The answer gives the kind of quantity that was asked: a percentage
+when a percentage was asked, an amount when an amount was asked. Deterministic.
+Emits `REVIEW`, never `FAIL`, because it is a heuristic.
+
+**Units.** A figure without the unit the question requires, or with a
+different one, is `REVIEW`.
+
+**The judge.** GroundLens does not ship a model. You pass the client you
+already use (AWS Bedrock, Azure OpenAI, or any OpenAI-compatible endpoint,
+including vLLM or Ollama on your own servers). GroundLens fills a fixed,
+versioned template with the policy, the scope and the provenance of every
+passage, and asks for evidence per claim: `supported`, `unsupported`,
+`contradicted` or `uncertain`, with the passages behind each label. The judge
+never decides. By default it can only escalate to `REVIEW`; a timeout or an
+error is `REVIEW`, never `PASS`. Instructions found inside a passage are data,
+not orders, and adversarial tests check it. `groundlens judge show-template`
+prints the exact prompt for a given input, and its hash is in the record.
+
+**Custom checks.** A decorated function or a small class, with a declared
+determinism class. Its version and the hash of its source go into the record.
+
+## The policy (planned)
+
+YAML, validated against a published schema. Unknown keys are errors. A policy
+can `extend` a shipped baseline and write only what differs. Decision rules
+are a fixed vocabulary evaluated in order; there is no expression language.
+
+```yaml
+policy: credit_desk
+version: 3
+extends: groundlens/finance-rag
+locale: es-ES
+rounding: half_even
+
+scope:
+  required: [entity]
+  passage_outside_scope: FAIL
+  missing_scope: REVIEW
+
+risk_classes:
+  default: routine
+  mandatory_review: [recommendation]
+
+pass_means: "may be shown to the analyst as an evidence summary"
+
+controls:
+  - id: CTRL-AI-014
+    maps_to: ["EU AI Act Art. 12", "EU AI Act Art. 15"]
+```
+
+`groundlens policy show --resolved` prints the policy with every default
+filled in. The resolved policy, not the partial file, is what gets hashed into
+the record.
+
+A decision of the verifier is not a decision to publish. The policy says what
+PASS means for the application, and a risk class can require human review even
+when every check passes.
+
+## Failure semantics (planned)
+
+| situation | decision |
+|---|---|
+| a passage the answer uses is outside the scope | FAIL |
+| a figure contradicts the passages under the rounding rule | FAIL |
+| a required scope key is missing | REVIEW |
+| a passage has no provenance | REVIEW |
+| the judge times out, errors or is not configured but required | REVIEW |
+| the judge labels a claim unsupported or contradicted | REVIEW (FAIL only if the policy says so) |
+| a required check could not run | REVIEW |
+| the record cannot be stored | error: no decision is returned |
+
+The final decision is the worst outcome of all checks.
+
+## The record (planned)
+
+The record schema moves to `groundlens.evidence-record/2`. It adds the scope,
+the provenance of every passage, the resolved policy hash, the judge model
+returned by the provider, the template hash and the hash of the judge's raw
+response, and the version and source hash of every custom check. By default it
+stores hashes, never the text of the question, answer or passages. Text is an
+explicit opt-in.
+
+Readers of `/2` verify records written as `/1`. The record format is versioned
+separately from the library, and its specification is part of the
+documentation.
+
+Signing goes through a small interface with adapters for AWS KMS, Azure Key
+Vault and PKCS#11; a local key file is for development only. Storage goes
+through a sink interface with adapters for JSONL files, S3 Object Lock, Azure
+Blob with immutability and Postgres. Many processes may write many chains;
+`groundlens records verify` accepts a set of chains.
+
+## Measurement (planned)
+
+`groundlens measure` takes a batch of decisions and a small set of labels from
+your own team (about 50, stratified by decision and risk class, labelled
+without seeing the verdict) and reports:
+
+- the rate of wrong answers that were passed, under your policy, with a
+  confidence interval (prediction-powered inference);
+- the same per risk class;
+- the cost per decision: review minutes and the expected cost of an escaped
+  error;
+- the formula, the sample weights and the seed.
+
+The report is signed. If the interval is wide, the report says so.
+`groundlens replay` re-runs past traffic under a new policy, reusing the
+stored judge evidence, and reports how many decisions would change.
+
+## What this design does not do
+
+- It does not bundle a model, and it does not require one.
+- It does not run a server. The MCP server stays an option for agents.
+- It does not use a solver in the core. Exact arithmetic covers the checks
+  that worked.
+- It does not claim compliance with any regulation. A policy maps decisions to
+  your own controls; the mapping is yours.
+- It does not promise to catch a correct figure taken from the wrong row
+  without the judge. The deterministic checks cover scope, arithmetic, intent
+  and units.
+
+## How the migration is delivered
+
+One pull request per step, in this order. Each step keeps the full test suite
+green, keeps records written by the previous release verifiable, and updates
+the documentation it touches in the same pull request.
+
+1. **This design page and the roadmap.**
+2. **Record compatibility fixtures.** Records written by the current release
+   are committed and verified in CI, forever.
+3. **Scope and provenance** in the input contract, the scope check, record
+   schema `/2` with a `/1` reader.
+4. **Model channels out of the default path.** Lexical, entailment and
+   similarity move behind an extra and out of the shipped policies.
+5. **Exact arithmetic recompute** with policy rounding, and the **units**
+   check.
+6. **Intent check.**
+7. **Policy schema:** `extends`, strict keys, risk classes, `pass_means`,
+   `policy show --resolved`, failure semantics.
+8. **Signer and sink interfaces;** `check()` stores before it returns.
+9. **The judge verifier:** adapters, template, claim-level evidence,
+   `judge show-template`, adversarial tests.
+10. **Measurement and replay.**
+11. **Regression suite on labelled real answers,** with recorded judge output,
+    run in CI without network.
