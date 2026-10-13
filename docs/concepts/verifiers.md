@@ -14,6 +14,7 @@ reproducible enough to decide on.
 | Id | Kind | What it checks | Determinism | Needs a bundle |
 | --- | --- | --- | --- | --- |
 | `groundlens.numeric` | exact | Numbers, currencies, percentages and physical units, compared as quantities in base units, with locale-aware parsing. | Exact | No |
+| `groundlens.scope` | exact | Where each figure comes from: fails a figure found only in passages outside the request's scope (another company, contract or version). Runs when the request states a scope. See [Scope and provenance](scope.md). | Exact | No |
 | `groundlens.rules` | symbolic | Your rule sets (YAML/JSON) run as checks. | Exact | No |
 | `groundlens.lexical` | lexical/ML | Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
 | `groundlens.nli` | ML | Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |

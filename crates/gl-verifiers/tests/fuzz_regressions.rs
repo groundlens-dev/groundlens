@@ -57,10 +57,11 @@ fn numeric_verifier_unit_conversion_overflow_does_not_panic() {
     let input = VerificationInput {
         question: None,
         answer,
-        sources: vec![Source { id: "s".into(), text: source, locator: None }],
+        sources: vec![Source { id: "s".into(), text: source, locator: None, provenance: Default::default() }],
         claims,
         locale: "und".into(),
         metadata: Default::default(),
+        scope: Default::default(),
     };
     let verifier = gl_verifiers::NumericVerifier::default();
     // The contract is simply: no panic.

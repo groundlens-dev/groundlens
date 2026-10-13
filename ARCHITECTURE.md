@@ -121,7 +121,7 @@ direction runs from the contracts outward to the surfaces.
 | `gl-core` | the contracts (claim, verifier, evidence, graph), canonical JSON, `content_hash`, `sha256`, error types |
 | `gl-text` | Unicode normalisation, word and sentence segmentation, spans as byte offsets |
 | `gl-numeric` | locale-aware parsing of numbers, currencies, percentages and physical units into base units |
-| `gl-verifiers` | the built-in verifiers (`numeric`, `rules`, `lexical`, `nli`) and claim extraction |
+| `gl-verifiers` | the built-in verifiers (`numeric`, `scope`, `rules`, `lexical`, `nli`, `semantic`) and claim extraction |
 | `gl-policy` | the policy schema, the linter, and `evaluate` (evidence graph → decision) |
 | `gl-record` | signed, hash-chained records for answers and runs; verification of a record and a chain |
 | `gl-bundle` | the bundle format: a manifest of artefacts, each hashed and re-checked on open |

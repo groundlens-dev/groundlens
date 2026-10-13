@@ -34,6 +34,7 @@ fn semantic_runs_end_to_end_from_a_bundle_and_is_hashed_into_the_record() {
             id: "s".into(),
             text: "The total amount due is 10,000 dollars.".into(),
             locator: None,
+            provenance: Default::default(),
         }],
     );
     req.policy_yaml = POLICY.into();

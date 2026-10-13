@@ -272,9 +272,11 @@ mod tests {
                 id: "invoice.pdf#p1".into(),
                 text: gl_text::normalise(source),
                 locator: None,
+                provenance: Default::default(),
             }],
             locale: "en".into(),
             metadata: Default::default(),
+            scope: Default::default(),
         }
     }
 

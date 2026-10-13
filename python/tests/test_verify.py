@@ -121,3 +121,36 @@ def test_evidence_shapes():
     assert text.decision == pairs.decision == dicts.decision == "PASS"
     with pytest.raises(TypeError):
         verify("Fee 250.", [42])
+
+
+def test_scope_fails_a_figure_taken_from_another_entity():
+    sources = [
+        ("IP/2007/page_75", "The company recorded an income tax provision of $1.9 billion.", {"entity": "IP"}),
+        ("AAPL/2006/page_100", "Provision for income taxes was $829 million.", {"entity": "AAPL"}),
+    ]
+    answer = "The 2006 tax expense was $1.9 billion."
+    scoped = verify(answer, sources, scope={"entity": "AAPL"}, locale="en", lexical=False)
+    unscoped = verify(answer, sources, locale="en", lexical=False)
+    assert (scoped.decision, unscoped.decision) == ("FAIL", "PASS")
+    scope_evidence = [e for e in scoped.evidence if e.verifier_id == "groundlens.scope"]
+    assert scope_evidence and scope_evidence[0].result == "contradicted"
+    scoped.verify()
+
+
+def test_provenance_accepts_dicts_and_missing_provenance_goes_to_review():
+    r = verify(
+        "Revenue was $10 million.",
+        [{"id": "s", "text": "Revenue was $10 million."}],
+        scope={"entity": "ACME"},
+        locale="en",
+        lexical=False,
+    )
+    assert r.decision == "REVIEW"
+    ok = verify(
+        "Revenue was $10 million.",
+        [{"id": "s", "text": "Revenue was $10 million.", "provenance": {"entity": "ACME"}}],
+        scope={"entity": "ACME"},
+        locale="en",
+        lexical=False,
+    )
+    assert ok.decision == "PASS"

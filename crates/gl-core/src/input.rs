@@ -59,6 +59,11 @@ pub struct Source {
     /// Optional structural anchor of the passage: page, table row, section.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locator: Option<String>,
+    /// Where the passage comes from: `doc_id`, `version`, `entity`, `page`,
+    /// `sha256`, or any key the application uses. Matched against the
+    /// request's scope by `groundlens.scope`. Hashed into `input_hash`.
+    #[serde(default, skip_serializing_if = "indexmap::IndexMap::is_empty")]
+    pub provenance: indexmap::IndexMap<String, String>,
 }
 
 /// An atomic, verifiable unit of the answer.
@@ -93,6 +98,11 @@ pub struct VerificationInput {
     /// id). Hashed into `input_hash`, never interpreted by verifiers.
     #[serde(default, skip_serializing_if = "indexmap::IndexMap::is_empty")]
     pub metadata: indexmap::IndexMap<String, String>,
+    /// What the request is about: `entity = UPS`, `contract_version = 3`.
+    /// A passage whose provenance has the same key with another value is
+    /// outside the scope. Hashed into `input_hash`.
+    #[serde(default, skip_serializing_if = "indexmap::IndexMap::is_empty")]
+    pub scope: indexmap::IndexMap<String, String>,
 }
 
 fn default_locale() -> String {

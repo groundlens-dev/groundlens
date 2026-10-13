@@ -24,6 +24,7 @@ pub mod lexical;
 pub mod nli;
 pub mod numeric;
 pub mod rules;
+pub mod scope;
 #[cfg(feature = "semantic")]
 pub mod semantic;
 
@@ -43,3 +44,5 @@ pub use semantic::SemanticVerifier;
 pub const SEMANTIC_ID: &str = "semantic.cosine";
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};
+pub use scope::ScopeVerifier;
+pub const SCOPE_ID: &str = scope::ID;

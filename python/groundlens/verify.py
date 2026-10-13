@@ -42,6 +42,7 @@ def verify(
     declared_precision: bool = False,
     percent_as_fraction: bool = False,
     metadata: Mapping[str, str] | None = None,
+    scope: Mapping[str, str] | None = None,
 ) -> Record:
     """Verify ``answer`` against ``evidence`` under ``policy`` and seal a record.
 
@@ -68,6 +69,13 @@ def verify(
             physical units). ``False`` gives groundlens 3.x bare-number semantics.
         declared_precision, percent_as_fraction: named relaxations of numeric
             equality, off by default; every relaxed match is noted in the receipt.
+        metadata: free-form strings (tenant, trace id) hashed into the record.
+        scope: what the request is about, e.g. ``{"entity": "UPS"}``. When
+            given, every figure in the answer must come from a passage whose
+            provenance matches: a figure found only in a passage of another
+            scope fails, and one found only in passages that do not state their
+            provenance goes to review. Pass provenance with each source as a
+            third tuple element or a ``provenance`` key.
 
     Returns:
         A :class:`Record`. ``record.decision`` is the policy's decision;
@@ -102,6 +110,7 @@ def verify(
         bundle=str(bundle.root) if isinstance(bundle, Bundle) else (str(bundle) if bundle else None),
         lexical=lexical,
         metadata=metadata,
+        scope=scope,
     )
     record = Record.from_json(_engine.verify_json(request))
     if log is not None:

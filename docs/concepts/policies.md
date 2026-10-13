@@ -24,7 +24,8 @@ thresholds:
   groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
   groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
 decision:
-  any_contradiction_from: [groundlens.numeric, groundlens.rules.*]
+  any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
+  unsupported_from: [groundlens.scope]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -65,6 +66,10 @@ to be at least twice the verifier's declared tolerance.
 
 - **any_contradiction_from** — a contradiction from any of these verifiers is a
   FAIL.
+- **unsupported_from** — an `unsupported` from any of these verifiers sends the
+  claim to REVIEW: the verifier could not establish what it checks, for example
+  a figure whose passage does not state its provenance. Optional; when it is
+  empty it is left out of the policy hash.
 - **unresolved_claims** — what to do with a claim no admitted verifier could
   resolve (usually REVIEW).
 - **conflicts** — what to do when verifiers disagree about a claim.
@@ -82,10 +87,12 @@ decision arrives already tied to the rule it concerns. See
 
 ## The shipped policies
 
-- **`groundlens_default_v1`** — numbers must be exactly supported; a numeric
-  contradiction fails; anything unresolved goes to review; no generative
-  verifier decides.
-- **`eu_ai_act_high_risk_v1`** — the default, plus scored thresholds for the
+- **`groundlens_default_v1`** (version 1.1.0) — numbers must be exactly
+  supported; a numeric contradiction fails; a figure taken from outside the
+  request's [scope](scope.md) fails, and one from a passage without provenance
+  goes to review; anything unresolved goes to review; no generative verifier
+  decides.
+- **`eu_ai_act_high_risk_v1`** (version 1.1.0) — the default, plus scored thresholds for the
   lexical and entailment channels and a mapping to Articles 15(1) and 12(1) of
   Regulation (EU) 2024/1689.
 

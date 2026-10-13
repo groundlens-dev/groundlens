@@ -27,6 +27,7 @@
 //!   groundlens.lexical:   { support_min: 0.60, guard_band: 0.02 }
 //! decision:
 //!   any_contradiction_from: [groundlens.numeric, groundlens.rules.*]   -> FAIL
+//!   unsupported_from: [groundlens.scope]                                -> REVIEW
 //!   unresolved_claims: REVIEW
 //!   conflicts: REVIEW
 //! regulatory_mapping:
@@ -116,6 +117,13 @@ pub struct DecisionRules {
     /// allowed) fails the whole answer.
     #[serde(default)]
     pub any_contradiction_from: Vec<String>,
+    /// An `Unsupported` from any of these verifiers (glob allowed) sends the
+    /// claim to review: the verifier could not establish what it checks, for
+    /// example a figure whose passage does not state its provenance.
+    /// Omitted from the policy hash when empty, so policies written before
+    /// this field existed keep their hash.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unsupported_from: Vec<String>,
     /// What to do with claims no admitted verifier could speak to.
     #[serde(default = "review")]
     pub unresolved_claims: Decision,
@@ -136,6 +144,7 @@ impl Default for DecisionRules {
     fn default() -> Self {
         DecisionRules {
             any_contradiction_from: vec!["groundlens.numeric".into(), "groundlens.rules.*".into()],
+            unsupported_from: vec![],
             unresolved_claims: Decision::Review,
             conflicts: Decision::Review,
             tolerate_unresolved_kinds: vec![gl_core::ClaimKind::Word],
@@ -300,6 +309,13 @@ pub fn evaluate(
                 reasons.push(format!("{} contradicted: {}", e.verifier_id, e.rationale));
                 continue;
             }
+            if e.result == EvidenceResult::Unsupported
+                && policy.decision.unsupported_from.iter().any(|p| glob_matches(p, &e.verifier_id))
+            {
+                decision = decision.max(Decision::Review);
+                reasons.push(format!("{} unsupported: {}", e.verifier_id, e.rationale));
+                continue;
+            }
             if let Some(t) = policy.thresholds.get(&e.verifier_id) {
                 let s = e.score.0;
                 if (s - t.support_min).abs() <= t.guard_band {
@@ -444,5 +460,32 @@ regulatory_mapping:
         policy.thresholds.get_mut("nli.demo").unwrap().guard_band = 0.0;
         let known = [info("nli.demo", Determinism::Reproducible { tolerance: Tolerance::FLOAT32_CPU })];
         assert_eq!(policy.lint(&known).len(), 1);
+    }
+
+    #[test]
+    fn unsupported_from_a_listed_verifier_goes_to_review_and_an_empty_list_keeps_the_hash() {
+        let rules = "decision:\n  any_contradiction_from: [groundlens.numeric]\n";
+        let before = Policy::from_yaml(&format!("{POLICY}{rules}")).unwrap();
+        let with_field = Policy::from_yaml(&format!("{POLICY}{rules}  unsupported_from: []\n")).unwrap();
+        assert_eq!(
+            before.hash().unwrap(),
+            with_field.hash().unwrap(),
+            "an empty list must not change the hash"
+        );
+
+        let policy =
+            Policy::from_yaml(&format!("{POLICY}{rules}  unsupported_from: [groundlens.scope]\n")).unwrap();
+        let mut graph = EvidenceGraph::default();
+        graph.push_verifier(
+            info("groundlens.numeric", Determinism::Exact),
+            vec![ev("groundlens.numeric", "c0", EvidenceResult::Supported, 1.0, Determinism::Exact)],
+        );
+        graph.push_verifier(
+            info("groundlens.scope", Determinism::Exact),
+            vec![ev("groundlens.scope", "c0", EvidenceResult::Unsupported, 0.0, Determinism::Exact)],
+        );
+        let kinds = BTreeMap::from([("c0".to_string(), ClaimKind::Numeric)]);
+        assert_eq!(evaluate(&policy, &graph, &kinds).unwrap().decision, Decision::Review);
+        assert_eq!(evaluate(&before, &graph, &kinds).unwrap().decision, Decision::Pass);
     }
 }
