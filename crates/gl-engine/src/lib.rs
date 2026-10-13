@@ -148,6 +148,28 @@ fn apply_policy(req: &VerifyRequest, policy: &Policy) -> Result<VerifyRequest> {
 /// Normalise, extract claims, run every admitted verifier, evaluate the
 /// policy and seal a signed record.
 pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
+    verify_timed(req).map(|(record, _)| record)
+}
+
+/// How long each part of a verification took, in microseconds. Kept out of the
+/// record on purpose: a duration differs on every run and every machine, and the
+/// record's content must not. Observability tools read these instead.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Timings {
+    /// Each verifier the engine ran, in the order it ran, with its duration.
+    pub verifiers: Vec<(String, u64)>,
+    /// From the request entering the engine to the sealed record.
+    pub total_us: u64,
+}
+
+fn micros(d: std::time::Duration) -> u64 {
+    u64::try_from(d.as_micros()).unwrap_or(u64::MAX)
+}
+
+/// [`verify`], also returning how long each verifier took.
+pub fn verify_timed(req: &VerifyRequest) -> Result<(EvidenceRecord, Timings)> {
+    let started = std::time::Instant::now();
+    let mut timings = Timings::default();
     let policy = request_policy(req)?;
     let req = &apply_policy(req, &policy)?;
     let answer = gl_text::normalise(&req.answer);
@@ -225,7 +247,10 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
 
     let mut graph = EvidenceGraph::default();
     for v in &verifiers {
-        match v.verify(&input) {
+        let t = std::time::Instant::now();
+        let out = v.verify(&input);
+        timings.verifiers.push((v.info().id.clone(), micros(t.elapsed())));
+        match out {
             Ok(ev) => graph.push_verifier(v.info().clone(), ev),
             Err(e) => graph.push_failure(&v.info().id, &e.to_string()),
         }
@@ -285,7 +310,9 @@ pub fn verify(req: &VerifyRequest) -> Result<EvidenceRecord> {
         None => RecordSigner::generate(),
     };
     let (record_id, timestamp) = record_id_and_time(&content)?;
-    seal(content, req.previous_record_hash.clone(), record_id, timestamp, &signer)
+    let record = seal(content, req.previous_record_hash.clone(), record_id, timestamp, &signer)?;
+    timings.total_us = micros(started.elapsed());
+    Ok((record, timings))
 }
 
 /// The id is outside the content hash on purpose: two verifications of the
@@ -304,19 +331,25 @@ fn record_id_and_time(content: &RecordContent) -> Result<(String, String)> {
 /// `record_hash` and pass the signature to [`gl_record::attach_signature`].
 /// `signing_key_hex` in the request is ignored.
 pub fn verify_unsigned(req: &VerifyRequest) -> Result<UnsignedRecord> {
+    verify_unsigned_timed(req).map(|(record, _)| record)
+}
+
+/// [`verify_unsigned`], also returning how long each verifier took.
+pub fn verify_unsigned_timed(req: &VerifyRequest) -> Result<(UnsignedRecord, Timings)> {
     let mut local = req.clone();
     // Seal with a throwaway key, then drop the signature: one pipeline, so an
     // unsigned record is exactly what a signed one would have been.
     local.signing_key_hex = None;
-    let sealed = verify(&local)?;
-    Ok(UnsignedRecord {
+    let (sealed, timings) = verify_timed(&local)?;
+    let unsigned = UnsignedRecord {
         record_id: sealed.record_id,
         timestamp: sealed.timestamp,
         content: sealed.content,
         content_hash: sealed.content_hash,
         previous_record_hash: sealed.previous_record_hash,
         record_hash: sealed.record_hash,
-    })
+    };
+    Ok((unsigned, timings))
 }
 
 /// The verification input the engine would build for a request, without
@@ -556,6 +589,18 @@ mod tests {
         // Under a policy that changes the prompt, the old answer is refused.
         replay.policy_yaml = format!("{policy}pass_means: shown to clients\n");
         assert!(verify(&replay).unwrap_err().to_string().contains("another prompt"));
+    }
+
+    #[test]
+    fn timings_list_every_verifier_and_stay_out_of_the_record() {
+        let mut req = VerifyRequest::new("Revenue was €10M.", vec![src("Revenue was €10M.")]);
+        req.question = Some("What was revenue?".into());
+        let (record, timings) = verify_timed(&req).unwrap();
+        let ran: Vec<&str> = timings.verifiers.iter().map(|(id, _)| id.as_str()).collect();
+        assert_eq!(ran, ["groundlens.numeric", "groundlens.intent"]);
+        assert!(timings.total_us >= timings.verifiers.iter().map(|(_, us)| us).sum::<u64>());
+        assert!(!serde_json::to_string(&record).unwrap().contains("total_us"));
+        assert_eq!(record.content_hash, verify(&req).unwrap().content_hash);
     }
 
     #[test]

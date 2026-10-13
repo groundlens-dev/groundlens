@@ -22,6 +22,24 @@ fn verify_json(request_json: &str) -> PyResult<String> {
     serde_json::to_string(&record).map_err(err)
 }
 
+/// Like `verify_json`, returning `{"record": ..., "timings": ...}`. The
+/// timings say how long each verifier took, in microseconds; they are not part
+/// of the record.
+#[pyfunction]
+fn verify_timed_json(request_json: &str) -> PyResult<String> {
+    let req: gl_engine::VerifyRequest = serde_json::from_str(request_json).map_err(err)?;
+    let (record, timings) = gl_engine::verify_timed(&req).map_err(err)?;
+    serde_json::to_string(&serde_json::json!({"record": record, "timings": timings})).map_err(err)
+}
+
+/// Like `verify_unsigned_json`, returning `{"record": ..., "timings": ...}`.
+#[pyfunction]
+fn verify_unsigned_timed_json(request_json: &str) -> PyResult<String> {
+    let req: gl_engine::VerifyRequest = serde_json::from_str(request_json).map_err(err)?;
+    let (record, timings) = gl_engine::verify_unsigned_timed(&req).map_err(err)?;
+    serde_json::to_string(&serde_json::json!({"record": record, "timings": timings})).map_err(err)
+}
+
 /// Verify like `verify_json`, without signing: an `UnsignedRecord` as JSON.
 /// A key service signs the UTF-8 bytes of its `record_hash`.
 #[pyfunction]
@@ -221,6 +239,8 @@ fn _engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_verify_json, m)?)?;
     m.add_function(wrap_pyfunction!(verify_unsigned_json, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_timed_json, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_unsigned_timed_json, m)?)?;
     m.add_function(wrap_pyfunction!(judge_prompt_json, m)?)?;
     m.add_function(wrap_pyfunction!(sign_document_json, m)?)?;
     m.add_function(wrap_pyfunction!(verify_document_json, m)?)?;

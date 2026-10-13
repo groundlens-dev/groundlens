@@ -1,0 +1,9 @@
+# The same desk with a judge: the model labels each sentence, and any doubt it
+# raises sends the answer to review. It can never make an answer pass.
+id: credit_desk_judged
+version: 1.0.0
+extends: credit_desk.yaml
+verifiers:
+  forbidden: []
+judge:
+  required: true

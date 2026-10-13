@@ -119,6 +119,28 @@ identical in the git tag and on PyPI.
   key, a verifier that could not run, a risk class that requires review.
   Omitted when empty, like the new `risk_class` and `pass_means` fields, so
   records that use none of them keep their hash.
+- **Observers and connectors.** `Verifier(observers=[...])` tells each
+  observer about a check after its record is stored: the record, and how long
+  each step took (`groundlens.observe.CheckEvent`). Observers never change a
+  decision; an observer that raises is logged and ignored.
+  - `gl.integrations.otel()`: OpenTelemetry spans (`groundlens.check`, the
+    judge with `gen_ai.*` attributes, one span per verifier, the signer, the
+    store) under the caller's trace, and the metrics `groundlens.decisions`,
+    `groundlens.reasons` and `groundlens.check.duration`.
+    `pip install "groundlens[otel]"`.
+  - `gl.integrations.langfuse(client)`: the check inside the Langfuse trace of
+    the answer, as a guardrail observation with the judge as a generation,
+    and the decision as the categorical score `groundlens.decision`.
+    `pip install "groundlens[langfuse]"`.
+  - `gl.integrations.grafana_dashboard()`: a Grafana dashboard for those
+    metrics and spans, to import.
+  - `groundlens.observe.reason_code`: a short code for each reason
+    (`groundlens.numeric.contradicted`, `mandatory_review`), fit for a metric
+    label.
+  - `examples/observability/`: a credit assistant watched in Grafana or
+    Langfuse.
+- `gl_engine::verify_timed` and `verify_unsigned_timed` return how long each
+  verifier took, outside the record.
 
 ### Changed
 

@@ -29,6 +29,9 @@ dependencies = []
 dev = ["pytest>=8"]
 # The MCP server. Opt-in, so the core keeps zero runtime dependencies.
 mcp = ["mcp>=2,<3"]
+# Connectors. Opt-in, like the MCP server.
+otel = ["opentelemetry-api>=1.27,<2"]  # 1.27: histogram bucket advice
+langfuse = ["langfuse>=3,<5"]
 
 [project.scripts]
 groundlens = "groundlens.cli:main"
