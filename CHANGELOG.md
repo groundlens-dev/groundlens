@@ -29,13 +29,20 @@ identical in the git tag and on PyPI.
 - **A rounding rule** for recomputed figures: `half_up` (default),
   `half_even` or `within_last_digit` (rounded or truncated). `rounding=` and
   `derive=` in Python, `--rounding` and `--no-derive` on both command lines.
+- **`groundlens.intent`**, a deterministic check that runs when a request has
+  a question. It reads what the question asks for (a percentage, a count, an
+  amount, a named unit such as euros) and the answer's last figure that is not
+  a year. A figure of another kind is `unsupported` with the note
+  `intent_mismatch`; another unit is `unit_mismatch`; no unit where one was
+  asked is `unit_missing`. On 192 labelled answers over annual reports it
+  flagged 10, of which 8 were wrong.
 - **`decision.unsupported_from`** in policies: an `unsupported` from a listed
   verifier sends the claim to review. Left out of the policy hash when empty,
   so existing policies keep their hash.
 
 ### Changed
 
-- **The shipped policies are now version 1.1.0.** `groundlens_default_v1` and
+- **Shipped policies 1.1.0.** `groundlens_default_v1` and
   `eu_ai_act_high_risk_v1` list `groundlens.scope` as recommended, fail on its
   contradictions and review its unsupported claims. Their hashes change, and
   so do the golden content hashes of the invoice example; the evidence and the
@@ -50,7 +57,11 @@ identical in the git tag and on PyPI.
   `groundlens.lexical` without a bundle named now fails with a message that
   says to pass one. `proofread()`, the word-level facade kept from 3.x, still
   uses the installed `base` bundle when none is named.
-- **The shipped policies are now version 1.2.0.** `groundlens_default_v1` and
+- **Shipped policies 1.3.0.** They recommend
+  `groundlens.intent` and send its `unsupported` to review, never to fail.
+  Records of requests with a question name the new verifier, so the golden
+  content hashes of the invoice example change; its decision does not.
+- **Shipped policies 1.2.0.** `groundlens_default_v1` and
   `eu_ai_act_high_risk_v1` no longer list the model channels and drop their
   thresholds. Decisions on requests without a bundle are unchanged; the
   policy version and hash in the record change, and so do the golden content

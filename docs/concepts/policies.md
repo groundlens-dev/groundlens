@@ -10,19 +10,19 @@ are correct.
 
 ```{code-block} yaml
 id: eu_ai_act_high_risk_v1
-version: 1.2.0
+version: 1.3.0
 description: >
   Numbers must be exactly supported. A numeric contradiction fails the answer,
   and so does a figure taken from outside the request's scope.
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.scope, groundlens.rules.*]
+  recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope]
+  unsupported_from: [groundlens.scope, groundlens.intent]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -94,18 +94,20 @@ decision arrives already tied to the rule it concerns. See
 
 ## The shipped policies
 
-- **`groundlens_default_v1`** (version 1.2.0) — numbers must be exactly
+- **`groundlens_default_v1`** (version 1.3.0) — numbers must be exactly
   supported; a numeric contradiction fails; a figure taken from outside the
   request's [scope](scope.md) fails, and one from a passage without provenance
-  goes to review; anything unresolved goes to review; no model is needed and no
-  generative verifier decides.
-- **`eu_ai_act_high_risk_v1`** (version 1.2.0) — the same checks, plus a
+  goes to review; a figure that is not the kind or unit the question asked for
+  goes to review; anything unresolved goes to review; no model is needed and
+  no generative verifier decides.
+- **`eu_ai_act_high_risk_v1`** (version 1.3.0) — the same checks, plus a
   mapping to Articles 15(1), 14(4)(a) and 12(1) of Regulation (EU) 2024/1689.
 
 Version 1.2.0 of both removes the model channels (`groundlens.lexical`,
 `groundlens.nli`, `semantic.cosine`) and their thresholds. Decisions on
 requests without a bundle are unchanged; only the policy version and hash in
-the record differ.
+the record differ. Version 1.3.0 adds the intent check, which sends to review
+an answer whose figure is not the kind or the unit the question asked for.
 
 ## Using and checking a policy
 

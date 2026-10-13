@@ -7,6 +7,8 @@
 //! | id                    | kind      | determinism  | status in 4.0 |
 //! |-----------------------|-----------|--------------|---------------|
 //! | `groundlens.numeric`  | exact     | Exact        | implemented   |
+//! | `groundlens.scope`    | exact     | Exact        | implemented   |
+//! | `groundlens.intent`   | symbolic  | Exact        | implemented   |
 //! | `groundlens.rules`    | symbolic  | Exact        | implemented   |
 //! | `groundlens.lexical`  | lexical   | Reproducible | feature `lexical` |
 //! | `groundlens.nli`      | ml        | Reproducible | feature `nli` |
@@ -18,6 +20,7 @@
 //! of them decides anything.
 
 pub mod extract;
+pub mod intent;
 #[cfg(feature = "lexical")]
 pub mod lexical;
 #[cfg(feature = "nli")]
@@ -42,7 +45,9 @@ pub const NLI_ID: &str = "groundlens.nli";
 pub use semantic::SemanticVerifier;
 /// Id of the semantic verifier, known even when the feature is off.
 pub const SEMANTIC_ID: &str = "semantic.cosine";
+pub use intent::IntentVerifier;
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};
+pub const INTENT_ID: &str = intent::ID;
 pub use scope::ScopeVerifier;
 pub const SCOPE_ID: &str = scope::ID;

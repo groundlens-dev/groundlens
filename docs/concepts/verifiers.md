@@ -15,6 +15,7 @@ reproducible enough to decide on.
 | --- | --- | --- | --- | --- |
 | `groundlens.numeric` | exact | Numbers, currencies, percentages and physical units, compared as quantities in base units, with locale-aware parsing. | Exact | No |
 | `groundlens.scope` | exact | Where each figure comes from: fails a figure found only in passages outside the request's scope (another company, contract or version). Runs when the request states a scope. See [Scope and provenance](scope.md). | Exact | No |
+| `groundlens.intent` | symbolic | Whether the answer's figure is the kind and unit the question asked for: a percentage when a percentage was asked, an amount in euros when euros were asked. Runs when the request has a question. | Exact | No |
 | `groundlens.rules` | symbolic | Your rule sets (YAML/JSON) run as checks. | Exact | No |
 | `groundlens.lexical` | lexical/ML | Deprecated. Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
 | `groundlens.nli` | ML | Deprecated. Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |
@@ -114,6 +115,33 @@ we looked at had correct arithmetic on figures that are in the sources; they
 were wrong because the figures came from the wrong row, year or company, which
 is not something a numeric check can see. The [scope check](scope.md) and a
 judge are for that.
+
+## The intent check
+
+An answer can quote a real figure that is the wrong kind of answer. Asked
+"what portion of the obligations is related to equity?", a model replies
+"$1,246 million". The figure is in the source, so the numeric and scope checks
+pass it. The question asked for a portion.
+
+`groundlens.intent` reads the question and the answer's last figure that is not
+a year (answers that show their work end with the result):
+
+| the question says | it asks for | the figure must be |
+|---|---|---|
+| "percentage", "portion", "proportion", "ratio", "growth rate", "porcentaje" | a percentage | a percentage or a bare number (`22.97 %`, `0.23`) |
+| "how many", "number of", "cuántos" | a count | not a percentage |
+| "how much", "in millions", "total", "amount", "cuánto", "importe" | an amount | not a percentage |
+| "in euros", "in millions of dollars", "en kilómetros" | that unit | in that unit (`unit_mismatch`), and with a unit (`unit_missing`) |
+
+A figure of the kind asked is `supported`. One that is not is `unsupported`
+with the note `intent_mismatch`, `unit_mismatch` or `unit_missing`, and the
+shipped policies send it to review, never to fail: the check reads words, so it
+can be wrong. A question with none of these signals, or an answer with no
+figure, gets no evidence from it.
+
+On 192 labelled answers over annual reports it flagged 10 answers: 8 were
+wrong, and the 2 correct ones answered a "percentage return" question with the
+dollar value of an investment.
 
 ## Writing your own
 
