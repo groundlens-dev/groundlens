@@ -95,6 +95,8 @@ identical in the git tag and on PyPI.
   judge's `supported` resolves nothing, so a judge cannot pass an answer the
   exact checks fail. A timeout, an error or a reply that is not the JSON asked
   for is `REVIEW`.
+- The MCP server's `verify_answer` accepts `scope`, `risk_class` and a
+  `provenance` per source, and returns the request-level `reasons`.
 - **`groundlens measure`**: the share of wrong answers among those that
   passed, with a 95 % interval, per risk class, and the cost per decision
   (review minutes, expected cost of a wrong answer that got through), from a
