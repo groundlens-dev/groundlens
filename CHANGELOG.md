@@ -32,6 +32,20 @@ identical in the git tag and on PyPI.
   input hash of a request without a scope are unchanged. Records written under
   1.0.0 keep verifying.
 
+- **No model runs unless a request names a bundle.** An installed `base`
+  bundle is no longer used by default: the lexical, entailment and similarity
+  channels run only with `--bundle base` or `bundle="base"`. A request without
+  a bundle records `sha256:unbundled` whatever is installed on the machine, so
+  the same request gives the same record everywhere. A policy that requires
+  `groundlens.lexical` without a bundle named now fails with a message that
+  says to pass one. `proofread()`, the word-level facade kept from 3.x, still
+  uses the installed `base` bundle when none is named.
+- **The shipped policies are now version 1.2.0.** `groundlens_default_v1` and
+  `eu_ai_act_high_risk_v1` no longer list the model channels and drop their
+  thresholds. Decisions on requests without a bundle are unchanged; the
+  policy version and hash in the record change, and so do the golden content
+  hashes of the invoice example.
+
 - **The Rust toolchain in CI is pinned** to `1.99.0` in the Rust, Python and
   release workflows, instead of following `stable`. A new Rust release can add
   clippy lints that break the build with no change to the code, as 1.99 did.
@@ -40,9 +54,21 @@ identical in the git tag and on PyPI.
   version. The MSRV job keeps checking `1.91`, and the fuzz job keeps
   `nightly`.
 
+### Deprecated
+
+- **The model channels: `groundlens.lexical`, `groundlens.nli` and
+  `semantic.cosine`,** and the `bundle` argument that feeds them. On real
+  answers from annual reports, contracts and a regulation they did not add
+  value: they check that words are present, not that a figure is bound to the
+  right company, year or clause, and they add a model download, weight and
+  latency. Naming a bundle prints a warning (`DeprecationWarning` in Python).
+  They leave the default build in the next release.
+
 ### Fixed
 
 - A needless borrow in the numeric verifier flagged by clippy in Rust 1.99.
+- Engine tests no longer depend on whether a bundle is installed on the
+  machine running them.
 
 ## [5.3.0] - 2026-09-22
 

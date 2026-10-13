@@ -9,6 +9,11 @@ checksums: models, tokenizers, calibrations, rules, policies.
 (``Bundle.pull`` or ``groundlens bundle pull``) so the engine can run in an
 isolated environment, and a download is trusted only when its hash matches
 the one pinned in this build of the engine.
+
+A bundle is used only when a call names it (``bundle="base"``). The model
+channels a bundle feeds (lexical, entailment, similarity) are deprecated:
+they did not add value on the answers we measured, and they leave the default
+build in the next release.
 """
 
 from __future__ import annotations
@@ -23,6 +28,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from groundlens import _engine
+
+MODEL_CHANNELS_DEPRECATED = (
+    "the model channels (lexical, entailment, similarity) are deprecated. They did not add "
+    "value on the answers we measured, and they leave the default build in the next release. "
+    "The default path needs no model."
+)
 
 
 class BundleError(RuntimeError):

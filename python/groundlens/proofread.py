@@ -109,6 +109,11 @@ def proofread(
 
     evidences = as_evidence(context)
     bundle_arg = str(bundle.root) if isinstance(bundle, Bundle) else (str(bundle) if bundle else None)
+    if bundle_arg is None and (Path(_engine.bundle_locate("base")) / "manifest.json").is_file():
+        # proofread() is the word-level facade kept from 3.x: scoring words is
+        # its whole job, so it keeps using the installed base bundle when no
+        # bundle is named. verify() does not.
+        bundle_arg = "base"
     request = build_request(
         answer=answer,
         evidence=[(e.id, e.text) for e in evidences],

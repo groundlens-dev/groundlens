@@ -53,11 +53,12 @@ enum Command {
         /// 32-byte hex Ed25519 seed. A fresh ephemeral key is used if absent.
         #[arg(long, env = "GLV_SIGNING_KEY")]
         signing_key: Option<String>,
-        /// A bundle directory or the name of an installed bundle. Default:
-        /// the installed `base` bundle, if any.
+        /// Run the model channels (lexical, entailment, similarity) from this
+        /// bundle: a directory or the name of an installed bundle. Without it
+        /// no model runs, even when a bundle is installed. Deprecated.
         #[arg(long)]
         bundle: Option<String>,
-        /// Skip the lexical channel even when a bundle is available.
+        /// With --bundle, skip its channels.
         #[arg(long)]
         no_lexical: bool,
         /// What the request is about, `key=value`, repeatable
@@ -322,6 +323,9 @@ fn run() -> anyhow_lite::Result<()> {
                 req.rule_sets_json.push(load_rules_json(r)?);
             }
             req.signing_key_hex = signing_key;
+            if bundle.is_some() {
+                eprintln!("{}", gl_engine::bundle::DEPRECATED);
+            }
             req.bundle = bundle;
             req.lexical = !no_lexical;
             req.previous_record_hash = match &log {

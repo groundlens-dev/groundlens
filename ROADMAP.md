@@ -16,7 +16,7 @@ Shipped is marked done. Everything unmarked is not built yet.
 
 - [ ] **Scope and provenance.** A request carries its scope (entity, contract and version, customer, document set) and every passage carries its provenance (document, version, entity, page, hash). An exact scope check: a passage the answer uses from outside the scope is `FAIL`, a missing scope key is `REVIEW`. Record schema `groundlens.evidence-record/2`, with readers that keep verifying `/1`. Record compatibility fixtures in CI.
 
-- [ ] **A lighter default path.** The lexical, entailment and similarity channels leave the default install and the shipped policies and move behind an extra, deprecated for one release. Our measurements on real answers showed that presence checks miss the costly errors. The default install becomes the engine alone, with no model and no network.
+- [ ] **A lighter default path.** The lexical, entailment and similarity channels leave the default install and the shipped policies and move behind an extra, deprecated for one release. Our measurements on real answers showed that presence checks miss the costly errors. The default install becomes the engine alone, with no model and no network. In progress: the channels are now off unless a request names a bundle, the shipped policies no longer use them, and naming a bundle prints a deprecation warning; they leave the default build in the release after.
 
 - [ ] **Exact arithmetic, units and intent.** Figures recomputed from the passages with exact rational arithmetic under the rounding rule and locale of the policy; a units check; an intent check (a percentage when a percentage was asked).
 

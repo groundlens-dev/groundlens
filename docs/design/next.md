@@ -257,7 +257,10 @@ the documentation it touches in the same pull request.
    record schema stays `/1`: scope and provenance are part of the input, so
    `input_hash` covers them.
 4. **Model channels out of the default path.** Lexical, entailment and
-   similarity move behind an extra and out of the shipped policies.
+   similarity run only when a request names a bundle, leave the shipped
+   policies, and are deprecated with a warning. Their code leaves the default
+   build in the next release, behind an opt-in feature and Python extra; one
+   release of warning first, because removing it is not reversible for users.
 5. **Exact arithmetic recompute** with policy rounding, and the **units**
    check.
 6. **Intent check.**

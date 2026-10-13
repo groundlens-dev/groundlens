@@ -54,7 +54,7 @@ jobs:
           groundlens bundle verify dist/bundle/groundlens-base-v2
           GROUNDLENS_BUNDLE_DIR=dist/bundle/groundlens-base-v2 groundlens verify \
             --answer examples/invoice/answer.txt --question examples/invoice/question.txt \
-            --source "invoice.pdf#p1=examples/invoice/invoice.txt" --locale en --json \
+            --source "invoice.pdf#p1=examples/invoice/invoice.txt" --locale en --bundle base --json \
             | python -c "import json,sys; r=json.load(sys.stdin); ids={e['verifier_id'] for e in r['content']['graph']['evidence']}; miss=[v for v in ('groundlens.lexical','semantic.cosine','groundlens.nli') if v not in ids]; assert not miss, f'missing {miss}; ran {sorted(ids)}'; print('ran', sorted(ids), 'bundle', r['content']['bundle_hash'])"
       # Sign the archive and attach SLSA provenance, so the bundle release is a
       # signed release too and does not drag the OpenSSF Signed-Releases score.

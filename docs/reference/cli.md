@@ -37,8 +37,8 @@ groundlens verify \
 | `--policy NAME\|PATH\|YAML` | A built-in name, a file, or YAML. Default `groundlens_default_v1`. |
 | `--rules PATH` | A rule set (JSON/YAML), repeatable. |
 | `--locale CODE` | How the documents write numbers (`en`, `es`, `de`, …). Default `und`. |
-| `--bundle DIR\|NAME` | Bundle for the lexical and NLI channels. Default: the installed `base` bundle. |
-| `--no-lexical` | Skip the lexical channel even with a bundle installed. |
+| `--bundle DIR\|NAME` | Deprecated. Run the lexical, entailment and similarity channels from this bundle. Without it no model runs, even when a bundle is installed. |
+| `--no-lexical` | With `--bundle`, skip its channels. |
 | `--log PATH` | Append the signed record to this JSON Lines log. |
 | `--signing-key HEX` | 32-byte hex Ed25519 seed (or `GROUNDLENS_SIGNING_KEY`). |
 | `--no-units` | GroundLens 3.x bare-number semantics. |

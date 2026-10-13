@@ -12,10 +12,11 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import warnings
 from pathlib import Path
 
 from groundlens import ENGINE_VERSION, __version__, _engine
-from groundlens.bundle import Bundle, BundleError
+from groundlens.bundle import MODEL_CHANNELS_DEPRECATED, Bundle, BundleError
 from groundlens.policy import Policy, PolicyError
 from groundlens.record import IntegrityError, Record
 from groundlens.report import write_report
@@ -47,8 +48,8 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--policy", default=None, help="built-in name, path or YAML; default groundlens_default_v1")
     v.add_argument("--rules", action="append", default=[], help="rule set JSON/YAML, repeatable")
     v.add_argument("--locale", default="und")
-    v.add_argument("--bundle", help="bundle directory or name; default: the installed base bundle, if any")
-    v.add_argument("--no-lexical", action="store_true", help="skip the lexical channel even if a bundle is installed")
+    v.add_argument("--bundle", help="deprecated: run the model channels from this bundle (directory or installed name); without it no model runs")
+    v.add_argument("--no-lexical", action="store_true", help="with --bundle, skip its channels")
     v.add_argument("--log", help="append the signed record to this JSON Lines file")
     v.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
@@ -107,19 +108,23 @@ def _run(args: argparse.Namespace) -> int:
     import os
 
     if args.cmd == "verify":
-        record = verify(
-            _read(args.answer),
-            args.source,
-            policy=args.policy,
-            question=_read(args.question) if args.question else None,
-            locale=args.locale,
-            rules=args.rules,
-            bundle=args.bundle,
-            lexical=not args.no_lexical,
-            signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
-            log=args.log,
-            units=not args.no_units,
-        )
+        if args.bundle:
+            print(f"groundlens: warning: {MODEL_CHANNELS_DEPRECATED}", file=sys.stderr)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            record = verify(
+                _read(args.answer),
+                args.source,
+                policy=args.policy,
+                question=_read(args.question) if args.question else None,
+                locale=args.locale,
+                rules=args.rules,
+                bundle=args.bundle,
+                lexical=not args.no_lexical,
+                signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
+                log=args.log,
+                units=not args.no_units,
+            )
         print(record.to_json(indent=2) if args.json else record.report())
         return EXIT[record.decision]
     if args.cmd == "report":

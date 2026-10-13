@@ -10,19 +10,16 @@ are correct.
 
 ```{code-block} yaml
 id: eu_ai_act_high_risk_v1
-version: 1.0.0
+version: 1.2.0
 description: >
-  Numbers must be exactly supported. A numeric contradiction fails the answer.
+  Numbers must be exactly supported. A numeric contradiction fails the answer,
+  and so does a figure taken from outside the request's scope.
 verifiers:
   required: [groundlens.numeric]
-  recommended: [groundlens.rules.*]
-  optional: [groundlens.nli, groundlens.lexical, sgi, dgi]
+  recommended: [groundlens.scope, groundlens.rules.*]
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
-thresholds:
-  groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
-  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
   unsupported_from: [groundlens.scope]
@@ -62,6 +59,16 @@ the guard band is REVIEW on every platform, so a small cross-platform score
 drift can never flip a PASS into a FAIL. `policy lint` requires the guard band
 to be at least twice the verifier's declared tolerance.
 
+No shipped policy sets thresholds: the checks in the default path are exact,
+and exact verifiers have no score to threshold. Thresholds apply to the
+deprecated model channels, if you still run them with a bundle:
+
+```{code-block} yaml
+thresholds:
+  groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
+  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
+```
+
 ### decision
 
 - **any_contradiction_from** — a contradiction from any of these verifiers is a
@@ -87,14 +94,18 @@ decision arrives already tied to the rule it concerns. See
 
 ## The shipped policies
 
-- **`groundlens_default_v1`** (version 1.1.0) — numbers must be exactly
+- **`groundlens_default_v1`** (version 1.2.0) — numbers must be exactly
   supported; a numeric contradiction fails; a figure taken from outside the
   request's [scope](scope.md) fails, and one from a passage without provenance
-  goes to review; anything unresolved goes to review; no generative verifier
-  decides.
-- **`eu_ai_act_high_risk_v1`** (version 1.1.0) — the default, plus scored thresholds for the
-  lexical and entailment channels and a mapping to Articles 15(1) and 12(1) of
-  Regulation (EU) 2024/1689.
+  goes to review; anything unresolved goes to review; no model is needed and no
+  generative verifier decides.
+- **`eu_ai_act_high_risk_v1`** (version 1.2.0) — the same checks, plus a
+  mapping to Articles 15(1), 14(4)(a) and 12(1) of Regulation (EU) 2024/1689.
+
+Version 1.2.0 of both removes the model channels (`groundlens.lexical`,
+`groundlens.nli`, `semantic.cosine`) and their thresholds. Decisions on
+requests without a bundle are unchanged; only the policy version and hash in
+the record differ.
 
 ## Using and checking a policy
 

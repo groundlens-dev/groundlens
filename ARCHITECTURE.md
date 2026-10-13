@@ -107,7 +107,7 @@ reasons about through the determinism class:
 | generative | LLM-as-a-judge (planned) | non-deterministic, recorded in full |
 
 The engine does not privilege any layer. A policy composes them: one deployment
-runs numeric + rules + lexical and is fully deterministic; another adds an
+runs numeric + scope + rules and is fully deterministic; another adds an
 LLM judge and is not, but its record still names the model, the prompt hash and
 the settings, so the run stays auditable.
 
