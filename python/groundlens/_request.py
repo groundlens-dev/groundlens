@@ -8,9 +8,23 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Any
 
-from groundlens._types import Evidence
+
+@dataclass(frozen=True, slots=True)
+class Evidence:
+    """One retrieved source, with an id so findings can point at it.
+
+    ``provenance`` says where the passage comes from (``entity``, ``version``,
+    ``doc_id``, ``page``, ``sha256``, or any key your application uses). It is
+    matched against the ``scope`` of :func:`groundlens.verify`.
+    """
+
+    id: str
+    text: str
+    provenance: Mapping[str, str] = field(default_factory=dict)
+
 
 EvidenceArg = (
     str
@@ -90,9 +104,6 @@ def build_request(
     rounding: str = "half_up",
     signing_key: str | None = None,
     previous_record_hash: str | None = None,
-    bundle_hash: str | None = None,
-    bundle: str | None = None,
-    lexical: bool = True,
     metadata: Mapping[str, str] | None = None,
     scope: Mapping[str, str] | None = None,
     risk_class: str | None = None,
@@ -115,9 +126,6 @@ def build_request(
         },
         "signing_key_hex": signing_key,
         "previous_record_hash": previous_record_hash,
-        "bundle_hash": bundle_hash,
-        "bundle": bundle,
-        "lexical": lexical,
         "metadata": dict(metadata or {}),
         "scope": {str(k): str(v) for k, v in (scope or {}).items()},
         "risk_class": risk_class,

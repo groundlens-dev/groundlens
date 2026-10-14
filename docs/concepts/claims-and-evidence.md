@@ -10,8 +10,9 @@ kind decides which verifiers apply to it.
   measurements). The numeric verifier checks them.
 - **Statement** claims are sentences. The [judge](../guides/use-a-judge.md)
   labels each one against its sources.
-- **Word** claims are content words, each with its span in the answer. Only
-  the deprecated lexical channel reads them, when a request names a bundle.
+- **Word** claims are content words, each with its span in the answer. No
+  verifier reads them; they are kept so the record lists every part of the
+  answer, and the shipped policies tolerate them unresolved.
 
 Claim extraction is deterministic and locale-aware. A claim that echoes the
 question rather than asserting something new is noted, so it does not count
@@ -26,7 +27,6 @@ Evidence carries, among other fields:
 - `result` — `SUPPORTED`, `CONTRADICTED`, `NOT_APPLICABLE`, `ERROR`, and so on;
 - `score` and, where relevant, a confidence;
 - `source_text` / spans — which part of which source backed or contradicted the claim;
-- `model_hash` — for ML verifiers, the sha256 of the exact model graph that produced the score;
 - notes — machine-readable flags such as `exact_string_in_span`.
 
 The point is that evidence is *kept*, not collapsed into a number. A record

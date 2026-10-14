@@ -2,9 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""``groundlens``: the CLI. Same engine as the Python API and the Rust binary.
+"""``groundlens``: the CLI. Same engine as the Python API.
 
-Exit codes: 0 PASS, 1 FAIL, 2 error, 3 REVIEW.
+Exit codes: 0 PASS (ALLOW for a run), 1 FAIL (DENY), 2 error, 3 REVIEW.
+
+The standalone ``glv`` binary, for auditors without Python, only checks:
+``glv record verify``, ``glv run check``, ``glv policy lint|show``.
 """
 
 from __future__ import annotations
@@ -12,14 +15,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import warnings
 from pathlib import Path
 
 from groundlens import ENGINE_VERSION, __version__, _engine
-from groundlens.bundle import MODEL_CHANNELS_DEPRECATED, Bundle, BundleError
 from groundlens.policy import Policy, PolicyError
 from groundlens.record import IntegrityError, Record
 from groundlens.report import write_report
+from groundlens.run import RunRecord, verify_run
 from groundlens.verify import verify
 
 EXIT = {"PASS": 0, "FAIL": 1, "REVIEW": 3}
@@ -94,8 +96,6 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--policy", default=None, help="built-in name, path or YAML; default groundlens_default_v1")
     v.add_argument("--rules", action="append", default=[], help="rule set JSON/YAML, repeatable")
     v.add_argument("--locale", default="und")
-    v.add_argument("--bundle", help="deprecated: run the model channels from this bundle (directory or installed name); without it no model runs")
-    v.add_argument("--no-lexical", action="store_true", help="with --bundle, skip its channels")
     v.add_argument("--log", help="append the signed record to this JSON Lines file")
     v.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
@@ -121,21 +121,18 @@ def build_parser() -> argparse.ArgumentParser:
     ps.add_argument("policy")
     ps.add_argument("--resolved", action="store_true")
 
-    b = sub.add_parser("bundle", help="bundle tools").add_subparsers(dest="sub", required=True)
-    bb = b.add_parser("build", help="write manifest.json for a bundle directory")
-    bb.add_argument("root")
-    bb.add_argument("--name", required=True)
-    bb.add_argument("--bundle-version", required=True)
-    bv = b.add_parser("verify", help="re-hash every artefact of a bundle")
-    bv.add_argument("root")
-    bs = b.add_parser("status", help="is a bundle installed, where, with which hash")
-    bs.add_argument("name", nargs="?", default="base")
-    bp = b.add_parser("pull", help="download and install a published bundle (the only command that uses the network)")
-    bp.add_argument("name", nargs="?", default="base")
-    bp.add_argument("--into", help="install directory (default: the per-user bundle directory)")
-    bp.add_argument("--url", help="download from here instead of the known release URL")
-    bp.add_argument("--sha256", help="expected archive hash for a bundle this build does not know")
-    bp.add_argument("--trust-unpinned", action="store_true", help="accept a bundle this build has no pinned hash for (development)")
+    run = sub.add_parser("run", help="whole agent executions").add_subparsers(dest="sub", required=True)
+    rnv = run.add_parser("verify", help="verify an MCP trace under an execution policy and seal a run record")
+    rnv.add_argument("--trace", required=True, help="the MCP trace, one JSON-RPC message per line")
+    rnv.add_argument("--policy", required=True, help="the execution policy, YAML or JSON")
+    rnv.add_argument("--run-id", required=True)
+    rnv.add_argument("--system", required=True, help="the deployed system this run belongs to")
+    rnv.add_argument("--system-version")
+    rnv.add_argument("--started-at")
+    rnv.add_argument("--log", help="append the signed run record to this JSON Lines file")
+    rnv.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
+    rnc = run.add_parser("check", help="recompute hashes, links and signatures of a run-record log")
+    rnc.add_argument("log")
 
     m = sub.add_parser("measure", help="estimate the share of wrong answers among those that passed, from labels on a sample")
     m.add_argument("records", nargs="+", help="records logs or directories")
@@ -182,8 +179,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return _run(args)
-    except (PolicyError, IntegrityError, BundleError, ValueError, FileNotFoundError, NotImplementedError, OSError) as e:
-        # OSError covers a failed download in `bundle pull` (urllib errors).
+    except (PolicyError, IntegrityError, ValueError, FileNotFoundError, NotImplementedError, OSError) as e:
         print(f"groundlens: {e}", file=sys.stderr)
         return 2
 
@@ -192,27 +188,21 @@ def _run(args: argparse.Namespace) -> int:
     import os
 
     if args.cmd == "verify":
-        if args.bundle:
-            print(f"groundlens: warning: {MODEL_CHANNELS_DEPRECATED}", file=sys.stderr)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            record = verify(
-                _read(args.answer),
-                _with_provenance(args.source, args.provenance),
-                policy=args.policy,
-                question=_read(args.question) if args.question else None,
-                locale=args.locale,
-                rules=args.rules,
-                bundle=args.bundle,
-                lexical=not args.no_lexical,
-                signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
-                log=args.log,
-                units=not args.no_units,
-                derive=not args.no_derive,
-                rounding=args.rounding,
-                scope=_scope(args.scope),
-                risk_class=args.risk_class,
-            )
+        record = verify(
+            _read(args.answer),
+            _with_provenance(args.source, args.provenance),
+            policy=args.policy,
+            question=_read(args.question) if args.question else None,
+            locale=args.locale,
+            rules=args.rules,
+            signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
+            log=args.log,
+            units=not args.no_units,
+            derive=not args.no_derive,
+            rounding=args.rounding,
+            scope=_scope(args.scope),
+            risk_class=args.risk_class,
+        )
         print(record.to_json(indent=2) if args.json else record.report())
         return EXIT[record.decision]
     if args.cmd == "report":
@@ -265,24 +255,22 @@ def _run(args: argparse.Namespace) -> int:
             return 0
         print(f"ok  {policy.id} v{policy.version}  {policy.hash}")
         return 0
-    if args.cmd == "bundle":
-        if args.sub == "build":
-            b = Bundle.build(args.root, name=args.name, version=args.bundle_version)
-            print(f"ok  {b.name} v{b.version}  {b.hash}")
-        elif args.sub == "verify":
-            b = Bundle.open(args.root)
-            print(f"ok  {b.name} v{b.version}  {b.hash}")
-        elif args.sub == "status":
-            s = Bundle.status(args.name)
-            if s["installed"]:
-                print(f"ok  {s['name']} v{s['version']}  {s['manifest_hash']}  {s['path']}")
-            else:
-                print(f"not installed  {s['name']}  (would go to {s['path']})")
-                if s["url"]:
-                    print(f"    groundlens bundle pull {s['name']}   <- {s['url']}")
-        else:
-            b = Bundle.pull(args.name, into=args.into, url=args.url, sha256=args.sha256, trust_unpinned=args.trust_unpinned)
-            print(f"ok  {b.name} v{b.version}  {b.hash}  {b.root}")
+    if args.cmd == "run" and args.sub == "verify":
+        run_record = verify_run(
+            args.trace,
+            args.policy,
+            run_id=args.run_id,
+            system=args.system,
+            system_version=args.system_version,
+            started_at=args.started_at,
+            signing_key=args.signing_key or os.environ.get("GROUNDLENS_SIGNING_KEY"),
+            log=args.log,
+        )
+        print(json.dumps(run_record.raw, ensure_ascii=False, indent=2))
+        return {"ALLOW": 0, "DENY": 1, "REVIEW": 3}[run_record.gate]
+    if args.cmd == "run":
+        n = RunRecord.verify_chain(RunRecord.read_log(args.log))
+        print(f"ok  {n} run records, chain intact, all signatures verify")
         return 0
     if args.cmd == "judge":
         from groundlens.verifier import Verifier  # noqa: PLC0415

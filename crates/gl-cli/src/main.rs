@@ -2,28 +2,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-//! `glv` — deterministic AI response verification, from the shell.
+//! `glv` — check GroundLens records without Python.
+//!
+//! A single static binary for whoever has to trust the records and does not
+//! run the application: an auditor, a second team, a CI job. It verifies
+//! answer records and run records offline and shows the policy a record
+//! names, with its hash. It produces nothing; the `groundlens` command in
+//! the Python package does.
 //!
 //! ```text
-//! glv verify --answer a.txt --source invoice.pdf#p1=invoice.txt --policy p.yaml [--rules r.yaml] [--question q.txt] [--log records.jsonl]
+//! glv record verify records.jsonl [more.jsonl | records/ ...]
+//! glv run check runs.jsonl
 //! glv policy lint p.yaml
 //! glv policy show p.yaml --resolved
-//! glv record verify records.jsonl [more.jsonl | records/ ...]
-//! glv bundle build ./bundle --name acme-verification --version 1.0.0
-//! glv bundle verify ./bundle
-//! glv keygen > signer.key
 //! ```
 
 use clap::{Parser, Subcommand};
-use gl_core::Source;
-use gl_engine::VerifyRequest;
 use gl_policy::Policy;
-use gl_record::RecordSigner;
-use std::io::Write;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "glv", version, about = "Deterministic AI response verification")]
+#[command(name = "glv", version, about = "Check GroundLens records offline")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -31,148 +30,32 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Verify an answer against its sources under a policy.
-    Verify {
-        #[arg(long)]
-        answer: PathBuf,
-        /// `id=path`, repeatable.
-        #[arg(long = "source")]
-        sources: Vec<String>,
-        #[arg(long)]
-        question: Option<PathBuf>,
-        /// A policy file, or the id of a shipped policy
-        /// (`groundlens_default_v1`, `eu_ai_act_high_risk_v1`).
-        #[arg(long)]
-        policy: String,
-        /// Rule set, YAML or JSON. Repeatable.
-        #[arg(long = "rules")]
-        rules: Vec<PathBuf>,
-        #[arg(long, default_value = "und")]
-        locale: String,
-        /// Append the signed record to this JSON Lines log.
-        #[arg(long)]
-        log: Option<PathBuf>,
-        /// 32-byte hex Ed25519 seed. A fresh ephemeral key is used if absent.
-        #[arg(long, env = "GLV_SIGNING_KEY")]
-        signing_key: Option<String>,
-        /// Run the model channels (lexical, entailment, similarity) from this
-        /// bundle: a directory or the name of an installed bundle. Without it
-        /// no model runs, even when a bundle is installed. Deprecated.
-        #[arg(long)]
-        bundle: Option<String>,
-        /// With --bundle, skip its channels.
-        #[arg(long)]
-        no_lexical: bool,
-        /// How a recomputed figure may differ from the one written:
-        /// half_up (default), half_even or within_last_digit.
-        #[arg(long, default_value = "half_up")]
-        rounding: String,
-        /// Do not recompute figures from the answer's own supported figures.
-        #[arg(long)]
-        no_derive: bool,
-        /// What the request is about, `key=value`, repeatable
-        /// (`--scope entity=UPS`). Turns on the scope check.
-        #[arg(long = "scope")]
-        scope: Vec<String>,
-        /// Provenance of a source, `id:key=value`, repeatable
-        /// (`--provenance 10k#p114:entity=UPS`).
-        #[arg(long = "provenance")]
-        provenance: Vec<String>,
-        /// The risk class of this request, when the policy defines them.
-        #[arg(long = "risk-class")]
-        risk_class: Option<String>,
-    },
-    /// Policy tools.
-    Policy {
-        #[command(subcommand)]
-        cmd: PolicyCmd,
-    },
-    /// Record tools.
+    /// Answer records.
     Record {
         #[command(subcommand)]
         cmd: RecordCmd,
     },
-    /// Bundle tools.
-    Bundle {
-        #[command(subcommand)]
-        cmd: BundleCmd,
-    },
-    /// Execution tools: verify a whole agent run, not one answer.
+    /// Run records: whole agent executions.
     Run {
         #[command(subcommand)]
         cmd: RunCmd,
     },
-    /// The judge: the prompt it is sent.
-    Judge {
+    /// Policies.
+    Policy {
         #[command(subcommand)]
-        cmd: JudgeCmd,
-    },
-    /// Print a fresh Ed25519 signing seed (hex) to stdout.
-    Keygen,
-}
-
-#[derive(Subcommand)]
-enum JudgeCmd {
-    /// Print the exact prompt a judge is sent for this input, with the
-    /// template id and the prompt hash that go into the record.
-    ShowTemplate {
-        #[arg(long)]
-        answer: PathBuf,
-        /// `id=path`, repeatable.
-        #[arg(long = "source")]
-        sources: Vec<String>,
-        #[arg(long)]
-        question: Option<PathBuf>,
-        /// A policy file, or the id of a shipped policy.
-        #[arg(long, default_value = "groundlens_default_v1")]
-        policy: String,
-        #[arg(long, default_value = "und")]
-        locale: String,
-        #[arg(long = "scope")]
-        scope: Vec<String>,
-        #[arg(long = "provenance")]
-        provenance: Vec<String>,
-        /// Print the prompt as JSON.
-        #[arg(long)]
-        json: bool,
+        cmd: PolicyCmd,
     },
 }
 
 #[derive(Subcommand)]
 enum RunCmd {
-    /// Verify an MCP execution trace under an execution policy and seal a
-    /// signed run record. The trace is one JSON-RPC message per line (an MCP
-    /// stdio transport), each optionally carrying a top-level `ts`.
-    Verify {
-        /// The MCP trace, JSON Lines.
-        #[arg(long)]
-        trace: PathBuf,
-        /// The execution policy, YAML or JSON.
-        #[arg(long)]
-        policy: PathBuf,
-        #[arg(long = "run-id")]
-        run_id: String,
-        /// The deployed system this run belongs to.
-        #[arg(long)]
-        system: String,
-        #[arg(long = "system-version")]
-        system_version: Option<String>,
-        #[arg(long = "started-at")]
-        started_at: Option<String>,
-        /// Append the signed run record to this JSON Lines log.
-        #[arg(long)]
-        log: Option<PathBuf>,
-        /// 32-byte hex Ed25519 seed. A fresh ephemeral key is used if absent.
-        #[arg(long, env = "GLV_SIGNING_KEY")]
-        signing_key: Option<String>,
-    },
     /// Verify a run-record JSON Lines log: every record and every link.
     Check { path: PathBuf },
 }
 
 #[derive(Subcommand)]
 enum PolicyCmd {
-    /// Check a policy: schema, extends, thresholds, rounding rule.
+    /// Check a policy: schema, extends, rounding rule.
     Lint {
         /// A policy file, or the id of a shipped policy.
         policy: String,
@@ -197,78 +80,12 @@ enum RecordCmd {
     },
 }
 
-#[derive(Subcommand)]
-enum BundleCmd {
-    Build {
-        root: PathBuf,
-        #[arg(long)]
-        name: String,
-        #[arg(long)]
-        version: String,
-    },
-    Verify {
-        root: PathBuf,
-    },
-    /// Whether a named bundle is installed, where, and with which hash.
-    Status {
-        #[arg(default_value = "base")]
-        name: String,
-    },
-    /// Download a published bundle and install it. The only command in glv
-    /// that opens a network connection; the archive hash must match the
-    /// value pinned in this build.
-    Pull {
-        #[arg(default_value = "base")]
-        name: String,
-        /// Install here instead of the per-user bundle directory.
-        #[arg(long)]
-        into: Option<PathBuf>,
-        /// Accept a bundle this build has no pinned hash for (development).
-        #[arg(long)]
-        trust_unpinned: bool,
-    },
-}
-
-fn read(path: &PathBuf) -> anyhow_lite::Result<String> {
+fn read(path: &PathBuf) -> Result<String> {
     std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()).into())
 }
 
-/// The request both `verify` and `judge show-template` build from the same
-/// options: answer, sources with provenance, scope and question.
-fn base_request(
-    answer: &PathBuf,
-    sources: &[String],
-    provenance: &[String],
-    scope: &[String],
-    question: Option<&PathBuf>,
-) -> anyhow_lite::Result<VerifyRequest> {
-    let mut srcs = Vec::new();
-    for s in sources {
-        let (id, path) = s.split_once('=').ok_or("--source expects id=path")?;
-        srcs.push(Source {
-            id: id.to_string(),
-            text: read(&PathBuf::from(path))?,
-            locator: None,
-            provenance: Default::default(),
-        });
-    }
-    for p in provenance {
-        let (id, pair) = p.rsplit_once(':').ok_or("--provenance expects id:key=value")?;
-        let (key, value) = pair.split_once('=').ok_or("--provenance expects id:key=value")?;
-        let source = srcs.iter_mut().find(|s| s.id == id).ok_or("--provenance names an unknown source id")?;
-        source.provenance.insert(key.to_string(), value.to_string());
-    }
-    let mut req = VerifyRequest::new(read(answer)?, srcs);
-    for s in scope {
-        let (key, value) = s.split_once('=').ok_or("--scope expects key=value")?;
-        req.scope.insert(key.to_string(), value.to_string());
-    }
-    req.question = question.map(read).transpose()?;
-    Ok(req)
-}
-
 /// A policy argument: a file, or the id of a shipped policy.
-fn read_policy(arg: &str) -> anyhow_lite::Result<String> {
+fn read_policy(arg: &str) -> Result<String> {
     let path = PathBuf::from(arg);
     if path.is_file() {
         return read(&path);
@@ -279,104 +96,7 @@ fn read_policy(arg: &str) -> anyhow_lite::Result<String> {
     }
 }
 
-mod anyhow_lite {
-    pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-}
-
-fn pull_bundle(
-    name: &str,
-    into: Option<PathBuf>,
-    trust_unpinned: bool,
-) -> Result<gl_bundle::Bundle, Box<dyn std::error::Error>> {
-    use sha2::Digest;
-    let known = gl_bundle::known(name).ok_or_else(|| format!("unknown bundle {name:?}"))?;
-    let target = into.unwrap_or_else(|| gl_bundle::locate(name));
-    eprintln!("fetching {}", known.url);
-    let mut body = ureq::get(known.url).call()?.into_body().into_reader();
-    let mut bytes = Vec::new();
-    std::io::Read::read_to_end(&mut body, &mut bytes)?;
-    let digest = format!("sha256:{}", hex::encode(sha2::Sha256::digest(&bytes)));
-    if known.archive_sha256 == "sha256:unpinned" {
-        if !trust_unpinned {
-            return Err(format!(
-                "this build has no pinned hash for bundle {name:?} (downloaded {digest}); refusing to install it. \
-                 Pass --trust-unpinned only in development."
-            )
-            .into());
-        }
-    } else if digest != known.archive_sha256 {
-        return Err(format!(
-            "download hash {digest} does not match the pinned {}; not installed",
-            known.archive_sha256
-        )
-        .into());
-    }
-    let staging = std::env::temp_dir().join(format!("glv-bundle-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&staging);
-    std::fs::create_dir_all(&staging)?;
-    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(std::io::Cursor::new(bytes)));
-    for entry in archive.entries()? {
-        let mut entry = entry?;
-        let path = entry.path()?.to_path_buf();
-        if path
-            .components()
-            .any(|c| matches!(c, std::path::Component::ParentDir | std::path::Component::RootDir))
-        {
-            return Err(format!("archive entry escapes the target directory: {}", path.display()).into());
-        }
-        if !entry.unpack_in(&staging)? {
-            return Err(format!("refused to unpack {}", path.display()).into());
-        }
-    }
-    let root = if staging.join("manifest.json").is_file() {
-        staging.clone()
-    } else {
-        let dirs: Vec<PathBuf> = std::fs::read_dir(&staging)?
-            .filter_map(|e| e.ok())
-            .map(|e| e.path())
-            .filter(|p| p.is_dir())
-            .collect();
-        match dirs.as_slice() {
-            [one] if one.join("manifest.json").is_file() => one.clone(),
-            _ => return Err("archive has no manifest.json at its top level".into()),
-        }
-    };
-    if target.exists() {
-        std::fs::remove_dir_all(&target)?;
-    }
-    if let Some(parent) = target.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-    if std::fs::rename(&root, &target).is_err() {
-        copy_dir(&root, &target)?;
-    }
-    let _ = std::fs::remove_dir_all(&staging);
-    Ok(gl_bundle::Bundle::open(&target)?)
-}
-
-fn copy_dir(from: &std::path::Path, to: &std::path::Path) -> std::io::Result<()> {
-    std::fs::create_dir_all(to)?;
-    for entry in std::fs::read_dir(from)? {
-        let entry = entry?;
-        let dest = to.join(entry.file_name());
-        if entry.path().is_dir() {
-            copy_dir(&entry.path(), &dest)?;
-        } else {
-            std::fs::copy(entry.path(), dest)?;
-        }
-    }
-    Ok(())
-}
-
-fn load_rules_json(path: &PathBuf) -> anyhow_lite::Result<String> {
-    let text = read(path)?;
-    if path.extension().is_some_and(|e| e == "yaml" || e == "yml") {
-        let v: serde_yaml::Value = serde_yaml::from_str(&text)?;
-        Ok(serde_json::to_string(&v)?)
-    } else {
-        Ok(text)
-    }
-}
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn main() {
     if let Err(e) = run() {
@@ -385,64 +105,8 @@ fn main() {
     }
 }
 
-fn run() -> anyhow_lite::Result<()> {
+fn run() -> Result<()> {
     match Cli::parse().command {
-        Command::Verify {
-            answer,
-            sources,
-            question,
-            policy,
-            rules,
-            locale,
-            log,
-            signing_key,
-            bundle,
-            no_lexical,
-            rounding,
-            no_derive,
-            scope,
-            provenance,
-            risk_class,
-        } => {
-            let mut req = base_request(&answer, &sources, &provenance, &scope, question.as_ref())?;
-            req.locale = locale;
-            req.policy_yaml = read_policy(&policy)?;
-            req.risk_class = risk_class;
-            for r in &rules {
-                req.rule_sets_json.push(load_rules_json(r)?);
-            }
-            req.signing_key_hex = signing_key;
-            if bundle.is_some() {
-                eprintln!("{}", gl_engine::bundle::DEPRECATED);
-            }
-            req.bundle = bundle;
-            req.lexical = !no_lexical;
-            req.numeric.derive = !no_derive;
-            req.numeric.rounding = serde_json::from_value(serde_json::Value::String(rounding.clone()))
-                .map_err(|_| {
-                    format!(
-                        "--rounding: unknown rule {rounding:?}; use half_up, half_even or within_last_digit"
-                    )
-                })?;
-            req.previous_record_hash = match &log {
-                Some(p) if p.exists() => {
-                    gl_record::from_jsonl(&read(p)?)?.last().map(|r| r.record_hash.clone())
-                }
-                _ => None,
-            };
-            let record = gl_engine::verify(&req)?;
-
-            if let Some(p) = log {
-                let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&p)?;
-                writeln!(f, "{}", gl_record::to_jsonl_line(&record)?)?;
-            }
-            println!("{}", serde_json::to_string_pretty(&record)?);
-            match record.content.outcome.decision {
-                gl_policy::Decision::Fail => std::process::exit(1),
-                gl_policy::Decision::Review => std::process::exit(3),
-                gl_policy::Decision::Pass => {}
-            }
-        }
         Command::Policy { cmd: PolicyCmd::Lint { policy } } => {
             let text = read_policy(&policy)?;
             let (hash, problems) = gl_engine::policy_lint(&text)?;
@@ -495,96 +159,10 @@ fn run() -> anyhow_lite::Result<()> {
                 );
             }
         }
-        Command::Bundle { cmd: BundleCmd::Build { root, name, version } } => {
-            let manifest = gl_bundle::build_manifest(&root, &name, &version, gl_core::ENGINE_VERSION)?;
-            std::fs::write(root.join("manifest.json"), serde_json::to_string_pretty(&manifest)?)?;
-            println!("ok  {} artefacts  {}", manifest.artefacts.len(), manifest.hash()?);
-        }
-        Command::Bundle { cmd: BundleCmd::Verify { root } } => {
-            let b = gl_bundle::Bundle::open(&root)?;
-            println!("ok  {} v{}  {}", b.manifest.name, b.manifest.version, b.manifest_hash);
-        }
-        Command::Bundle { cmd: BundleCmd::Status { name } } => {
-            let s = gl_engine::bundle::status(&name);
-            if s.installed {
-                println!(
-                    "ok  {} v{}  {}  {}",
-                    s.name,
-                    s.version.unwrap_or_default(),
-                    s.manifest_hash.unwrap_or_default(),
-                    s.path
-                );
-            } else {
-                println!("not installed  {}  (would go to {})", s.name, s.path);
-                if !s.url.is_empty() {
-                    println!("    glv bundle pull {}   ← {}", s.name, s.url);
-                }
-            }
-        }
-        Command::Bundle { cmd: BundleCmd::Pull { name, into, trust_unpinned } } => {
-            let b = pull_bundle(&name, into, trust_unpinned)?;
-            println!(
-                "ok  {} v{}  {}  {}",
-                b.manifest.name,
-                b.manifest.version,
-                b.manifest_hash,
-                b.root.display()
-            );
-        }
-        Command::Run {
-            cmd:
-                RunCmd::Verify { trace, policy, run_id, system, system_version, started_at, log, signing_key },
-        } => {
-            let req = gl_engine::RunVerifyRequest {
-                trace: read(&trace)?,
-                policy_json: load_rules_json(&policy)?,
-                run_id,
-                system_id: system,
-                system_version,
-                started_at,
-                signing_key_hex: signing_key,
-                previous_record_hash: match &log {
-                    Some(p) if p.exists() => {
-                        gl_record::run_records_from_jsonl(&read(p)?)?.last().map(|r| r.record_hash.clone())
-                    }
-                    _ => None,
-                },
-            };
-            let record = gl_engine::verify_run(&req)?;
-            if let Some(p) = log {
-                let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&p)?;
-                writeln!(f, "{}", gl_record::run_record_to_jsonl_line(&record)?)?;
-            }
-            println!("{}", serde_json::to_string_pretty(&record)?);
-            match record.content.gate {
-                gl_engine::gl_runtime::GateEffect::Deny => std::process::exit(1),
-                gl_engine::gl_runtime::GateEffect::Review => std::process::exit(3),
-                gl_engine::gl_runtime::GateEffect::Allow => {}
-            }
-        }
         Command::Run { cmd: RunCmd::Check { path } } => {
             let records = gl_record::run_records_from_jsonl(&read(&path)?)?;
             gl_record::verify_run_chain(&records)?;
             println!("ok  {} run records, chain intact, all signatures verify", records.len());
-        }
-        Command::Judge {
-            cmd: JudgeCmd::ShowTemplate { answer, sources, question, policy, locale, scope, provenance, json },
-        } => {
-            let mut req = base_request(&answer, &sources, &provenance, &scope, question.as_ref())?;
-            req.locale = locale;
-            req.policy_yaml = read_policy(&policy)?;
-            let prompt = gl_engine::judge_prompt(&req)?;
-            if json {
-                println!("{}", serde_json::to_string_pretty(&prompt)?);
-            } else {
-                println!("# {} {}", prompt.template_id, prompt.template_hash);
-                println!("# prompt {}", prompt.prompt_hash);
-                println!("\n## system\n{}\n\n## user\n{}", prompt.system, prompt.user);
-            }
-        }
-        Command::Keygen => {
-            let signer = RecordSigner::generate();
-            println!("{}", signer.seed_hex());
         }
     }
     Ok(())

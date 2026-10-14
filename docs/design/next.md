@@ -302,9 +302,9 @@ the documentation it touches in the same pull request.
    `input_hash` covers them.
 4. **Model channels out of the default path.** Lexical, entailment and
    similarity run only when a request names a bundle, leave the shipped
-   policies, and are deprecated with a warning. Their code leaves the default
-   build in the next release, behind an opt-in feature and Python extra; one
-   release of warning first, because removing it is not reversible for users.
+   policies, and are deprecated with a warning for one release. Removed in
+   6.0, with their bundles, `calibrate()` and the 3.x `proofread()`; the
+   optional feature and extra planned here were not worth keeping.
 5. **Exact arithmetic recompute** with a rounding rule. Figures the answer
    computed are recomputed from its own supported figures as exact fractions;
    years and formula constants stop counting as wrong figures; a unit or scale
@@ -330,5 +330,3 @@ the documentation it touches in the same pull request.
 - `Passage` and `Scope` classes, and `acheck()`.
 - Custom checks registered from Python, with their source hash in the record.
 - Records that keep hashes only, with text as an opt-in.
-- Removing the lexical, entailment and similarity channels from the default
-  build. They are deprecated now and leave in the release after the next one.

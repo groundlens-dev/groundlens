@@ -11,6 +11,23 @@ layout of the Rust workspace, and how the Python package and the command line
 sit on top of it. It is the reference for anyone extending the engine, auditing
 it, or embedding it in their own system.
 
+## Where to start reading
+
+About 5,500 lines of Rust check an answer and seal the record: `gl-numeric`
+and `gl-verifiers` (what is checked), `gl-policy` (what the result means),
+`gl-record` (the signed chain) and `gl-engine` (the one function that runs
+them in order). Start at `gl_engine::verify`. Verifying an agent run adds
+about 1,300 more (`gl-runtime`, `gl-mcp`). Everything else is a surface: the
+Python package, its connectors to the services you already run, and the `glv`
+binary.
+
+**Why Rust, for what is mostly parsing and arithmetic.** A record is worth
+something only if anyone can recompute it and get the same bytes: on another
+machine, from Python or from the binary, years later. One implementation, with no
+floating point in the checks, compiled once for every platform, gives that.
+The Python package calls it through a thin binding, and CI checks the same
+`content_hash` on Linux, macOS and Windows against a committed value.
+
 ## The idea in one line
 
 GroundLens keeps five things separate that most tools blur together: the
@@ -53,8 +70,8 @@ verification input  (question / answer / sources / metadata,  or  a run trace)
    sink                         stored before the decision is returned
 ```
 
-The engine runs this once. Every surface, the Python package, the `glv` binary
-and any future binding, calls the same pipeline, so there is exactly one
+The engine runs this once. Every surface, the Python package and any future
+binding, calls the same pipeline, so there is exactly one
 implementation of "verify under a policy and seal the record".
 
 ## The core contracts
@@ -84,7 +101,7 @@ decides what a conflict means.
 
 **Policy.** A YAML document that turns evidence into a decision: which verifiers
 are required, recommended, optional, fallback or forbidden; the minimum
-determinism class it will decide on; thresholds with guard bands; the decision
+determinism class it will decide on; the decision
 rules (what fails, what reviews, what is tolerated); and a regulatory mapping.
 It can also fix the locale and rounding rule, require scope keys, define risk
 classes that always go to review, and say what `PASS` means. A policy may
@@ -109,7 +126,6 @@ reasons about through the determinism class:
 | exact | `groundlens.numeric`, `groundlens.scope`, the execution gate | deterministic, bit-identical everywhere |
 | symbolic | `groundlens.intent`, `groundlens.rules` | deterministic, bit-identical everywhere |
 | generative | `llm_judge.<adapter>`, your own model | non-deterministic, recorded: model, prompt hash, reply hash |
-| model channels (deprecated) | `groundlens.lexical`, `groundlens.nli`, `semantic.cosine` | reproducible under a pinned model; run only when a request names a bundle |
 
 The engine does not privilege any layer. A policy composes them: one deployment
 runs numeric + scope + intent + rules and is fully deterministic; another adds
@@ -127,20 +143,18 @@ direction runs from the contracts outward to the surfaces.
 | `gl-core` | the contracts (claim, verifier, evidence, graph), canonical JSON, `content_hash`, `sha256`, error types |
 | `gl-text` | Unicode normalisation, word and sentence segmentation, spans as byte offsets |
 | `gl-numeric` | locale-aware parsing of numbers, currencies, percentages and physical units into base units |
-| `gl-verifiers` | the built-in verifiers (`numeric`, `scope`, `intent`, `rules`; the deprecated `lexical`, `nli`, `semantic` behind features) and claim extraction |
+| `gl-verifiers` | the built-in verifiers (`numeric`, `scope`, `intent`, `rules`) and claim extraction |
 | `gl-policy` | the policy schema, the linter, and `evaluate` (evidence graph → decision) |
 | `gl-record` | signed, hash-chained records for answers and runs; external signatures (ECDSA P-256 from a key service); verification of a record, a chain and a set of chains; signed reports |
-| `gl-bundle` | deprecated: the bundle format for the model channels |
-| `gl-onnx` | deprecated: model hosting on `tract` (pure-Rust ONNX) for the model channels |
 | `gl-runtime` | execution contracts: the run event log, the execution policy and the gate, the run audit |
 | `gl-mcp` | the MCP adapter: JSON-RPC trace → run, recording hashes not content |
 | `gl-engine` | the one pipeline, `verify()` and `verify_run()`, that every binding calls; the judge prompt and the reading of its reply |
 | `gl-python` | the `pyo3` / `maturin` extension module (`groundlens._engine`) |
-| `gl-cli` | the `glv` binary (and `groundlens`), the same engine on the command line |
+| `gl-cli` | the `glv` binary: checks records offline, for whoever has no Python |
 
 `gl-core` depends on nothing in the workspace; `gl-engine` depends on the
-verifiers, policy, record, bundle and runtime; the surfaces (`gl-python`,
-`gl-cli`) depend only on `gl-engine`. No engine or runtime crate depends on an
+verifiers, policy, record and runtime; the surfaces (`gl-python`,
+`gl-cli`) depend only on `gl-engine`. No crate in the workspace depends on an
 HTTP or TLS library, and a CI job fails the build if one ever appears.
 
 ## The runtime and the gate
@@ -178,9 +192,7 @@ sends it to review.
 ## Determinism and the record
 
 The exact and symbolic checks use integer and rational arithmetic, no floating
-point, so they are bit-identical on every platform. The deprecated model
-channels run under the `cpu-f32` profile on `tract`, with scores within `1e-6`
-across x86-64 and arm64 and a guard band around every threshold.
+point, so they are bit-identical on every platform.
 
 The record ties all of this together. `content_hash` covers the input and the
 resolved policy, so it is identical on any machine; the record id and timestamp are
@@ -192,15 +204,16 @@ records share one signing envelope, so a single log can hold both.
 
 The Python package (`gl-python`, built with `maturin`) exposes the engine as
 `groundlens`: `Verifier` (with `judges`, `signers` and `sinks`), `verify`,
-`verify_run`, `measure`, and the `Record`, `RunRecord` and `Policy` types;
-`proofread` stays for 3.x users. The wheel carries the compiled engine and has
+`verify_run`, `measure`, and the `Record`, `RunRecord` and `Policy` types.
+The wheel carries the compiled engine and has
 no runtime dependencies; every adapter takes a client you already have.
 
-The `glv` binary (`gl-cli`) is the same engine on the command line, with
-`verify`, `record verify`, `policy lint`, `policy show`, `judge show-template`,
-`keygen` and, for executions, `run verify` and `run check`. The Python command
-line adds `report`, `measure` and `replay`. Both surfaces call `gl-engine` and
-nothing else, so their behaviour cannot drift from each other.
+The `groundlens` command line, installed with the package, does everything:
+`verify`, `run verify`, `record verify`, `report`, `measure`, `replay`,
+`policy`, `judge show-template` and `keygen`. The `glv` binary (`gl-cli`) is
+for whoever checks records and does not run the application: `record verify`,
+`run check`, `policy lint` and `policy show`, one static file, no Python. Both
+call `gl-engine` and nothing else, so they cannot disagree.
 
 For the user-facing reference, the API and CLI documentation and the concept
 guides, see [groundlens.readthedocs.io](https://groundlens.readthedocs.io).

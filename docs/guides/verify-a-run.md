@@ -42,9 +42,11 @@ default: ALLOW
 ## 3. Verify and gate
 
 ```{code-block} bash
-glv run verify \
+groundlens run verify \
   --trace trace.jsonl \
   --policy execution-policy.yaml \
+  --run-id run_42 \
+  --system invoice-agent \
   --log run.jsonl
 
 echo "exit: $?"       # 0 ALLOW · 3 REVIEW · 1 DENY
@@ -56,7 +58,7 @@ and the audit flags the breach. From Python:
 ```{code-block} python
 from groundlens import verify_run
 
-record = verify_run(trace="trace.jsonl", policy="execution-policy.yaml")
+record = verify_run(trace="trace.jsonl", policy="execution-policy.yaml", run_id="run_42", system="invoice-agent")
 print(record.gate)              # DENY  (ALLOW / REVIEW / DENY)
 for b in record.breaches:
     print(b)
@@ -67,7 +69,7 @@ See {func}`groundlens.verify_run` for every argument.
 ## 4. Check a run record later
 
 ```{code-block} bash
-glv run check run.jsonl
+groundlens run check run.jsonl
 ```
 
 This recomputes every hash, link and signature in the run-record log, offline,

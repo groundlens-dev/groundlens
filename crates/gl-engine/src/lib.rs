@@ -15,7 +15,6 @@ use gl_verifiers::{
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub use gl_bundle;
 pub use gl_core;
 pub use gl_mcp;
 pub use gl_policy;
@@ -23,7 +22,6 @@ pub use gl_record;
 pub use gl_runtime;
 pub use gl_verifiers;
 
-pub mod bundle;
 pub mod judge;
 pub mod run;
 pub use run::{verify_run, RunVerifyRequest};
@@ -56,19 +54,6 @@ pub struct VerifyRequest {
     pub signing_key_hex: Option<String>,
     #[serde(default)]
     pub previous_record_hash: Option<String>,
-    /// Recorded when no bundle is loaded (`sha256:unbundled` otherwise).
-    #[serde(default)]
-    pub bundle_hash: Option<String>,
-    /// A bundle directory, or the name of an installed bundle (`base`). The
-    /// model channels (lexical, entailment, similarity) run only when this
-    /// names a bundle; `None` runs none of them, even when a bundle is
-    /// installed. Deprecated: the model channels leave the default build in
-    /// the next release.
-    #[serde(default)]
-    pub bundle: Option<String>,
-    /// With a bundle named, run its channels. `false` skips them.
-    #[serde(default = "default_true")]
-    pub lexical: bool,
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
     /// What the request is about (`entity = UPS`). When present, the scope
@@ -91,10 +76,6 @@ pub struct VerifyRequest {
     pub judge_evidence: Option<judge::StoredJudge>,
 }
 
-fn default_true() -> bool {
-    true
-}
-
 fn und() -> String {
     "und".into()
 }
@@ -111,9 +92,6 @@ impl VerifyRequest {
             numeric: NumericConfig::default(),
             signing_key_hex: None,
             previous_record_hash: None,
-            bundle_hash: None,
-            bundle: None,
-            lexical: true,
             metadata: BTreeMap::new(),
             scope: BTreeMap::new(),
             risk_class: None,
@@ -208,32 +186,6 @@ pub fn verify_timed(req: &VerifyRequest) -> Result<(EvidenceRecord, Timings)> {
     for json in &req.rule_sets_json {
         verifiers.push(Box::new(RuleSet::from_json(json)?.compile()?));
     }
-    let mut bundle_hash = req.bundle_hash.clone().unwrap_or_else(|| "sha256:unbundled".into());
-    let loaded = if req.lexical { bundle::load(req.bundle.as_deref())? } else { None };
-    match &loaded {
-        Some(b) => {
-            bundle_hash = b.manifest_hash.clone();
-            #[cfg(feature = "lexical")]
-            verifiers.push(Box::new(gl_verifiers::LexicalVerifier::new(b.encoder.clone(), &b.model_hash)));
-            #[cfg(feature = "nli")]
-            if let Some((model, hash)) = &b.entailment {
-                verifiers.push(Box::new(gl_verifiers::NliVerifier::new(model.clone(), hash)));
-            }
-            #[cfg(feature = "semantic")]
-            verifiers.push(Box::new(gl_verifiers::SemanticVerifier::new(b.encoder.clone(), &b.model_hash)));
-        }
-        None => {
-            if policy.verifiers.required.iter().any(|r| r == gl_verifiers::LEXICAL_ID) {
-                return Err(gl_core::Error::InvalidInput(bundle::MISSING_BASE.into()));
-            }
-        }
-    }
-    #[cfg(feature = "nli")]
-    if policy.verifiers.required.iter().any(|r| r == gl_verifiers::NLI_ID)
-        && !verifiers.iter().any(|v| v.info().id == gl_verifiers::NLI_ID)
-    {
-        return Err(gl_core::Error::InvalidInput(bundle::MISSING_NLI.into()));
-    }
     let mut infos: Vec<_> = verifiers.iter().map(|v| v.info().clone()).collect();
     for k in known_verifiers() {
         if !infos.iter().any(|i| i.id == k.id) {
@@ -292,7 +244,8 @@ pub fn verify_timed(req: &VerifyRequest) -> Result<(EvidenceRecord, Timings)> {
     let content = RecordContent {
         schema: RECORD_SCHEMA.into(),
         engine_version: gl_core::ENGINE_VERSION.into(),
-        bundle_hash,
+        // Part of the record schema since 1.0. No model runs, so no bundle.
+        bundle_hash: "sha256:unbundled".into(),
         input_hash: gl_record::input_hash(&input)?,
         locale: req.locale.clone(),
         graph,
@@ -353,7 +306,7 @@ pub fn verify_unsigned_timed(req: &VerifyRequest) -> Result<(UnsignedRecord, Tim
 }
 
 /// The verification input the engine would build for a request, without
-/// running anything. Used by the `proofread()` facade to list claims.
+/// running anything. The judge prompt is rendered from it.
 pub fn prepare(req: &VerifyRequest) -> VerificationInput {
     // The locale a policy fixes changes how claims are read, so honour it
     // here too; an invalid policy is reported by `verify`, not here.
@@ -413,21 +366,13 @@ pub fn policy_resolve(yaml: &str) -> Result<String> {
     Ok(format!("# {} v{}\n# hash: {}\n{}", policy.id, policy.version, policy.hash()?, policy.to_yaml()?))
 }
 
-/// Declarations of every built-in verifier, model or no model.
+/// Declarations of every built-in verifier.
 pub fn known_verifiers() -> Vec<gl_core::VerifierInfo> {
-    #[allow(unused_mut)]
-    let mut known = vec![
+    vec![
         NumericVerifier::default().info().clone(),
         ScopeVerifier::default().info().clone(),
         IntentVerifier::default().info().clone(),
-    ];
-    #[cfg(feature = "lexical")]
-    known.push(gl_verifiers::LexicalVerifier::info_without_model());
-    #[cfg(feature = "nli")]
-    known.push(gl_verifiers::NliVerifier::info_without_model());
-    #[cfg(feature = "semantic")]
-    known.push(gl_verifiers::SemanticVerifier::info_without_model());
-    known
+    ]
 }
 
 pub fn keygen_hex() -> String {
@@ -463,7 +408,7 @@ mod tests {
     }
 
     #[test]
-    fn the_default_path_runs_no_model_channel() {
+    fn a_request_without_scope_or_question_runs_the_numeric_check_only() {
         let req = VerifyRequest::new(
             "The invoice total is 1,000 dollars.",
             vec![Source {
@@ -473,24 +418,10 @@ mod tests {
                 provenance: Default::default(),
             }],
         );
-        // Whatever is installed on this machine, no bundle is named, so no
-        // model is loaded and the record says so.
         let record = verify(&req).unwrap();
         assert_eq!(record.content.bundle_hash, "sha256:unbundled");
         let ids: Vec<&str> = record.content.graph.verifiers.iter().map(|v| v.id.as_str()).collect();
         assert_eq!(ids, ["groundlens.numeric"]);
-        let policy = Policy::from_yaml(DEFAULT_POLICY_YAML).unwrap();
-        let named: Vec<&String> = policy
-            .verifiers
-            .required
-            .iter()
-            .chain(&policy.verifiers.recommended)
-            .chain(&policy.verifiers.optional)
-            .chain(policy.thresholds.keys())
-            .collect();
-        for model in [gl_verifiers::LEXICAL_ID, "groundlens.nli", "semantic.cosine"] {
-            assert!(!named.iter().any(|n| n.as_str() == model), "the default policy names {model}");
-        }
     }
 
     fn src(text: &str) -> Source {
@@ -613,42 +544,5 @@ mod tests {
             assert!(resolved.contains(&hash));
             assert_eq!(policy_lint(&resolved).unwrap().0, hash);
         }
-    }
-
-    #[cfg(feature = "lexical")]
-    #[test]
-    fn lexical_channel_runs_from_a_bundle_and_is_hashed_into_the_record() {
-        let tiny = concat!(env!("CARGO_MANIFEST_DIR"), "/../gl-onnx/testdata/tiny-bundle");
-        let mut req = VerifyRequest::new(
-            "The invoice total is 1,000 dollars.",
-            vec![Source {
-                id: "s".into(),
-                text: "The total amount due is 10,000 dollars.".into(),
-                locator: None,
-                provenance: Default::default(),
-            }],
-        );
-        req.bundle = Some(tiny.into());
-        let record = verify(&req).unwrap();
-        assert!(record.content.bundle_hash.starts_with("sha256:"));
-        assert_ne!(record.content.bundle_hash, "sha256:unbundled");
-        let lexical: Vec<_> =
-            record.content.graph.evidence.iter().filter(|e| e.verifier_id == "groundlens.lexical").collect();
-        assert_eq!(lexical.len(), 2, "invoice, total");
-        assert!(lexical.iter().all(|e| e.model_hash.is_some()));
-        assert_eq!(record.content.outcome.decision, Decision::Fail);
-        assert_eq!(verify(&req).unwrap().content_hash, record.content_hash);
-
-        // A policy that requires the channel refuses to run without a bundle.
-        let mut strict = req.clone();
-        strict.bundle = None;
-        strict.policy_yaml = "id: strict
-version: 1
-verifiers:
-  required: [groundlens.numeric, groundlens.lexical]
-"
-        .into();
-        let err = verify(&strict).unwrap_err().to_string();
-        assert!(err.contains("--bundle base"), "{err}");
     }
 }

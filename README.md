@@ -226,7 +226,7 @@ GroundLens splits verification into five parts that never mix: **claims**, **ver
 4. The **policy**, a YAML file you own, turns evidence into a decision: `PASS`, `REVIEW` or `FAIL`, with reasons.
 5. The **record** holds the input hash, the evidence, the policy hash and the decision, chained to the previous record and signed. It is stored before `check` returns; observers are told after.
 
-The engine is Rust (`crates/gl-core`, `gl-numeric`, `gl-verifiers`, `gl-policy`, `gl-record`, `gl-engine`), shipped as a Python wheel (abi3, Python 3.10+) and as the `glv` binary. It runs in your process: no server, no network, no runtime dependencies.
+The engine is Rust (`crates/gl-core`, `gl-numeric`, `gl-verifiers`, `gl-policy`, `gl-record`, `gl-engine`), shipped as a Python wheel (abi3, Python 3.10+), with a standalone `glv` binary that checks records without Python. It runs in your process: no server, no network, no runtime dependencies.
 
 <br>
 

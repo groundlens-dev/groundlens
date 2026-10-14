@@ -209,8 +209,6 @@ class Verifier:
             question=question,
             locale=self.locale,
             rules=self.rules,
-            bundle=None,
-            lexical=True,
             signing_key=local_seed,
             previous_hash=previous,
             units=self.units,

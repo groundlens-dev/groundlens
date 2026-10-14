@@ -2,49 +2,29 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-//! Built-in verifiers.
+//! Built-in verifiers. Each one is exact: the same input gives the same
+//! evidence on every machine, and no model runs.
 //!
-//! | id                    | kind      | determinism  | status in 4.0 |
-//! |-----------------------|-----------|--------------|---------------|
-//! | `groundlens.numeric`  | exact     | Exact        | implemented   |
-//! | `groundlens.scope`    | exact     | Exact        | implemented   |
-//! | `groundlens.intent`   | symbolic  | Exact        | implemented   |
-//! | `groundlens.rules`    | symbolic  | Exact        | implemented   |
-//! | `groundlens.lexical`  | lexical   | Reproducible | feature `lexical` |
-//! | `groundlens.nli`      | ml        | Reproducible | feature `nli` |
-//! | `semantic.cosine`     | ml        | Reproducible | feature `semantic` |
-//! | `sgi`, `dgi`          | geometric | Reproducible | needs gl-onnx |
-//! | `llm_judge.*`         | generative| NonDet.      | adapter only  |
+//! | id                    | checks |
+//! |-----------------------|--------|
+//! | `groundlens.numeric`  | every figure is in a source, or follows from figures that are |
+//! | `groundlens.scope`    | every figure comes from a passage about the request's entity |
+//! | `groundlens.intent`   | the figure is the kind and unit the question asked for |
+//! | `groundlens.rules.*`  | the organisation's own rules |
 //!
-//! Every verifier here implements the same [`gl_core::Verifier`] trait. None
-//! of them decides anything.
+//! The judge (`llm_judge.*`) is not here: the engine never calls a model.
+//! The caller does and passes the reply (`gl_engine::judge`).
+//!
+//! Every verifier implements the same [`gl_core::Verifier`] trait. None of
+//! them decides anything; the policy does.
 
 pub mod extract;
 pub mod intent;
-#[cfg(feature = "lexical")]
-pub mod lexical;
-#[cfg(feature = "nli")]
-pub mod nli;
 pub mod numeric;
 pub mod rules;
 pub mod scope;
-#[cfg(feature = "semantic")]
-pub mod semantic;
 
 pub use extract::{extract_claims, extract_claims_with};
-#[cfg(feature = "lexical")]
-pub use lexical::LexicalVerifier;
-
-/// Id of the lexical verifier, known even when the feature is off.
-pub const LEXICAL_ID: &str = "groundlens.lexical";
-#[cfg(feature = "nli")]
-pub use nli::NliVerifier;
-/// Id of the NLI verifier, known even when the feature is off.
-pub const NLI_ID: &str = "groundlens.nli";
-#[cfg(feature = "semantic")]
-pub use semantic::SemanticVerifier;
-/// Id of the semantic verifier, known even when the feature is off.
-pub const SEMANTIC_ID: &str = "semantic.cosine";
 pub use intent::IntentVerifier;
 pub use numeric::{NumericConfig, NumericVerifier};
 pub use rules::{Rule, RuleAction, RuleSet, RulesVerifier};

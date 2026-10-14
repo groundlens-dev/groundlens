@@ -1,8 +1,8 @@
 # Policies
 
 The policy is the product. It is a short YAML document that says which
-verifiers must run, what thresholds apply, and what happens to a claim nobody
-could resolve. The engine holds no judgement of its own; the policy holds all
+verifiers must run, what each one's evidence does to the decision, and what
+happens to a claim nobody could resolve. The engine holds no judgement of its own; the policy holds all
 of it. The same evidence under two policies can produce two decisions, and both
 are correct.
 
@@ -14,7 +14,7 @@ anyone noticing.
 
 ```{code-block} yaml
 id: eu_ai_act_high_risk_v1
-version: 1.3.0
+version: 1.4.0
 description: >
   Numbers must be exactly supported. A numeric contradiction fails the answer,
   and so does a figure taken from outside the request's scope.
@@ -149,24 +149,6 @@ allowed):
 evidence the policy will act on: `exact`, `reproducible`, or `any`. Evidence
 from a verifier below this class is recorded but does not drive the decision.
 
-### thresholds
-
-For a scored verifier, `support_min` is the score below which a claim is not
-considered supported, and `guard_band` is a band around it. A score **inside**
-the guard band is REVIEW on every platform, so a small cross-platform score
-drift can never flip a PASS into a FAIL. `policy lint` requires the guard band
-to be at least twice the verifier's declared tolerance.
-
-No shipped policy sets thresholds: the checks in the default path are exact,
-and exact verifiers have no score to threshold. Thresholds apply to the
-deprecated model channels, if you still run them with a bundle:
-
-```{code-block} yaml
-thresholds:
-  groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
-  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
-```
-
 ### decision
 
 - **any_contradiction_from** — a contradiction from any of these verifiers is a
@@ -209,20 +191,19 @@ The final decision is the worst of all of these and of every claim.
 
 ## The shipped policies
 
-- **`groundlens_default_v1`** (version 1.3.0) — numbers must be exactly
+- **`groundlens_default_v1`** (version 1.4.0) — numbers must be exactly
   supported; a numeric contradiction fails; a figure taken from outside the
   request's [scope](scope.md) fails, and one from a passage without provenance
   goes to review; a figure that is not the kind or unit the question asked for
   goes to review; anything unresolved goes to review; no model is needed and
   no generative verifier decides.
-- **`eu_ai_act_high_risk_v1`** (version 1.3.0) — the same checks, plus a
+- **`eu_ai_act_high_risk_v1`** (version 1.4.0) — the same checks, plus a
   mapping to Articles 15(1), 14(4)(a) and 12(1) of Regulation (EU) 2024/1689.
 
-Version 1.2.0 of both removes the model channels (`groundlens.lexical`,
-`groundlens.nli`, `semantic.cosine`) and their thresholds. Decisions on
-requests without a bundle are unchanged; only the policy version and hash in
-the record differ. Version 1.3.0 adds the intent check, which sends to review
-an answer whose figure is not the kind or the unit the question asked for.
+Version 1.3.0 adds the intent check, which sends to review an answer whose
+figure is not the kind or the unit the question asked for. Version 1.4.0
+changes nothing in the YAML; it marks the 6.0 schema, which has no
+`thresholds` key, so the hash differs from 1.3.0.
 
 ## Using and checking a policy
 
@@ -241,7 +222,6 @@ groundlens policy show my-policy.yaml --resolved
 ```
 
 `policy lint` rejects unknown keys, unknown rounding rules, a `missing_scope`
-of `PASS`, a risk class listed twice, thresholds on exact verifiers (a threshold on an exact
-score is meaningless), guard bands narrower than twice the verifier tolerance,
-and unknown verifier ids. See [Writing policies](../guides/writing-policies.md)
+of `PASS`, a risk class listed twice, and a required verifier the engine does
+not have. See [Writing policies](../guides/writing-policies.md)
 for a step-by-step build and {class}`groundlens.Policy` for the API.

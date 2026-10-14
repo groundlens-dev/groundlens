@@ -12,9 +12,6 @@ pub enum Error {
     #[error("verifier {verifier} failed: {message}")]
     Verifier { verifier: String, message: String },
 
-    #[error("verifier {0} is not available in this bundle")]
-    VerifierUnavailable(String),
-
     #[error("serialisation error: {0}")]
     Serialisation(String),
 

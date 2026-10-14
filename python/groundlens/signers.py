@@ -106,7 +106,12 @@ def aws_kms(client: Any, key_id: str) -> AwsKms:
 
 
 class AzureKeyVault:
-    """A P-256 key in Azure Key Vault or Managed HSM (``EC``, curve ``P-256``)."""
+    """A P-256 key in Azure Key Vault or Managed HSM (``EC``, curve ``P-256``).
+
+    Experimental: Key Vault has no emulator, so CI tests this signer only
+    against a stand-in with the SDK's call shape. The other signers run
+    against real software in CI (``tests/test_live_services.py``).
+    """
 
     algorithm = ECDSA_P256_SHA256
 
@@ -161,7 +166,10 @@ class Pkcs11:
     def sign(self, message: bytes) -> bytes:
         from pkcs11 import Mechanism  # noqa: PLC0415 - optional, the caller's library
 
-        return bytes(self.private_key.sign(message, mechanism=Mechanism.ECDSA_SHA256))
+        # CKM_ECDSA over a digest computed here. Every PKCS#11 token has it;
+        # CKM_ECDSA_SHA256 is optional, and SoftHSM and many HSMs lack it.
+        digest = hashlib.sha256(message).digest()
+        return bytes(self.private_key.sign(digest, mechanism=Mechanism.ECDSA))
 
 
 def pkcs11(private_key: Any, public_key: Any) -> Pkcs11:

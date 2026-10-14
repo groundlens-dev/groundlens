@@ -1,7 +1,7 @@
 # Command line
 
-Installing the package gives you two identical commands, `groundlens` and
-`glv`. They call the same engine as the Python API. Output is UTF-8 on every
+Installing the package gives you the `groundlens` command. It calls the same
+engine as the Python API. Output is UTF-8 on every
 platform.
 
 ```{admonition} Exit codes
@@ -37,8 +37,6 @@ groundlens verify \
 | `--policy NAME\|PATH\|YAML` | A built-in name, a file, or YAML. Default `groundlens_default_v1`. |
 | `--rules PATH` | A rule set (JSON/YAML), repeatable. |
 | `--locale CODE` | How the documents write numbers (`en`, `es`, `de`, …). Default `und`. A `locale` in the policy wins. |
-| `--bundle DIR\|NAME` | Deprecated. Run the lexical, entailment and similarity channels from this bundle. Without it no model runs, even when a bundle is installed. |
-| `--no-lexical` | With `--bundle`, skip its channels. |
 | `--log PATH` | Append the signed record to this JSON Lines log. |
 | `--signing-key HEX` | 32-byte hex Ed25519 seed (or `GROUNDLENS_SIGNING_KEY`). |
 | `--no-units` | GroundLens 3.x bare-number semantics. |
@@ -77,9 +75,8 @@ groundlens record verify worker-1.jsonl worker-2.jsonl
 
 ## policy lint
 
-Check a policy: reject unknown keys, thresholds on exact verifiers, guard bands
-narrower than twice the verifier tolerance, unknown rounding rules and unknown
-verifier ids. Prints the hash of the resolved policy.
+Check a policy: reject unknown keys, unknown rounding rules and a required
+verifier the engine does not have. Prints the hash of the resolved policy.
 
 ```{code-block} bash
 groundlens policy lint my-policy.yaml
@@ -95,24 +92,6 @@ the resolved text gives the same hash.
 ```{code-block} bash
 groundlens policy show my-policy.yaml --resolved
 ```
-
-## bundle
-
-Manage model bundles. `pull` is the only command that uses the network.
-
-```{code-block} bash
-groundlens bundle pull base          # download and install (~470 MB, once)
-groundlens bundle status             # is it installed, where, which hash
-groundlens bundle verify path/       # re-hash every artefact
-groundlens bundle build path/ --name base --bundle-version 1
-```
-
-| Command | Meaning |
-| --- | --- |
-| `bundle pull [NAME]` | Download and install a published bundle. `--into`, `--url`, `--sha256`, `--trust-unpinned`. |
-| `bundle status [NAME]` | Whether a bundle is installed, its path and hash. |
-| `bundle verify ROOT` | Re-hash every artefact of a bundle directory. |
-| `bundle build ROOT` | Write `manifest.json`. `--name`, `--bundle-version` required. |
 
 ## measure
 
@@ -165,17 +144,33 @@ records can be attributed to your application.
 export GROUNDLENS_SIGNING_KEY="$(groundlens keygen)"
 ```
 
-## Verifying an execution
+## run verify, run check
 
-The standalone `glv` binary shipped with each release adds a `run` command for
-execution traces:
+Verify a whole agent execution instead of one answer. `run verify` turns a
+trace (for example an MCP session, one JSON-RPC message per line) into a signed
+run record and gates it under an execution policy: exit code `0` ALLOW, `1`
+DENY, `3` REVIEW. `run check` verifies a run-record log offline.
 
 ```{code-block} bash
-glv run verify --trace trace.jsonl --policy execution-policy.yaml --log run.jsonl
-glv run check run.jsonl
+groundlens run verify --trace trace.jsonl --policy execution-policy.yaml \
+  --run-id run_42 --system invoice-agent --log runs.jsonl
+groundlens run check runs.jsonl
 ```
 
-`glv run verify` turns a trace (for example an MCP session) into a signed run
-record and gates it; `glv run check` verifies a run-record log offline. The
-same thing is available from Python as {func}`groundlens.verify_run`. See
+The same thing is available from Python as {func}`groundlens.verify_run`. See
 [Verify an execution](../guides/verify-a-run.md).
+
+## glv: checking records without Python
+
+Each [release](https://github.com/groundlens-dev/groundlens/releases) also has
+`glv`, a single binary for Linux, macOS and Windows, for whoever checks the
+records and does not run the application. It produces nothing; it only checks.
+
+```{code-block} bash
+glv record verify records.jsonl [more.jsonl | records/ ...]
+glv run check runs.jsonl
+glv policy lint my-policy.yaml
+glv policy show eu_ai_act_high_risk_v1 --resolved
+```
+
+Exit code `0` when everything verifies, `2` when anything does not.

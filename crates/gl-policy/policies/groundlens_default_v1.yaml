@@ -1,5 +1,5 @@
 id: groundlens_default_v1
-version: 1.3.0
+version: 1.4.0
 description: >
   Numeric claims must be exactly supported by the sources. A numeric
   contradiction fails the answer, and so does a figure taken from a passage

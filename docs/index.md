@@ -57,7 +57,7 @@ record.verify()             # recompute every hash and the signature, offline
   verifying an answer to producing an evidence package for an auditor.
 - **[Python API](reference/python-api.md)** — every public function and class,
   from the docstrings.
-- **[Command line](reference/cli.md)** — the `groundlens` / `glv` commands.
+- **[Command line](reference/cli.md)** — the `groundlens` command, and `glv` for checking records without Python.
 - **[Design](design/next.md)** — what changes in the next release and why, and what is built.
 
 ```{toctree}
@@ -97,14 +97,6 @@ guides/measure-and-replay
 guides/observability
 guides/rules
 guides/evidence-for-auditors
-```
-
-```{toctree}
-:hidden:
-:caption: Deprecated
-
-getting-started/bundles
-guides/calibration
 ```
 
 ```{toctree}

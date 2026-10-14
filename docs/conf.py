@@ -6,7 +6,7 @@
 
 The API reference is generated from the docstrings in the ``groundlens``
 Python package. The compiled Rust extension (``groundlens._engine``) is
-mocked, so the docs build needs no Rust toolchain and no model bundle: it
+mocked, so the docs build needs no Rust toolchain: it
 reads the pure-Python sources on ``sys.path`` and renders their docstrings.
 """
 

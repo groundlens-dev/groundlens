@@ -1,6 +1,6 @@
 [package]
 name = "gl-cli"
-description = "glv: command-line front end of the Groundlens verification engine"
+description = "glv: check GroundLens records offline, without Python"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,25 +13,7 @@ name = "glv"
 path = "src/main.rs"
 
 [dependencies]
-gl-core.workspace = true
 gl-engine.workspace = true
-gl-text.workspace = true
-gl-verifiers.workspace = true
 gl-policy.workspace = true
 gl-record.workspace = true
-gl-bundle.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-serde_yaml.workspace = true
 clap.workspace = true
-chrono.workspace = true
-sha2.workspace = true
-hex.workspace = true
-# Only `glv bundle pull` uses these. The engine crates never do; a CI job
-# checks that.
-ureq = { version = "3", default-features = false, features = ["rustls"] }
-flate2 = "1"
-tar = "0.4"
-
-[dev-dependencies]
-serde_json.workspace = true

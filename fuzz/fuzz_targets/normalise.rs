@@ -14,6 +14,5 @@ fuzz_target!(|data: &[u8]| {
         for w in gl_text::words(&once, "en") {
             assert_eq!(&once[w.span.start..w.span.end], w.text);
         }
-        let _ = gl_text::segmentation_warnings(&once);
     }
 });

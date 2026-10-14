@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -109,10 +108,10 @@ def test_chain_via_log_and_tamper_detection(tmp_path):
         Record.verify_chain([records[0], records[2]])
 
 
-def test_policy_lint_rejects_a_narrow_guard_band():
-    bad = "id: bad\nversion: 1\nthresholds:\n  groundlens.numeric: { support_min: 0.5, guard_band: 0.0 }\n"
-    with pytest.raises(PolicyError):
-        Policy.from_yaml(bad)
+def test_a_5x_policy_with_thresholds_is_refused():
+    old = "id: old\nversion: 1\nthresholds:\n  groundlens.lexical: { support_min: 0.6, guard_band: 0.02 }\n"
+    with pytest.raises((PolicyError, ValueError), match="thresholds"):
+        Policy.from_yaml(old)
 
 
 def test_evidence_shapes():
@@ -130,8 +129,8 @@ def test_scope_fails_a_figure_taken_from_another_entity():
         ("AAPL/2006/page_100", "Provision for income taxes was $829 million.", {"entity": "AAPL"}),
     ]
     answer = "The 2006 tax expense was $1.9 billion."
-    scoped = verify(answer, sources, scope={"entity": "AAPL"}, locale="en", lexical=False)
-    unscoped = verify(answer, sources, locale="en", lexical=False)
+    scoped = verify(answer, sources, scope={"entity": "AAPL"}, locale="en")
+    unscoped = verify(answer, sources, locale="en")
     assert (scoped.decision, unscoped.decision) == ("FAIL", "PASS")
     scope_evidence = [e for e in scoped.evidence if e.verifier_id == "groundlens.scope"]
     assert scope_evidence and scope_evidence[0].result == "contradicted"
@@ -144,7 +143,6 @@ def test_provenance_accepts_dicts_and_missing_provenance_goes_to_review():
         [{"id": "s", "text": "Revenue was $10 million."}],
         scope={"entity": "ACME"},
         locale="en",
-        lexical=False,
     )
     assert r.decision == "REVIEW"
     ok = verify(
@@ -152,25 +150,15 @@ def test_provenance_accepts_dicts_and_missing_provenance_goes_to_review():
         [{"id": "s", "text": "Revenue was $10 million.", "provenance": {"entity": "ACME"}}],
         scope={"entity": "ACME"},
         locale="en",
-        lexical=False,
     )
     assert ok.decision == "PASS"
 
 
-def test_naming_a_bundle_is_deprecated_and_no_bundle_runs_no_model():
-    import warnings
-
-    tiny = Path(__file__).resolve().parents[2] / "crates" / "gl-onnx" / "testdata" / "tiny-bundle"
+def test_no_model_runs():
     sources = [("s", "The total amount due is 10,000 dollars.")]
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        plain = verify("The invoice total is 1,000 dollars.", sources, locale="en")
-    assert plain.bundle_hash == "sha256:unbundled"
-    assert {e.verifier_id for e in plain.evidence} == {"groundlens.numeric"}
-
-    with pytest.warns(DeprecationWarning, match="model channels"):
-        modelled = verify("The invoice total is 1,000 dollars.", sources, locale="en", bundle=tiny)
-    assert any(e.verifier_id == "groundlens.lexical" for e in modelled.evidence)
+    record = verify("The invoice total is 1,000 dollars.", sources, locale="en")
+    assert record.bundle_hash == "sha256:unbundled"
+    assert {e.verifier_id for e in record.evidence} == {"groundlens.numeric"}
 
 
 def test_figures_the_answer_computed_are_recomputed_under_the_rounding_rule():

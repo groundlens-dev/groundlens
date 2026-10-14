@@ -69,7 +69,7 @@ class Record:
 
     @property
     def content_hash(self) -> str:
-        """Hash of everything that is a function of input, bundle and policy.
+        """Hash of everything that is a function of the input and the policy.
         Identical across machines for the same verification."""
         return self.raw["content_hash"]
 

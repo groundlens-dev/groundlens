@@ -59,3 +59,47 @@ jobs:
           LANG: tr_TR.UTF-8
           TZ: Pacific/Kiritimati
       - run: python -c "import importlib.metadata as m; r=[x for x in (m.distribution('groundlens').requires or []) if 'extra' not in x]; assert not r, r"
+
+  # The sinks and signers against the real software instead of stand-ins:
+  # Postgres, MinIO (S3 with Object Lock), LocalStack (AWS KMS), Azurite
+  # (Azure Blob) and SoftHSM (PKCS#11). Azure Key Vault has no emulator.
+  live-services:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: "1.99.0"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: start the services
+        # Pinned by digest, like every action here.
+        run: |
+          docker run -d --name pg -p 5432:5432 -e POSTGRES_PASSWORD=gl postgres:17@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+          docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=glroot -e MINIO_ROOT_PASSWORD=glglglgl cgr.dev/chainguard/minio@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56 server /data
+          docker run -d --name kms -p 4566:4566 -e SERVICES=kms localstack/localstack:4.4@sha256:b52c16663c70b7234f217cb993a339b46686e30a1a5d9279cb5feeb2202f837c
+          docker run -d --name azurite -p 10000:10000 mcr.microsoft.com/azure-storage/azurite:3.34.0@sha256:0a47e12e3693483cef5c71f35468b91d751611f172d2f97414e9c69113b106d9 azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
+          sudo apt-get install -y -q softhsm2
+      - run: pip install --require-hashes -r python/requirements-ci.txt
+      - run: pip install --require-hashes -r python/requirements-live.txt
+      - run: maturin build --release --out dist
+        working-directory: python
+      - run: python -c "import glob,subprocess,sys; subprocess.check_call([sys.executable,'-m','pip','install','--no-deps',*glob.glob('dist/groundlens-*.whl')])"
+        working-directory: python
+      - name: wait for the services
+        run: |
+          for i in $(seq 60); do
+            docker exec pg pg_isready -q && curl -sf localhost:9000/minio/health/live && curl -sf localhost:4566/_localstack/health >/dev/null && break
+            sleep 2
+          done
+      - run: python -m pytest -q python/tests/test_live_services.py -p no:cacheprovider -rs
+        env:
+          GL_LIVE_POSTGRES: postgresql://postgres:gl@localhost:5432/postgres
+          GL_LIVE_S3: http://localhost:9000
+          GL_LIVE_S3_USER: glroot
+          GL_LIVE_S3_PASSWORD: glglglgl
+          GL_LIVE_KMS: http://localhost:4566
+          GL_LIVE_AZURE_BLOB: http://127.0.0.1:10000
+          GL_LIVE_PKCS11: /usr/lib/softhsm/libsofthsm2.so

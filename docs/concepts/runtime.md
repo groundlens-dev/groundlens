@@ -75,13 +75,14 @@ hold both.
 
 ```{code-block} python
 from groundlens import verify_run, RunRecord
-record = verify_run(trace="trace.jsonl", policy="execution-policy.yaml")
+record = verify_run(trace="trace.jsonl", policy="execution-policy.yaml", run_id="run_42", system="invoice-agent")
 print(record.gate)          # ALLOW / REVIEW / DENY
 ```
 
 ```{code-block} bash
-glv run verify --trace trace.jsonl --policy execution-policy.yaml --log run.jsonl
-glv run check run.jsonl
+groundlens run verify --trace trace.jsonl --policy execution-policy.yaml \
+  --run-id run_42 --system invoice-agent --log run.jsonl
+groundlens run check run.jsonl
 ```
 
 Exit codes are `0` / `3` / `1` on `ALLOW` / `REVIEW` / `DENY`. See

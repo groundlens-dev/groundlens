@@ -16,7 +16,7 @@ engine and asserts the behaviours GroundLens promises, grouped by contract:
     Scope boundaries       only the given evidence is a source, never the question
 
 The result is not a score. It is PASS or FAIL per contract. It uses only the
-deterministic verifiers, so it needs no model bundle and no network:
+deterministic verifiers, so it needs no model and no network:
 
     pip install groundlens
     python conformance.py            # human report, exit 1 if any FAIL

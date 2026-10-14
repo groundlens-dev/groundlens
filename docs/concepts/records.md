@@ -6,7 +6,7 @@ machine, without calling GroundLens back.
 
 ## What a record holds
 
-- the engine version and the bundle hash (which models, by hash, took part);
+- the engine version;
 - the input hash (the answer, sources and question, canonicalised);
 - the full evidence graph — every verifier's evidence for every claim;
 - the policy id and the policy hash;
@@ -19,8 +19,8 @@ See {class}`groundlens.Record` and {class}`groundlens.RunRecord` for the fields.
 
 ## The content hash
 
-`content_hash` covers everything that is a function of the input, the policy and
-the bundle. It is computed over canonical JSON, so **the same check gives the
+`content_hash` covers everything that is a function of the input and the policy.
+It is computed over canonical JSON, so **the same check gives the
 same content hash on any machine**. The record id and timestamp are deliberately
 left outside it: two verifications of the same input are two records with the
 same content hash but different ids.
@@ -28,7 +28,7 @@ same content hash but different ids.
 ```{code-block} python
 a = verify(answer, sources, question=q)
 b = verify(answer, sources, question=q)
-assert a.content_hash == b.content_hash     # same input + policy + bundle
+assert a.content_hash == b.content_hash     # same input + policy
 assert a.record_id != b.record_id           # but two distinct records
 ```
 
@@ -81,7 +81,7 @@ groundlens record verify records/            # several chains: every .jsonl in i
 
 What an auditor can rely on: **integrity** (any change or reordering is detected
 offline), **attribution** (each record is signed, the key is inside it),
-**reproducibility** (same input, policy and bundle give the same content hash),
+**reproducibility** (same input and policy give the same content hash),
 and **separation of duties** (the engine measured, the named-and-hashed policy
 decided). To hand all of this to someone as a package, see
 [Evidence for auditors](../guides/evidence-for-auditors.md).
