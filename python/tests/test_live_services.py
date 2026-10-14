@@ -8,7 +8,7 @@ Each test runs only when its service is reachable, named by an environment
 variable; otherwise it is skipped. CI starts them all (``live-services`` in
 ``.github/workflows/ci.yml``):
 
-- ``GL_LIVE_POSTGRES``: a libpq URL, e.g. ``postgresql://postgres:gl@localhost:5432/postgres``
+- ``GL_LIVE_POSTGRES``: a libpq connection URL to a Postgres you can create tables in
 - ``GL_LIVE_S3``: an S3 endpoint with Object Lock (MinIO), user and password in
   ``GL_LIVE_S3_USER`` and ``GL_LIVE_S3_PASSWORD``
 - ``GL_LIVE_KMS``: an AWS KMS endpoint (LocalStack)
@@ -76,8 +76,8 @@ def s3_client():
     return boto3.client(
         "s3",
         endpoint_url=service("GL_LIVE_S3"),
-        aws_access_key_id=os.environ.get("GL_LIVE_S3_USER", "minioadmin"),
-        aws_secret_access_key=os.environ.get("GL_LIVE_S3_PASSWORD", "minioadmin"),
+        aws_access_key_id=service("GL_LIVE_S3_USER"),
+        aws_secret_access_key=service("GL_LIVE_S3_PASSWORD"),
         region_name="us-east-1",
     )
 
