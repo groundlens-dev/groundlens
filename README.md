@@ -31,6 +31,11 @@
   <img src="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/light.svg" height="26" alt="Model Context Protocol">
 </picture></a>
 
+<br>
+
+<br>
+
+<img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/langfuse.gif" alt="Langfuse: the GroundLens checks of a credit assistant filtered by level, a FAIL opened with its reasons, its score and the duration of each verifier." width="100%">
 
 </div>
 
