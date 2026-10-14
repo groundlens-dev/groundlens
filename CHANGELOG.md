@@ -130,7 +130,9 @@ identical in the git tag and on PyPI.
     `pip install "groundlens[otel]"`.
   - `gl.integrations.langfuse(client)`: the check inside the Langfuse trace of
     the answer, as a guardrail observation with the judge as a generation,
-    and the decision as the categorical score `groundlens.decision`.
+    and the decision as the categorical score `groundlens.decision` on the
+    check and its trace; the check's metadata carries the decision, reason
+    codes, record id and hash.
     `pip install "groundlens[langfuse]"`.
   - `gl.integrations.grafana_dashboard()`: a Grafana dashboard for those
     metrics and spans, to import.
