@@ -85,7 +85,7 @@ def _with_provenance(sources: list[tuple[str, str]], specs: list[str]) -> list[t
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="groundlens", description="GroundLens: the verification and evidence layer for AI.")
+    p = argparse.ArgumentParser(prog="groundlens", description="GroundLens: guardrails for LLM answers.")
     p.add_argument("--version", action="version", version=f"groundlens {__version__} (GLV engine {ENGINE_VERSION})")
     sub = p.add_subparsers(dest="cmd", required=True)
 

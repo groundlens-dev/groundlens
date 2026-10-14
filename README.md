@@ -180,7 +180,7 @@ verifier = gl.Verifier(
 )
 ```
 
-Several processes: give each its own chain (`chain="worker-3"`) and verify them together with `groundlens record verify`. GroundLens depends on none of these SDKs: you pass the client you already use. The S3, Azure, Postgres and KMS adapters are tested against stand-ins with each SDK's call shapes, not yet against the live services.
+Several processes: give each its own chain (`chain="worker-3"`) and verify them together with `groundlens record verify`. GroundLens depends on none of these SDKs: you pass the client you already use. Postgres, S3 Object Lock, AWS KMS, Azure Blob and PKCS#11 are tested in CI against real software (Postgres, MinIO, LocalStack, Azurite, SoftHSM); Azure Key Vault has no emulator and is experimental.
 
 </details>
 
@@ -371,7 +371,7 @@ If GroundLens got one of your answers wrong, that case is the most valuable cont
 
 Apache-2.0, all of it: engine, checks, policies, connectors, command line and MCP server. Verification evidence has to be checkable by anyone, without our software or our permission, and that only holds if the verifier is open. 
 
-> Not included: a hosted service, and a the judge model.
+> Not included: a hosted service, and the judge model.
 
 <br>
 

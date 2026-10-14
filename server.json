@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.groundlens-dev/groundlens",
   "title": "GroundLens",
-  "description": "Check AI answers against their sources under your policy; signed, offline-verifiable records.",
+  "description": "Guardrails for LLM answers: exact checks against sources, PASS/REVIEW/FAIL, signed records.",
   "repository": {
     "url": "https://github.com/groundlens-dev/groundlens",
     "source": "github"

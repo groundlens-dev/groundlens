@@ -4,47 +4,48 @@
 :width: 640px
 ```
 
-# Execution verification runtime for agentic AI systems
+# Guardrails for LLM answers
 
-GroundLens turns what an AI system does into evidence that someone else can
-check. It reads an answer or a whole execution, runs a pipeline of verifiers
-that each produce evidence rather than a verdict, lets a policy you control
-turn that evidence into a decision, and seals the result in a signed,
-hash-chained record mapped to the regulation it concerns.
+GroundLens checks an LLM answer against its sources without a model, decides
+PASS, REVIEW or FAIL under your policy, and keeps a signed record.
 
-It runs beside your system, not inside the model. It has no opinion of its
-own: the verifiers measure, the policy decides, and every decision carries a
-record that anyone can verify offline, on any machine, without calling
-GroundLens back.
+It checks every figure against the passages the answer was written from, and
+where each figure came from. A policy you own turns that evidence into a
+decision, and the record of it is signed and stored before the decision
+returns. Anyone can verify the records offline, with the public key alone. If
+you already run an LLM judge, GroundLens runs first, and a FAIL never reaches
+the judge.
 
 ```{admonition} Who this is for
-Teams that put AI in front of regulated decisions and have to show, later and
-to someone else, that a given answer or action was checked, how it was
-checked, and under which rule. Model risk, compliance, audit, and the
-engineers who build the systems they sign off on.
+Teams whose LLM answers carry figures from documents, in finance, credit,
+insurance, legal or reporting, and who have to show later, to someone else,
+that each answer was checked, how, and under which rule.
 ```
 
 ## Start here
-
-If you are new, install the package, verify one answer, then read the
-[concepts](concepts/overview.md) to understand what the pieces mean.
 
 ```{code-block} bash
 pip install groundlens
 ```
 
 ```{code-block} python
-from groundlens import verify
+import groundlens as gl
 
-record = verify(
-    "The invoice total is 1,000 dollars.",
-    [("invoice.pdf#p1", "The total amount due is 10,000 dollars.")],
-    question="What is the invoice total?",
+verifier = gl.Verifier(sink=gl.sinks.jsonl("records/"))
+record = verifier.check(
+    answer="Revenue was €42.1 million.",
+    passages=["Revenue reached €41.2 million."],
 )
-print(record.decision)      # FAIL
-print(record.report())      # what a reviewer needs to see
-record.verify()             # recompute every hash and the signature, offline
+print(record.decision, record.reasons)
 ```
+
+```{code-block} text
+FAIL ['c2: groundlens.numeric contradicted: €42.1 million not in sources; nearest 41200000 EUR in ctx-0 (relative distance 0.021)']
+```
+
+No account, no API key, no model, no network. The signed record is in
+`records/` before `check` returns. Then read the
+[concepts](concepts/overview.md) to see what the pieces mean.
 
 ## The documentation
 
