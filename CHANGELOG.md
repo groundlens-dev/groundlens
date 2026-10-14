@@ -7,6 +7,8 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-10-14
+
 ### Added
 
 - **The sinks and signers run against real software in CI**: Postgres, MinIO
@@ -155,6 +157,14 @@ identical in the git tag and on PyPI.
   verifier took, outside the record.
 
 ### Changed
+
+- **YAML is read with `serde_norway`**, the maintained fork of
+  `serde_yaml`, which is unmaintained (RUSTSEC-2024-0449, through
+  `unsafe-libyaml`). Same API and the same parse: policy hashes and the
+  golden content hashes are unchanged.
+- **`cargo-deny` runs in CI** (`deny.toml`): no networking crate anywhere in
+  the workspace, only the licences the graph uses, no crate with a RustSec
+  advisory. The README said so before CI checked it.
 
 - **Shipped policies 1.1.0.** `groundlens_default_v1` and
   `eu_ai_act_high_risk_v1` list `groundlens.scope` as recommended, fail on its
@@ -469,6 +479,7 @@ The 3.x Python implementation is kept at tag
 for reproducibility of published numbers. Its history is in the release
 notes of each 3.x tag.
 
+[6.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v6.0.0
 [5.3.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.3.0
 [5.2.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.2.0
 [5.1.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.1.0
