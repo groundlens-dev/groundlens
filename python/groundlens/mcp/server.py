@@ -28,13 +28,26 @@ except ModuleNotFoundError as e:  # pragma: no cover - exercised only without th
 
 def build_server() -> "MCPServer":
     """Build the MCP server with the three verification tools registered."""
+    from groundlens import __version__
+
     server = MCPServer(
         "groundlens",
+        title="GroundLens",
+        description=(
+            "Guardrails for LLM answers. Checks an LLM answer against its sources without a "
+            "model, decides PASS, REVIEW or FAIL under a policy, and keeps a signed record."
+        ),
+        version=__version__,
+        website_url="https://groundlens.dev",
         instructions=(
-            "GroundLens verifies AI output and executions and seals signed, "
-            "offline-verifiable evidence records. Use verify_answer to check an "
-            "answer against its sources under a policy, verify_run to gate an MCP "
-            "execution trace, and verify_records to check a records log offline."
+            "GroundLens: guardrails for LLM answers. Before you send an answer written from "
+            "documents, call verify_answer with the answer and the passages it came from. It "
+            "checks every figure (amounts, rates, percentages, dates, units, and figures the "
+            "answer computed) against the passages without a model, and returns PASS, REVIEW "
+            "or FAIL with the reasons. On FAIL, fix the figures the reasons name; on REVIEW, "
+            "say what could not be confirmed. Pass scope (e.g. {\"entity\": \"ACME\"}) to "
+            "fail figures taken from another company. verify_records checks a log of records "
+            "offline; verify_run gates an MCP execution trace under an execution policy."
         ),
     )
 
@@ -48,7 +61,10 @@ def build_server() -> "MCPServer":
         scope: dict[str, str] | None = None,
         risk_class: str | None = None,
     ) -> dict[str, Any]:
-        """Verify an answer against its sources under a policy and return the sealed record.
+        """Check an answer against the passages it was written from, before you send it.
+
+        Every figure must be in the passages or follow from figures that are; no model
+        is used. Returns PASS, REVIEW or FAIL with the reasons, and the signed record.
 
         sources: (id, text) pairs, {"id","text","provenance"} dicts, or bare strings.
         policy: a built-in name (e.g. "eu_ai_act_high_risk_v1"), a path, or YAML.

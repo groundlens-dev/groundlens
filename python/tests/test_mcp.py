@@ -111,3 +111,14 @@ def test_verify_answer_checks_the_scope_from_provenance():
     assert any("outside the request scope" in r for r in out["reasons"])
     ok = tools.verify_answer("UPS revenue was $91.0 billion.", sources, locale="en", scope={"entity": "UPS"})
     assert ok["decision"] == "PASS"
+
+
+def test_the_server_tells_an_agent_what_it_is_for():
+    pytest.importorskip("mcp")
+    import groundlens
+    from groundlens.mcp.server import build_server
+
+    server = build_server()
+    assert server.version == groundlens.__version__
+    assert "guardrails for LLM answers" in server.instructions
+    assert "verify_answer" in server.instructions
