@@ -10,12 +10,45 @@
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![Docs](https://img.shields.io/readthedocs/groundlens)](https://groundlens.readthedocs.io/en/latest/)
-[![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
-[![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![SLSA](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev)
 
+<br>
+
+
+<br>
+
+
+<table>
+  <tr>
+    <td rowspan="4" valign="middle" width="50%">
+      <h3>🤔 Already running an LLM&#8209;as&#8209;judge?</h3>
+      Keep it. GroundLens runs the exact checks first, and a <b>FAIL</b> never reaches the judge. Your judge only sees the answers the exact checks could not reject.
+    </td>
+    <td><b>Deterministic</b></td>
+    <td><sub>Exact&nbsp;checks&nbsp;first,&nbsp;no&nbsp;LLM&nbsp;judge&nbsp;needed<sub></td>
+  </tr>
+  <tr>
+    <td><b>Provable</b></td>
+    <td><sub>PASS,&nbsp;REVIEW&nbsp;or&nbsp;FAIL,&nbsp;with&nbsp;a&nbsp;signed&nbsp;record<sub></td>
+  </tr>
+  <tr>
+    <td><b>Measured</b></td>
+    <td><sub>You&nbsp;know&nbsp;the&nbsp;error&nbsp;rate&nbsp;of&nbsp;what&nbsp;passes<sub></td>
+  </tr>
+  <tr>
+    <td><b>Portable</b></td>
+    <td><sub>Rust&nbsp;engine:&nbsp;the&nbsp;same&nbsp;hash&nbsp;on&nbsp;every&nbsp;OS<sub></td>
+  </tr>
+</table>
+
+
+<br>
+
+
+<p align="center"><sub>Works with</sub><br><br>
+
+</p>
 
 <a href="#langfuse"><picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://langfuse.com/langfuse_logo_white.svg">
@@ -30,29 +63,7 @@
   <img src="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/light.svg" height="26" alt="Model Context Protocol">
 </picture></a>
 
-
 <br>
-
-<br>
-
-
-<table>
-  <tr>
-    <td align="center" valign="top" width="33%"><b>Deterministic</b><br><sub>Exact&nbsp;checks&nbsp;first<br>no&nbsp;LLM&nbsp;judge&nbsp;needed</sub></td>
-    <td align="center" valign="top" width="33%"><b>Provable</b><br><sub>PASS,&nbsp;REVIEW&nbsp;or&nbsp;FAIL<br>with&nbsp;a&nbsp;signed&nbsp;record</sub></td>
-    <td align="center" valign="top" width="33%"><b>Measured</b><br><sub>You&nbsp;know&nbsp;the&nbsp;error&nbsp;rate<br>of&nbsp;what&nbsp;passes</sub></td>
-  </tr>
-</table>
-
-<br>
-
-### 🤔 **Already running an LLM-as-judge?** 
-Keep it. Before calling the judge, GroundLens <br>
-runs the exact checks. If the result is FAIL, it <br>
-doesn’t call the judge: the judge can only escalate an answer, <br>
-so its reply  couldn’t change a FAIL. <br>
-One run of the exact checks, a couple of milliseconds.
-
 
 <br>
 
