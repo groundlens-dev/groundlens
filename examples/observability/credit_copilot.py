@@ -119,6 +119,8 @@ def run_grafana(args) -> None:
 def run_langfuse(args) -> None:
     from langfuse import Langfuse
 
+    # Name the service, as an application would; Langfuse shows it on each trace.
+    os.environ.setdefault("OTEL_SERVICE_NAME", "credit-copilot")
     client = Langfuse()
     verifier = make_verifier(args, [gl.integrations.langfuse(client)])
     for case in loop(args):

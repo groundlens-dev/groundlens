@@ -17,8 +17,11 @@ the check appears in that trace:
 - the judge as a generation, with its model, so it sits next to your own
   model calls;
 - each verifier, the signer and the store as spans, with their latency;
-- the decision as the categorical score ``groundlens.decision`` on the trace,
-  with the reasons as its comment, so you can filter traces and chart it.
+- the decision as the categorical score ``groundlens.decision``, on the
+  check and so on its trace, with the reason codes as its comment, so you can
+  filter traces and chart it;
+- the decision, reason codes, record id and hash and policy in the check's
+  metadata, to find the signed record behind it.
 
 Works with Langfuse Cloud and self-hosted Langfuse, Python SDK v3 or v4. Install with
 ``pip install "groundlens[langfuse]"``.
@@ -64,7 +67,10 @@ class Langfuse:
                 _TYPE: "guardrail",
                 _LEVEL: LEVELS.get(r.decision, "DEFAULT"),
                 _OUTPUT: r.decision,
+                _METADATA + ".decision": r.decision,
+                _METADATA + ".reasons": ", ".join(reason_codes(r)) or None,
                 _METADATA + ".record_id": r.record_id,
+                _METADATA + ".record_hash": r.record_hash,
                 _METADATA + ".policy": r.policy_id,
             }
             if r.reasons:
@@ -92,6 +98,9 @@ class Langfuse:
             value=r.decision,
             data_type="CATEGORICAL",
             trace_id=format(ctx.trace_id, "032x"),
+            # On the check itself as well as on the trace: the trace's score
+            # list and filters show it, and so does the check's Scores tab.
+            observation_id=format(ctx.span_id, "016x"),
             comment=", ".join(reason_codes(r)) or None,
             metadata={"record_id": r.record_id, "record_hash": r.record_hash, "policy": r.policy_id},
         )

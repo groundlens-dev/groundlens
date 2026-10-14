@@ -162,6 +162,9 @@ def test_langfuse_puts_the_check_in_the_trace_and_the_decision_in_a_score(tmp_pa
     assert score["name"] == "groundlens.decision" and score["value"] == "REVIEW"
     assert score["data_type"] == "CATEGORICAL"
     assert score["trace_id"] == format(parent.get_span_context().trace_id, "032x")
+    assert score["observation_id"] == format(check.context.span_id, "016x")
+    assert check.attributes["langfuse.observation.metadata.decision"] == "REVIEW"
+    assert check.attributes["langfuse.observation.metadata.record_hash"] == record.record_hash
     assert score["metadata"]["record_hash"] == record.record_hash
 
 

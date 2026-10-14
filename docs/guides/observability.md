@@ -40,7 +40,13 @@ of that answer gets:
 | `groundlens.judge` | A generation with the judge's model, when the policy uses a judge. Next to your own model calls, with its latency. |
 | `groundlens.engine` and one span per verifier | How long each check took. Exact checks take about a millisecond. |
 | `groundlens.store` | Writing the record to your sink. |
-| Score `groundlens.decision` | Categorical, on the trace: `PASS`, `REVIEW` or `FAIL`, with the reason codes as its comment. Filter traces by it, chart it, export it. |
+| Score `groundlens.decision` | Categorical: `PASS`, `REVIEW` or `FAIL`, with the reason codes as its comment. Attached to `groundlens.check`, so it shows on the check and on its trace. Filter traces by it, chart it, export it. |
+| Metadata of `groundlens.check` | The decision, the reason codes, the record id and hash, and the policy: what you need to find the signed record. |
+
+Langfuse has its own levels for every observation. `groundlens.check` uses
+them so problems stand out without a filter: `PASS` is `DEFAULT`, `REVIEW` is
+`WARNING`, `FAIL` is `ERROR`. To filter by decision, use the score, which keeps
+GroundLens's words.
 
 ## Grafana, and any OpenTelemetry backend
 
