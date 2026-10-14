@@ -7,7 +7,10 @@ a sentence that says something the passages never said. For that you need a
 model that reads. GroundLens calls it the **judge**.
 
 GroundLens does not ship a model. You pass the client you already use, and
-GroundLens sends it one fixed prompt per answer.
+GroundLens sends it one fixed prompt per answer, but only when the exact checks
+have not already failed that answer. The judge can escalate and never pass, so
+on a FAIL its reply could change nothing: it is not asked, and you do not pay
+for the call.
 
 ## The short version
 
@@ -84,6 +87,7 @@ judge:
 | contradicted | `contradicted` (REVIEW by default, FAIL if the policy says so) |
 | no label, a label outside the four, or a reply that is not the JSON asked for | REVIEW |
 | a timeout or an error | REVIEW |
+| not asked, because the exact checks already failed the answer | FAIL stays FAIL; a required judge that was not asked adds no reason |
 
 Because the judge's agreement counts for nothing, a judge that is wrong, or
 that a passage has talked into saying "supported", cannot pass an answer that
