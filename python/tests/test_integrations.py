@@ -225,3 +225,11 @@ def test_spans_reach_the_global_provider_by_default(tmp_path):
 )
 def test_reasons_become_codes_a_dashboard_can_group_by(reason, code):
     assert gl.observe.reason_code(reason) == code
+
+
+def test_the_example_policies_load():
+    from pathlib import Path
+
+    here = Path(__file__).resolve().parents[2] / "examples" / "observability"
+    for name in ("credit_desk.yaml", "credit_desk_judged.yaml"):
+        assert gl.Policy.coerce(here / name).hash.startswith("sha256:")
