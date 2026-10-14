@@ -10,7 +10,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![Docs](https://readthedocs.org/projects/groundlens/badge/?version=latest)](https://groundlens.readthedocs.io/en/latest/)
+[![Docs](https://img.shields.io/readthedocs/groundlens)](https://groundlens.readthedocs.io/en/latest/)
 [![Python](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/python.yml)
 [![Rust](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml/badge.svg)](https://github.com/groundlens-dev/groundlens/actions/workflows/rust.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
@@ -18,9 +18,18 @@
 
 <br>
 
-<a href="#langfuse"><img src="https://cdn.brandfetch.io/domain/langfuse.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM" height="32" alt="Langfuse"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="#grafana-and-opentelemetry"><img src="https://cdn.brandfetch.io/domain/grafana.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM" height="26" alt="Grafana"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="#mcp"><img src="https://cdn.brandfetch.io/domain/modelcontextprotocol.io/fallback/transparent/w/820/h/820/logo?c=1ideAdvVHkxtvsuMFiM" height="26" alt="Model Context Protocol"></a>
+<a href="#langfuse"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://langfuse.com/langfuse_logo_white.svg">
+  <img src="https://cdn.brandfetch.io/domain/langfuse.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM" height="32" alt="Langfuse">
+</picture></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#grafana-and-opentelemetry"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.brandfetch.io/domain/grafana.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM">
+  <img src="https://cdn.brandfetch.io/domain/grafana.com/w/820/h/194/theme/dark/logo?c=1ideAdvVHkxtvsuMFiM" height="26" alt="Grafana">
+</picture></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#mcp"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/dark.svg">
+  <img src="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/light.svg" height="26" alt="Model Context Protocol">
+</picture></a>
 
 
 </div>
@@ -44,10 +53,14 @@ FAIL ['c2: groundlens.numeric contradicted: €42.1 million not in sources; near
 
 Runs locally: no account, no API key, no model, no network. The signed record is in `records/` before `check` returns.
 
+<br>
+
+## Integration
+
 The same check, wired into your stack:
 
 <a name="langfuse"></a>
-<details open>
+<details close>
 <summary><b>Langfuse</b> · <code>pip install "groundlens[langfuse]"</code></summary>
 
 ```python
@@ -67,7 +80,7 @@ Call `check` inside the observation that produced the answer, and its trace gets
 </details>
 
 <a name="grafana-and-opentelemetry"></a>
-<details open>
+<details close>
 <summary><b>Grafana and OpenTelemetry</b> · <code>pip install "groundlens[otel]"</code></summary>
 
 ```python
@@ -98,7 +111,7 @@ Spans and metrics go through the providers your application already configured: 
 </details>
 
 <a name="mcp"></a>
-<details open>
+<details close>
 <summary><b>MCP</b> · <code>pip install "groundlens[mcp]"</code></summary>
 
 ```json
@@ -109,7 +122,72 @@ Tools: `verify_answer`, `verify_run`, `verify_records`, over stdio. An agent che
 
 </details>
 
-**Both connectors:** no text of questions, answers or passages is sent unless you pass `capture_text=True`. Exact checks add about 3 ms at p95 per answer (measured on 2 CPU cores); a judge adds one call to your model. GroundLens has no telemetry and never contacts us.
+<a name="storage"></a>
+<details close>
+<summary><b>Where records are kept</b> · <code>sink=</code></summary>
+
+`check()` returns only after the signed record is stored. If it cannot be stored, `check()` raises and no decision comes back. Each sink keeps a chain: every record carries the hash of the one before it.
+
+| Sink | What you pass | How it stays append-only |
+|---|---|---|
+| `gl.sinks.jsonl("records/")` | a directory or a `.jsonl` path | one JSON line per record, flushed to disk and locked on every write. For development and single machines |
+| `gl.sinks.s3_object_lock(boto3.client("s3"), "bucket")` | your S3 client and a bucket created with Object Lock | one object per record, written only if absent; `retain_days=` adds a retention date (`COMPLIANCE` mode by default) |
+| `gl.sinks.azure_blob(container_client)` | an `azure.storage.blob.ContainerClient` | one blob per record, never overwritten; give the container a time-based immutability policy |
+| `gl.sinks.postgres(psycopg.connect(...))` | any DB-API connection | one row per record; the table is created if missing, and its keys stop a position from being written twice or a chain from forking |
+
+```python
+import boto3
+verifier = gl.Verifier(
+    signer=gl.signers.aws_kms(boto3.client("kms"), key_id),           # the key never leaves KMS
+    sink=gl.sinks.s3_object_lock(boto3.client("s3"), "audit-records", retain_days=3650),
+)
+```
+
+Several processes: give each its own chain (`chain="worker-3"`) and verify them together with `groundlens record verify`. GroundLens depends on none of these SDKs: you pass the client you already use. The S3, Azure, Postgres and KMS adapters are tested against stand-ins with each SDK's call shapes, not yet against the live services.
+
+</details>
+
+<br>
+
+## LLM-as-a-judge
+
+The exact checks catch a figure that is wrong, miscalculated, from another company or of another kind than asked. They cannot catch a real figure taken from the wrong row of the right table, or a sentence the passages never say. For that you connect a model that reads: the **judge**. GroundLens ships no model; you pass the client you already use.
+
+```python
+from openai import OpenAI
+
+verifier = gl.Verifier(
+    "credit_desk.yaml",                                       # a policy that allows a judge, below
+    judge=gl.judges.openai_compatible(OpenAI(), "gpt-4.1"),
+    sink=gl.sinks.jsonl("records/"),
+)
+```
+
+| Adapter | Client |
+|---|---|
+| `gl.judges.openai_compatible(client, model)` | `openai.OpenAI`, or any server with the same API: vLLM, Ollama, your gateway (`base_url=`) |
+| `gl.judges.azure_openai(client, deployment)` | `openai.AzureOpenAI` |
+| `gl.judges.bedrock(client, model_id)` | `boto3.client("bedrock-runtime")` |
+
+The shipped policies forbid a judge, so the policy that uses one says so:
+
+```yaml
+id: credit_desk
+version: 1.0.0
+extends: eu_ai_act_high_risk_v1
+verifiers:
+  forbidden: []          # allow llm_judge.*
+judge:
+  required: true         # no judge, or a judge that fails: REVIEW
+  contradicted: REVIEW   # or FAIL
+  unsupported: REVIEW
+```
+
+**The judge can escalate, never pass.** It labels each sentence `supported`, `unsupported`, `contradicted` or `uncertain`. `supported` resolves nothing on its own, so a judge that is wrong, or that a passage has talked into agreeing, cannot let through an answer the exact checks fail. A timeout, an error or a malformed reply is `REVIEW`.
+
+**You see exactly what it is sent.** One prompt per answer, from a fixed template (`groundlens.judge/1`): what PASS means for you, the scope, the question, the answer and every passage with its provenance. Passages sit between markers they cannot contain, so text inside them is data, not instructions. `groundlens judge show-template` prints the exact prompt before anything is sent anywhere.
+
+**The record keeps the trail.** The template id, the hash of the prompt, the model the provider says answered and the hash of its reply, with each sentence's label, the passages it cited and its one-line reason. In Langfuse the judge appears as a `generation`, next to your own model calls.
 
 <br>
 
@@ -127,7 +205,7 @@ The engine is Rust (`crates/gl-core`, `gl-numeric`, `gl-verifiers`, `gl-policy`,
 
 <br>
 
-## Parameters and capabilities
+## Parameters 
 
 | Parameter of `Verifier` | Options |
 |---|---|
@@ -145,20 +223,85 @@ The engine is Rust (`crates/gl-core`, `gl-numeric`, `gl-verifiers`, `gl-policy`,
 | `scope` | what the request is about (`{"entity": "ACME"}`): a figure from another entity fails |
 | `risk_class` | a class your policy can send to human review whatever the checks say |
 
-A policy, in full:
+<br>
+
+## Policy
+
+The checks produce evidence. The policy decides what that evidence means for you: what fails, what goes to a person, and what PASS allows. It is a short YAML file that you own and version with your code. The same answer under two policies can get two different decisions, and both are correct; that difference is your risk appetite, written down.
+
+Two policies ship with GroundLens:
+
+| Policy | For |
+|---|---|
+| `groundlens_default_v1` (default) | any application. A contradicted figure or a figure from outside the scope fails; an answer of the wrong kind or unit goes to review. No model decides. |
+| `eu_ai_act_high_risk_v1` | systems under Annex III of the EU AI Act. The same rules, with each decision mapped to Art. 15(1) accuracy, Art. 14(4)(a) human oversight and Art. 12(1) record keeping. |
+
+### Write your own policy
+
+Extend a shipped policy and write only what differs:
 
 ```yaml
 id: credit_desk
-version: 1.0.0
+version: 1.2.0
 extends: eu_ai_act_high_risk_v1
+pass_means: "may be shown to the analyst as a summary of the filing"
+locale: es-ES                     # how the documents write numbers: 1.234,56
+rounding: half_even               # how a recomputed figure may round
 scope:
-  required: [entity]
+  required: [entity]              # every request must name the borrower
+  missing_scope: REVIEW           # or FAIL; never PASS
 risk_classes:
   default: credit_information
-  mandatory_review: [credit_limit_change]
+  mandatory_review: [credit_limit_change]   # always seen by a person
 ```
 
-Also: `groundlens measure` estimates the share of wrong answers among those that passed, from a small labelled sample, with a confidence interval; `groundlens replay` shows which past decisions a policy change would flip. Full documentation: [groundlens.readthedocs.io](https://groundlens.readthedocs.io).
+```python
+verifier = gl.Verifier("policies/credit_desk.yaml")
+verifier.check(answer=a, passages=p, scope={"entity": "Talleres Norte"}, risk_class="credit_limit_change")
+```
+
+| Key | What it sets |
+|---|---|
+| `extends` | a shipped policy to start from. Maps merge key by key, lists replace. Your policy must set its own `id` and `version`. |
+| `pass_means` | what PASS allows in your application, in one sentence. A verifier's PASS is not a decision to publish; this says which one it is. |
+| `locale`, `rounding` | how figures are read and compared: `half_up`, `half_even` or `within_last_digit`. Written here, they win over the request. |
+| `scope` | the keys every request must carry, and what a missing one gets. |
+| `risk_classes` | classes that always go to review. A class the policy does not list is an error, so a typo cannot route around review. |
+| `verifiers` | which checks are `required`, `recommended`, `optional`, `fallback` or `forbidden`. |
+| `decision` | which verifiers can fail an answer, which send it to review, and what unresolved or conflicting claims get. |
+| `judge` | whether a judge is required and what its labels may do. See [LLM-as-a-judge](#llm-as-a-judge). |
+| `regulatory_mapping` | which control and article each decision evidences, in your own control ids. |
+
+Unknown keys are errors, not ignored: a misspelt rule never silently does nothing.
+
+### Failure is not a PASS
+
+| Situation | Decision |
+|---|---|
+| a figure contradicts the passages, under the rounding rule | FAIL |
+| a figure comes only from a passage outside the scope | FAIL |
+| a required scope key is missing | REVIEW (or FAIL, if the policy says so) |
+| a risk class that requires review | REVIEW, whatever the checks say |
+| a check could not run, or the judge timed out or failed | REVIEW |
+| the record cannot be stored | an exception, and no decision |
+
+The final decision is the worst outcome of all checks.
+
+### Check your policy
+
+```bash
+groundlens policy lint policies/credit_desk.yaml                # errors before you deploy
+groundlens policy show --resolved policies/credit_desk.yaml     # every default filled in
+```
+
+The hash of the resolved policy goes into every record it decides, so each decision can be traced to the exact rules that produced it.
+
+Before you change a policy,you have to measure it:
+
+- `groundlens measure` estimates the share of wrong answers among those that passed, from a small sample your team labels without seeing the verdicts, with a 95 % confidence interval, per risk class, and the cost per decision.
+- `groundlens replay` runs past traffic under the new policy and lists the decisions that would change.
+
+Both reports are signed. Full reference: [Writing policies](https://groundlens.readthedocs.io/en/latest/guides/writing-policies.html).
 
 <br>
 
