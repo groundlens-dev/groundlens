@@ -110,6 +110,10 @@ identical in the git tag and on PyPI.
   (`groundlens.replay/1`).
 - `gl_record::SignedDocument`, `sign_document`, `verify_document` for signed
   reports; `VerifyRequest::judge_evidence` to replay a judge's stored evidence.
+- **The judge is not asked when the exact checks already fail an answer.** It
+  can only escalate, so its reply could not change a FAIL; skipping it saves
+  the call's time and cost. A required judge that was not asked for that
+  reason no longer adds `judge_missing` to the FAIL.
 - **`groundlens judge show-template`** (and `glv judge show-template`) prints
   the exact prompt for an input, with its hash. `Verifier.judge_prompt()` in
   Python.

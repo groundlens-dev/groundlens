@@ -148,12 +148,26 @@ def test_instructions_inside_a_passage_stay_inside_the_data_block():
 
 def test_a_judge_that_obeys_an_injected_instruction_still_cannot_pass_a_wrong_figure():
     """The worst case: the passage talks the judge into 'supported' for
-    everything. The judge's agreement resolves nothing, so the exact check
-    still fails the wrong figure."""
-    v = verifier(gl.judges.openai_compatible(OpenAIClient(labels_all("supported")), "m"))
+    everything. The exact check fails the wrong figure first, so the judge is
+    not even asked; and when it is asked, its agreement resolves nothing (the
+    policy engine's tests check that)."""
+    client = OpenAIClient(labels_all("supported"))
+    v = verifier(gl.judges.openai_compatible(client, "m"))
     r = v.seal(answer="UPS revenue was $95.0 billion in 2023.", passages=[("10k#p114", INJECTED, {"entity": "UPS"})], scope=SCOPE)
     assert r.decision == "FAIL"
     assert any("groundlens.numeric contradicted" in reason for reason in r.reasons)
+    assert client.calls == []
+
+
+def test_the_judge_is_not_asked_when_the_exact_checks_already_fail(tmp_path):
+    client = OpenAIClient(labels_all("supported"))
+    v = gl.Verifier(JUDGED, judge=gl.judges.openai_compatible(client, "m"), sink=gl.sinks.jsonl(tmp_path))
+    failed = v.check(answer="UPS revenue was $95.0 billion in 2023.", passages=PASSAGES, scope=SCOPE)
+    assert failed.decision == "FAIL" and client.calls == []
+    assert not any(r.startswith("judge_missing") for r in failed.reasons)
+    assert not any(x["id"].startswith("llm_judge.") for x in failed.verifiers)
+    passed = v.check(answer="UPS revenue was $91.0 billion in 2023.", passages=PASSAGES, scope=SCOPE)
+    assert passed.decision == "PASS" and len(client.calls) == 1
 
 
 def test_a_judge_reply_with_unknown_claim_ids_or_labels_is_review():

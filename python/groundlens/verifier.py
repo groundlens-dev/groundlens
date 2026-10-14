@@ -51,8 +51,9 @@ class Verifier:
             :meth:`check`; :meth:`seal` works without one.
         judge: the model you already use (:mod:`groundlens.judges`). It
             labels each sentence of the answer; the policy's ``judge``
-            section says what its labels may do. Without one, no model is
-            called.
+            section says what its labels may do. It is asked only when the
+            exact checks have not already failed the answer, since it can
+            escalate but never pass. Without one, no model is called.
         locale, rounding, units, derive: how numbers are read, as in
             :func:`groundlens.verify`. A ``locale`` or ``rounding`` written in
             the policy wins.
@@ -176,6 +177,11 @@ class Verifier:
 
     def _ask_judge(self, *, answer, passages, question, scope, risk_class, timer=None) -> dict | None:
         if self.judge is None:
+            return None
+        # The judge can only escalate. If the exact checks already fail the
+        # answer, nothing it says can change the decision: it is not asked.
+        exact = json.loads(_engine.verify_unsigned_json(self._request(answer, passages, question, scope, risk_class, None, None)))
+        if exact["content"]["outcome"]["decision"] == "FAIL":
             return None
         prompt = self.judge_prompt(answer=answer, passages=passages, question=question, scope=scope, risk_class=risk_class)
         start = time.time_ns()

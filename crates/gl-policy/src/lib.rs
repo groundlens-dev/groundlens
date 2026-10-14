@@ -594,14 +594,14 @@ pub fn evaluate_request(
         request_decision = request_decision.max(Decision::Review);
         request_reasons.push(format!("verifier_failed: {verifier_id} could not run: {message}"));
     }
-    if let Some(rules) = &policy.judge {
-        let judged = graph.verifiers.iter().any(|v| is_judge(&v.id))
-            || graph.failures.iter().any(|(id, _)| is_judge(id));
-        if rules.required && !judged {
-            request_decision = request_decision.max(Decision::Review);
-            request_reasons.push("judge_missing: the policy requires a judge and none ran".into());
-        }
-    }
+    // A required judge that did not run sends the answer to review, unless the
+    // answer already fails: the judge can only escalate, so on a FAIL it is not
+    // asked (see the Python Verifier) and its absence changes nothing.
+    let judge_missing = policy.judge.as_ref().is_some_and(|rules| {
+        rules.required
+            && !graph.verifiers.iter().any(|v| is_judge(&v.id))
+            && !graph.failures.iter().any(|(id, _)| is_judge(id))
+    });
     if let (Some(classes), Some(class)) = (&policy.risk_classes, &risk_class) {
         if classes.mandatory_review.contains(class) {
             request_decision = request_decision.max(Decision::Review);
@@ -736,6 +736,10 @@ pub fn evaluate_request(
         overall = overall.max(Decision::Review);
     }
     overall = overall.max(request_decision);
+    if judge_missing && overall != Decision::Fail {
+        overall = overall.max(Decision::Review);
+        request_reasons.push("judge_missing: the policy requires a judge and none ran".into());
+    }
 
     let regulatory_mapping =
         policy.regulatory_mapping.iter().filter(|c| c.triggered_by.contains(&overall)).cloned().collect();
@@ -1079,6 +1083,23 @@ regulatory_mapping:
         let strict = Policy::from_yaml(&format!("{JUDGED}  contradicted: FAIL\n")).unwrap();
         let out = evaluate(&strict, &graph_with(vec![("c1", EvidenceResult::Contradicted)]), &kinds).unwrap();
         assert_eq!(out.decision, Decision::Fail);
+    }
+
+    #[test]
+    fn a_missing_judge_does_not_touch_an_answer_that_already_fails() {
+        let policy = Policy::from_yaml(
+            &JUDGED.replace("decision:\n", "decision:\n  any_contradiction_from: [groundlens.numeric]\n"),
+        )
+        .unwrap();
+        let mut graph = EvidenceGraph::default();
+        graph.push_verifier(
+            info("groundlens.numeric", Determinism::Exact),
+            vec![ev("groundlens.numeric", "c0", EvidenceResult::Contradicted, 0.0, Determinism::Exact)],
+        );
+        let kinds = BTreeMap::from([("c0".to_string(), ClaimKind::Numeric)]);
+        let out = evaluate(&policy, &graph, &kinds).unwrap();
+        assert_eq!(out.decision, Decision::Fail);
+        assert!(out.reasons.iter().all(|r| !r.starts_with("judge_missing")), "{:?}", out.reasons);
     }
 
     #[test]
