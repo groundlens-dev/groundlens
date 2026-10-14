@@ -47,10 +47,11 @@
 <br>
 
 ### 🤔 **Already running an LLM-as-judge?** 
-Keep it, and let GroundLens check first.<br>
-Wrong figures, wrong companies and wrong arithmetic are caught <br>  **without a model**, with a reason that replays the same every time. <br>
-Your judge keeps the cases only a model can read. <br>
-Your audit stops resting on a model's opinion.
+Keep it. Before calling the judge, GroundLens <br>
+runs the exact checks. If the result is FAIL, it <br>
+doesn’t call the judge: the judge can only escalate an answer, <br>
+so its reply  couldn’t change a FAIL. <br>
+One run of the exact checks, a couple of milliseconds.
 
 
 <br>
