@@ -71,6 +71,22 @@ If the command is not on the client's `PATH`, use the interpreter form:
 }
 ```
 
+With [uv](https://docs.astral.sh/uv/), nothing needs to be installed first:
+
+```{code-block} json
+{
+  "mcpServers": {
+    "groundlens": {
+      "command": "uvx",
+      "args": ["--from", "groundlens[mcp]", "groundlens-mcp"]
+    }
+  }
+}
+```
+
+Keep `--from "groundlens[mcp]"`. Without it, `uvx groundlens-mcp` installs
+`groundlens-mcp`, an old package that only says where the server moved.
+
 Once connected, the client lists the three tools and can call them. For example,
 an agent can call `verify_answer` on its own draft before returning it, and act
 on a `FAIL`.

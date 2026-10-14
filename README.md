@@ -155,6 +155,8 @@ Spans and metrics go through the providers your application already configured: 
 { "mcpServers": { "groundlens": { "command": "groundlens-mcp" } } }
 ```
 
+Or, with nothing installed: `"command": "uvx", "args": ["--from", "groundlens[mcp]", "groundlens-mcp"]`.
+
 Tools: `verify_answer`, `verify_run`, `verify_records`, over stdio. An agent checks its own draft before it answers.
 
 </details>
