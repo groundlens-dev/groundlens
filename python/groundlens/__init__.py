@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""GroundLens: the verification and evidence layer for AI.
+"""GroundLens: guardrails for LLM answers.
 
     >>> from groundlens import verify
     >>> record = verify(answer, evidence=[("policy.pdf#p3", passage)])

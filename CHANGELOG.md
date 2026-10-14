@@ -120,7 +120,7 @@ identical in the git tag and on PyPI.
   can only escalate, so its reply could not change a FAIL; skipping it saves
   the call's time and cost. A required judge that was not asked for that
   reason no longer adds `judge_missing` to the FAIL.
-- **`groundlens judge show-template`** (and `glv judge show-template`) prints
+- **`groundlens judge show-template`** prints
   the exact prompt for an input, with its hash. `Verifier.judge_prompt()` in
   Python.
 - In Rust, `gl_record::prepare_unsigned` and `gl_record::attach_signature`,
@@ -163,14 +163,6 @@ identical in the git tag and on PyPI.
   input hash of a request without a scope are unchanged. Records written under
   1.0.0 keep verifying.
 
-- **No model runs unless a request names a bundle.** An installed `base`
-  bundle is no longer used by default: the lexical, entailment and similarity
-  channels run only with `--bundle base` or `bundle="base"`. A request without
-  a bundle records `sha256:unbundled` whatever is installed on the machine, so
-  the same request gives the same record everywhere. A policy that requires
-  `groundlens.lexical` without a bundle named now fails with a message that
-  says to pass one. `proofread()`, the word-level facade kept from 3.x, still
-  uses the installed `base` bundle when none is named.
 - **Shipped policies 1.3.0.** They recommend
   `groundlens.intent` and send its `unsupported` to review, never to fail.
   Records of requests with a question name the new verifier, so the golden

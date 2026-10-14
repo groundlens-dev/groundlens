@@ -5,12 +5,12 @@ build-backend = "maturin"
 [project]
 name = "groundlens"
 version = "5.3.0"
-description = "GroundLens: the verification and evidence layer for AI."
+description = "Guardrails for LLM answers: checks an answer against its sources without a model, decides PASS, REVIEW or FAIL under your policy, and keeps a signed record."
 readme = "../README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
 authors = [{ name = "Javier Marin", email = "javier@jmarin.info" }]
-keywords = ["verification", "rag", "grounding", "evidence", "ai-act", "policy"]
+keywords = ["llm", "guardrails", "rag", "llm-as-a-judge", "hallucination", "verification", "audit-trail", "eu-ai-act", "langfuse", "opentelemetry", "mcp"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",

@@ -24,7 +24,7 @@ answer + sources (+ question)
    evidence graph              every verifier's evidence for every claim, kept whole
         │
         ▼
-   policy                      thresholds, required verifiers, what to do with the unresolved
+   policy                      required verifiers, what fails, what goes to review
         │
         ▼
    decision  +  record         PASS / REVIEW / FAIL, sealed and signed
