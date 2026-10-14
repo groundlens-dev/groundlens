@@ -4,9 +4,9 @@
 
 ![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
 
-# GroundLens: verification for LLM answers. 
+# Guardrails for LLM answers
 
-#### Every answer gets a decision you can act on and a signed record you can audit.**
+### Every figure checked against its source, every decision signed
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -18,10 +18,10 @@
 
 <br>
 
-<a href="#langfuse"><img src="https://cdn.brandfetch.io/langfuse.com/w/240/h/64/theme/light/logo?c=BRANDFETCH_CLIENT_ID" height="26" alt="Langfuse"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="#grafana-and-opentelemetry"><img src="https://cdn.brandfetch.io/grafana.com/w/240/h/64/theme/light/logo?c=BRANDFETCH_CLIENT_ID" height="26" alt="Grafana"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="#grafana-and-opentelemetry"><img src="https://cdn.brandfetch.io/opentelemetry.io/w/240/h/64/theme/light/logo?c=BRANDFETCH_CLIENT_ID" height="26" alt="OpenTelemetry"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="#mcp"><img src="https://cdn.brandfetch.io/modelcontextprotocol.io/w/240/h/64/theme/light/logo?c=BRANDFETCH_CLIENT_ID" height="26" alt="Model Context Protocol"></a>
+<a href="#langfuse"><img src="https://cdn.brandfetch.io/domain/langfuse.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM" height="32" alt="Langfuse"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#grafana-and-opentelemetry"><img src="https://cdn.brandfetch.io/domain/grafana.com/w/820/h/194/theme/light/logo?c=1ideAdvVHkxtvsuMFiM" height="26" alt="Grafana"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#mcp"><img src="https://cdn.brandfetch.io/domain/modelcontextprotocol.io/fallback/transparent/w/820/h/820/logo?c=1ideAdvVHkxtvsuMFiM" height="26" alt="Model Context Protocol"></a>
+
 
 </div>
 
@@ -55,11 +55,14 @@ from langfuse import get_client
 verifier = gl.Verifier(sink=gl.sinks.jsonl("records/"), observers=[gl.integrations.langfuse(get_client())])
 ```
 
-- **Score:** `groundlens.decision`, categorical, values `PASS`, `REVIEW`, `FAIL`. Filter traces by it, chart it, export it.
-- **Observation:** `groundlens.check`, type `guardrail`, inside the trace that produced the answer. Level `WARNING` on REVIEW, `ERROR` on FAIL; the reasons are its status message, one per line.
+Call `check` inside the observation that produced the answer, and its trace gets:
+
+- **Score `groundlens.decision`:** categorical, `PASS`, `REVIEW` or `FAIL`, on the check and on its trace. Filter traces by it, chart it, export it.
+- **Observation `groundlens.check`:** type `guardrail`. The reasons are its status message, one per line. Its level follows Langfuse's own scale: `PASS` is `DEFAULT`, `REVIEW` is `WARNING`, `FAIL` is `ERROR`.
+- **Metadata of the check:** decision, reason codes (`groundlens.scope.contradicted`), policy, and the id and hash of the signed record behind it.
 - **Judge:** a `generation` observation with the model name, next to your own model calls.
-- **Spans:** one per verifier, plus the store, each with its duration.
-- **SDK:** Python v3 and v4, Langfuse Cloud and self-hosted. Tested on Langfuse 4.58.
+- **Spans:** one per verifier, plus the store, each with its duration. Log View shows them in milliseconds.
+- **SDK:** Python v3 and v4. Tested on Langfuse Cloud and self-hosted Langfuse 4.58.
 
 </details>
 
