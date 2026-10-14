@@ -1,8 +1,14 @@
 # The same desk with a judge: the model labels each sentence, and any doubt it
 # raises sends the answer to review. It can never make an answer pass.
+# extends names a shipped policy only, so the desk's rules are repeated here.
 id: credit_desk_judged
 version: 1.0.0
-extends: credit_desk.yaml
+extends: eu_ai_act_high_risk_v1
+scope:
+  required: [entity]
+risk_classes:
+  default: credit_information
+  mandatory_review: [credit_limit_change]
 verifiers:
   forbidden: []
 judge:
