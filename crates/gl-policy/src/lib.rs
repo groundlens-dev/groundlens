@@ -6,9 +6,8 @@
 //!
 //! The engine measures. The policy interprets. A policy names which
 //! verifiers are required, recommended, optional, fallback or forbidden,
-//! which determinism class may decide, the thresholds per verifier, a
-//! guard band around each threshold, and how each outcome maps to a
-//! regulatory control.
+//! which determinism class may decide, what each verifier's evidence does
+//! to the decision, and how each outcome maps to a regulatory control.
 //!
 //! ```yaml
 //! id: eu_ai_act_high_risk_v1
@@ -16,15 +15,11 @@
 //! description: Article 15 accuracy controls for a RAG assistant in a high-risk use
 //! verifiers:
 //!   required: [groundlens.numeric]
-//!   recommended: [nli.deberta_v3_small, groundlens.lexical]
-//!   optional: [sgi, dgi]
-//!   fallback: [llm_judge.default]
-//!   forbidden: []
+//!   recommended: [groundlens.scope, groundlens.intent, groundlens.rules.*]
+//!   fallback: []
+//!   forbidden: [llm_judge.*]
 //! determinism:
 //!   minimum_to_decide: reproducible     # exact | reproducible | any
-//! thresholds:
-//!   nli.deberta_v3_small: { support_min: 0.85, guard_band: 0.02 }
-//!   groundlens.lexical:   { support_min: 0.60, guard_band: 0.02 }
 //! decision:
 //!   any_contradiction_from: [groundlens.numeric, groundlens.rules.*]   -> FAIL
 //!   unsupported_from: [groundlens.scope]                                -> REVIEW
@@ -36,16 +31,6 @@
 //!     control: accuracy-of-outputs
 //!     triggered_by: [FAIL, REVIEW]
 //! ```
-//!
-//! ## The guard band
-//!
-//! Functional determinism promises the same *classification* across
-//! platforms while scores may drift within a tolerance. A threshold compared
-//! with a drifting score is exactly where classifications flip. The guard
-//! band closes that gap: a score within `guard_band` of the threshold is
-//! `REVIEW` on every platform, so a platform difference can never turn a
-//! `PASS` into a `FAIL`. The band must be at least twice the verifier's
-//! declared tolerance; `lint` enforces that.
 //!
 //! ## Strict keys and `extends`
 //!
@@ -142,16 +127,6 @@ impl Default for DeterminismPolicy {
     fn default() -> Self {
         DeterminismPolicy { minimum_to_decide: MinimumDeterminism::Reproducible }
     }
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Threshold {
-    /// Scores at or above this count as support.
-    pub support_min: f64,
-    /// Half-width of the review band around `support_min`.
-    #[serde(default)]
-    pub guard_band: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -307,8 +282,6 @@ pub struct Policy {
     #[serde(default)]
     pub determinism: DeterminismPolicy,
     #[serde(default)]
-    pub thresholds: BTreeMap<String, Threshold>,
-    #[serde(default)]
     pub decision: DecisionRules,
     #[serde(default)]
     pub regulatory_mapping: Vec<RegulatoryControl>,
@@ -463,30 +436,13 @@ impl Policy {
                 ));
             }
         }
-        for (id, t) in &self.thresholds {
-            if !(0.0..=1.0).contains(&t.support_min) {
-                problems.push(format!("{id}: support_min out of [0,1]"));
-            }
-            if let Some(info) = known.iter().find(|k| &k.id == id) {
-                if info.determinism == Determinism::Exact {
-                    problems
-                        .push(format!("{id}: is an exact verifier; it has no continuous score to threshold"));
-                }
-                let tol = info.determinism.tolerance().0;
-                if t.guard_band < 2.0 * tol {
-                    problems.push(format!(
-                        "{id}: guard_band {} is below twice the verifier tolerance {}",
-                        t.guard_band, tol
-                    ));
-                }
-                if !self.determinism.minimum_to_decide.admits(info.determinism) {
-                    problems.push(format!(
-                        "{id}: has a threshold but its determinism class cannot decide under this policy"
-                    ));
-                }
-            }
-        }
         for id in &self.verifiers.required {
+            let named_at_run_time = id.starts_with("groundlens.rules.") || id.starts_with(JUDGE_PREFIX);
+            if !named_at_run_time && !id.ends_with(".*") && !known.iter().any(|k| &k.id == id) {
+                problems.push(format!(
+                    "{id}: required, but this engine has no such verifier (the model channels were removed in 6.0)"
+                ));
+            }
             if self.verifiers.forbidden.contains(id) {
                 problems.push(format!("{id}: both required and forbidden"));
             }
@@ -698,19 +654,7 @@ pub fn evaluate_request(
                 reasons.push(format!("{} unsupported: {}", e.verifier_id, e.rationale));
                 continue;
             }
-            if let Some(t) = policy.thresholds.get(&e.verifier_id) {
-                let s = e.score.0;
-                if (s - t.support_min).abs() <= t.guard_band {
-                    decision = decision.max(Decision::Review);
-                    reasons.push(format!(
-                        "{} score {s:.6} inside guard band of {}",
-                        e.verifier_id, t.support_min
-                    ));
-                } else if s < t.support_min {
-                    decision = decision.max(Decision::Review);
-                    reasons.push(format!("{} score {s:.6} below {}", e.verifier_id, t.support_min));
-                }
-            } else if e.result == EvidenceResult::Contradicted {
+            if e.result == EvidenceResult::Contradicted {
                 decision = decision.max(Decision::Review);
                 reasons.push(format!(
                     "{} contradicted (not a failing verifier under this policy)",
@@ -762,7 +706,7 @@ pub fn evaluate_request(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gl_core::{ClaimKind, Evidence, Receipt, Score, Tolerance, VerifierKind};
+    use gl_core::{ClaimKind, Evidence, Receipt, Score, VerifierKind};
 
     fn info(id: &str, d: Determinism) -> VerifierInfo {
         VerifierInfo {
@@ -800,8 +744,6 @@ verifiers:
   forbidden: [llm_judge.*]
 determinism:
   minimum_to_decide: reproducible
-thresholds:
-  nli.demo: { support_min: 0.85, guard_band: 0.02 }
 regulatory_mapping:
   - framework: EU-AI-Act-2024/1689
     article: "Art. 15(1)"
@@ -824,32 +766,34 @@ regulatory_mapping:
     }
 
     #[test]
-    fn guard_band_routes_to_review_and_judge_is_recorded_not_deciding() {
+    fn a_judge_the_policy_does_not_admit_is_recorded_not_deciding() {
         let policy = Policy::from_yaml(POLICY).unwrap();
-        let rep = Determinism::Reproducible { tolerance: Tolerance::FLOAT32_CPU };
         let mut graph = EvidenceGraph::default();
         graph.push_verifier(info("groundlens.numeric", Determinism::Exact), vec![]);
         graph.push_verifier(
-            info("nli.demo", rep),
-            vec![ev("nli.demo", "c0", EvidenceResult::Supported, 0.86, rep)],
-        );
-        graph.push_verifier(
             info("llm_judge.x", Determinism::NonDeterministic),
-            vec![ev("llm_judge.x", "c0", EvidenceResult::Contradicted, 0.1, Determinism::NonDeterministic)],
+            vec![ev("llm_judge.x", "c0", EvidenceResult::Contradicted, 0.0, Determinism::NonDeterministic)],
         );
         let kinds = BTreeMap::from([("c0".to_string(), ClaimKind::Statement)]);
         let out = evaluate(&policy, &graph, &kinds).unwrap();
+        // Its contradiction would fail the answer if it counted; it does not.
         assert_eq!(out.decision, Decision::Review);
-        assert!(out.claims[0].reasons[0].contains("guard band"));
         assert_eq!(out.excluded_verifiers[0].0, "llm_judge.x");
     }
 
     #[test]
-    fn lint_catches_a_guard_band_narrower_than_drift() {
-        let mut policy = Policy::from_yaml(POLICY).unwrap();
-        policy.thresholds.get_mut("nli.demo").unwrap().guard_band = 0.0;
-        let known = [info("nli.demo", Determinism::Reproducible { tolerance: Tolerance::FLOAT32_CPU })];
-        assert_eq!(policy.lint(&known).len(), 1);
+    fn requiring_a_verifier_the_engine_does_not_have_is_a_lint_problem() {
+        let policy =
+            Policy::from_yaml("id: t\nversion: 1.0.0\nverifiers:\n  required: [groundlens.lexical]\n")
+                .unwrap();
+        let problems = policy.lint(&[info("groundlens.numeric", Determinism::Exact)]);
+        assert!(problems[0].contains("no such verifier"), "{problems:?}");
+    }
+
+    #[test]
+    fn a_policy_from_5x_with_thresholds_is_refused() {
+        let e = Policy::from_yaml("id: t\nversion: 1.0.0\nthresholds: {}\n").unwrap_err().to_string();
+        assert!(e.contains("unknown field"), "{e}");
     }
 
     #[test]
@@ -896,7 +840,7 @@ regulatory_mapping:
             "verifiers:\n  requird: [groundlens.numeric]\n",
             "decision:\n  any_contradiction_frm: [groundlens.numeric]\n",
             "determinism:\n  minimum: exact\n",
-            "thresholds:\n  nli.demo: { support_min: 0.9, guardband: 0.02 }\n",
+            "judge:\n  requird: true\n",
             "regulatory_mapping:\n  - {framework: x, article: y, control: z, triggered_by: [FAIL], tag: t}\n",
             "scope:\n  require: [entity]\n",
             "risk_classes:\n  default: routine\n  mandatory: [recommendation]\n",
@@ -918,15 +862,14 @@ regulatory_mapping:
     }
 
     #[test]
-    fn the_repository_copies_of_the_shipped_policies_are_identical() {
+    fn the_repository_copy_of_the_shipped_policy_is_identical() {
         let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
         let eu = builtin("eu_ai_act_high_risk_v1").unwrap();
-        for copy in
-            ["policies/eu_ai_act_high_risk_v1.yaml", "python/groundlens/policies/eu_ai_act_high_risk_v1.yaml"]
-        {
-            let text = std::fs::read_to_string(format!("{root}/{copy}")).unwrap();
-            assert_eq!(text, eu, "{copy} differs from crates/gl-policy/policies; edit both");
-        }
+        let text = std::fs::read_to_string(format!("{root}/policies/eu_ai_act_high_risk_v1.yaml")).unwrap();
+        assert_eq!(
+            text, eu,
+            "policies/eu_ai_act_high_risk_v1.yaml differs from crates/gl-policy/policies; edit both"
+        );
     }
 
     #[test]
@@ -980,7 +923,7 @@ regulatory_mapping:
         let lax =
             Policy::from_yaml(&format!("{POLICY}scope:\n  required: [entity]\n  missing_scope: PASS\n"))
                 .unwrap();
-        assert_eq!(lax.lint(&[]).len(), 1);
+        assert_eq!(lax.lint(&[info("groundlens.numeric", Determinism::Exact)]).len(), 1);
     }
 
     #[test]
@@ -1116,18 +1059,20 @@ regulatory_mapping:
         assert!(out.reasons[0].contains("timeout"));
 
         let bad = Policy::from_yaml(&format!("{JUDGED}  unsupported: PASS\n")).unwrap();
-        assert_eq!(bad.lint(&[]).len(), 1);
+        assert_eq!(bad.lint(&[info("groundlens.numeric", Determinism::Exact)]).len(), 1);
         let forbids =
             Policy::from_yaml("id: x\nversion: 1\nextends: groundlens_default_v1\njudge: {}\n").unwrap();
-        assert!(forbids.lint(&[])[0].contains("forbids llm_judge"));
+        assert!(
+            forbids.lint(&[info("groundlens.numeric", Determinism::Exact)])[0].contains("forbids llm_judge")
+        );
     }
 
     #[test]
     fn lint_rejects_an_unknown_rounding_rule() {
         let policy = Policy::from_yaml(&format!("{POLICY}rounding: bankers\n")).unwrap();
-        assert!(policy.lint(&[])[0].starts_with("rounding"));
+        assert!(policy.lint(&[info("groundlens.numeric", Determinism::Exact)])[0].starts_with("rounding"));
         let ok = Policy::from_yaml(&format!("{POLICY}rounding: half_even\nlocale: es-ES\n")).unwrap();
-        assert!(ok.lint(&[]).is_empty());
+        assert!(ok.lint(&[info("groundlens.numeric", Determinism::Exact)]).is_empty());
     }
 
     #[test]

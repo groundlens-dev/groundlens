@@ -220,7 +220,6 @@ def test_spans_reach_the_global_provider_by_default(tmp_path):
         ("c1: llm_judge.openai_compatible unsupported: cites p12: EBIT, not EBITDA", "llm_judge.openai_compatible.unsupported"),
         ("c1: llm_judge.bedrock could not label: timeout", "llm_judge.bedrock.could_not_label"),
         ("c3: no admitted verifier produced evidence for this claim", "unresolved"),
-        ("c3: nli.deberta score 0.700000 below 0.85", "nli.deberta.below_threshold"),
     ],
 )
 def test_reasons_become_codes_a_dashboard_can_group_by(reason, code):

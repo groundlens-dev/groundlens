@@ -22,7 +22,6 @@ fn request(question: Option<&str>, answer: &str) -> VerifyRequest {
         }],
     );
     req.locale = "en".into();
-    req.lexical = false;
     req.question = question.map(str::to_string);
     req
 }

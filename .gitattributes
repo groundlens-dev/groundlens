@@ -1,10 +1,8 @@
-# Bundles, goldens and tokenizers are hashed byte for byte. Never let a
-# checkout rewrite line endings.
+# Goldens and fixtures are hashed byte for byte. Never let a checkout
+# rewrite line endings.
 * text=auto eol=lf
-*.onnx binary
 # Hashed test data: never converted, never diffed.
-crates/gl-onnx/testdata/** binary
-crates/gl-cli/tests/golden/** binary
-python/tests/compat/*.json binary
+crates/gl-engine/tests/golden/** binary
+crates/gl-record/tests/fixtures/*/*.jsonl binary
 *.png binary
 *.ipynb text eol=lf

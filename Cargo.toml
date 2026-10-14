@@ -7,8 +7,6 @@ members = [
     "crates/gl-verifiers",
     "crates/gl-policy",
     "crates/gl-record",
-    "crates/gl-bundle",
-    "crates/gl-onnx",
     "crates/gl-engine",
     "crates/gl-runtime",
     "crates/gl-mcp",
@@ -33,8 +31,6 @@ gl-numeric = { path = "crates/gl-numeric" }
 gl-verifiers = { path = "crates/gl-verifiers" }
 gl-policy = { path = "crates/gl-policy" }
 gl-record = { path = "crates/gl-record" }
-gl-bundle = { path = "crates/gl-bundle" }
-gl-onnx = { path = "crates/gl-onnx" }
 gl-engine = { path = "crates/gl-engine" }
 gl-runtime = { path = "crates/gl-runtime" }
 gl-mcp = { path = "crates/gl-mcp" }

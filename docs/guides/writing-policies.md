@@ -80,28 +80,10 @@ rounding: half_even
 ## Decide what fails, what reviews, what passes
 
 - Put the verifiers whose contradiction should **fail** the answer in
-  `any_contradiction_from`. The exact verifiers (`groundlens.numeric`,
-  `groundlens.rules.*`) belong here; a scored verifier usually does not.
+  `any_contradiction_from`: usually `groundlens.numeric`, `groundlens.scope`
+  and `groundlens.rules.*`.
 - Send the rest to a human by leaving `unresolved_claims: REVIEW` and choosing
   which claim kinds you `tolerate_unresolved_kinds`.
-- A scored verifier decides through `thresholds`, not contradictions.
-
-## Add a scored channel with a guard band (deprecated)
-
-The lexical and entailment channels are deprecated and run only when a request
-names a bundle. If you still run them and want them to influence the decision,
-give them a threshold and a guard band:
-
-```{code-block} yaml
-thresholds:
-  groundlens.lexical: { support_min: 0.60, guard_band: 0.02 }
-  groundlens.nli:     { support_min: 0.85, guard_band: 0.02 }
-```
-
-The guard band must be at least twice the verifier's tolerance. A score inside
-the band is REVIEW on every platform, so a small cross-platform drift can never
-flip the decision. Do not put a threshold on an exact verifier; there is no
-score to threshold, and `policy lint` rejects it.
 
 ## Map decisions to your framework
 
@@ -121,7 +103,5 @@ policy = Policy.from_yaml(open("my_policy_v1.yaml").read())
 record = verify(answer, sources, policy=policy)
 ```
 
-`policy lint` catches unknown keys, thresholds on exact verifiers, guard bands
-that are too narrow, and unknown verifier ids before they ever reach a
-decision. To pick a threshold from your own data rather than guessing, see
-[Calibration](calibration.md).
+`policy lint` catches unknown keys, a required verifier the engine does not
+have, and rules that contradict each other, before they ever reach a decision.

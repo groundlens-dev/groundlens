@@ -90,8 +90,6 @@ _VERIFIER = [
     (re.compile(r"^(\S+) unsupported"), "unsupported"),
     (re.compile(r"^(\S+) could not label"), "could_not_label"),
     (re.compile(r"^(\S+) could not check"), "could_not_check"),
-    (re.compile(r"^(\S+) score \S+ inside guard band"), "guard_band"),
-    (re.compile(r"^(\S+) score \S+ below"), "below_threshold"),
 ]
 
 

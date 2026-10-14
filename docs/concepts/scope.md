@@ -37,7 +37,7 @@ record.decision   # FAIL: $1.9 billion comes only from International Paper's rep
 From the command line:
 
 ```{code-block} bash
-glv verify --answer answer.txt \
+groundlens verify --answer answer.txt \
   --source IP#75=ip.txt --source AAPL#100=aapl.txt \
   --provenance IP#75:entity=IP --provenance AAPL#100:entity=AAPL \
   --scope entity=AAPL --policy policies/eu_ai_act_high_risk_v1.yaml --locale en

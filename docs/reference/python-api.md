@@ -17,7 +17,6 @@ installed version.
 
 .. autofunction:: groundlens.verify
 .. autofunction:: groundlens.verify_run
-.. autofunction:: groundlens.proofread
 ```
 
 ## Records
@@ -37,20 +36,6 @@ installed version.
 ```{eval-rst}
 .. autoclass:: groundlens.Evidence
    :members:
-
-.. autoclass:: groundlens.Proofread
-   :members:
-
-.. autoclass:: groundlens.Anchor
-   :members:
-
-.. autoclass:: groundlens.AnchorKind
-   :members:
-
-.. autoclass:: groundlens.Span
-   :members:
-
-.. autofunction:: groundlens.as_evidence
 ```
 
 ## Judges
@@ -88,33 +73,7 @@ installed version.
    :members:
 ```
 
-## Bundles and encoders
-
-```{eval-rst}
-.. autoclass:: groundlens.Bundle
-   :members:
-
-.. autoclass:: groundlens.Encoder
-   :members:
-
-.. autoclass:: groundlens.WindowEncoding
-   :members:
-```
-
-## Calibration
-
-```{eval-rst}
-.. autofunction:: groundlens.calibrate
-.. autoclass:: groundlens.OperatingPoint
-   :members:
-.. autofunction:: groundlens.adaptive_k
-```
-
 ## Constants
-
-```{eval-rst}
-.. autodata:: groundlens.NOTE_CODES
-```
 
 ```{py:data} groundlens.ENGINE_VERSION
 The version string of the compiled GLV engine, read from the extension at

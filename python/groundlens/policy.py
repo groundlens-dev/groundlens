@@ -9,7 +9,6 @@ hash goes into every record it decides."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from importlib import resources
 from pathlib import Path
 
 from groundlens import _engine
@@ -71,7 +70,7 @@ class Policy:
             return cls.default()
         text = _engine.builtin_policy_yaml(name)
         if text is None:
-            text = resources.files("groundlens").joinpath("policies", f"{name}.yaml").read_text(encoding="utf-8")
+            raise ValueError(f"{name!r}: no such file, and not a shipped policy (groundlens_default_v1, eu_ai_act_high_risk_v1)")
         return cls.from_yaml(text)
 
     @classmethod

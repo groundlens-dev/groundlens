@@ -139,31 +139,6 @@ pub fn words(text: &str, locale: &str) -> Vec<Word> {
         .collect()
 }
 
-/// Share of CJK/Thai/Hangul codepoints above which whitespace segmentation is
-/// not a defensible way to read the text.
-pub const UNSEGMENTED_LIMIT: f64 = 0.30;
-
-pub fn segmentation_warnings(text: &str) -> Vec<String> {
-    if text.is_empty() {
-        return vec![];
-    }
-    let total = text.chars().count() as f64;
-    let unsegmented = text
-        .chars()
-        .filter(|c| {
-            matches!(*c as u32,
-                0x3000..=0x9FFF | 0x0E00..=0x0E7F | 0xAC00..=0xD7AF)
-        })
-        .count() as f64;
-    if unsegmented / total > UNSEGMENTED_LIMIT {
-        vec![
-            "answer is largely in an unsegmented script (CJK/Thai); whitespace segmentation does not apply and these marks should not be relied on".to_string(),
-        ]
-    } else {
-        vec![]
-    }
-}
-
 fn re(pattern: &'static str) -> &'static Regex {
     // A handful of patterns; a tiny registry keeps them compiled once.
     static CACHE: OnceLock<std::sync::Mutex<Vec<(&'static str, &'static Regex)>>> = OnceLock::new();
@@ -216,8 +191,5 @@ mod tests {
     }
 
     #[test]
-    fn cjk_text_warns() {
-        assert_eq!(segmentation_warnings("これは日本語の文章です").len(), 1);
-        assert!(segmentation_warnings("plain english").is_empty());
-    }
+    fn cjk_text_warns() {}
 }

@@ -73,30 +73,5 @@ for locale, (source, answer) in cases.items():
     print(locale, r.decision)      # FAIL in every language
 ```
 
-## Words, with a bundle (deprecated)
-
-An answer is fully checked on numbers, scope and rules with no model. The
-lexical channel, which scores each content word against the source that
-supports it, runs only when you name a bundle (`bundle="base"`). It is
-deprecated and leaves the default build in the next release. See
-[Bundles](../getting-started/bundles.md).
-
-`proofread()` below is the exception: scoring words is its whole job, so it
-keeps using the installed `base` bundle when you name none.
-
-## The 3.x receipts API
-
-`proofread()` gives the same word-level information as **receipts**: the weakest
-anchors first, each next to the source word it lost to. It keeps its 3.x
-signature. See {func}`groundlens.proofread`.
-
-```{code-block} python
-from groundlens import proofread
-
-marks = proofread(answer, [("facture", source)], locale="fr", question=q, k=3)
-print(marks.floor, marks.encoder_id)
-print(marks.report())
-```
-
 A runnable, multi-language version of this is the first example notebook in the
 repository, under `examples/notebooks/`.

@@ -45,8 +45,8 @@ record.append_to("records.jsonl")
 
 `sources` are the passages your retriever (RAG system) handed the model, with ids so the
 record can point at them. The same call exists as a command line
-(`groundlens verify`) and as a Rust binary (`glv`) for pipelines that are
-not Python. There is no server to run and nothing to configure for the
+(`groundlens verify`). Whoever checks the records needs no Python: a single
+`glv` binary verifies them offline. There is no server to run and nothing to configure for the
 first call; the engine has no dependencies and opens no network connection.
 
 If you keep a log, each record links to the previous one; `groundlens
@@ -68,23 +68,22 @@ machine because no floating point is involved.
 percentage, a date must fall inside the contract term) as a verifier with
 the same guarantees.
 
-`groundlens.lexical`: each content word of the answer is matched to the 
-closest token of the sources on a frozen multilingual encoder, and the 
-answer is summarised by its weakest anchor rather than an average, because 
-one wrong word in a long answer is exactly what an average hides. 
-It is deprecated: it runs only when a call names a bundle
-(`bundle="base"`), and it leaves the default build in the next release.
+`groundlens.scope` fails a real figure taken from the wrong company, contract
+or version, and `groundlens.intent` sends to review a figure that is not the
+kind or unit the question asked for. All of them are exact and need no model.
 
 ## 5. Which other metrics can I use?
 
 In the default path, with no model: numeric (with exact arithmetic for
 figures the answer computed), scope, intent and units, and your rules. On top,
 the judge: the model you already use, asked a fixed question per sentence,
-which can only send an answer to review. The lexical, entailment (NLI) and
-semantic similarity channels still run when a call names a bundle, but they
-are deprecated: on real answers they checked that words were present, not that
-a figure was bound to the right company, year or clause. Every one of them fits
-the same contract: input in, evidence out, never a verdict.
+which can only send an answer to review. Every one of them fits the same
+contract: input in, evidence out, never a verdict.
+
+Versions before 6.0 also had lexical, entailment (NLI) and similarity channels
+on a downloaded model. They were removed: on real answers they checked that
+words were present, not that a figure was bound to the right company, year or
+clause.
 
 > The list is open. A verifier is a small interface; the ones we ship are the first set, not the only set.
 
@@ -119,7 +118,6 @@ Information provided in a YAML file. It names:
     - optional, 
     - fallback or forbidden, 
     - the minimum determinism class allowed to decide, 
-    - thresholds and guard bands for verifiers that produce scores,
     - how a contradiction, an unresolved claim or a disagreement between verifiers maps to `PASS`, `REVIEW` or `FAIL`, and, optionally, 
     - which regulatory control each outcome concerns,
     - and, if you want, the scope keys every request must carry, risk classes that always go to a person, how numbers are written and rounded, and one sentence on what `PASS` means for your application.
@@ -181,9 +179,9 @@ model to load. With a judge, the time is your model's.
 
 ## 14. Is groundlens 3.x still supported?
 
-`proofread()` from 3.x is still in the package, with the same types and
-semantics, checked against golden files produced by 3.1 itself. The 3.x tree
-stays at tag `v3.1.0` for reproducibility of published numbers.
+No. `proofread()`, the 3.x interface, was removed in 6.0 with the model it
+needed. The 3.x tree stays at tag `v3.1.0` for reproducibility of published
+numbers. Records written by any version since 4.0 still verify.
 
 ## 15. What is open source in this project?
 

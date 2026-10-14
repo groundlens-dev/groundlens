@@ -11,28 +11,13 @@ reproducible enough to decide on.
 
 ## The built-in verifiers
 
-| Id | Kind | What it checks | Determinism | Needs a bundle |
+| Id | Kind | What it checks | Determinism | Needs a model |
 | --- | --- | --- | --- | --- |
 | `groundlens.numeric` | exact | Numbers, currencies, percentages and physical units, compared as quantities in base units, with locale-aware parsing. | Exact | No |
 | `groundlens.scope` | exact | Where each figure comes from: fails a figure found only in passages outside the request's scope (another company, contract or version). Runs when the request states a scope. See [Scope and provenance](scope.md). | Exact | No |
 | `groundlens.intent` | symbolic | Whether the answer's figure is the kind and unit the question asked for: a percentage when a percentage was asked, an amount in euros when euros were asked. Runs when the request has a question. | Exact | No |
 | `groundlens.rules` | symbolic | Your rule sets (YAML/JSON) run as checks. | Exact | No |
 | `llm_judge.<adapter>` | generative | The model you already use, asked a fixed question per sentence: supported, unsupported, contradicted or uncertain. Can only escalate. See [Use a judge](../guides/use-a-judge.md). | Non-deterministic | No (your own client) |
-| `groundlens.lexical` | lexical/ML | Deprecated. Word-level grounding: each content word anchored to the source span that supports it, scored by a frozen multilingual encoder. | Reproducible | Yes (`base`) |
-| `groundlens.nli` | ML | Deprecated. Entailment: each sentence-level statement checked against its sources by a three-way NLI classifier (entailment / neutral / contradiction). | Reproducible | Yes (a bundle carrying an entailment model) |
-| `semantic.cosine` | statistical | Deprecated. Sentence similarity between each statement and its closest source passage, on the bundle's encoder. | Reproducible | Yes (`base`) |
-
-```{admonition} The model channels are deprecated
-:class: warning
-`groundlens.lexical`, `groundlens.nli` and `semantic.cosine` run only when the
-request names a bundle (`--bundle base`, `bundle="base"`), never by default,
-and no shipped policy uses them. On real answers from annual reports,
-contracts and a regulation they did not add value: the costly error is a real
-figure attached to the wrong company, year or clause, and these channels check
-that the words are present, not that they are bound to the right thing. They
-leave the default build in the next release. The
-[design page](../design/next.md) explains what replaces them.
-```
 
 ## The numeric verifier in depth
 

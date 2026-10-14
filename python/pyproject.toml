@@ -35,7 +35,6 @@ langfuse = ["langfuse>=3,<5"]
 
 [project.scripts]
 groundlens = "groundlens.cli:main"
-glv = "groundlens.cli:main"
 groundlens-mcp = "groundlens.mcp:main"
 
 [project.urls]
@@ -49,7 +48,6 @@ python-source = "."
 module-name = "groundlens._engine"
 features = ["pyo3/extension-module"]
 strip = true
-include = [{ path = "groundlens/policies/*.yaml", format = "sdist" }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

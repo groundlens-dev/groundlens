@@ -9,12 +9,10 @@ from __future__ import annotations
 
 import importlib.metadata as md
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples" / "invoice"
@@ -90,64 +88,12 @@ def test_cli_policy_show_resolved(tmp_path):
     assert lint.returncode == 0 and lint.stdout.split()[-1] in resolved.stdout
 
 
-def test_cli_bundle_build_and_verify(tmp_path):
-    (tmp_path / "policies").mkdir()
-    (tmp_path / "policies" / "p.yaml").write_text("id: p\nversion: 1\n")
-    assert run("bundle", "build", str(tmp_path), "--name", "t", "--bundle-version", "1").returncode == 0
-    assert run("bundle", "verify", str(tmp_path)).returncode == 0
-    (tmp_path / "policies" / "p.yaml").write_text("id: p\nversion: 2\n")
-    assert run("bundle", "verify", str(tmp_path)).returncode == 2
-    assert run("bundle", "status").returncode == 0
-
-
-def test_bundle_pull_verifies_the_archive_and_installs(tmp_path, monkeypatch):
-    """pull is the one network operation; exercised here over file:// so the
-    test itself stays offline."""
-    import hashlib
-    import tarfile
-
-    from groundlens import Bundle
-    from groundlens.bundle import BundleError
-
-    tiny = ROOT / "crates" / "gl-onnx" / "testdata" / "tiny-bundle"
-    archive = tmp_path / "tiny.tar.gz"
-    with tarfile.open(archive, "w:gz") as tar:
-        tar.add(tiny, arcname="tiny-bundle")
-    url = archive.resolve().as_uri()
-    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-
-    # The pinned hash of `base` protects it from any other archive.
-    with pytest.raises(BundleError, match="does not match the pinned"):
-        Bundle.pull("base", url=url, into=tmp_path / "b0")
-    assert not (tmp_path / "b0").exists()
-
-    # A bundle this build does not know, with no hash given: refused.
-    with pytest.raises(BundleError, match="pinned"):
-        Bundle.pull("tiny", url=url, into=tmp_path / "b1")
-    assert not (tmp_path / "b1").exists()
-
-    # The same with its hash: installed and verified.
-    with pytest.raises(BundleError, match="does not match"):
-        Bundle.pull("tiny", url=url, sha256="0" * 64, into=tmp_path / "b2")
-    b = Bundle.pull("tiny", url=url, sha256=digest, into=tmp_path / "b2")
-    assert b.name == "tiny-test" and (tmp_path / "b2" / "manifest.json").is_file()
-    assert Bundle.open(tmp_path / "b2").hash == b.hash
-
-    # An installed bundle is not used unless the call names it.
-    monkeypatch.setenv("GROUNDLENS_BUNDLE_DIR", str(tmp_path / "b2"))
-    args = ("verify", "--answer", str(EXAMPLE / "answer.txt"), "--source", f"s={EXAMPLE / 'invoice.txt'}", "--json")
-    r = run(*args)
-    assert r.returncode == 1, r.stderr
-    rec = json.loads(r.stdout)
-    assert rec["content"]["bundle_hash"] == "sha256:unbundled"
-    assert not any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
-    assert "deprecated" not in r.stderr
-
-    # Named, it runs, with a deprecation warning.
-    r = run(*args, "--bundle", "base")
-    assert r.returncode == 1, r.stderr
-    rec = json.loads(r.stdout)
-    assert rec["content"]["bundle_hash"] == b.hash
-    assert any(e["verifier_id"] == "groundlens.lexical" for e in rec["content"]["graph"]["evidence"])
-    assert "deprecated" in r.stderr
-    assert run("bundle", "status").stdout.startswith("ok  base v1")
+def test_cli_verifies_and_checks_an_agent_run(tmp_path):
+    log = tmp_path / "runs.jsonl"
+    here = ROOT / "examples" / "run"
+    args = ("--policy", str(here / "execution-policy.yaml"), "--run-id", "r1", "--system", "demo", "--log", str(log))
+    denied = run("run", "verify", "--trace", str(here / "trace.jsonl"), *args)
+    assert denied.returncode == 1, denied.stderr  # the trace calls a denied tool
+    assert json.loads(denied.stdout)["content"]["gate"] == "DENY"
+    checked = run("run", "check", str(log))
+    assert checked.returncode == 0 and checked.stdout.startswith("ok  1 run records")

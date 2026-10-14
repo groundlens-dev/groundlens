@@ -1,7 +1,7 @@
 # Quick start
 
 This page verifies one answer end to end, in Python and on the command line,
-and shows what comes back. It needs no bundle.
+and shows what comes back. It needs no model.
 
 ## Verify an answer in Python
 

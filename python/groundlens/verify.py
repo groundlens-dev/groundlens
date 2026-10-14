@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""``verify()``: the GroundLens 4.0 entry point.
+"""``verify()``: check one answer and seal a record.
 
     answer + evidence
         → claims
@@ -15,13 +15,11 @@
 from __future__ import annotations
 
 import json
-import warnings
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from groundlens import _engine
 from groundlens._request import EvidenceArg, build_request
-from groundlens.bundle import MODEL_CHANNELS_DEPRECATED, Bundle
 from groundlens.policy import Policy
 from groundlens.record import Record
 
@@ -34,8 +32,6 @@ def verify(
     question: str | None = None,
     locale: str = "und",
     rules: Sequence[str | Path | Mapping] = (),
-    bundle: Bundle | str | Path | None = None,
-    lexical: bool = True,
     signing_key: str | None = None,
     previous: Record | str | None = None,
     log: str | Path | None = None,
@@ -61,12 +57,6 @@ def verify(
         locale: how the documents write numbers: ``"und"``, ``"en"``, ``"es"``...
             A ``locale`` written in the policy wins over this argument.
         rules: rule sets (YAML/JSON paths or dicts) run as symbolic verifiers.
-        bundle: deprecated. A :class:`Bundle`, a bundle directory, or the
-            name of an installed bundle (``"base"``). Its models run the
-            lexical, entailment and similarity channels and its hash goes into
-            the record. ``None`` runs no model, even when a bundle is
-            installed. Naming one raises a ``DeprecationWarning``.
-        lexical: with a bundle named, run its channels. ``False`` skips them.
         signing_key: 32-byte hex Ed25519 seed. An ephemeral key is used if absent.
         previous: the previous record (or its ``record_hash``) to chain to.
         log: an append-only JSON Lines file; the record is appended and the
@@ -104,8 +94,6 @@ def verify(
         ``record.evidence`` is what each verifier said; ``record.reasons``
         is what a reviewer should read first.
     """
-    if bundle is not None:
-        warnings.warn(MODEL_CHANNELS_DEPRECATED, DeprecationWarning, stacklevel=2)
     previous_hash: str | None
     if isinstance(previous, Record):
         previous_hash = previous.record_hash
@@ -125,8 +113,6 @@ def verify(
         question=question,
         locale=locale,
         rules=rules,
-        bundle=bundle,
-        lexical=lexical,
         signing_key=signing_key,
         previous_hash=previous_hash,
         units=units,
@@ -152,8 +138,6 @@ def _request(
     question: str | None,
     locale: str,
     rules: Sequence[str | Path | Mapping],
-    bundle: Bundle | str | Path | None,
-    lexical: bool,
     signing_key: str | None,
     previous_hash: str | None,
     units: bool,
@@ -183,8 +167,6 @@ def _request(
         rounding=rounding,
         signing_key=signing_key,
         previous_record_hash=previous_hash,
-        bundle=str(bundle.root) if isinstance(bundle, Bundle) else (str(bundle) if bundle else None),
-        lexical=lexical,
         metadata=metadata,
         scope=scope,
         risk_class=risk_class,

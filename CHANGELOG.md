@@ -9,6 +9,12 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **The sinks and signers run against real software in CI**: Postgres, MinIO
+  (S3 with Object Lock), LocalStack (AWS KMS), Azurite (Azure Blob) and
+  SoftHSM (PKCS#11), in `tests/test_live_services.py`. Azure Key Vault has no
+  emulator; its signer is marked experimental.
+- **`groundlens run verify` and `groundlens run check`**, so the Python
+  command does everything the binary used to.
 - **Scope and provenance.** A request can state its scope (`scope={"entity":
   "AAPL"}`, `--scope entity=AAPL`) and every source its provenance (a third
   tuple element or a `provenance` key in Python, `--provenance id:key=value`
@@ -205,26 +211,39 @@ identical in the git tag and on PyPI.
   (`word`, `statement` in the shipped policies) are unchanged.
 - **The shipped policies live in the `gl-policy` crate**
   (`crates/gl-policy/policies/`), so the engine, the command lines and
-  `extends` read one source. The copies under `policies/` and in the Python
-  package stay, and a test checks they are identical.
-
-### Deprecated
-
-- **`calibrate()`** raises a `DeprecationWarning` and leaves with the model
-  channels it calibrates. To know how many wrong answers a policy lets through,
-  use `groundlens measure`. Its guide and the bundles page move to a
-  "Deprecated" section of the docs.
-
-- **The model channels: `groundlens.lexical`, `groundlens.nli` and
-  `semantic.cosine`,** and the `bundle` argument that feeds them. On real
-  answers from annual reports, contracts and a regulation they did not add
-  value: they check that words are present, not that a figure is bound to the
-  right company, year or clause, and they add a model download, weight and
-  latency. Naming a bundle prints a warning (`DeprecationWarning` in Python).
-  They leave the default build in the next release.
+  `extends` read one source. The copy under `policies/` stays, and a test
+  checks it is identical.
 
 ### Removed
 
+- **The model channels: `groundlens.lexical`, `groundlens.nli` and
+  `semantic.cosine`,** with the bundles that carried their models (`gl-bundle`,
+  `gl-onnx`, `Bundle`, `groundlens bundle`, the `bundle=` and `lexical=`
+  arguments, `--bundle` and `--no-lexical`). On real answers from annual
+  reports, contracts and a regulation they did not add value: they check that
+  words are present, not that a figure is bound to the right company, year or
+  clause, and they added a model download, weight and latency. The engine now
+  has no model and no network code at all. Records that 5.x wrote with them
+  still verify: the record schema is unchanged, and `bundle_hash` is always
+  `sha256:unbundled`.
+- **`calibrate()`**, which picked thresholds for those channels. To know how
+  many wrong answers a policy lets through, use `groundlens measure`.
+- **`proofread()`**, the 3.x interface, and its types (`Proofread`, `Anchor`,
+  `Encoder`, `WindowEncoding`, `OperatingPoint`, `adaptive_k`, `as_evidence`,
+  `NOTE_CODES`). It needed the lexical model. The 3.x tree stays at tag
+  `v3.1.0`.
+- **`thresholds` and `guard_band` in policies.** No verifier has a score to
+  threshold any more; a policy that still sets them is refused with
+  `unknown field`. The shipped policies move to 1.4.0: their YAML is
+  unchanged, their hash is not, because the schema lost a key.
+- **The `glv` alias in the Python package.** It was a second name for
+  `groundlens`, while the release binary of the same name did something else.
+  `groundlens` is the command; `glv` is only the release binary.
+- **`glv verify`, `glv bundle`, `glv judge` and `glv keygen`.** The binary
+  keeps what someone checking records needs without Python: `record verify`,
+  `run check`, `policy lint` and `policy show`. Everything else is in the
+  `groundlens` command, which also gains `run verify` and `run check`.
+- The copy of the shipped policy inside the Python package, which nothing read.
 - `README.prototype.md`, a positioning draft nothing linked to.
 - `suite/verifier_evaluation/`, the FPR-at-95-%-recall benchmark of the model
   channels against other detectors. What a deployment lets through is now
@@ -237,8 +256,9 @@ identical in the git tag and on PyPI.
 
 ### Fixed
 
-- `bundle pull` extracts with the tar `data` filter where Python has it, the
-  default from Python 3.14, instead of a deprecation warning.
+- **The PKCS#11 signer** asked the token for `CKM_ECDSA_SHA256`, which is
+  optional and missing from SoftHSM and many HSMs. It now hashes locally and
+  asks for `CKM_ECDSA`, which every token has. Found by the new live tests.
 - **A decimal point no longer ends a sentence.** `$37.35 billion` was split
   into two sentence claims at the point. Only the meaning channels and the
   judge read sentences, so no decision changes, but the claim list, and with

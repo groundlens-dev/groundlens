@@ -24,7 +24,6 @@ fn source(id: &str, text: &str, entity: Option<&str>) -> Source {
 fn request(answer: &str, sources: Vec<Source>, entity: Option<&str>) -> VerifyRequest {
     let mut req = VerifyRequest::new(answer, sources);
     req.locale = "en".into();
-    req.lexical = false;
     if let Some(e) = entity {
         req.scope.insert("entity".into(), e.into());
     }

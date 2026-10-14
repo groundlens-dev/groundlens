@@ -77,8 +77,6 @@ on a `FAIL`.
 
 ## What runs where
 
-The server calls the same engine as the Python API and the `glv` binary, so a
-verification through the server produces the same signed record as the same
-verification anywhere else. Numbers and rules need nothing. The deprecated
-lexical and entailment channels do not run in the MCP server: it names no
-[bundle](../getting-started/bundles.md).
+The server calls the same engine as the Python API, so a verification through
+the server produces the same signed record as the same verification anywhere
+else. It needs no model and no network.

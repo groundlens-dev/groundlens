@@ -29,8 +29,7 @@ impl Tolerance {
     pub const FLOAT32_CPU: Tolerance = Tolerance(1e-6);
 
     /// Number of decimals to keep so that two runs within tolerance quantise
-    /// to the same value in the overwhelming majority of cases. Boundary
-    /// cases are handled by the policy guard band, not here.
+    /// to the same value in the overwhelming majority of cases.
     pub fn decimals(self) -> u32 {
         if self.0 <= 0.0 {
             return 12;

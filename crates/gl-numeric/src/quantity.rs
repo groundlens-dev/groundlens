@@ -367,8 +367,8 @@ pub fn find_quantities(text: &str, profile: &LocaleProfile) -> Vec<Quantity> {
 }
 
 /// Bare numerals only, groundlens 3.x semantics: no scale words, no units,
-/// no header-declared scales. `$37.35 billion` is the number 37.35. Used by
-/// the `proofread()` compatibility facade and its golden tests.
+/// no header-declared scales. `$37.35 billion` is the number 37.35. Used
+/// when a request turns units off (`units=False`, `--no-units`).
 pub fn find_bare_numerals(text: &str, profile: &LocaleProfile) -> Vec<Quantity> {
     find_quantities_with(text, profile, false)
 }
