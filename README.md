@@ -6,7 +6,7 @@
 
 # Guardrails for LLM answers
 
-### Every figure checked against its source, every decision signed
+<br>
 
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -16,7 +16,6 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
 [![SLSA](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev)
 
-<br>
 
 <a href="#langfuse"><picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://langfuse.com/langfuse_logo_white.svg">
@@ -31,7 +30,28 @@
   <img src="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/light.svg" height="26" alt="Model Context Protocol">
 </picture></a>
 
+
 <br>
+
+<br>
+
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="33%"><b>Deterministic</b><br><sub>Exact&nbsp;checks&nbsp;first<br>no&nbsp;LLM&nbsp;judge&nbsp;needed</sub></td>
+    <td align="center" valign="top" width="33%"><b>Provable</b><br><sub>PASS,&nbsp;REVIEW&nbsp;or&nbsp;FAIL<br>with&nbsp;a&nbsp;signed&nbsp;record</sub></td>
+    <td align="center" valign="top" width="33%"><b>Measured</b><br><sub>You&nbsp;know&nbsp;the&nbsp;error&nbsp;rate<br>of&nbsp;what&nbsp;passes</sub></td>
+  </tr>
+</table>
+
+<br>
+
+### 🤔 **Already running an LLM-as-judge?** 
+Keep it, and let GroundLens check first.<br>
+Wrong figures, wrong companies and wrong arithmetic are caught <br>  **without a model**, with a reason that replays the same every time. <br>
+Your judge keeps the cases only a model can read. <br>
+Your audit stops resting on a model's opinion.
+
 
 <br>
 
