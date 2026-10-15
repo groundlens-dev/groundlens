@@ -33,7 +33,7 @@ use gl_core::{
 use gl_numeric::{compare, find_bare_numerals, find_quantities, locale, Match, MatchOptions};
 
 pub const ID: &str = "groundlens.scope";
-pub const VERSION: &str = "1.0.0";
+pub const VERSION: &str = "1.1.0";
 
 /// Where a passage stands against the request's scope.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -243,6 +243,25 @@ mod tests {
             &[("entity", "AAPL")],
         );
         assert_eq!(results(&i), vec![(EvidenceResult::Contradicted, vec!["out_of_scope_source".into()])]);
+    }
+
+    #[test]
+    fn a_short_bare_figure_found_only_outside_is_not_a_contradiction() {
+        // "2.3" is a difference the answer computed; that another company's
+        // passage happens to contain 2.3 says nothing about where it came from.
+        let i = input(
+            "Earnings rose from $32.8 million to $35.1 million, a gain of 2.3.",
+            vec![
+                src(
+                    "dre-15",
+                    "earnings from service operations $ 35.1 million and $ 32.8 million",
+                    &[("entity", "DRE")],
+                ),
+                src("aes-44", "a ratio of 2.3 times", &[("entity", "AES")]),
+            ],
+            &[("entity", "DRE")],
+        );
+        assert!(results(&i).iter().all(|r| r.0 != EvidenceResult::Contradicted), "{:?}", results(&i));
     }
 
     #[test]

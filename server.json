@@ -7,12 +7,12 @@
     "url": "https://github.com/groundlens-dev/groundlens",
     "source": "github"
   },
-  "version": "6.0.2",
+  "version": "6.0.3",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "groundlens",
-      "version": "6.0.2",
+      "version": "6.0.3",
       "transport": {
         "type": "stdio"
       },

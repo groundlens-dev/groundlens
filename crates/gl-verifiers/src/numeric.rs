@@ -35,7 +35,7 @@ use gl_numeric::{
 use serde::{Deserialize, Serialize};
 
 pub const ID: &str = "groundlens.numeric";
-pub const VERSION: &str = "1.2.0";
+pub const VERSION: &str = "1.3.0";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NumericConfig {
@@ -930,6 +930,76 @@ mod tests {
             NumericConfig::default(),
         );
         assert_eq!(result_of(&rows, "12%"), EvidenceResult::Unsupported);
+    }
+
+    #[test]
+    fn a_table_scale_applies_to_its_bare_cells() {
+        let rows = results(
+            "Basic net income was $217,692,000.",
+            "per share data ( in thousands ) : basic net income available for common shareholders | $ 217692 | $ 145095",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$217,692,000"), EvidenceResult::Supported);
+        let rows = results(
+            "The value was -$57 million in 2003.",
+            "strategy ( in millions ) | 2003 | 2002 protect carrying values | -57 ( 57 ) | -41 ( 41 )",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "-$57 million"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn sums_and_averages_of_three_figures_are_recomputed() {
+        let source = "compensation expense of $ 12.1 million , $ 9.0 million , and $ 5.7 million";
+        let rows = results(
+            "Expense was $5.7 million, $9.0 million and $12.1 million: $26.8 million in total, $8.93 million a year.",
+            source,
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$26.8 million"), EvidenceResult::Supported);
+        assert_eq!(result_of(&rows, "$8.93 million"), EvidenceResult::Supported);
+        let rows = results(
+            "Expense was $5.7 million, $9.0 million and $12.1 million: $28.6 million in total.",
+            source,
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$28.6 million"), EvidenceResult::Contradicted);
+    }
+
+    #[test]
+    fn an_amount_per_unit_is_recomputed() {
+        let rows = results(
+            "Net income of $217,692 over 139,255 shares is $1.56 per share.",
+            "net income $ 217,692 ; weighted average shares 139,255",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$1.56"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn a_slip_in_the_last_digit_of_a_computed_figure_is_not_a_wrong_figure() {
+        let source = "SG&A was $2.0 billion and total costs were $22.885 billion";
+        let rows =
+            results("SG&A of $2.0 billion over $22.885 billion is 8.75%.", source, NumericConfig::default());
+        assert_eq!(result_of(&rows, "8.75%"), EvidenceResult::Supported, "the exact value is 8.739 %");
+        let pct = rows.iter().find(|r| r.0 == "8.75%").unwrap();
+        assert!(pct.2.iter().any(|n| n == "last_digit_slip"));
+        let strict = results(
+            "SG&A of $2.0 billion over $22.885 billion is 8.75%.",
+            source,
+            NumericConfig { rounding: Rounding::HalfUp, ..Default::default() },
+        );
+        assert_eq!(result_of(&strict, "8.75%"), EvidenceResult::Contradicted, "half_up stays strict");
+    }
+
+    #[test]
+    fn a_short_figure_with_its_unit_on_one_side_is_not_a_contradiction() {
+        let rows = results(
+            "Gains were $52 million.",
+            "net unrealized investment gains | 76 | 73 | 52",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "$52 million"), EvidenceResult::Unsupported);
     }
 
     #[test]

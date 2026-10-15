@@ -25,7 +25,7 @@ from groundlens.run import RunRecord, verify_run
 from groundlens.verifier import Verifier
 from groundlens.verify import verify
 
-__version__ = "6.0.2"
+__version__ = "6.0.3"
 ENGINE_VERSION = _engine_version()
 
 __all__ = [

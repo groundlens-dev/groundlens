@@ -1,7 +1,9 @@
 name: release
 
 # A tag `vX.Y.Z` is the release: wheels for Linux, macOS and Windows, an
-# sdist, the glv binaries, PyPI (trusted publishing) and a GitHub Release.
+# sdist, the glv binaries, PyPI (trusted publishing), the Rust crates on
+# crates.io (trusted publishing), the MCP registry entry and a GitHub Release.
+# Nothing is published by hand and no token is stored anywhere.
 # The tag must equal the version in python/pyproject.toml and Cargo.toml.
 # Every wheel, the sdist and every glv binary gets a signed build provenance
 # attestation (SLSA build level 2); verify one with
@@ -200,3 +202,63 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" bin/* --repo "$GITHUB_REPOSITORY" \
             --title "groundlens $GITHUB_REF_NAME" --generate-notes
+
+  # The ten crates, in dependency order, through crates.io trusted publishing:
+  # the job exchanges its GitHub OIDC token for a crates.io token that lives
+  # for this job only. Each crate must list this repository, this workflow and
+  # the `crates-io` environment under Settings → Trusted Publishing on
+  # crates.io. A crate already at this version is skipped, so a rerun after a
+  # partial failure picks up where it stopped.
+  crates:
+    needs: pypi
+    runs-on: ubuntu-latest
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: "1.99.0"
+      - uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
+      - env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          for c in groundlens-core groundlens-text groundlens-numeric groundlens-policy groundlens-runtime \
+                   groundlens-mcp groundlens-verifiers groundlens-record groundlens groundlens-cli; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -A "groundlens-release (github.com/groundlens-dev/groundlens)" \
+              "https://crates.io/api/v1/crates/$c/$version")
+            if [ "$code" = 200 ]; then echo "$c $version already on crates.io"; continue; fi
+            cargo publish -p "$c" --locked
+          done
+
+  # The MCP registry entry (server.json) points at the PyPI package, so it is
+  # published after PyPI has the version. GitHub OIDC proves the run belongs
+  # to groundlens-dev, which owns the io.github.groundlens-dev/* namespace.
+  mcp-registry:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install mcp-publisher v1.8.1 (checksum pinned)
+        run: |
+          curl -sSfL -o mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
+          echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+      - name: Wait until PyPI serves the version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          for i in $(seq 1 30); do
+            curl -sf "https://pypi.org/pypi/groundlens/$version/json" > /dev/null && exit 0
+            sleep 10
+          done
+          echo "PyPI does not serve groundlens $version yet" && exit 1
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish

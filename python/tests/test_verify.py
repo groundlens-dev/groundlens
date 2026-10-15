@@ -164,9 +164,9 @@ def test_no_model_runs():
 def test_figures_the_answer_computed_are_recomputed_under_the_rounding_rule():
     sources = [("10-K", "net cash provided by operating activities $1,410.5 million; cash flow $957.4 million; payout 31.0%")]
     answer = "Cash flow was $957.4 million of $1,410.5 million, or 67.8%."
-    strict = verify(answer, sources, locale="en")
+    strict = verify(answer, sources, locale="en", rounding="half_up")
     assert strict.decision == "FAIL"  # 67.876… rounds half up to 67.9
-    lenient = verify(answer, sources, locale="en", rounding="within_last_digit")
+    lenient = verify(answer, sources, locale="en")  # within_last_digit, the default since 6.0.3
     assert lenient.decision == "PASS"
     derived = [e for e in lenient.evidence if "derived" in e.notes]
     assert derived and "$957.4 million / $1,410.5 million" in derived[0].rationale

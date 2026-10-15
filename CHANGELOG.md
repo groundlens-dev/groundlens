@@ -7,6 +7,51 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.3] - 2026-10-15
+
+Measured on 300 real gpt-4o-mini answers over FinQA 10-K pages, labels set
+automatically against the official FinQA answer (1 % tolerance), split by
+question into a development half and a test half scored once:
+
+| test half | 6.0.2 | 6.0.3 |
+|---|---|---|
+| FAIL on correct answers | 40 % (18 of 45) | 11 % (5 of 45) |
+| FAIL on wrong answers | 44 % (29 of 66) | 33 % (22 of 66) |
+
+The labels are noisy (FinQA's own answers are wrong about 7 % of the time, and
+some "correct" answers carry a wrong intermediate sum). The remaining false
+alarms are a product with a percentage (5 % of $375 million), sums whose
+terms are written without their scale, and figures repeated bare inside a
+formula; they are open for 6.0.4, which needs fresh data to be measured.
+
+### Fixed
+
+- **A scale the table declares applies to its bare cells.** "( in millions )"
+  over `-57`, "( in thousands )" over `217692`: the answer's `-$57 million`
+  and `$217,692,000` are now `supported`, note `scale_from_header`, where they
+  were contradictions.
+- **Sums and averages of three or more figures are recomputed**, and so are
+  the average of two and an amount divided by a count ("$1.56 per share").
+- **A slip in the last digit of a recomputed figure is not a wrong figure.**
+  The default rounding rule is now `within_last_digit` (rounded or
+  truncated), and under it a recomputed figure within 0.5 % of the exact value
+  is `supported`, note `last_digit_slip`. `half_up` and `half_even` stay
+  strict. A figure compared with a source must still match it exactly.
+- **A short figure with its unit on one side is not a contradiction.** `$52
+  million` against a bare `52` in a table with no declared scale is
+  `unsupported` (review), not `contradicted`.
+- **Scope: a short bare figure found only outside the scope is not a
+  contradiction.** A computed `2.3` that another company's passage happens to
+  contain no longer fails the answer.
+
+Numeric verifier 1.3.0, scope verifier 1.1.0.
+
+### Added
+
+- **The release publishes everything.** Pushing the tag now also publishes the
+  ten crates to crates.io through trusted publishing (no token stored) and the
+  MCP registry entry through GitHub OIDC, after PyPI serves the version.
+
 ## [6.0.2] - 2026-10-15
 
 ### Fixed
