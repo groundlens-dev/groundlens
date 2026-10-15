@@ -160,6 +160,12 @@ groundlens run check runs.jsonl
 The same thing is available from Python as {func}`groundlens.verify_run`. See
 [Verify an execution](../guides/verify-a-run.md).
 
+## mcp
+
+Run the [MCP server](../guides/mcp-server.md) over stdio. Needs the extra:
+`pip install "groundlens[mcp]"`. The same as the `groundlens-mcp` command;
+with nothing installed, `uvx --from "groundlens[mcp]" groundlens mcp`.
+
 ## glv: checking records without Python
 
 Each [release](https://github.com/groundlens-dev/groundlens/releases) also has

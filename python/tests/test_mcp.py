@@ -122,3 +122,20 @@ def test_the_server_tells_an_agent_what_it_is_for():
     assert server.version == groundlens.__version__
     assert "guardrails for LLM answers" in server.instructions
     assert "verify_answer" in server.instructions
+
+
+def test_the_registry_entry_runs_the_mcp_subcommand_of_this_version():
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    import groundlens
+
+    entry = json.loads((Path(__file__).resolve().parents[2] / "server.json").read_text())
+    package = entry["packages"][0]
+    assert entry["version"] == package["version"] == groundlens.__version__
+    assert package["runtimeArguments"][0]["value"] == "groundlens[mcp]"
+    assert [a["value"] for a in package["packageArguments"]] == ["mcp"]
+    help_text = subprocess.run([sys.executable, "-m", "groundlens.cli", "--help"], capture_output=True, text=True).stdout
+    assert "mcp" in help_text
