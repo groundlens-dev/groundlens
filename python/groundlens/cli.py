@@ -165,6 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     jt.add_argument("--json", action="store_true", help="print the prompt as JSON")
 
     sub.add_parser("keygen", help="print a fresh Ed25519 signing seed")
+    sub.add_parser("mcp", help='run the MCP server over stdio (needs pip install "groundlens[mcp]")')
     return p
 
 
@@ -287,6 +288,14 @@ def _run(args: argparse.Namespace) -> int:
             print(f"# {prompt['template_id']} {prompt['template_hash']}")
             print(f"# prompt {prompt['prompt_hash']}")
             print(f"\n## system\n{prompt['system']}\n\n## user\n{prompt['user']}")
+        return 0
+    if args.cmd == "mcp":
+        try:
+            from groundlens.mcp.server import run  # noqa: PLC0415 - optional extra
+        except ModuleNotFoundError as e:
+            print(f"groundlens: {e}", file=sys.stderr)
+            return 2
+        run()
         return 0
     if args.cmd == "keygen":
         print(_engine.keygen())

@@ -7,6 +7,17 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.1] - 2026-10-15
+
+### Fixed
+
+- **The MCP registry entry starts the MCP server.** It named the `groundlens`
+  package with no run instructions, so a client that installed from the
+  registry ran the `groundlens` command line instead of the server, without
+  the MCP SDK. `server.json` now says how to start it, `uvx
+  --from=groundlens[mcp] groundlens mcp`, and the command line has an `mcp`
+  subcommand that runs the server over stdio.
+
 ## [6.0.0] - 2026-10-14
 
 ### Added
@@ -479,6 +490,7 @@ The 3.x Python implementation is kept at tag
 for reproducibility of published numbers. Its history is in the release
 notes of each 3.x tag.
 
+[6.0.1]: https://github.com/groundlens-dev/groundlens/releases/tag/v6.0.1
 [6.0.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v6.0.0
 [5.3.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.3.0
 [5.2.0]: https://github.com/groundlens-dev/groundlens/releases/tag/v5.2.0
