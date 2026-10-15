@@ -27,7 +27,7 @@ pub fn extract_claims_with(answer: &str, locale_name: &str, units: bool) -> Vec<
         gl_numeric::find_bare_numerals(answer, &profile)
     };
     for q in quantities {
-        if formula_constant(answer, &q) {
+        if formula_constant(answer, &q) || day_of_a_date(answer, &q) {
             continue;
         }
         let mut attributes = indexmap::IndexMap::new();
@@ -104,6 +104,103 @@ fn formula_constant(answer: &str, q: &gl_numeric::Quantity) -> bool {
         && value <= 12.into()
         && ["/", "÷"].iter().any(|op| before.strip_suffix(op).is_some_and(|b| b.trim_end().ends_with(')')));
     scaling || divisor
+}
+
+/// The day of a written date: the `31` of "December 31, 2015" or
+/// "31 de diciembre". It names a day, not an amount; checking it against the
+/// sources only produced false alarms.
+fn day_of_a_date(answer: &str, q: &gl_numeric::Quantity) -> bool {
+    const MONTHS: &[&str] = &[
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "sept",
+        "oct",
+        "nov",
+        "dec",
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "setiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+        "gener",
+        "febrer",
+        "març",
+        "maig",
+        "juny",
+        "juliol",
+        "agost",
+        "setembre",
+        "octubre",
+        "novembre",
+        "desembre",
+        "januar",
+        "februar",
+        "märz",
+        "mai",
+        "juni",
+        "juli",
+        "oktober",
+        "dezember",
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "décembre",
+    ];
+    let text = &answer[q.span.start..q.span.end];
+    if !text.chars().all(|c| c.is_ascii_digit())
+        || text.len() > 2
+        || *q.dimension() != Dimension::Dimensionless
+    {
+        return false;
+    }
+    let Ok(day) = text.parse::<u32>() else { return false };
+    if !(1..=31).contains(&day) {
+        return false;
+    }
+    let is_month = |w: &str| MONTHS.contains(&w.trim_end_matches('.').to_lowercase().as_str());
+    let before = answer[..q.span.start].trim_end();
+    let prev = before.rsplit(|c: char| c.is_whitespace()).next().unwrap_or("");
+    let mut after = answer[q.span.end..].trim_start().trim_start_matches(['.', 'º', 'ª']).trim_start();
+    for connector in ["de ", "of "] {
+        if let Some(rest) = after.strip_prefix(connector) {
+            after = rest;
+            break;
+        }
+    }
+    let next: String = after.chars().take_while(|c| c.is_alphabetic() || *c == '.').collect();
+    is_month(prev) || is_month(&next)
 }
 
 fn dimension_name(d: &Dimension) -> String {
@@ -203,6 +300,25 @@ mod tests {
         assert!(claims
             .iter()
             .any(|c| c.kind == ClaimKind::Numeric && c.text == "100 trucks" || c.text == "100"));
+    }
+
+    #[test]
+    fn the_day_of_a_date_is_not_a_claim() {
+        for answer in [
+            "As of December 31, 2015 the balance was $120 million.",
+            "At 31 December 2015 the balance was $120 million.",
+            "A 31 de diciembre de 2015 el saldo era de 120 millones.",
+            "Dec. 31, 2015: $120 million.",
+        ] {
+            let claims = extract_claims(answer, "en");
+            let numeric: Vec<_> =
+                claims.iter().filter(|c| c.kind == ClaimKind::Numeric).map(|c| c.text.as_str()).collect();
+            assert!(!numeric.contains(&"31"), "{answer}: {numeric:?}");
+            assert!(numeric.iter().any(|t| t.contains("120")), "{answer}: {numeric:?}");
+        }
+        // A count next to a month name that is not a day stays a claim.
+        let claims = extract_claims("Revenue grew 45 percent in May.", "en");
+        assert!(claims.iter().any(|c| c.kind == ClaimKind::Numeric && c.text.starts_with("45")));
     }
 
     #[test]
