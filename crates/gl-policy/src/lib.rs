@@ -153,6 +153,12 @@ pub struct DecisionRules {
     /// paraphrase, typically).
     #[serde(default)]
     pub tolerate_unresolved_kinds: Vec<gl_core::ClaimKind>,
+    /// Receipt notes that keep an `Unsupported` out of review: a verifier that
+    /// names why it is silent (`year_not_in_sources`: a year is a label, not
+    /// an amount) can be told apart from one that found nothing. Omitted from
+    /// the policy hash when empty.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tolerate_notes: Vec<String>,
 }
 
 fn review() -> Decision {
@@ -167,6 +173,7 @@ impl Default for DecisionRules {
             unresolved_claims: Decision::Review,
             conflicts: Decision::Review,
             tolerate_unresolved_kinds: vec![gl_core::ClaimKind::Word],
+            tolerate_notes: vec![],
         }
     }
 }
@@ -649,6 +656,7 @@ pub fn evaluate_request(
             }
             if e.result == EvidenceResult::Unsupported
                 && policy.decision.unsupported_from.iter().any(|p| glob_matches(p, &e.verifier_id))
+                && !e.receipt.notes.iter().any(|n| policy.decision.tolerate_notes.contains(n))
             {
                 decision = decision.max(Decision::Review);
                 reasons.push(format!("{} unsupported: {}", e.verifier_id, e.rationale));
@@ -794,6 +802,28 @@ regulatory_mapping:
     fn a_policy_from_5x_with_thresholds_is_refused() {
         let e = Policy::from_yaml("id: t\nversion: 1.0.0\nthresholds: {}\n").unwrap_err().to_string();
         assert!(e.contains("unknown field"), "{e}");
+    }
+
+    #[test]
+    fn a_tolerated_note_keeps_an_unsupported_out_of_review() {
+        let rules = "decision:\n  any_contradiction_from: [groundlens.numeric]\n  unsupported_from: [groundlens.numeric]\n";
+        let tolerant =
+            Policy::from_yaml(&format!("{POLICY}{rules}  tolerate_notes: [year_not_in_sources]\n")).unwrap();
+        let strict = Policy::from_yaml(&format!("{POLICY}{rules}")).unwrap();
+        let empty = Policy::from_yaml(&format!("{POLICY}{rules}  tolerate_notes: []\n")).unwrap();
+        assert_eq!(strict.hash().unwrap(), empty.hash().unwrap(), "an empty list must not change the hash");
+
+        let decide = |policy: &Policy, note: Option<&str>| {
+            let mut e = ev("groundlens.numeric", "c0", EvidenceResult::Unsupported, 0.0, Determinism::Exact);
+            e.receipt.notes.extend(note.map(str::to_string));
+            let mut graph = EvidenceGraph::default();
+            graph.push_verifier(info("groundlens.numeric", Determinism::Exact), vec![e]);
+            let kinds = BTreeMap::from([("c0".to_string(), ClaimKind::Numeric)]);
+            evaluate(policy, &graph, &kinds).unwrap().decision
+        };
+        assert_eq!(decide(&tolerant, Some("year_not_in_sources")), Decision::Pass);
+        assert_eq!(decide(&tolerant, None), Decision::Review);
+        assert_eq!(decide(&strict, Some("year_not_in_sources")), Decision::Review);
     }
 
     #[test]

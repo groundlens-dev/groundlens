@@ -32,7 +32,7 @@ use regex::Regex;
 use std::sync::OnceLock;
 
 pub const ID: &str = "groundlens.intent";
-pub const VERSION: &str = "1.0.0";
+pub const VERSION: &str = "1.1.0";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Kind {
@@ -219,6 +219,18 @@ impl Verifier for IntentVerifier {
                     format!("the question asks for {word}; the answer's figure {} has no unit", claim.text),
                     "unit_missing".into(),
                 ));
+            } else if given == Dimension::Percent && kind != Some(Kind::Percent) {
+                // "What was revenue in euros?" answered with "12 %": a share
+                // where an amount in a unit was asked. A question that asks
+                // for a percentage keeps its percentage.
+                problems.push((
+                    format!(
+                        "the question asks for {word} ({}); the answer's figure {} is a percentage",
+                        dimension_name(wanted),
+                        claim.text
+                    ),
+                    "unit_mismatch".into(),
+                ));
             } else if given != *wanted && given != Dimension::Percent {
                 problems.push((
                     format!(
@@ -343,6 +355,16 @@ mod tests {
         assert!(has(&rows, "intent_mismatch") && has(&rows, "asked:count"));
         let rows = check("How many stores were opened in 2015?", "In 2015, 120 stores were opened.");
         assert_eq!(rows[0].0, EvidenceResult::Supported, "the year is not the figure");
+    }
+
+    #[test]
+    fn a_percentage_where_a_unit_was_asked_is_flagged() {
+        let rows = check("What was ACME's Q4 revenue in euros?", "Q4 revenue was 12%.");
+        assert_eq!(rows[0].0, EvidenceResult::Unsupported);
+        assert!(has(&rows, "unit_mismatch") && has(&rows, "asked_unit:EUR"), "{rows:?}");
+        // A question that asks for a percentage keeps its percentage.
+        let rows = check("What percentage of revenue in euros came from Spain?", "Spain was 12%.");
+        assert!(!has(&rows, "unit_mismatch"), "{rows:?}");
     }
 
     #[test]

@@ -37,7 +37,8 @@ determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope, groundlens.intent]
+  unsupported_from: [groundlens.numeric, groundlens.scope, groundlens.intent]
+  tolerate_notes: [year_not_in_sources]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]

@@ -457,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "gl-python"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens",
  "groundlens-core",
@@ -471,7 +471,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "chrono",
  "groundlens-core",
@@ -492,7 +492,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-cli"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "clap",
  "groundlens",
@@ -502,7 +502,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-core"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "hex",
  "indexmap",
@@ -514,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-mcp"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "groundlens-runtime",
@@ -524,7 +524,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-numeric"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "regex",
@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-policy"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "serde",
@@ -544,7 +544,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-record"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "ed25519-dalek",
  "groundlens-core",
@@ -559,7 +559,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-runtime"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "serde",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-text"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "regex",
@@ -577,7 +577,7 @@ dependencies = [
 
 [[package]]
 name = "groundlens-verifiers"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "groundlens-core",
  "groundlens-numeric",
