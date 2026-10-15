@@ -15,6 +15,8 @@
 
 <br>
 
+**When GroundLens says FAIL, the answer is wrong 2 times in 3.<br>It flags 5 % of correct answers. 2 ms, no model.**<sup>[1](#measured-on)</sup>
+
 
 <br>
 
@@ -382,6 +384,9 @@ Apache-2.0, all of it: engine, checks, policies, connectors, command line and MC
 You can contact the developer at javier@groundlens.dev
 
 <br>
+
+<a id="measured-on"></a>
+<sub>1. GroundLens 6.0.4, default policy. 294 real answers by gpt-4o-mini from a RAG over FinQA 10-K pages (e5 embeddings, top 4 passages; 150 questions, with and without a company filter). Each answer labelled twice by hand-written criteria without seeing GroundLens, with a third pass on disagreements. 30 answers got FAIL: 20 were wrong (67 %, 95 % CI 49–81 %). 6 of 132 correct answers got FAIL. The fix behind the last release was found on these same answers, so this is not a held-out measurement. Median 2.2 ms per check. Details in the [changelog](CHANGELOG.md).</sub>
 
 <div align="center">
 
