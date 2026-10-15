@@ -456,17 +456,52 @@ dependencies = [
 ]
 
 [[package]]
-name = "gl-cli"
+name = "gl-python"
 version = "6.0.1"
 dependencies = [
- "clap",
- "gl-engine",
- "gl-policy",
- "gl-record",
+ "groundlens",
+ "groundlens-core",
+ "groundlens-record",
+ "groundlens-text",
+ "hex",
+ "pyo3",
+ "serde_json",
+ "serde_norway",
 ]
 
 [[package]]
-name = "gl-core"
+name = "groundlens"
+version = "6.0.1"
+dependencies = [
+ "chrono",
+ "groundlens-core",
+ "groundlens-mcp",
+ "groundlens-numeric",
+ "groundlens-policy",
+ "groundlens-record",
+ "groundlens-runtime",
+ "groundlens-text",
+ "groundlens-verifiers",
+ "hex",
+ "indexmap",
+ "rand_core 0.6.4",
+ "serde",
+ "serde_json",
+ "serde_norway",
+]
+
+[[package]]
+name = "groundlens-cli"
+version = "6.0.1"
+dependencies = [
+ "clap",
+ "groundlens",
+ "groundlens-policy",
+ "groundlens-record",
+]
+
+[[package]]
+name = "groundlens-core"
 version = "6.0.1"
 dependencies = [
  "hex",
@@ -478,78 +513,43 @@ dependencies = [
 ]
 
 [[package]]
-name = "gl-engine"
+name = "groundlens-mcp"
 version = "6.0.1"
 dependencies = [
- "chrono",
- "gl-core",
- "gl-mcp",
- "gl-numeric",
- "gl-policy",
- "gl-record",
- "gl-runtime",
- "gl-text",
- "gl-verifiers",
- "hex",
- "indexmap",
- "rand_core 0.6.4",
- "serde",
- "serde_json",
- "serde_norway",
-]
-
-[[package]]
-name = "gl-mcp"
-version = "6.0.1"
-dependencies = [
- "gl-core",
- "gl-runtime",
+ "groundlens-core",
+ "groundlens-runtime",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "gl-numeric"
+name = "groundlens-numeric"
 version = "6.0.1"
 dependencies = [
- "gl-core",
+ "groundlens-core",
  "regex",
  "rust_decimal",
  "serde",
 ]
 
 [[package]]
-name = "gl-policy"
+name = "groundlens-policy"
 version = "6.0.1"
 dependencies = [
- "gl-core",
+ "groundlens-core",
  "serde",
  "serde_json",
  "serde_norway",
 ]
 
 [[package]]
-name = "gl-python"
-version = "6.0.1"
-dependencies = [
- "gl-core",
- "gl-engine",
- "gl-record",
- "gl-text",
- "hex",
- "pyo3",
- "serde_json",
- "serde_norway",
-]
-
-[[package]]
-name = "gl-record"
+name = "groundlens-record"
 version = "6.0.1"
 dependencies = [
  "ed25519-dalek",
- "gl-core",
- "gl-policy",
- "gl-runtime",
+ "groundlens-core",
+ "groundlens-policy",
+ "groundlens-runtime",
  "hex",
  "p256",
  "rand_core 0.6.4",
@@ -558,30 +558,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "gl-runtime"
+name = "groundlens-runtime"
 version = "6.0.1"
 dependencies = [
- "gl-core",
+ "groundlens-core",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "gl-text"
+name = "groundlens-text"
 version = "6.0.1"
 dependencies = [
- "gl-core",
+ "groundlens-core",
  "regex",
  "unicode-normalization",
 ]
 
 [[package]]
-name = "gl-verifiers"
+name = "groundlens-verifiers"
 version = "6.0.1"
 dependencies = [
- "gl-core",
- "gl-numeric",
- "gl-text",
+ "groundlens-core",
+ "groundlens-numeric",
+ "groundlens-text",
  "indexmap",
  "regex",
  "rust_decimal",

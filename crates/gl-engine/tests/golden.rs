@@ -9,7 +9,7 @@
 //! committed in `tests/golden/invoice.hash`. Change the golden file only in
 //! a commit that explains why the finding changed.
 
-use gl_engine::{gl_core::Source, gl_policy::Decision, verify, VerifyRequest};
+use groundlens::{gl_core::Source, gl_policy::Decision, verify, VerifyRequest};
 use std::path::PathBuf;
 
 fn repo_root() -> PathBuf {

@@ -8,8 +8,8 @@
 //! other check passes it.
 
 use gl_core::Source;
-use gl_engine::{verify, VerifyRequest};
 use gl_policy::Decision;
+use groundlens::{verify, VerifyRequest};
 
 fn request(question: Option<&str>, answer: &str) -> VerifyRequest {
     let mut req = VerifyRequest::new(

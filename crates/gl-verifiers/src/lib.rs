@@ -13,7 +13,7 @@
 //! | `groundlens.rules.*`  | the organisation's own rules |
 //!
 //! The judge (`llm_judge.*`) is not here: the engine never calls a model.
-//! The caller does and passes the reply (`gl_engine::judge`).
+//! The caller does and passes the reply (`groundlens::judge`).
 //!
 //! Every verifier implements the same [`gl_core::Verifier`] trait. None of
 //! them decides anything; the policy does.

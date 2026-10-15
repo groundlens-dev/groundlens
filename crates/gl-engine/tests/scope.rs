@@ -10,8 +10,8 @@
 //! that only asks "is this number in the sources?" passes it.
 
 use gl_core::Source;
-use gl_engine::{verify, VerifyRequest};
 use gl_policy::Decision;
+use groundlens::{verify, VerifyRequest};
 
 fn source(id: &str, text: &str, entity: Option<&str>) -> Source {
     let mut provenance = indexmap::IndexMap::new();

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [package]
-name = "gl-runtime"
+name = "groundlens-runtime"
 description = "Execution-verification contracts for GroundLens: runs, events and the identities they reference. Pure data, no I/O and no network."
 version.workspace = true
 edition.workspace = true

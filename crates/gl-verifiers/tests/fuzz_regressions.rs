@@ -53,7 +53,7 @@ fn numeric_verifier_unit_conversion_overflow_does_not_panic() {
     }
     let (answer, source) = text.split_at(cut);
     let (answer, source) = (gl_text::normalise(answer), gl_text::normalise(source));
-    let claims = gl_verifiers::extract_claims(&answer, "und");
+    let claims = groundlens_verifiers::extract_claims(&answer, "und");
     let input = VerificationInput {
         question: None,
         answer,
@@ -63,7 +63,7 @@ fn numeric_verifier_unit_conversion_overflow_does_not_panic() {
         metadata: Default::default(),
         scope: Default::default(),
     };
-    let verifier = gl_verifiers::NumericVerifier::default();
+    let verifier = groundlens_verifiers::NumericVerifier::default();
     // The contract is simply: no panic.
     let _ = verifier.verify(&input);
 }

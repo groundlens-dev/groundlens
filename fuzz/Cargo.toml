@@ -9,11 +9,11 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-gl-text = { path = "../crates/gl-text" }
-gl-numeric = { path = "../crates/gl-numeric" }
-gl-policy = { path = "../crates/gl-policy" }
-gl-verifiers = { path = "../crates/gl-verifiers" }
-gl-core = { path = "../crates/gl-core" }
+gl-text = { package = "groundlens-text", path = "../crates/gl-text" }
+gl-numeric = { package = "groundlens-numeric", path = "../crates/gl-numeric" }
+gl-policy = { package = "groundlens-policy", path = "../crates/gl-policy" }
+gl-verifiers = { package = "groundlens-verifiers", path = "../crates/gl-verifiers" }
+gl-core = { package = "groundlens-core", path = "../crates/gl-core" }
 
 [[bin]]
 name = "numerals"

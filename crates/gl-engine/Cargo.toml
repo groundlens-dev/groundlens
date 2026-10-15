@@ -1,6 +1,11 @@
 [package]
-name = "gl-engine"
-description = "GLV, the GroundLens verification engine: one entry point that runs claims → verifiers → evidence → policy → decision → signed record"
+name = "groundlens"
+description = "Guardrails for LLM answers: check an answer against its sources without a model, decide PASS, REVIEW or FAIL under a policy, and keep a signed record"
+readme = "../../README.md"
+homepage = "https://groundlens.dev"
+documentation = "https://groundlens.readthedocs.io"
+keywords = ["llm", "rag", "guardrails", "verification", "audit"]
+categories = ["text-processing", "cryptography"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -1,6 +1,6 @@
 [package]
-name = "gl-core"
-description = "Core contracts of the Groundlens verification engine: claims, evidence, verifier trait, canonical hashing, determinism classes"
+name = "groundlens-core"
+description = "Core contracts of the GroundLens verification engine: claims, evidence, verifier trait, canonical hashing, determinism classes"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

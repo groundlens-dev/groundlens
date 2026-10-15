@@ -152,6 +152,9 @@ direction runs from the contracts outward to the surfaces.
 | `gl-python` | the `pyo3` / `maturin` extension module (`groundlens._engine`) |
 | `gl-cli` | the `glv` binary: checks records offline, for whoever has no Python |
 
+On crates.io each `gl-*` crate is published as `groundlens-*`, and `gl-engine`
+as `groundlens`; the directories and the names in the code stay `gl-*`.
+
 `gl-core` depends on nothing in the workspace; `gl-engine` depends on the
 verifiers, policy, record and runtime; the surfaces (`gl-python`,
 `gl-cli`) depend only on `gl-engine`. No crate in the workspace depends on an
