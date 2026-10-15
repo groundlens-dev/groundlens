@@ -62,6 +62,10 @@ the answer computed itself. Outside the scope, a bare figure needs three or
 more significant digits to count; one with a unit or a scale word (`$1.9
 billion`) needs none.
 
+A year is not checked for scope at all. "The excerpts say nothing about 2011"
+names the period the question asked about; that another company's passage
+mentions 2011 does not make the answer a quote from that company.
+
 A passage is inside the scope when every scope key its provenance states has
 the same value as the request. A passage that states none of the scope keys
 has unknown provenance. Figures are located by their number alone, ignoring

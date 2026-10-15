@@ -105,6 +105,8 @@ whatever happens to round to it; an exact match is accepted at any precision.
   `unsupported` with the note `year_not_in_sources`, not a contradiction. A
   year is a label; its absence from a passage is not a wrong amount. A year is
   never an operand.
+- **The day of a date.** The `31` of "December 31, 2015" or "31 de
+  diciembre" is not a claim.
 - **Formula constants.** The `100` of `× 100` and the divisor of an average,
   `(47 + 47) / 2`, are not claims.
 - **A scale the table declares.** A passage says "( in millions )" once and

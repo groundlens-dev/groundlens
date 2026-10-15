@@ -33,7 +33,7 @@ use gl_core::{
 use gl_numeric::{compare, find_bare_numerals, find_quantities, locale, Match, MatchOptions};
 
 pub const ID: &str = "groundlens.scope";
-pub const VERSION: &str = "1.1.0";
+pub const VERSION: &str = "1.2.0";
 
 /// Where a passage stands against the request's scope.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -117,6 +117,12 @@ impl Verifier for ScopeVerifier {
             let Some(answer_q) = find(&claim.text).into_iter().next() else {
                 continue;
             };
+            // A year is a label, not an amount: "the excerpts say nothing
+            // about 2011" names a period, it does not quote another
+            // company. The numeric verifier already exempts years.
+            if crate::numeric::is_year(&answer_q) {
+                continue;
+            }
             // Every passage where the figure appears exactly, in passage order.
             let mut inside: Option<(&Source, Span)> = None;
             let mut outside: Option<(&Source, Span, &Standing)> = None;
@@ -243,6 +249,18 @@ mod tests {
             &[("entity", "AAPL")],
         );
         assert_eq!(results(&i), vec![(EvidenceResult::Contradicted, vec!["out_of_scope_source".into()])]);
+    }
+
+    #[test]
+    fn a_year_found_only_outside_is_not_a_contradiction() {
+        // A refusal that names the period asked about is not a figure
+        // quoted from another company.
+        let i = input(
+            "The excerpts do not contain repurchase claims for 2011 and 2012.",
+            vec![src("amt-50", "in 2011 and 2012 the company acquired towers", &[("entity", "AMT")])],
+            &[("entity", "PNC")],
+        );
+        assert!(results(&i).is_empty(), "{:?}", results(&i));
     }
 
     #[test]
