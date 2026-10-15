@@ -99,7 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--log", help="append the signed record to this JSON Lines file")
     v.add_argument("--signing-key", help="32-byte hex Ed25519 seed (or GROUNDLENS_SIGNING_KEY)")
     v.add_argument("--no-units", action="store_true", help="groundlens 3.x bare-number semantics")
-    v.add_argument("--rounding", default="half_up", choices=["half_up", "half_even", "within_last_digit"], help="how a recomputed figure may differ from the one written")
+    v.add_argument("--rounding", default="within_last_digit", choices=["half_up", "half_even", "within_last_digit"], help="how a recomputed figure may differ from the one written")
     v.add_argument("--no-derive", action="store_true", help="do not recompute figures from the answer's own supported figures")
     v.add_argument("--scope", action="append", default=[], help="what the request is about, key=value, repeatable")
     v.add_argument("--provenance", action="append", default=[], help="provenance of a source, id:key=value, repeatable")

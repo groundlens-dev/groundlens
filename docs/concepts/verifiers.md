@@ -46,15 +46,25 @@ source, and they are right. The verifier recomputes them.
 
 A figure that no source contains is checked against the other figures of the
 same answer that the sources do support: their sum, their difference, their
-ratio, and their percentage change. Each is computed as an exact fraction, with
+average, their ratio and their percentage change; an amount divided by a count
+("$217,692 over 139,255 shares is $1.56"); and the sum and the average of three
+or more figures of the same kind ("$5.7, $9.0 and $12.1 million, $26.8 million
+in total"). Each is computed as an exact fraction, with
 no floating point, and compared with the figure the answer wrote at the
 precision it wrote it. `15.58 %` has two decimals, so the exact value
 `15.5844…` must round to `15.58`. A match is `supported`, with the note
 `derived` and the formula in the rationale:
 
 ```{code-block} text
-15.58% = |($65 million − $77 million) / $77 million| × 100 = 15.584415, rounded half_up
+15.58% = |($65 million − $77 million) / $77 million| × 100 = 15.584415, rounded within_last_digit
 ```
+
+Models slip in the last digit when they divide by hand: "2.0 / 22.885 × 100 ≈
+8.75 %", where the exact value is 8.739. Under the default rule a recomputed
+figure within half a percent of the exact value is `supported`, with the note
+`last_digit_slip`; "a change of −7.5 %" where the figures give −7.92 % is 5 %
+off and stays a contradiction. The tolerance applies only to recomputed
+figures; a figure compared with a source must match it exactly.
 
 A figure that matches nothing stays a contradiction, so wrong arithmetic still
 fails. That holds even when no source states a figure of that kind: in "from
@@ -77,9 +87,12 @@ written:
 
 | rule | what it accepts | example, exact value `67.876…` |
 |---|---|---|
-| `half_up` (default) | round to nearest, ties away from zero | `67.9` |
-| `half_even` | round to nearest, ties to the even digit | `67.9` |
-| `within_last_digit` | rounded or truncated | `67.8` or `67.9` |
+| `within_last_digit` (default) | rounded or truncated, or a recomputed figure within 0.5 % | `67.8` or `67.9` |
+| `half_up` | round to nearest, ties away from zero; no slip tolerance | `67.9` |
+| `half_even` | round to nearest, ties to the even digit; no slip tolerance | `67.9` |
+
+`within_last_digit` is the default since 6.0.3. Under `half_up`, 30 % of the
+correct answers in our FinQA measurement failed on a cut or slipped last digit.
 
 Set it with `rounding=` in Python or `--rounding` on the command line; turn
 recomputation off with `derive=False` or `--no-derive`. A rounded match needs
@@ -94,6 +107,14 @@ whatever happens to round to it; an exact match is accepted at any precision.
   never an operand.
 - **Formula constants.** The `100` of `× 100` and the divisor of an average,
   `(47 + 47) / 2`, are not claims.
+- **A scale the table declares.** A passage says "( in millions )" once and
+  its cells are bare: `-57`, `217692`. The answer writes the scale out,
+  `-$57 million`, `$217,692,000`. Under the declared scale they are the same
+  figure: `supported`, with the note `scale_from_header`.
+- **A short figure with its unit on one side.** `$52 million` against a bare
+  `52` in a table that states no scale: two digits are too few to call it the
+  same figure and too many to call it another. It is `unsupported`, so it goes
+  to review, not to fail.
 - **A unit or scale stated on one side only.** A table cell says `5312` under a
   header the parser could not read, and the answer says `$5,312 million`. The
   same written number, with the unit or the scale on one side only, is

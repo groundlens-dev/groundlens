@@ -56,6 +56,12 @@ answer it finds every passage where the same number appears and reports:
 | only in passages that do not state their provenance | `unsupported`, note `provenance_missing` | REVIEW |
 | in no passage | nothing; the numeric verifier speaks to it | — |
 
+A short bare number found only outside the scope is not a contradiction: a
+figure such as `2.3` turns up in some passage by chance, often as a difference
+the answer computed itself. Outside the scope, a bare figure needs three or
+more significant digits to count; one with a unit or a scale word (`$1.9
+billion`) needs none.
+
 A passage is inside the scope when every scope key its provenance states has
 the same value as the request. A passage that states none of the scope keys
 has unknown provenance. Figures are located by their number alone, ignoring

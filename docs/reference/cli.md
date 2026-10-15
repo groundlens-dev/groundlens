@@ -40,7 +40,7 @@ groundlens verify \
 | `--log PATH` | Append the signed record to this JSON Lines log. |
 | `--signing-key HEX` | 32-byte hex Ed25519 seed (or `GROUNDLENS_SIGNING_KEY`). |
 | `--no-units` | GroundLens 3.x bare-number semantics. |
-| `--rounding RULE` | How a recomputed figure may differ from the one written: `half_up` (default), `half_even`, `within_last_digit`. A `rounding` in the policy wins. |
+| `--rounding RULE` | How a recomputed figure may differ from the one written: `within_last_digit` (default), `half_up`, `half_even`. A `rounding` in the policy wins. |
 | `--no-derive` | Do not recompute figures from the answer's own supported figures. |
 | `--scope key=value` | What the request is about (`--scope entity=UPS`), repeatable. Turns on the scope check. |
 | `--provenance id:key=value` | Where a source comes from (`--provenance 10k#p114:entity=UPS`), repeatable. |
