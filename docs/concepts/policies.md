@@ -14,7 +14,7 @@ anyone noticing.
 
 ```{code-block} yaml
 id: eu_ai_act_high_risk_v1
-version: 1.4.0
+version: 1.5.0
 description: >
   Numbers must be exactly supported. A numeric contradiction fails the answer,
   and so does a figure taken from outside the request's scope.
@@ -26,7 +26,8 @@ determinism:
   minimum_to_decide: reproducible
 decision:
   any_contradiction_from: [groundlens.numeric, groundlens.scope, groundlens.rules.*]
-  unsupported_from: [groundlens.scope, groundlens.intent]
+  unsupported_from: [groundlens.numeric, groundlens.scope, groundlens.intent]
+  tolerate_notes: [year_not_in_sources]
   unresolved_claims: REVIEW
   conflicts: REVIEW
   tolerate_unresolved_kinds: [word, statement]
@@ -155,8 +156,12 @@ from a verifier below this class is recorded but does not drive the decision.
   FAIL.
 - **unsupported_from** — an `unsupported` from any of these verifiers sends the
   claim to REVIEW: the verifier could not establish what it checks, for example
-  a figure whose passage does not state its provenance. Optional; when it is
-  empty it is left out of the policy hash.
+  a figure no passage contains, or one whose passage does not state its
+  provenance. Optional; when it is empty it is left out of the policy hash.
+- **tolerate_notes** — receipt notes that keep an `unsupported` out of review.
+  The shipped policies tolerate `year_not_in_sources`: a year the passages do
+  not mention is a label, not a wrong amount. Optional; left out of the hash
+  when empty.
 - **unresolved_claims** — what to do with a claim no admitted verifier could
   resolve (usually REVIEW).
 - **conflicts** — what to do when verifiers disagree about a claim.
@@ -191,19 +196,22 @@ The final decision is the worst of all of these and of every claim.
 
 ## The shipped policies
 
-- **`groundlens_default_v1`** (version 1.4.0) — numbers must be exactly
-  supported; a numeric contradiction fails; a figure taken from outside the
+- **`groundlens_default_v1`** (version 1.5.0) — numbers must be exactly
+  supported; a numeric contradiction fails; a figure no passage contains and
+  the answer cannot recompute goes to review; a figure taken from outside the
   request's [scope](scope.md) fails, and one from a passage without provenance
   goes to review; a figure that is not the kind or unit the question asked for
   goes to review; anything unresolved goes to review; no model is needed and
   no generative verifier decides.
-- **`eu_ai_act_high_risk_v1`** (version 1.4.0) — the same checks, plus a
+- **`eu_ai_act_high_risk_v1`** (version 1.5.0) — the same checks, plus a
   mapping to Articles 15(1), 14(4)(a) and 12(1) of Regulation (EU) 2024/1689.
 
 Version 1.3.0 adds the intent check, which sends to review an answer whose
 figure is not the kind or the unit the question asked for. Version 1.4.0
 changes nothing in the YAML; it marks the 6.0 schema, which has no
-`thresholds` key, so the hash differs from 1.3.0.
+`thresholds` key, so the hash differs from 1.3.0. Version 1.5.0 sends to
+review a figure that no passage contains and that the answer cannot recompute,
+where 1.4.0 let it pass; years stay tolerated.
 
 ## Using and checking a policy
 

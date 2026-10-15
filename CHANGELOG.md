@@ -7,6 +7,31 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.2] - 2026-10-15
+
+### Fixed
+
+- **Wrong arithmetic fails even when no source states a figure of that
+  kind.** "From €38.0 million to €41.2 million, up 12 %" passed when the
+  passages held no percentage: `12 %` was `unsupported` and nothing decided on
+  it. The answer's two amounts give 8.42 %, so `12 %` is now `contradicted`,
+  with the note `recomputation_mismatch`, and the answer fails. The numeric
+  verifier is 1.2.0.
+- **A figure nothing supports goes to review.** A figure no passage contains
+  and the answer gives nothing to recompute from ("revenue grew 12 %" on its
+  own) was `unsupported` and passed. The shipped policies, now 1.5.0, list
+  `groundlens.numeric` in `unsupported_from`, so it goes to review. A year the
+  passages do not mention stays tolerated through the new policy key
+  `tolerate_notes: [year_not_in_sources]`; an empty `tolerate_notes` is left
+  out of the policy hash.
+- **A percentage where a unit was asked goes to review.** "What was revenue
+  in euros?" answered with "12 %" passed the intent check; it is now
+  `unit_mismatch`. A question that asks for a percentage keeps its
+  percentage. The intent verifier is 1.1.0.
+
+Records written by earlier versions still verify. The policy hashes change, so
+records written under 1.5.0 name a new policy hash.
+
 ### Added
 
 - **The Rust crates are on crates.io.** The engine is `groundlens`

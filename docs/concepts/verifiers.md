@@ -57,8 +57,16 @@ precision it wrote it. `15.58 %` has two decimals, so the exact value
 ```
 
 A figure that matches nothing stays a contradiction, so wrong arithmetic still
-fails. A derived figure can feed the next one: the decline, then the decline as
-a share of the first year.
+fails. That holds even when no source states a figure of that kind: in "from
+€38.0 million to €41.2 million, up 12 %", the passages contain no percentage,
+but the answer's two amounts give 8.42 %, so `12 %` is contradicted, with the
+note `recomputation_mismatch`. A derived figure can feed the next one: the
+decline, then the decline as a share of the first year.
+
+A figure that no source contains and that the answer gives nothing to
+recompute from ("revenue grew 12 %" on its own) is `unsupported`, and the
+shipped policies send it to review: nothing contradicts it, and nothing
+supports it.
 
 Only the answer's own supported figures are operands, never two figures picked
 from the sources. A table holds dozens of numbers, and some pair of them
@@ -117,7 +125,7 @@ a year (answers that show their work end with the result):
 | "percentage", "portion", "proportion", "ratio", "growth rate", "porcentaje" | a percentage | a percentage or a bare number (`22.97 %`, `0.23`) |
 | "how many", "number of", "cuántos" | a count | not a percentage |
 | "how much", "in millions", "total", "amount", "cuánto", "importe" | an amount | not a percentage |
-| "in euros", "in millions of dollars", "en kilómetros" | that unit | in that unit (`unit_mismatch`), and with a unit (`unit_missing`) |
+| "in euros", "in millions of dollars", "en kilómetros" | that unit | in that unit, not a percentage unless one was asked (`unit_mismatch`), and with a unit (`unit_missing`) |
 
 A figure of the kind asked is `supported`. One that is not is `unsupported`
 with the note `intent_mismatch`, `unit_mismatch` or `unit_missing`, and the

@@ -35,7 +35,7 @@ use gl_numeric::{
 use serde::{Deserialize, Serialize};
 
 pub const ID: &str = "groundlens.numeric";
-pub const VERSION: &str = "1.1.0";
+pub const VERSION: &str = "1.2.0";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NumericConfig {
@@ -295,6 +295,7 @@ impl Verifier for NumericVerifier {
         }
         if self.config.derive {
             derive(&mut rows, self.config.rounding);
+            wrong_recomputations(&mut rows);
         }
 
         let mut out: Vec<Evidence> = rows
@@ -520,6 +521,51 @@ fn derive(rows: &mut [Row], rounding: Rounding) {
     }
 }
 
+/// A figure that no source contains and that is the kind of figure the
+/// answer's own supported figures can produce (a percentage from two amounts,
+/// an amount from two amounts) was checked by [`derive`] and matched nothing:
+/// it is wrong arithmetic, not a figure the sources are silent about. "From
+/// €38.0 million to €41.2 million, up 12 %" is a contradiction (8.4 % is the
+/// change), even when no source states a percentage. A bare number is left
+/// alone: "2 quarters" next to two amounts is not a computation.
+fn wrong_recomputations(rows: &mut [Row]) {
+    let ops: Vec<Operand> = rows
+        .iter()
+        .filter(|r| r.result == EvidenceResult::Supported && !is_year(&r.quantity))
+        .filter_map(Operand::of)
+        .collect();
+    let cands = candidates(&ops);
+    for row in rows.iter_mut() {
+        if row.result != EvidenceResult::Unsupported || is_year(&row.quantity) {
+            continue;
+        }
+        let dimension = row.quantity.dimension().clone();
+        if dimension == Dimension::Dimensionless {
+            continue;
+        }
+        let mut from: Vec<&str> = cands
+            .iter()
+            .filter(|c| c.dimension == dimension && !c.from.contains(&row.claim_id))
+            .flat_map(|c| c.from.iter().map(String::as_str))
+            .collect();
+        if from.is_empty() {
+            continue;
+        }
+        from.sort_unstable();
+        from.dedup();
+        let operands: Vec<&str> =
+            ops.iter().filter(|op| from.contains(&op.claim_id.as_str())).map(|op| op.text.as_str()).collect();
+        row.result = EvidenceResult::Contradicted;
+        row.score = 0.0;
+        row.rationale = format!(
+            "{} is in no source and matches no sum, difference, ratio or change of {}",
+            row.text,
+            operands.join(", ")
+        );
+        row.receipt.notes.push("recomputation_mismatch".into());
+    }
+}
+
 fn rounding_name(r: Rounding) -> &'static str {
     match r {
         Rounding::HalfUp => "half_up",
@@ -663,6 +709,37 @@ mod tests {
             NumericConfig::default(),
         );
         assert_eq!(result_of(&rows, "-7.92%"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn a_wrong_percentage_change_fails_even_when_no_source_states_a_percentage() {
+        let source = "In 2024, revenue reached €41.2 million, up from €38.0 million in 2023.";
+        let rows = results(
+            "Revenue rose from €38.0 million to €41.2 million, up 12%.",
+            source,
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "12%"), EvidenceResult::Contradicted, "the change is 8.42 %");
+        let pct = rows.iter().find(|r| r.0 == "12%").unwrap();
+        assert!(pct.2.iter().any(|n| n == "recomputation_mismatch"));
+        let rows = results(
+            "Revenue rose from €38.0 million to €41.2 million, up 8.4%.",
+            source,
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "8.4%"), EvidenceResult::Supported);
+    }
+
+    #[test]
+    fn a_percentage_with_nothing_to_recompute_it_from_stays_unsupported() {
+        // No supported amounts in the answer: nothing was computed, so
+        // nothing is wrong arithmetic. The policy decides what silence means.
+        let rows = results(
+            "Revenue grew 12%.",
+            "In 2024, revenue reached €41.2 million, up from €38.0 million in 2023.",
+            NumericConfig::default(),
+        );
+        assert_eq!(result_of(&rows, "12%"), EvidenceResult::Unsupported);
     }
 
     #[test]

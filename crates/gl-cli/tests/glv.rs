@@ -30,7 +30,7 @@ fn shows_a_shipped_policy_with_its_hash() {
     let out = glv(&["policy", "show", "eu_ai_act_high_risk_v1", "--resolved"]);
     assert!(out.status.success());
     let text = String::from_utf8(out.stdout).unwrap();
-    assert!(text.starts_with("# eu_ai_act_high_risk_v1 v1.4.0\n# hash: sha256:"), "{text}");
+    assert!(text.starts_with("# eu_ai_act_high_risk_v1 v1.5.0\n# hash: sha256:"), "{text}");
 }
 
 #[test]
