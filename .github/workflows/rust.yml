@@ -67,6 +67,21 @@ jobs:
           cargo tree --workspace -e normal \
             | grep -Ei 'reqwest|hyper|ureq|curl|openssl|rustls|native-tls|tokio-tungstenite|hf-hub' && exit 1 || echo "clean"
 
+  # cargo-deny (deny.toml): no networking crate, only the licences listed,
+  # no crate with a RustSec advisory, no yanked crate. The binary is the
+  # release archive, pinned by its SHA-256.
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install cargo-deny 0.20.2
+        run: |
+          v=0.20.2
+          curl -sSfL -o deny.tgz "https://github.com/EmbarkStudios/cargo-deny/releases/download/$v/cargo-deny-$v-x86_64-unknown-linux-musl.tar.gz"
+          echo "9f12ed4c49936e09b48bf862b595cde2fe64fcbd9d74dfacac6131ca824c8d5f  deny.tgz" | sha256sum -c -
+          tar xzf deny.tgz --strip-components=1 -C "$HOME/.cargo/bin" "cargo-deny-$v-x86_64-unknown-linux-musl/cargo-deny"
+      - run: cargo deny check
+
   # Licensing: every file carries SPDX copyright and licence information
   # (REUSE specification 3.3), so the bill of materials of a release is
   # complete without reading the source.

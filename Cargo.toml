@@ -17,7 +17,7 @@ members = [
 exclude = ["fuzz"]
 
 [workspace.package]
-version = "5.3.0"
+version = "6.0.0"
 edition = "2021"
 rust-version = "1.91"
 license = "Apache-2.0"
@@ -37,7 +37,9 @@ gl-mcp = { path = "crates/gl-mcp" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
-serde_yaml = "0.9"
+# serde_yaml is unmaintained (RUSTSEC-2024-0449, via unsafe-libyaml); serde_norway is
+# its maintained fork with the same API, so the crates keep `use serde_yaml`.
+serde_yaml = { package = "serde_norway", version = "0.9" }
 rust_decimal = { version = "1", features = ["serde-with-str"] }
 sha2 = "0.10"
 hex = "0.4"

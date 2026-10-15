@@ -457,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "gl-cli"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "clap",
  "gl-engine",
@@ -467,7 +467,7 @@ dependencies = [
 
 [[package]]
 name = "gl-core"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "hex",
  "indexmap",
@@ -479,7 +479,7 @@ dependencies = [
 
 [[package]]
 name = "gl-engine"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "chrono",
  "gl-core",
@@ -495,12 +495,12 @@ dependencies = [
  "rand_core 0.6.4",
  "serde",
  "serde_json",
- "serde_yaml",
+ "serde_norway",
 ]
 
 [[package]]
 name = "gl-mcp"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "gl-runtime",
@@ -510,7 +510,7 @@ dependencies = [
 
 [[package]]
 name = "gl-numeric"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "regex",
@@ -520,17 +520,17 @@ dependencies = [
 
 [[package]]
 name = "gl-policy"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "serde",
  "serde_json",
- "serde_yaml",
+ "serde_norway",
 ]
 
 [[package]]
 name = "gl-python"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "gl-engine",
@@ -539,12 +539,12 @@ dependencies = [
  "hex",
  "pyo3",
  "serde_json",
- "serde_yaml",
+ "serde_norway",
 ]
 
 [[package]]
 name = "gl-record"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "ed25519-dalek",
  "gl-core",
@@ -559,7 +559,7 @@ dependencies = [
 
 [[package]]
 name = "gl-runtime"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "serde",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "gl-text"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "regex",
@@ -577,7 +577,7 @@ dependencies = [
 
 [[package]]
 name = "gl-verifiers"
-version = "5.3.0"
+version = "6.0.0"
 dependencies = [
  "gl-core",
  "gl-numeric",
@@ -1077,16 +1077,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
-version = "0.9.34+deprecated"
+name = "serde_norway"
+version = "0.9.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+checksum = "e408f29489b5fd500fab51ff1484fc859bb655f32c671f307dcd733b72e8168c"
 dependencies = [
  "indexmap",
  "itoa",
  "ryu",
  "serde",
- "unsafe-libyaml",
+ "unsafe-libyaml-norway",
 ]
 
 [[package]]
@@ -1259,10 +1259,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "unsafe-libyaml"
-version = "0.2.11"
+name = "unsafe-libyaml-norway"
+version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
+checksum = "b39abd59bf32521c7f2301b52d05a6a2c975b6003521cbd0c6dc1582f0a22104"
 
 [[package]]
 name = "utf8parse"
