@@ -1,6 +1,6 @@
 [package]
-name = "gl-numeric"
-description = "Exact numerals with scale, currency, percent and physical units for the Groundlens engine"
+name = "groundlens-numeric"
+description = "Exact numerals with scale, currency, percent and physical units for the GroundLens engine"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

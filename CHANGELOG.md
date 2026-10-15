@@ -7,6 +7,16 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- **The Rust crates are on crates.io.** The engine is `groundlens`
+  (`cargo add groundlens`) and the `glv` binary is `groundlens-cli`
+  (`cargo install groundlens-cli`). The other crates are published as
+  `groundlens-core`, `groundlens-text`, `groundlens-numeric`,
+  `groundlens-verifiers`, `groundlens-policy`, `groundlens-record`,
+  `groundlens-runtime` and `groundlens-mcp`, because the `gl-*` names belong to
+  another project. Inside the workspace the crates keep their `gl_*` names.
+
 ## [6.0.1] - 2026-10-15
 
 ### Fixed

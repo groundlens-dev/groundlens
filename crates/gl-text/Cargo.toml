@@ -1,6 +1,6 @@
 [package]
-name = "gl-text"
-description = "Input normalisation and word segmentation for the Groundlens engine (port of groundlens 3.x _text/_words)"
+name = "groundlens-text"
+description = "Input normalisation and word segmentation for the GroundLens engine"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

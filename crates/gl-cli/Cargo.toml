@@ -1,6 +1,9 @@
 [package]
-name = "gl-cli"
+name = "groundlens-cli"
 description = "glv: check GroundLens records offline, without Python"
+homepage = "https://groundlens.dev"
+keywords = ["llm", "guardrails", "audit", "ed25519", "cli"]
+categories = ["command-line-utilities", "cryptography"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

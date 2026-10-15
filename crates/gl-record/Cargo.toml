@@ -1,6 +1,6 @@
 [package]
-name = "gl-record"
-description = "Signed, append-only evidence records for the Groundlens engine"
+name = "groundlens-record"
+description = "Signed, append-only evidence records for the GroundLens engine"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

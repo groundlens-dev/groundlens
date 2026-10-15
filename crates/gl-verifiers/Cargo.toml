@@ -1,6 +1,6 @@
 [package]
-name = "gl-verifiers"
-description = "Built-in verifiers for the Groundlens engine: numeric, scope, intent and rules, all exact, and the claim extractor"
+name = "groundlens-verifiers"
+description = "Built-in verifiers for the GroundLens engine: numeric, scope, intent and rules, all exact, and the claim extractor"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

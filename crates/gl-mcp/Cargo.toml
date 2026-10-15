@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [package]
-name = "gl-mcp"
+name = "groundlens-mcp"
 description = "The MCP adapter for GroundLens: turn a real Model Context Protocol execution (tool calls, results, model sampling) into a signed-ready event log. Records hashes, not content."
 version.workspace = true
 edition.workspace = true

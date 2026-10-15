@@ -13,7 +13,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use gl_record::{
+use groundlens_record::{
     verify_chain, verify_run_chain, EvidenceRecord, RunRecord, RECORD_SCHEMA, RUN_RECORD_SCHEMA,
 };
 

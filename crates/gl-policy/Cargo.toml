@@ -1,6 +1,6 @@
 [package]
-name = "gl-policy"
-description = "Policy engine of the Groundlens engine: composes evidence into a decision and maps it to regulatory controls"
+name = "groundlens-policy"
+description = "Policy engine of the GroundLens engine: composes evidence into a decision and maps it to regulatory controls"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
