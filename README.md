@@ -15,7 +15,7 @@
 
 <br>
 
-**When GroundLens says FAIL, the answer is wrong 2 times in 3.<br>It flags 5 % of correct answers. 2 ms, no model.**<sup>[1](#measured-on)</sup>
+**When GroundLens says FAIL, the answer is wrong 2 times in 3. It flags less than 5 % of correct answers. Latency: 2 ms. Deterministic (no LLM in the loop).**<sup>[1](#measured-on)</sup>
 
 
 <br>
