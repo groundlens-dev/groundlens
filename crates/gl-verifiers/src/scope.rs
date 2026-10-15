@@ -33,7 +33,7 @@ use gl_core::{
 use gl_numeric::{compare, find_bare_numerals, find_quantities, locale, Match, MatchOptions};
 
 pub const ID: &str = "groundlens.scope";
-pub const VERSION: &str = "1.1.0";
+pub const VERSION: &str = "1.2.0";
 
 /// Where a passage stands against the request's scope.
 #[derive(Debug, Clone, PartialEq, Eq)]

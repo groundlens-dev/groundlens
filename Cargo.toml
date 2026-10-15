@@ -17,7 +17,7 @@ members = [
 exclude = ["fuzz"]
 
 [workspace.package]
-version = "6.0.3"
+version = "6.0.4"
 edition = "2021"
 rust-version = "1.91"
 license = "Apache-2.0"
@@ -28,15 +28,15 @@ authors = ["Javier Marin <javier@jmarin.info>"]
 # On crates.io the crates are groundlens-* (the gl-* names belong to another project);
 # inside the workspace they keep their short gl_* names. On a release, bump the
 # version here together with [workspace.package].
-gl-core = { package = "groundlens-core", path = "crates/gl-core", version = "6.0.3" }
-gl-text = { package = "groundlens-text", path = "crates/gl-text", version = "6.0.3" }
-gl-numeric = { package = "groundlens-numeric", path = "crates/gl-numeric", version = "6.0.3" }
-gl-verifiers = { package = "groundlens-verifiers", path = "crates/gl-verifiers", version = "6.0.3" }
-gl-policy = { package = "groundlens-policy", path = "crates/gl-policy", version = "6.0.3" }
-gl-record = { package = "groundlens-record", path = "crates/gl-record", version = "6.0.3" }
-gl-engine = { package = "groundlens", path = "crates/gl-engine", version = "6.0.3" }
-gl-runtime = { package = "groundlens-runtime", path = "crates/gl-runtime", version = "6.0.3" }
-gl-mcp = { package = "groundlens-mcp", path = "crates/gl-mcp", version = "6.0.3" }
+gl-core = { package = "groundlens-core", path = "crates/gl-core", version = "6.0.4" }
+gl-text = { package = "groundlens-text", path = "crates/gl-text", version = "6.0.4" }
+gl-numeric = { package = "groundlens-numeric", path = "crates/gl-numeric", version = "6.0.4" }
+gl-verifiers = { package = "groundlens-verifiers", path = "crates/gl-verifiers", version = "6.0.4" }
+gl-policy = { package = "groundlens-policy", path = "crates/gl-policy", version = "6.0.4" }
+gl-record = { package = "groundlens-record", path = "crates/gl-record", version = "6.0.4" }
+gl-engine = { package = "groundlens", path = "crates/gl-engine", version = "6.0.4" }
+gl-runtime = { package = "groundlens-runtime", path = "crates/gl-runtime", version = "6.0.4" }
+gl-mcp = { package = "groundlens-mcp", path = "crates/gl-mcp", version = "6.0.4" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }

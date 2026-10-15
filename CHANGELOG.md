@@ -7,6 +7,36 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.4] - 2026-10-15
+
+The 300 answers measured for 6.0.3 were labelled again by hand-written
+criteria, twice and blind to GroundLens, with a third blind pass on the 11
+disagreements (the two passes agreed on 96 %). Under those labels 6.0.3 gave
+FAIL to 34 of the 108 answers that only say the passages lack the data: in 28
+of them the only "figure" was a year. 6.0.4 removes that:
+
+| all 294 answers, reviewed labels | 6.0.3 | 6.0.4 |
+|---|---|---|
+| FAIL in total | 60 | 30 |
+| FAIL on answers that decline | 34 of 108 | 4 of 108 |
+| a FAIL lands on a wrong answer | 33 % (20 of 60) | 67 % (20 of 30) |
+| wrong answers given FAIL | 37 % (20 of 54) | 37 % (20 of 54) |
+| correct answers given FAIL | 5 % (6 of 132) | 5 % (6 of 132) |
+
+The fix was found on these answers, so these numbers are not a held-out
+measurement. Median check time 2.2 ms.
+
+### Fixed
+
+- **Scope: a year is not a figure.** A refusal that names the period asked
+  about ("nothing about 2011 and 2012") no longer fails because another
+  company's passage mentions those years. The numeric verifier already
+  treated years this way.
+- **The day of a date is not a claim.** The `31` of "December 31, 2015" is no
+  longer checked against the sources.
+
+Scope verifier 1.2.0.
+
 ## [6.0.3] - 2026-10-15
 
 Measured on 300 real gpt-4o-mini answers over FinQA 10-K pages, labels set
