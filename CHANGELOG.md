@@ -7,6 +7,14 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- **SLSA Build Level 3 provenance.** Every wheel, the sdist and every `glv`
+  binary of a release is covered by provenance that the OpenSSF generator
+  signs in its own isolated job, out of reach of the build steps. It ships on
+  the GitHub Release as `groundlens-vX.Y.Z.intoto.jsonl` and is checked with
+  `slsa-verifier verify-artifact`.
+
 ## [6.0.4] - 2026-10-15
 
 The 300 answers measured for 6.0.3 were labelled again by a language model
