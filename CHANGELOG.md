@@ -9,9 +9,9 @@ identical in the git tag and on PyPI.
 
 ## [6.0.4] - 2026-10-15
 
-The 300 answers measured for 6.0.3 were labelled again by hand-written
-criteria, twice and blind to GroundLens, with a third blind pass on the 11
-disagreements (the two passes agreed on 96 %). Under those labels 6.0.3 gave
+The 300 answers measured for 6.0.3 were labelled again by a language model
+(Claude) against fixed written criteria, twice and blind to GroundLens, with a
+third blind pass on the 11 disagreements (the two passes agreed on 96 %). Under those labels 6.0.3 gave
 FAIL to 34 of the 108 answers that only say the passages lack the data: in 28
 of them the only "figure" was a year. 6.0.4 removes that:
 
