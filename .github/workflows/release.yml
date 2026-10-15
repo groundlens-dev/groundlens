@@ -5,13 +5,17 @@ name: release
 # crates.io (trusted publishing), the MCP registry entry and a GitHub Release.
 # Nothing is published by hand and no token is stored anywhere.
 # The tag must equal the version in python/pyproject.toml and Cargo.toml.
-# Every wheel, the sdist and every glv binary gets a signed build provenance
-# attestation (SLSA build level 2); verify one with
+# Every wheel, the sdist and every glv binary gets SLSA Build Level 3
+# provenance: the OpenSSF generator signs it in its own isolated job, which
+# the build steps cannot reach, and it rides on the GitHub Release as
+# `groundlens-vX.Y.Z.intoto.jsonl`. Verify any of those files with
+#   slsa-verifier verify-artifact <file> \
+#     --provenance-path groundlens-vX.Y.Z.intoto.jsonl \
+#     --source-uri github.com/groundlens-dev/groundlens --source-tag vX.Y.Z
+# Each file also carries a GitHub build attestation, checked with
 #   gh attestation verify <file> --repo groundlens-dev/groundlens
-# The GitHub Release additionally carries, for every binary, a sigstore
-# keyless signature (`.sig` + `.pem`) and the SLSA provenance bundle
-# (`.intoto.jsonl`) as downloadable assets, so the release is verifiable
-# offline and the artifacts are signed on the release itself. Verify one with
+# and every binary on the release a sigstore keyless signature (`.sig` +
+# `.pem`). Verify one with
 #   cosign verify-blob --certificate glv-... .pem --signature glv-... .sig \
 #     --certificate-identity-regexp 'https://github.com/groundlens-dev/groundlens/.*' \
 #     --certificate-oidc-issuer https://token.actions.githubusercontent.com  glv-...
@@ -157,28 +161,57 @@ jobs:
         with:
           packages-dir: dist
 
+  # SHA-256 of every file the release ships, the subjects of the SLSA provenance.
+  hashes:
+    needs: [wheels, sdist, glv]
+    runs-on: ubuntu-latest
+    outputs:
+      subjects: ${{ steps.hash.outputs.subjects }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: release
+          merge-multiple: true
+      - id: hash
+        working-directory: release
+        run: |
+          set -euo pipefail
+          sha256sum * | tee /dev/stderr > ../SHA256SUMS
+          echo "subjects=$(base64 -w0 ../SHA256SUMS)" >> "$GITHUB_OUTPUT"
+
+  # SLSA Build Level 3 provenance, generated and signed by the OpenSSF reusable
+  # workflow in jobs of its own. It must be referenced by tag, not by commit:
+  # slsa-verifier checks the tag of the builder that signed the provenance.
+  provenance:
+    needs: hashes
+    permissions:
+      actions: read     # read the path of this workflow
+      id-token: write   # sign the provenance with sigstore
+      contents: write   # required by the generator, which does not upload here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: ${{ needs.hashes.outputs.subjects }}
+      provenance-name: groundlens-${{ github.ref_name }}.intoto.jsonl
+      upload-assets: false
+
   github-release:
-    needs: [pypi, glv]
+    needs: [pypi, glv, provenance]
     runs-on: ubuntu-latest
     permissions:
       contents: write      # create the release and upload assets
       id-token: write      # keyless sigstore signing and provenance OIDC
-      attestations: write  # SLSA build provenance attestation
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: "glv-*"
           merge-multiple: true
           path: bin
-      # SLSA build provenance over the exact binaries being released, kept as a
-      # file so it can ride along on the release (Scorecard reads it there).
-      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        id: provenance
+      # The SLSA provenance of every wheel, the sdist and every binary rides on
+      # the release (Scorecard's Signed-Releases check reads it there).
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          subject-path: "bin/*"
-      - name: Attach the provenance bundle as a release asset
-        shell: bash
-        run: cp "${{ steps.provenance.outputs.bundle-path }}" "bin/${GITHUB_REF_NAME}.intoto.jsonl"
+          name: ${{ needs.provenance.outputs.provenance-name }}
+          path: bin
       - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
         with:
           # cosign 3.x defaults to the new bundle format and drops the detached

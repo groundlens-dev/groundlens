@@ -11,7 +11,7 @@
 [![PyPI](https://img.shields.io/pypi/v/groundlens?color=1a4fd6)](https://pypi.org/project/groundlens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/groundlens-dev/groundlens/badge)](https://scorecard.dev/viewer/?uri=github.com/groundlens-dev/groundlens)
-[![SLSA](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev)
+[![SLSA](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
 
 <br>
 
@@ -359,7 +359,7 @@ GroundLens sits on the path between a model and a decision, and its records are 
 | Two writers fork a chain | Conditional writes in every sink; a lost race is retried, never overwritten |
 | Data leaves through the verifier | No network code in the engine (`cargo-deny` bans HTTP and TLS crates); other systems are reached only through clients you pass in |
 | Hostile input exhausts the parser | Bounded numeral grammar against regular-expression DoS; fuzzing of every parser |
-| A tampered release | Pinned and hashed CI dependencies, SLSA level 2 provenance, signed release binaries, OpenSSF Scorecard |
+| A tampered release | Pinned and hashed CI dependencies, SLSA Build Level 3 provenance, signed release binaries, OpenSSF Scorecard |
 
 Report vulnerabilities privately through [GitHub security advisories](https://github.com/groundlens-dev/groundlens/security/advisories/new). See [SECURITY.md](SECURITY.md).
 
