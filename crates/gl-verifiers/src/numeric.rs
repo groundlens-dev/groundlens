@@ -101,6 +101,30 @@ impl NumericVerifier {
 struct SourceQuantity<'a> {
     source_id: &'a str,
     quantity: Quantity,
+    /// The scale the passage declares once for its table, "( in millions )":
+    /// a power of ten applied to the bare cells under it.
+    declared_scale: Option<u32>,
+}
+
+/// The scale a passage declares for its figures: "( in millions )",
+/// "(in thousands of dollars)", "dollars in billions". Tables state it once in
+/// a header and leave the cells bare; the answer usually writes it out
+/// ("$217,692,000" for a cell "217692" in thousands).
+fn declared_scale(text: &str) -> Option<u32> {
+    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    let re = RE.get_or_init(|| {
+        regex::Regex::new(
+            r"(?i)\(\s*(?:\$|€|£|dollars|usd|eur|euros?)?\s*in\s+(thousands|millions|billions)\b|\b(?:dollars|usd|euros?)\s+in\s+(thousands|millions|billions)\b",
+        )
+        .expect("declared scale")
+    });
+    let word = re.captures(text)?.iter().skip(1).flatten().next()?.as_str().to_lowercase();
+    match word.as_str() {
+        "thousands" => Some(3),
+        "millions" => Some(6),
+        "billions" => Some(9),
+        _ => None,
+    }
 }
 
 impl Verifier for NumericVerifier {
@@ -123,7 +147,12 @@ impl Verifier for NumericVerifier {
             .sources
             .iter()
             .flat_map(|s| {
-                find(&s.text).into_iter().map(move |quantity| SourceQuantity { source_id: &s.id, quantity })
+                let declared_scale = declared_scale(&s.text);
+                find(&s.text).into_iter().map(move |quantity| SourceQuantity {
+                    source_id: &s.id,
+                    quantity,
+                    declared_scale,
+                })
             })
             .collect();
 
@@ -274,6 +303,45 @@ impl Verifier for NumericVerifier {
                     };
                 }
             }
+            // The table says "( in millions )" once and the cell says "-57";
+            // the answer says "-$57 million". The same figure, with the
+            // scale the passage declares.
+            if result != EvidenceResult::Supported && answer_q.numeral.significant_digits >= 2 {
+                if let Some(sq) = source_quantities.iter().find(|sq| header_scale_matches(&answer_q, sq)) {
+                    let span = Span::new(sq.quantity.span.start, sq.quantity.span.end);
+                    let shown = input_source_text(input, sq.source_id, sq.quantity.span);
+                    result = EvidenceResult::Supported;
+                    score = 1.0;
+                    rationale = format!(
+                        "{} = {} in {}, under the scale its table declares",
+                        claim.text, shown, sq.source_id
+                    );
+                    receipt = Receipt {
+                        source_id: Some(sq.source_id.to_string()),
+                        source_span: Some(span),
+                        source_text: Some(shown),
+                        notes: notes.iter().cloned().chain(["scale_from_header".to_string()]).collect(),
+                    };
+                }
+            }
+            // "$52 million" against a bare "52" in a table that states no
+            // scale: two digits are too few to call it the same figure, and
+            // too many to call it a different one. Not a contradiction.
+            if result == EvidenceResult::Contradicted && answer_q.numeral.significant_digits == 2 {
+                if let Some(sq) =
+                    source_quantities.iter().find(|sq| unit_on_one_side(&answer_q, &sq.quantity))
+                {
+                    result = EvidenceResult::Unsupported;
+                    score = 0.0;
+                    rationale = format!(
+                        "{} matches {} in {} only if the unit or scale stated on one side applies to the other",
+                        claim.text,
+                        input_source_text(input, sq.source_id, sq.quantity.span),
+                        sq.source_id
+                    );
+                    receipt.notes.push("unit_or_scale_on_one_side_unconfirmed".into());
+                }
+            }
             rows.push(Row {
                 claim_id: claim.id.clone(),
                 text: claim.text.clone(),
@@ -349,6 +417,34 @@ fn unit_on_one_side(answer: &Quantity, source: &Quantity) -> bool {
         && answer.numeral.readings.iter().any(|a| source.numeral.readings.iter().any(|s| a == s))
 }
 
+/// The answer's figure is the source cell times the scale its passage
+/// declares: `$217,692,000` against `217692` under "( in thousands )". The
+/// cell must be bare (no scale word, no unit of another dimension).
+fn header_scale_matches(answer: &Quantity, sq: &SourceQuantity) -> bool {
+    let source = &sq.quantity;
+    if is_year(source) {
+        return false;
+    }
+    let (da, ds) = (answer.dimension(), source.dimension());
+    if !(da == ds || *ds == Dimension::Dimensionless) {
+        return false;
+    }
+    let (Some(a), Some(s)) = (answer.base_ratio(0), source.base_ratio(0)) else {
+        return false;
+    };
+    // The reader already applied the table's scale to the cell, but the
+    // header named no currency: "( in millions )" over "-57".
+    if source.scale_exponent > 0 && source.notes.contains(&"scale_from_context") {
+        return s == a;
+    }
+    // A header the reader does not take as a scale context, such as
+    // "( in thousands )" after a title: apply it here.
+    let Some(exp) = sq.declared_scale.filter(|_| source.scale_exponent == 0) else {
+        return false;
+    };
+    Ratio::pow10(exp as i32).and_then(|f| s.checked_mul(f)).is_some_and(|scaled| scaled == a)
+}
+
 /// A bare four-digit year: `2015`, `(2011)`. No separator, no decimals, no
 /// unit, no scale, between 1900 and 2100.
 pub(crate) fn is_year(q: &Quantity) -> bool {
@@ -396,49 +492,135 @@ struct Candidate {
     from: Vec<String>,
 }
 
+/// Largest group of same-dimension operands whose sums and averages are
+/// tried: 2^10 subsets at most.
+const MAX_GROUP: usize = 10;
+
 fn candidates(ops: &[Operand]) -> Vec<Candidate> {
     let hundred = Ratio::from_int(100);
+    let two = Ratio::from_int(2);
     let mut out = Vec::new();
+    let mut push = |value: Option<Ratio>, dimension: Dimension, formula: String, from: Vec<String>| {
+        if let Some(value) = value {
+            out.push(Candidate { value, dimension, formula, from });
+        }
+    };
     for (i, a) in ops.iter().enumerate() {
         for (j, b) in ops.iter().enumerate() {
-            if i == j || a.dimension != b.dimension {
+            if i == j {
                 continue;
             }
             let from = vec![a.claim_id.clone(), b.claim_id.clone()];
-            let mut push = |value: Option<Ratio>, dimension: Dimension, formula: String| {
-                if let Some(value) = value {
-                    out.push(Candidate { value, dimension, formula, from: from.clone() });
-                }
-            };
             let (at, bt) = (&a.text, &b.text);
+            // An amount per unit: "$217,692 / 139,255 = $1.56" per share.
+            if a.dimension != Dimension::Dimensionless
+                && b.dimension == Dimension::Dimensionless
+                && !b.base.is_zero()
+            {
+                push(a.base.checked_div(b.base), a.dimension.clone(), format!("{at} / {bt}"), from.clone());
+            }
+            if a.dimension != b.dimension {
+                continue;
+            }
             if i < j {
-                push(a.base.checked_add(b.base), a.dimension.clone(), format!("{at} + {bt}"));
+                let sum = a.base.checked_add(b.base);
+                push(sum, a.dimension.clone(), format!("{at} + {bt}"), from.clone());
+                push(
+                    sum.and_then(|x| x.checked_div(two)),
+                    a.dimension.clone(),
+                    format!("({at} + {bt}) / 2"),
+                    from.clone(),
+                );
             }
             let diff = a.base.checked_sub(b.base);
-            push(diff, a.dimension.clone(), format!("{at} − {bt}"));
+            push(diff, a.dimension.clone(), format!("{at} − {bt}"), from.clone());
             if i < j {
-                push(diff.and_then(Ratio::checked_abs), a.dimension.clone(), format!("|{at} − {bt}|"));
+                push(
+                    diff.and_then(Ratio::checked_abs),
+                    a.dimension.clone(),
+                    format!("|{at} − {bt}|"),
+                    from.clone(),
+                );
             }
             if !b.base.is_zero() {
                 let ratio = a.base.checked_div(b.base);
-                push(ratio, Dimension::Dimensionless, format!("{at} / {bt}"));
+                push(ratio, Dimension::Dimensionless, format!("{at} / {bt}"), from.clone());
                 push(
                     ratio.and_then(|r| r.checked_mul(hundred)),
                     Dimension::Percent,
                     format!("{at} / {bt} × 100"),
+                    from.clone(),
                 );
                 let change = diff.and_then(|d| d.checked_div(b.base)).and_then(|r| r.checked_mul(hundred));
-                push(change, Dimension::Percent, format!("({at} − {bt}) / {bt} × 100"));
+                push(change, Dimension::Percent, format!("({at} − {bt}) / {bt} × 100"), from.clone());
                 push(
                     change.and_then(Ratio::checked_abs),
                     Dimension::Percent,
                     format!("|({at} − {bt}) / {bt}| × 100"),
+                    from,
                 );
             }
         }
     }
+    // Sums and averages of three or more figures of the same kind: "the
+    // total for 2008 to 2010", "the average of the three categories".
+    let mut dims: Vec<&Dimension> = Vec::new();
+    for op in ops {
+        if !dims.contains(&&op.dimension) {
+            dims.push(&op.dimension);
+        }
+    }
+    for dim in dims {
+        let group: Vec<&Operand> = ops.iter().filter(|o| &o.dimension == dim).collect();
+        if group.len() < 3 || group.len() > MAX_GROUP {
+            continue;
+        }
+        for mask in 0u32..(1u32 << group.len()) {
+            let members: Vec<&Operand> =
+                group.iter().enumerate().filter(|(k, _)| mask & (1 << k) != 0).map(|(_, o)| *o).collect();
+            if members.len() < 3 {
+                continue;
+            }
+            let Some(sum) = members.iter().try_fold(Ratio::from_int(0), |acc, o| acc.checked_add(o.base))
+            else {
+                continue;
+            };
+            let texts: Vec<&str> = members.iter().map(|o| o.text.as_str()).collect();
+            let from: Vec<String> = members.iter().map(|o| o.claim_id.clone()).collect();
+            push(Some(sum), dim.clone(), texts.join(" + "), from.clone());
+            let n = Ratio::from_int(members.len() as i128);
+            push(
+                sum.checked_div(n),
+                dim.clone(),
+                format!("({}) / {}", texts.join(" + "), members.len()),
+                from,
+            );
+        }
+    }
     out
 }
+
+/// A recomputed figure written within half a percent of the exact value:
+/// "1,095.6 / 2,719.3 × 100 ≈ 40.4 %" (40.29) or "2.0 / 22.885 ≈ 8.75 %"
+/// (8.74). Models slip in the last digit when they divide by hand; a slip
+/// that small is not a wrong figure. "24.0 % to 22.1 %, a change of −7.5 %"
+/// (−7.92) is 5 % off, and stays wrong. Only recomputed figures get this
+/// tolerance, and only under the default `within_last_digit` rule; `half_up`
+/// and `half_even` stay strict. A figure compared with a source must match
+/// it exactly whatever the rule.
+fn close_enough(value: Ratio, written: Ratio) -> bool {
+    let check = || -> Option<bool> {
+        let gap = value
+            .checked_sub(written)?
+            .checked_abs()?
+            .checked_mul(Ratio::from_int(RELATIVE_TOLERANCE_INV))?;
+        Some(!value.is_zero() && gap.checked_cmp(value.checked_abs()?)? != std::cmp::Ordering::Greater)
+    };
+    check().unwrap_or(false)
+}
+
+/// 1 / 200 = 0.5 %.
+const RELATIVE_TOLERANCE_INV: i128 = 200;
 
 /// Turn figures no source contains into `supported` when they restate or
 /// recompute the answer's own supported figures. Runs to a fixed point (at
@@ -494,10 +676,15 @@ fn derive(rows: &mut [Row], rounding: Rounding) {
                     return false;
                 }
                 let comparable = c.dimension == dimension || (bare && c.dimension == Dimension::Percent);
-                comparable && (c.value == base || (rounded_ok && rounds_to(c.value, base, step, rounding)))
+                comparable
+                    && (c.value == base
+                        || (rounded_ok
+                            && (rounds_to(c.value, base, step, rounding)
+                                || (rounding == Rounding::WithinLastDigit && close_enough(c.value, base)))))
             });
             if let Some(c) = found {
                 let exact = c.value == base;
+                let slip = !exact && !rounds_to(c.value, base, step, rounding);
                 row.result = EvidenceResult::Supported;
                 row.score = 1.0;
                 row.rationale = format!(
@@ -511,6 +698,9 @@ fn derive(rows: &mut [Row], rounding: Rounding) {
                 row.receipt.notes.push(format!("derived_from:{}", c.from.join(",")));
                 if !exact {
                     row.receipt.notes.push(format!("rounding:{}", rounding_name(rounding)));
+                }
+                if slip {
+                    row.receipt.notes.push("last_digit_slip".into());
                 }
                 changed = true;
             }
@@ -669,7 +859,7 @@ mod tests {
         let rows = results(
             "Expense was $77 million in 2016 and $65 million in 2017, a decline of $12 million, or 15.58%.",
             "amortization expense: $77 million (2016), $65 million (2017)",
-            NumericConfig::default(),
+            NumericConfig { rounding: Rounding::HalfUp, ..Default::default() },
         );
         assert_eq!(result_of(&rows, "$12 million"), EvidenceResult::Supported);
         assert_eq!(result_of(&rows, "15.58%"), EvidenceResult::Supported, "12/77 = 15.584…");
@@ -746,7 +936,8 @@ mod tests {
     fn the_rounding_rule_decides_truncated_figures() {
         let answer = "Cash flow was $957.4 million of $1,410.5 million, or 67.8%.";
         let source = "net cash provided $1,410.5 million; cash flow $957.4 million";
-        let half_up = results(answer, source, NumericConfig::default());
+        let half_up =
+            results(answer, source, NumericConfig { rounding: Rounding::HalfUp, ..Default::default() });
         assert_ne!(result_of(&half_up, "67.8%"), EvidenceResult::Supported, "67.876… rounds to 67.9");
         let lenient = results(
             answer,

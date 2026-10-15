@@ -129,14 +129,15 @@ impl Ratio {
 pub enum Rounding {
     /// Round to nearest, ties away from zero: `2.345` → `2.35`. What most
     /// people and most spreadsheets do.
-    #[default]
     HalfUp,
     /// Round to nearest, ties to the even digit: `2.345` → `2.34`. Banking
     /// and IEEE practice.
     HalfEven,
     /// Rounded or truncated: anything strictly within one unit of the last
-    /// digit written. `67.87…` matches `67.8` and `67.9`. Lenient, for
-    /// answers that cut digits instead of rounding them.
+    /// digit written. `67.87…` matches `67.8` and `67.9`. The default since
+    /// 6.0.3: language models cut digits as often as they round them, and a
+    /// difference in the last digit written is not a wrong figure.
+    #[default]
     WithinLastDigit,
 }
 

@@ -39,7 +39,7 @@ def verify(
     declared_precision: bool = False,
     percent_as_fraction: bool = False,
     derive: bool = True,
-    rounding: str = "half_up",
+    rounding: str = "within_last_digit",
     metadata: Mapping[str, str] | None = None,
     scope: Mapping[str, str] | None = None,
     risk_class: str | None = None,
@@ -71,8 +71,8 @@ def verify(
             the note ``derived`` and the formula in the rationale. ``False``
             gives the 5.3 behaviour.
         rounding: how a recomputed figure may differ from the figure written, at
-            the precision written: ``"half_up"`` (default), ``"half_even"`` or
-            ``"within_last_digit"`` (rounded or truncated). A ``rounding`` rule
+            the precision written: ``"within_last_digit"`` (default, rounded or
+            truncated), ``"half_up"`` or ``"half_even"``. A ``rounding`` rule
             written in the policy wins over this argument.
         metadata: free-form strings (tenant, trace id) hashed into the record.
         scope: what the request is about, e.g. ``{"entity": "UPS"}``. When

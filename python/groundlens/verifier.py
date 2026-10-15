@@ -71,7 +71,7 @@ class Verifier:
         sink: Sink | None = None,
         judge: Judge | None = None,
         locale: str = "und",
-        rounding: str = "half_up",
+        rounding: str = "within_last_digit",
         units: bool = True,
         derive: bool = True,
         rules: Sequence[str | Path | Mapping] = (),

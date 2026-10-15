@@ -30,7 +30,7 @@ use gl_core::{
     ClaimKind, Determinism, Evidence, EvidenceResult, Receipt, Result, Score, Source, Span,
     VerificationInput, Verifier, VerifierInfo, VerifierKind,
 };
-use gl_numeric::{compare, find_bare_numerals, locale, Match, MatchOptions};
+use gl_numeric::{compare, find_bare_numerals, find_quantities, locale, Match, MatchOptions};
 
 pub const ID: &str = "groundlens.scope";
 pub const VERSION: &str = "1.0.0";
@@ -93,6 +93,12 @@ impl Verifier for ScopeVerifier {
     }
 
     fn verify(&self, input: &VerificationInput) -> Result<Vec<Evidence>> {
+        // A short bare number ("2.3", "15") turns up in some passage by
+        // chance: a difference the answer computed is not evidence that it
+        // came from another company. A bare figure needs three or more
+        // significant digits to be a contradiction; one with a unit or a
+        // scale word ("$1.9 billion") does not.
+        const MIN_DIGITS_OUT_OF_SCOPE: u32 = 3;
         if input.scope.is_empty() {
             return Ok(Vec::new());
         }
@@ -144,7 +150,12 @@ impl Verifier for ScopeVerifier {
                     format!("{} found in {}, inside the request scope", claim.text, s.id),
                     receipt(s, span, vec![]),
                 )
-            } else if let Some((s, span, Standing::Outside(key, wanted, found))) = outside {
+            } else if let Some((s, span, Standing::Outside(key, wanted, found))) = outside.filter(|_| {
+                answer_q.numeral.significant_digits >= MIN_DIGITS_OUT_OF_SCOPE
+                    || find_quantities(&claim.text, &profile).first().is_some_and(|q| {
+                        q.scale_exponent > 0 || *q.dimension() != gl_numeric::Dimension::Dimensionless
+                    })
+            }) {
                 (
                     EvidenceResult::Contradicted,
                     0.0,
