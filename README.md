@@ -15,8 +15,11 @@
 
 <br>
 
-<p align="center">GroundLens checks AI answers against your documents: the figures, who they are about, and whether they answer the question.</p>
-<p align="center">On financial answers it had never seen, it stopped 3 of 4 wrong ones; on public claims with numbers, half of the unsupported ones.</p>
+<p align="center">GroundLens checks AI answers against your documents:</p>
+<p align="center">the figures, who they are about, and whether they answer the question.</p>
+<br>
+<p align="center">On financial answers it had never seen, it stopped 3 of 4 wrong ones;</p>
+<p align="center">on public claims with numbers, half of the unsupported ones.</p>
 <p align="center">About 10 ms per check, deterministic, no LLM in the loop.<sup><a href="#measured-on">1</a></sup></p>
 
 
@@ -376,8 +379,6 @@ If GroundLens got one of your answers wrong, that case is the most valuable cont
 ## Open source
 
 Apache-2.0, all of it: engine, checks, policies, connectors, command line and MCP server. Verification evidence has to be checkable by anyone, without our software or our permission, and that only holds if the verifier is open. 
-
-> Not included: a hosted service, and the judge model.
 
 <br>
 
