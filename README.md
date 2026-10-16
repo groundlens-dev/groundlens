@@ -15,8 +15,8 @@
 
 <br>
 
-<p align="center">On answers it had never seen, GroundLens stopped</p>
-<p align="center">3 of 4 wrong answers. Of those it let through, only 1 in 26 was wrong.</p>
+<p align="center">GroundLens checks AI answers against your documents: the figures, who they are about, and whether they answer the question.</p>
+<p align="center">On financial answers it had never seen, it stopped 3 of 4 wrong ones; on public claims with numbers, half of the unsupported ones.</p>
 <p align="center">About 10 ms per check, deterministic, no LLM in the loop.<sup><a href="#measured-on">1</a></sup></p>
 
 
@@ -388,7 +388,7 @@ You can contact the developer at javier@groundlens.dev
 <br>
 
 <a id="measured-on"></a>
-<sub>1. GroundLens 6.0.5, default policy, no judge. 189 real answers by Claude Haiku from a RAG over FinQA 10-K pages (e5 embeddings, top 4 passages), on multi-step questions never used while developing GroundLens. Each answer labelled twice by a language model (Claude Opus 5.5, `claude-opus-5-5`) against fixed written criteria, blind to GroundLens, with a third pass on the 3 disagreements; labels were frozen before GroundLens ran. 22 answers were wrong (1 in 9): 17 got FAIL or REVIEW (77 %, 95 % CI 57–90 %). Of the 129 answers that passed, 5 were wrong (3.9 %, 95 % CI 1.7–8.8 %). The price: 60 of 189 answers (32 %) went to FAIL or REVIEW, including 38 of 110 correct ones. Median 10.6 ms per check in a fresh process. Details in the [changelog](CHANGELOG.md). Results on five more sets of answers, including where it does not help, in [BENCHMARK.md](BENCHMARK.md).</sub>
+<sub>1. GroundLens 6.0.5, default policy, no judge. **Financial answers:** 189 real answers by Claude Haiku from a RAG over FinQA 10-K pages (e5 embeddings, top 4 passages), on multi-step questions never used while developing GroundLens. Each answer labelled twice by a language model (Claude Opus 5.5, `claude-opus-5-5`) against fixed written criteria, blind to GroundLens, with a third pass on the 3 disagreements; labels were frozen before GroundLens ran. 22 answers were wrong (1 in 9): 17 got FAIL or REVIEW (77 %, 95 % CI 57–90 %). Of the 129 answers that passed, 5 were wrong (3.9 %, 95 % CI 1.7–8.8 %). The price: 60 of 189 answers (32 %) went to FAIL or REVIEW, including 38 of 110 correct ones. Median 10.6 ms per check in a fresh process. **Public claims:** LLM-AggreFact test split (29,320 claim–document pairs from 11 sets, human labels), never used while developing GroundLens. Of the 1,616 unsupported claims that contain a number, 796 got FAIL or REVIEW (49 %, 95 % CI 47–52 %); among the claims with a number that passed, 16.3 % were unsupported, against 25.4 % before the check. Claims without a number all passed: GroundLens caught none of their errors. Median 4.0 ms per check. All results, including the sets where it does not help, in [BENCHMARK.md](BENCHMARK.md).</sub>
 
 <div align="center">
 

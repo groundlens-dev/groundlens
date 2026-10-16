@@ -13,7 +13,8 @@ The short version:
   plain text pass almost untouched. GroundLens checks numbers, scope and intent; it does not judge
   meaning.
 - **In front of a judge, it saves calls.** On the financial set, GroundLens decides two thirds of
-  the answers itself and the judge only sees the rest, with no more errors getting through.
+  the answers itself and the judge only sees the rest. Six times more answers reach the user,
+  at the same error rate.
 
 <p align="center">
 <img src="docs/assets/benchmark_wrong_rate.png" alt="Wrong answers among those that reach the user, without a check and with GroundLens 6.0.5, on six sets of answers." width="100%">

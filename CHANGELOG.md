@@ -7,6 +7,22 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- **`BENCHMARK.md`**: what 6.0.5 does to the share of wrong answers that reach
+  a user on six sets of answers (FinQA held out and development, LLM-AggreFact,
+  RAGTruth, LegalBench-RAG contracts, EU AI Act Omnibus), including the sets
+  where it does not help, a cascade in front of an LLM judge and one crash found
+  on LLM-AggreFact.
+
+### Changed
+
+- **README headline** says what GroundLens checks (figures, who an answer is
+  about, whether it answers the question) and cites two measurements on data
+  never used in development: FinQA (3 of 4 wrong answers stopped) and
+  LLM-AggreFact claims with a number (half of the unsupported ones). The
+  footnote gives both, with their price, and links to `BENCHMARK.md`.
+
 ## [6.0.5] - 2026-10-16
 
 The first measurement on answers GroundLens never saw during development.
