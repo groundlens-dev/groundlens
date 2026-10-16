@@ -235,3 +235,19 @@ def test_a_rounding_rule_in_the_policy_wins_over_the_request():
     plain = verify(answer, sources)
     assert [e.result for e in by_policy.evidence] == [e.result for e in by_both.evidence]
     assert [e.result for e in by_policy.evidence] != [e.result for e in plain.evidence]
+
+
+def test_two_passages_with_the_same_id_do_not_crash_and_show_their_own_text():
+    """Chunks of one page often share the page id. A figure found in the second
+    chunk used to be sliced out of the first one, which aborted the process
+    when the first chunk was shorter."""
+    r = verify(
+        answer="Revenue was €42.1 million in 2015.",
+        evidence=[
+            ("10k/page_7", "Short intro."),
+            ("10k/page_7", "Further down the same page, revenue reached €42.1 million in 2015."),
+        ],
+    )
+    assert r.decision == "PASS"
+    shown = {e.source_text for e in r.evidence if e.verifier_id == "groundlens.numeric"}
+    assert shown == {"€42.1 million", "2015"}

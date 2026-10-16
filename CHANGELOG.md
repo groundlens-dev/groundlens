@@ -7,6 +7,17 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Two passages with the same id no longer crash the process.** Chunks of
+  one page often share the page id. The numeric verifier looked a passage up
+  by id, took the first chunk with that id and sliced it with a span found in
+  another chunk: when the first chunk was shorter, the engine panicked and
+  the Python process aborted; when it was longer, the receipt showed text
+  from the wrong chunk. Each figure now keeps the text of the passage it was
+  found in. On 189 RAG answers whose passages share page ids, 12 (6 %)
+  aborted under 6.0.4 and none do now; every decision is unchanged.
+
 ### Added
 
 - **SLSA Build Level 3 provenance.** Every wheel, the sdist and every `glv`
