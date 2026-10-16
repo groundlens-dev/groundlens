@@ -7,6 +7,47 @@ identical in the git tag and on PyPI.
 
 ## [Unreleased]
 
+## [6.0.5] - 2026-10-16
+
+The first measurement on answers GroundLens never saw during development.
+189 answers by Claude Haiku from the same FinQA 10-K RAG, on multi-step
+questions that are not among the 150 used to develop 6.0.3 and 6.0.4, minus
+the 9 answers in the regression cases. The protocol was written before
+GroundLens ran. Labels follow the 6.0.4 criteria: two blind passes by
+separate Claude Opus 5.5 (`claude-opus-5-5`) agents, which agreed on 186 of
+189, a third blind pass on the 3 disagreements, frozen before GroundLens ran
+once with the default policy and no judge. That run used 6.0.4 with a
+unique id per passage; the same answers with shared page ids give exactly
+the same decisions under 6.0.5 (see Fixed).
+
+| 189 answers, held out | PASS | REVIEW | FAIL |
+|---|---|---|---|
+| wrong (22) | 5 | 6 | 11 |
+| correct (110) | 72 | 21 | 17 |
+| declines to answer (57) | 52 | 4 | 1 |
+
+| measure | 6.0.4, development set | 6.0.5, held out |
+|---|---|---|
+| wrong answers stopped (FAIL or REVIEW) | n/a | 77 % (17 of 22), CI 57–90 % |
+| wrong among the answers that passed | n/a | 3.9 % (5 of 129), CI 1.7–8.8 % |
+| a FAIL lands on a wrong answer | 67 % (20 of 30), CI 49–81 % | 38 % (11 of 29), CI 23–56 % |
+| correct answers given FAIL | 5 % (6 of 132), CI 2–10 % | 15 % (17 of 110), CI 10–23 % |
+| wrong answers given FAIL | 37 % (20 of 54), CI 25–50 % | 50 % (11 of 22), CI 31–69 % |
+
+95 % Wilson intervals. The held-out answers come from another model and
+harder questions, so part of the difference is the shift a new deployment
+brings. Without GroundLens 1 in 9 answers was wrong; among those it let
+through, 1 in 26. The price is review: 32 % of all answers and 35 % of the
+correct ones went to FAIL or REVIEW. Most false FAILs on correct answers are
+a scale written on one side only ("$1.5 billion" against a cell "1.5"),
+intermediate results of multi-step calculations not recognised as derived,
+rounding of computed amounts, and the intent check reading an amount
+question as a percentage one. These are open for the next release and must
+be measured on fresh answers.
+
+The 6.0.3 test half was part of the answers the 6.0.4 fix was found on, so
+it is no longer held out.
+
 ### Fixed
 
 - **Two passages with the same id no longer crash the process.** Chunks of

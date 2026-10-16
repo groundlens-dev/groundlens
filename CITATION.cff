@@ -18,5 +18,5 @@ abstract: >-
   the user's own model, is optional and can only escalate. Every decision is
   sealed in a signed, hash-chained record that anyone can verify offline.
 license: Apache-2.0
-version: 6.0.4
-date-released: '2026-10-15'
+version: 6.0.5
+date-released: '2026-10-16'

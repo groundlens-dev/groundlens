@@ -15,7 +15,9 @@
 
 <br>
 
-**When GroundLens says FAIL, the answer is wrong 2 times in 3. It flags less than 5 % of correct answers. Latency: 2 ms. Deterministic (no LLM in the loop).**<sup>[1](#measured-on)</sup>
+<p align="center">On answers it had never seen, GroundLens stopped</p>
+<p align="center">3 of 4 wrong answers. Of those it let through, only 1 in 26 was wrong.</p>
+<p align="center">About 10 ms per check, deterministic, no LLM in the loop.<sup><a href="#measured-on">1</a></sup></p>
 
 
 <br>
@@ -36,7 +38,7 @@
   </tr>
   <tr>
     <td><b>Measured</b></td>
-    <td><sub>You&nbsp;know&nbsp;the&nbsp;error&nbsp;rate&nbsp;of&nbsp;what&nbsp;passes<sub></td>
+    <td><sub>Measure&nbsp;the&nbsp;error&nbsp;rate&nbsp;of&nbsp;what&nbsp;passes,&nbsp;on&nbsp;your&nbsp;answers<sub></td>
   </tr>
   <tr>
     <td><b>Portable</b></td>
@@ -386,7 +388,7 @@ You can contact the developer at javier@groundlens.dev
 <br>
 
 <a id="measured-on"></a>
-<sub>1. GroundLens 6.0.4, default policy. 294 real answers by gpt-4o-mini from a RAG over FinQA 10-K pages (e5 embeddings, top 4 passages; 150 questions, with and without a company filter). Each answer labelled twice by a language model (Claude Opus 5.5, `claude-opus-5-5`) against fixed written criteria, never seeing what GroundLens said, with a third pass on the 11 disagreements. 30 answers got FAIL: 20 were wrong (67 %, 95 % CI 49–81 %). 6 of 132 correct answers got FAIL. The fix behind the last release was found on these same answers, so this is not a held-out measurement. Median 2.2 ms per check. Details in the [changelog](CHANGELOG.md).</sub>
+<sub>1. GroundLens 6.0.5, default policy, no judge. 189 real answers by Claude Haiku from a RAG over FinQA 10-K pages (e5 embeddings, top 4 passages), on multi-step questions never used while developing GroundLens. Each answer labelled twice by a language model (Claude Opus 5.5, `claude-opus-5-5`) against fixed written criteria, blind to GroundLens, with a third pass on the 3 disagreements; labels were frozen before GroundLens ran. 22 answers were wrong (1 in 9): 17 got FAIL or REVIEW (77 %, 95 % CI 57–90 %). Of the 129 answers that passed, 5 were wrong (3.9 %, 95 % CI 1.7–8.8 %). The price: 60 of 189 answers (32 %) went to FAIL or REVIEW, including 38 of 110 correct ones. Median 10.6 ms per check in a fresh process. Details in the [changelog](CHANGELOG.md).</sub>
 
 <div align="center">
 
