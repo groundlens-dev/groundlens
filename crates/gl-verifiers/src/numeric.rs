@@ -100,6 +100,9 @@ impl NumericVerifier {
 
 struct SourceQuantity<'a> {
     source_id: &'a str,
+    /// The text of the passage the quantity was found in. Spans index into
+    /// this text, never into another passage that happens to share its id.
+    source_text: &'a str,
     quantity: Quantity,
     /// The scale the passage declares once for its table, "( in millions )":
     /// a power of ten applied to the bare cells under it.
@@ -150,6 +153,7 @@ impl Verifier for NumericVerifier {
                 let declared_scale = declared_scale(&s.text);
                 find(&s.text).into_iter().map(move |quantity| SourceQuantity {
                     source_id: &s.id,
+                    source_text: &s.text,
                     quantity,
                     declared_scale,
                 })
@@ -201,7 +205,7 @@ impl Verifier for NumericVerifier {
                     let mut receipt = Receipt {
                         source_id: Some(sq.source_id.to_string()),
                         source_span: Some(Span::new(sq.quantity.span.start, sq.quantity.span.end)),
-                        source_text: Some(input_source_text(input, sq.source_id, sq.quantity.span)),
+                        source_text: Some(span_text(sq.source_text, sq.quantity.span)),
                         notes: notes.clone(),
                     };
                     match &m {
@@ -284,7 +288,7 @@ impl Verifier for NumericVerifier {
                     source_quantities.iter().find(|sq| unit_on_one_side(&answer_q, &sq.quantity))
                 {
                     let span = Span::new(sq.quantity.span.start, sq.quantity.span.end);
-                    let shown = input_source_text(input, sq.source_id, sq.quantity.span);
+                    let shown = span_text(sq.source_text, sq.quantity.span);
                     result = EvidenceResult::Supported;
                     score = 1.0;
                     rationale = format!(
@@ -309,7 +313,7 @@ impl Verifier for NumericVerifier {
             if result != EvidenceResult::Supported && answer_q.numeral.significant_digits >= 2 {
                 if let Some(sq) = source_quantities.iter().find(|sq| header_scale_matches(&answer_q, sq)) {
                     let span = Span::new(sq.quantity.span.start, sq.quantity.span.end);
-                    let shown = input_source_text(input, sq.source_id, sq.quantity.span);
+                    let shown = span_text(sq.source_text, sq.quantity.span);
                     result = EvidenceResult::Supported;
                     score = 1.0;
                     rationale = format!(
@@ -336,7 +340,7 @@ impl Verifier for NumericVerifier {
                     rationale = format!(
                         "{} matches {} in {} only if the unit or scale stated on one side applies to the other",
                         claim.text,
-                        input_source_text(input, sq.source_id, sq.quantity.span),
+                        span_text(sq.source_text, sq.quantity.span),
                         sq.source_id
                     );
                     receipt.notes.push("unit_or_scale_on_one_side_unconfirmed".into());
@@ -781,13 +785,8 @@ fn closer(a: &Match, b: &Match) -> bool {
     }
 }
 
-fn input_source_text(input: &VerificationInput, id: &str, span: Span) -> String {
-    input
-        .sources
-        .iter()
-        .find(|s| s.id == id)
-        .map(|s| s.text[span.start..span.end].to_string())
-        .unwrap_or_default()
+fn span_text(text: &str, span: Span) -> String {
+    text.get(span.start..span.end).unwrap_or_default().to_string()
 }
 
 #[cfg(test)]
@@ -830,6 +829,30 @@ mod tests {
         assert_eq!(wrong.score.0, 0.0);
         assert_eq!(wrong.receipt.source_text.as_deref(), Some("10,000 dollars"));
         assert_eq!(ev[1].result, EvidenceResult::Supported);
+    }
+
+    /// Two chunks of the same page often share an id. A figure found in the
+    /// second chunk must be shown from the second chunk: looking the text up
+    /// by id took the first chunk and sliced it with the second chunk's span,
+    /// which panicked when the first chunk was shorter.
+    #[test]
+    fn two_passages_with_the_same_id_keep_their_own_text() {
+        let v = NumericVerifier::default();
+        let mut i =
+            input("Revenue was 4,250 dollars in 2015.", "short intro.", Some("What was revenue in 2015?"));
+        i.sources.push(Source {
+            id: "invoice.pdf#p1".into(),
+            text: gl_text::normalise("a much longer passage of the same page that goes on for a while before it says revenue was 4,250 dollars in 2015 and 3,900 dollars in 2014."),
+            locator: None,
+            provenance: Default::default(),
+        });
+        let ev = v.verify(&i).unwrap();
+        let revenue = ev
+            .iter()
+            .find(|e| e.receipt.source_text.as_deref().is_some_and(|t| t.contains("4,250")))
+            .expect("the figure is found in the second passage");
+        assert_eq!(revenue.result, EvidenceResult::Supported);
+        assert_eq!(revenue.receipt.source_text.as_deref(), Some("4,250 dollars"));
     }
 
     fn results(
