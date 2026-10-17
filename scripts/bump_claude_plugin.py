@@ -2,9 +2,9 @@
 
     python scripts/bump_claude_plugin.py 6.0.6
 
-Sets the pinned version in plugins/groundlens/.claude-plugin/plugin.json (the
-`uvx --from groundlens[mcp]==X.Y.Z` launch and the plugin's own `version`) and in
-plugins/groundlens/pyproject.toml. Run `uv lock` in plugins/groundlens afterwards.
+Sets the pinned version in plugins/groundlens/.mcp.json (the
+`uvx --from groundlens[mcp]==X.Y.Z` launch), in plugins/groundlens/pyproject.toml,
+and the plugin's own `version` in .claude-plugin/plugin.json. Run `uv lock` in plugins/groundlens afterwards.
 The release workflow does both once PyPI serves the version.
 """
 
@@ -24,15 +24,19 @@ def main(version: str) -> None:
         raise SystemExit(f"not a version: {version!r}")
     pin = f"groundlens[mcp]=={version}"
 
-    manifest = PLUGIN / ".claude-plugin" / "plugin.json"
-    data = json.loads(manifest.read_text(encoding="utf-8"))
+    servers = PLUGIN / ".mcp.json"
+    data = json.loads(servers.read_text(encoding="utf-8"))
     args = data["mcpServers"]["groundlens"]["args"]
     hits = [i for i, a in enumerate(args) if PIN.fullmatch(a)]
     if len(hits) != 1:
-        raise SystemExit(f"expected one groundlens[mcp]==… argument in {manifest}, found {len(hits)}")
+        raise SystemExit(f"expected one groundlens[mcp]==… argument in {servers}, found {len(hits)}")
     args[hits[0]] = pin
-    data["version"] = version
-    manifest.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    servers.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    manifest = PLUGIN / ".claude-plugin" / "plugin.json"
+    meta = json.loads(manifest.read_text(encoding="utf-8"))
+    meta["version"] = version
+    manifest.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     project = PLUGIN / "pyproject.toml"
     text = project.read_text(encoding="utf-8")

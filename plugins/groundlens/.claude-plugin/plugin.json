@@ -18,16 +18,5 @@
     "guardrails",
     "mcp"
   ],
-  "mcpServers": {
-    "groundlens": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "groundlens[mcp]==6.0.5",
-        "groundlens",
-        "mcp"
-      ]
-    }
-  },
   "icon": "./.claude-plugin/icon.png"
 }
