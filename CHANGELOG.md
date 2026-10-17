@@ -9,6 +9,10 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **Claude plugin:** the MCP server is declared in `plugins/groundlens/.mcp.json`, next to
+  `pyproject.toml` and `uv.lock`, so the directory finds the lockfile beside the file that
+  declares the server. `scripts/bump_claude_plugin.py` edits `.mcp.json` now.
+
 - **Claude plugin lockfile:** `plugins/groundlens/pyproject.toml` and `uv.lock` pin the MCP
   server's 35 packages to exact versions, PyPI sources and hashes, which Anthropic's
   directory asks for its Verified badge.

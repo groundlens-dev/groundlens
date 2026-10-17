@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "groundlens": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "groundlens[mcp]==6.0.5",
+        "groundlens",
+        "mcp"
+      ]
+    }
+  }
+}
