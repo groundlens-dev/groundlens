@@ -9,6 +9,11 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **MCP tool annotations**: `verify_answer`, `verify_run` and `verify_records` now
+  declare a title and `readOnlyHint` (with `destructiveHint: false`,
+  `idempotentHint: true`, `openWorldHint: false`). Clients use them to call the tools
+  without asking each time, and Anthropic's directory requires them.
+
 - **`skills/groundlens/SKILL.md`**: an OpenClaw skill for ClawHub. It tells an agent
   to run `groundlens verify` on any answer with figures taken from documents, and
   what to do on PASS, FAIL and REVIEW. Documentation only; no release needed.
