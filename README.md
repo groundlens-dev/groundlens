@@ -68,6 +68,10 @@
 <a href="#mcp"><picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/dark.svg">
   <img src="https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/logo/light.svg" height="26" alt="Model Context Protocol">
+</picture></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#openclaw"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/openclaw-dark.png">
+  <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/openclaw-light.png" height="30" alt="OpenClaw">
 </picture></a>
 
 <br>
@@ -165,6 +169,20 @@ Spans and metrics go through the providers your application already configured: 
 Or, with nothing installed: `"command": "uvx", "args": ["--from", "groundlens[mcp]", "groundlens-mcp"]`.
 
 Tools: `verify_answer`, `verify_run`, `verify_records`, over stdio. An agent checks its own draft before it answers.
+
+</details>
+
+<a name="openclaw"></a>
+<details close>
+<summary><b>OpenClaw</b> · <code>clawhub install groundlens</code></summary>
+
+[A skill on ClawHub](https://clawhub.ai/javihaus/groundlens), the skill registry of [OpenClaw](https://github.com/openclaw/openclaw). Before your assistant sends an answer with figures taken from your documents, it runs `groundlens verify` on its draft:
+
+- **PASS:** the answer goes out.
+- **FAIL:** it fixes the figure from the source and checks again.
+- **REVIEW:** the answer goes out, saying which figure it could not confirm.
+
+Runs on your machine, with no API key and no second model. The skill is in [`skills/groundlens`](https://github.com/groundlens-dev/groundlens/blob/main/skills/groundlens/SKILL.md). OpenClaw can also use the [MCP server](#mcp) directly, with `openclaw mcp add`.
 
 </details>
 
