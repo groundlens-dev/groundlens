@@ -44,11 +44,11 @@ serde_json = { version = "1", features = ["preserve_order"] }
 # its maintained fork with the same API, so the crates keep `use serde_yaml`.
 serde_yaml = { package = "serde_norway", version = "0.9" }
 rust_decimal = { version = "1", features = ["serde-with-str"] }
-sha2 = "0.10"
+sha2 = "0.11"
 hex = "0.4"
-ed25519-dalek = { version = "2", features = ["rand_core", "pem"] }
+ed25519-dalek = { version = "3", features = ["rand_core", "pem"] }
 # ECDSA P-256 records: the curve AWS KMS, Azure Key Vault and most HSMs sign with.
-p256 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8", "std"] }
+p256 = { version = "0.14", default-features = false, features = ["ecdsa", "pkcs8", "std"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 unicode-normalization = "0.1"
 regex = "1"
