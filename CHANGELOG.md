@@ -9,6 +9,15 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **Claude plugin:** a 1024 px icon, and the MCP server pinned to `groundlens[mcp]==6.0.5`
+  (Anthropic's directory requires an exact version). Raise it with each release.
+- **README:** the Cursor, VS Code and Claude Code install buttons are now under the
+  "Works with" logos, not hidden inside the MCP section.
+
+- **MCP tool annotations**: `verify_answer`, `verify_run` and `verify_records` now
+  declare a title and `readOnlyHint` (with `destructiveHint: false`,
+  `idempotentHint: true`, `openWorldHint: false`). Clients use them to call the tools
+  without asking each time, and Anthropic's directory requires them.
 - **Claude Code plugin** in `plugins/groundlens` (the MCP server plus the skill), listed in
   the repository's own marketplace, `.claude-plugin/marketplace.json`:
   `claude plugin marketplace add groundlens-dev/groundlens`. The skill moved from
