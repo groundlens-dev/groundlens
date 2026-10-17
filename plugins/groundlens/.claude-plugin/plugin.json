@@ -9,6 +9,10 @@
   },
   "homepage": "https://groundlens.dev",
   "repository": "https://github.com/groundlens-dev/groundlens",
+  "documentationUrl": "https://github.com/groundlens-dev/groundlens/blob/main/plugins/groundlens/README.md",
+  "supportUrl": "https://github.com/groundlens-dev/groundlens/issues",
+  "privacyPolicyUrl": "https://github.com/groundlens-dev/groundlens/blob/main/plugins/groundlens/README.md#privacy",
+  "termsOfServiceUrl": "https://github.com/groundlens-dev/groundlens/blob/main/plugins/groundlens/LICENSE",
   "license": "Apache-2.0",
   "keywords": [
     "verification",
