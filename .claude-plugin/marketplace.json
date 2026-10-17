@@ -1,0 +1,16 @@
+{
+  "name": "groundlens",
+  "description": "GroundLens: check AI answers against your documents.",
+  "owner": {
+    "name": "GroundLens",
+    "email": "javier@groundlens.dev",
+    "url": "https://groundlens.dev"
+  },
+  "plugins": [
+    {
+      "name": "groundlens",
+      "source": "./plugins/groundlens",
+      "description": "Check AI answers against your documents before you send them: wrong figures, bad arithmetic, figures from the wrong company."
+    }
+  ]
+}
