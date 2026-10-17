@@ -10,11 +10,24 @@
   "homepage": "https://groundlens.dev",
   "repository": "https://github.com/groundlens-dev/groundlens",
   "license": "Apache-2.0",
-  "keywords": ["verification", "hallucination", "rag", "fact-checking", "guardrails", "mcp"],
+  "keywords": [
+    "verification",
+    "hallucination",
+    "rag",
+    "fact-checking",
+    "guardrails",
+    "mcp"
+  ],
   "mcpServers": {
     "groundlens": {
       "command": "uvx",
-      "args": ["--from", "groundlens[mcp]", "groundlens", "mcp"]
+      "args": [
+        "--from",
+        "groundlens[mcp]==6.0.5",
+        "groundlens",
+        "mcp"
+      ]
     }
-  }
+  },
+  "icon": "./.claude-plugin/icon.png"
 }

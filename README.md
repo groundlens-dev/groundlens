@@ -74,6 +74,12 @@
   <img src="https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/openclaw-light.png" height="30" alt="OpenClaw">
 </picture></a>
 
+<br><br>
+
+<a href="https://cursor.com/en/install-mcp?name=groundlens&amp;config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJncm91bmRsZW5zW21jcF0iLCJncm91bmRsZW5zIiwibWNwIl19"><img src="https://cursor.com/deeplink/mcp-install-dark.svg" height="32" alt="Add GroundLens to Cursor"></a>&nbsp;
+<a href="https://vscode.dev/redirect/mcp/install?name=groundlens&amp;config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22groundlens%5Bmcp%5D%22%2C%22groundlens%22%2C%22mcp%22%5D%7D"><img src="https://img.shields.io/badge/VS_Code-Install_GroundLens-0098FF?style=for-the-badge&amp;logo=visualstudiocode&amp;logoColor=white" height="32" alt="Install GroundLens in VS Code"></a>&nbsp;
+<a href="#mcp"><img src="https://img.shields.io/badge/Claude_Code-Add_the_plugin-D97757?style=for-the-badge&amp;logo=claude&amp;logoColor=white" height="32" alt="Add the GroundLens plugin to Claude Code"></a>
+
 <br>
 
 <br>
