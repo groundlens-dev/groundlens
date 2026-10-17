@@ -20,6 +20,7 @@ from groundlens.mcp import tools
 
 try:
     from mcp.server.mcpserver import MCPServer
+    from mcp.types import ToolAnnotations
 except ModuleNotFoundError as e:  # pragma: no cover - exercised only without the extra
     raise ModuleNotFoundError(
         "the GroundLens MCP server needs the MCP SDK. Install it with: pip install 'groundlens[mcp]'"
@@ -51,7 +52,19 @@ def build_server() -> "MCPServer":
         ),
     )
 
-    @server.tool(name="verify_answer")
+    # The three tools only read their arguments and return a result: they write nothing, call
+    # no network and give the same output for the same input. Clients and directories read
+    # these hints to decide whether to ask the user before a call.
+    def _hints(title: str) -> ToolAnnotations:
+        return ToolAnnotations(
+            title=title,
+            read_only_hint=True,
+            destructive_hint=False,
+            idempotent_hint=True,
+            open_world_hint=False,
+        )
+
+    @server.tool(name="verify_answer", title="Verify an answer", annotations=_hints("Verify an answer"))
     def verify_answer(
         answer: str,
         sources: list[Any],
@@ -78,7 +91,7 @@ def build_server() -> "MCPServer":
             answer, sources, question=question, locale=locale, policy=policy, scope=scope, risk_class=risk_class
         )
 
-    @server.tool(name="verify_run")
+    @server.tool(name="verify_run", title="Verify an agent run", annotations=_hints("Verify an agent run"))
     def verify_run(
         trace: str,
         policy: str,
@@ -102,7 +115,9 @@ def build_server() -> "MCPServer":
             started_at=started_at,
         )
 
-    @server.tool(name="verify_records")
+    @server.tool(
+        name="verify_records", title="Verify a records log", annotations=_hints("Verify a records log")
+    )
     def verify_records(records: str) -> dict[str, Any]:
         """Verify a log of records offline: every hash, every link, every signature.
 

@@ -101,6 +101,21 @@ def test_server_registers_the_three_tools():
     assert {"verify_answer", "verify_run", "verify_records"} <= names
 
 
+def test_every_tool_says_it_only_reads():
+    """Clients and directories (Claude's among them) ask for a title and a read-only hint."""
+    pytest.importorskip("mcp")
+    import asyncio
+
+    from groundlens.mcp.server import build_server
+
+    for tool in asyncio.run(build_server().list_tools()):
+        assert tool.title, tool.name
+        assert tool.annotations is not None, tool.name
+        assert tool.annotations.title == tool.title
+        assert tool.annotations.read_only_hint is True
+        assert tool.annotations.destructive_hint is False
+
+
 def test_verify_answer_checks_the_scope_from_provenance():
     sources = [
         {"id": "ups#p1", "text": "UPS revenue was $91.0 billion.", "provenance": {"entity": "UPS"}},
