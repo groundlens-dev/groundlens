@@ -160,15 +160,35 @@ Spans and metrics go through the providers your application already configured: 
 
 <a name="mcp"></a>
 <details close>
-<summary><b>MCP</b> · <code>pip install "groundlens[mcp]"</code></summary>
+<summary><b>Claude, Codex, Cursor, VS Code and other MCP clients</b> · <code>uvx --from "groundlens[mcp]" groundlens mcp</code></summary>
 
-```json
-{ "mcpServers": { "groundlens": { "command": "groundlens-mcp" } } }
-```
+Your assistant checks its own draft before it answers. Three read-only tools over stdio: `verify_answer`, `verify_run`, `verify_records`. Needs [uv](https://docs.astral.sh/uv/).
 
-Or, with nothing installed: `"command": "uvx", "args": ["--from", "groundlens[mcp]", "groundlens-mcp"]`.
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=groundlens&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJncm91bmRsZW5zW21jcF0iLCJncm91bmRsZW5zIiwibWNwIl19)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_GroundLens-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=groundlens&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22groundlens%5Bmcp%5D%22%2C%22groundlens%22%2C%22mcp%22%5D%7D)
 
-Tools: `verify_answer`, `verify_run`, `verify_records`, over stdio. An agent checks its own draft before it answers.
+- **Claude Code** (plugin: the MCP server plus a skill that tells Claude when to check):
+
+  ```bash
+  claude plugin marketplace add groundlens-dev/groundlens
+  claude plugin install groundlens@groundlens
+  ```
+
+- **Codex:**
+
+  ```bash
+  codex mcp add groundlens -- uvx --from "groundlens[mcp]" groundlens mcp
+  ```
+
+- **Any MCP client** (Claude Desktop, Windsurf, Zed...):
+
+  ```json
+  { "mcpServers": { "groundlens": { "command": "uvx", "args": ["--from", "groundlens[mcp]", "groundlens", "mcp"] } } }
+  ```
+
+  With the package installed (`pip install "groundlens[mcp]"`), `"command": "groundlens-mcp"` is enough.
+
+- **Nothing to install:** the [Hugging Face Space](https://huggingface.co/spaces/groundlens/groundlens) is also a remote MCP server, with `verify_answer`, at `https://groundlens-groundlens.hf.space/gradio_api/mcp/`.
 
 </details>
 
@@ -182,7 +202,7 @@ Tools: `verify_answer`, `verify_run`, `verify_records`, over stdio. An agent che
 - **FAIL:** it fixes the figure from the source and checks again.
 - **REVIEW:** the answer goes out, saying which figure it could not confirm.
 
-Runs on your machine, with no API key and no second model. The skill is in [`skills/groundlens`](https://github.com/groundlens-dev/groundlens/blob/main/skills/groundlens/SKILL.md). OpenClaw can also use the [MCP server](#mcp) directly, with `openclaw mcp add`.
+Runs on your machine, with no API key and no second model. The skill is in [`plugins/groundlens/skills/groundlens`](https://github.com/groundlens-dev/groundlens/blob/main/plugins/groundlens/skills/groundlens/SKILL.md), the same one the Claude Code plugin uses. OpenClaw can also use the [MCP server](#mcp) directly, with `openclaw mcp add`.
 
 </details>
 

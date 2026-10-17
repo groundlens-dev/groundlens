@@ -9,7 +9,14 @@ identical in the git tag and on PyPI.
 
 ### Added
 
-- **`skills/groundlens/SKILL.md`**: an OpenClaw skill for ClawHub. It tells an agent
+- **Claude Code plugin** in `plugins/groundlens` (the MCP server plus the skill), listed in
+  the repository's own marketplace, `.claude-plugin/marketplace.json`:
+  `claude plugin marketplace add groundlens-dev/groundlens`. The skill moved from
+  `skills/groundlens` into the plugin, so ClawHub, Claude Code and Codex share one copy.
+- **README:** one-click install for Cursor and VS Code, and the commands for Claude Code,
+  Codex and any MCP client.
+
+- **`plugins/groundlens/skills/groundlens/SKILL.md`**: an OpenClaw skill for ClawHub. It tells an agent
   to run `groundlens verify` on any answer with figures taken from documents, and
   what to do on PASS, FAIL and REVIEW. Documentation only; no release needed.
 - **README:** OpenClaw in the "Works with" row and its own section, with the
