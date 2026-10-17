@@ -11,8 +11,11 @@ identical in the git tag and on PyPI.
 
 - **Claude plugin lockfile:** `plugins/groundlens/pyproject.toml` and `uv.lock` pin the MCP
   server's 35 packages to exact versions, PyPI sources and hashes, which Anthropic's
-  directory asks for its Verified badge. After raising the pin in `plugin.json`, update
-  `pyproject.toml` and run `uv lock` in `plugins/groundlens`.
+  directory asks for its Verified badge.
+- **Release workflow keeps the Claude plugin current:** once PyPI serves a new version,
+  the `claude-plugin` job pins the plugin to it (`scripts/bump_claude_plugin.py`),
+  regenerates `uv.lock` and opens a pull request. The plugin's `version` now follows
+  the package version (6.0.5).
 
 - **Claude plugin:** a 1024 px icon, and the MCP server pinned to `groundlens[mcp]==6.0.5`
   (Anthropic's directory requires an exact version). Raise it with each release.

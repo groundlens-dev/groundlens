@@ -268,6 +268,54 @@ jobs:
             cargo publish -p "$c" --locked
           done
 
+  # The Claude plugin (plugins/groundlens) runs `uvx --from groundlens[mcp]==X.Y.Z`
+  # and ships a uv.lock of that version, so it can only move once PyPI serves the
+  # release. This job pins the new version, regenerates the lock and opens a pull
+  # request; Anthropic's directory picks the plugin up from main after the merge.
+  # Needs Settings → Actions → General → "Allow GitHub Actions to create and approve
+  # pull requests".
+  claude-plugin:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # push the branch
+      pull-requests: write   # open the pull request
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - name: Wait until PyPI serves the version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          for i in $(seq 1 30); do
+            curl -sf "https://pypi.org/pypi/groundlens/$version/json" > /dev/null && exit 0
+            sleep 10
+          done
+          echo "PyPI does not serve groundlens $version yet" && exit 1
+      - name: Pin the plugin and regenerate its lock
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python3 scripts/bump_claude_plugin.py "$version"
+          cd plugins/groundlens && uv lock --refresh-package groundlens
+      - name: Open the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if git diff --quiet; then echo "plugin already at $version"; exit 0; fi
+          branch="release/claude-plugin-$version"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add plugins/groundlens
+          git commit -m "plugin: GroundLens $version for Claude" \
+            -m "Pins uvx --from groundlens[mcp]==$version in plugin.json and pyproject.toml, and regenerates uv.lock."
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Claude plugin: GroundLens $version" \
+            --body "Opened by the release workflow after PyPI published groundlens $version. Pins the plugin's MCP server to this version and regenerates \`plugins/groundlens/uv.lock\`. Merge it and Anthropic's directory picks up the new version from main."
+
   # The MCP registry entry (server.json) points at the PyPI package, so it is
   # published after PyPI has the version. GitHub OIDC proves the run belongs
   # to groundlens-dev, which owns the io.github.groundlens-dev/* namespace.

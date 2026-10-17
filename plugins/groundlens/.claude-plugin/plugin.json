@@ -1,6 +1,6 @@
 {
   "name": "groundlens",
-  "version": "1.0.0",
+  "version": "6.0.5",
   "description": "Check AI answers against your documents before you send them: wrong figures, arithmetic that does not add up, figures from the wrong company. Deterministic, no second model.",
   "author": {
     "name": "Javier Marín",
