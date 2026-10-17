@@ -48,11 +48,17 @@ no figures will usually pass. PASS means "no figure problem found", not "true".
 
 ## Privacy
 
-Everything runs locally. The plugin sends nothing anywhere: the MCP server reads the answer
-and the sources the assistant passes to it, and returns a result. It keeps no data, has no
-telemetry, and makes no network calls. The only download is the `groundlens` package and its
-dependencies from PyPI when `uvx` first starts the server. Their exact versions and hashes
-are in `uv.lock` (from `pyproject.toml`). Questions: javier@groundlens.dev.
+Everything runs on your machine.
+
+- **What it collects:** nothing. The MCP server reads the answer and the sources your
+  assistant passes to it in a call, and returns a result.
+- **Use and storage:** the text is used only to compute that result. Nothing is written to
+  disk unless you pass a log path yourself.
+- **Sharing:** none. No telemetry, no analytics, no network calls. The only download is the
+  `groundlens` package and its dependencies from PyPI when `uvx` first starts the server;
+  their exact versions and hashes are in `uv.lock` (from `pyproject.toml`).
+- **Retention:** none. Nothing is kept after the call returns.
+- **Contact:** javier@groundlens.dev
 
 ## More
 
