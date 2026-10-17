@@ -9,6 +9,9 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **`skills/groundlens/SKILL.md`**: an OpenClaw skill for ClawHub. It tells an agent
+  to run `groundlens verify` on any answer with figures taken from documents, and
+  what to do on PASS, FAIL and REVIEW. Documentation only; no release needed.
 - **`BENCHMARK.md`**: what 6.0.5 does to the share of wrong answers that reach
   a user on six sets of answers (FinQA held out and development, LLM-AggreFact,
   RAGTruth, LegalBench-RAG contracts, EU AI Act Omnibus), including the sets
