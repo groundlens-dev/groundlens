@@ -9,6 +9,11 @@ identical in the git tag and on PyPI.
 
 ### Added
 
+- **Claude plugin lockfile:** `plugins/groundlens/pyproject.toml` and `uv.lock` pin the MCP
+  server's 35 packages to exact versions, PyPI sources and hashes, which Anthropic's
+  directory asks for its Verified badge. After raising the pin in `plugin.json`, update
+  `pyproject.toml` and run `uv lock` in `plugins/groundlens`.
+
 - **Claude plugin:** a 1024 px icon, and the MCP server pinned to `groundlens[mcp]==6.0.5`
   (Anthropic's directory requires an exact version). Raise it with each release.
 - **README:** the Cursor, VS Code and Claude Code install buttons are now under the

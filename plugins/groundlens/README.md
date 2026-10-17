@@ -50,8 +50,9 @@ no figures will usually pass. PASS means "no figure problem found", not "true".
 
 Everything runs locally. The plugin sends nothing anywhere: the MCP server reads the answer
 and the sources the assistant passes to it, and returns a result. It keeps no data, has no
-telemetry, and makes no network calls. The only download is the `groundlens` package from
-PyPI when `uvx` first starts the server. Questions: javier@groundlens.dev.
+telemetry, and makes no network calls. The only download is the `groundlens` package and its
+dependencies from PyPI when `uvx` first starts the server. Their exact versions and hashes
+are in `uv.lock` (from `pyproject.toml`). Questions: javier@groundlens.dev.
 
 ## More
 
