@@ -5,5 +5,5 @@ sphinx>=7,<9
 furo>=2024.8
 myst-parser>=3
 sphinx-copybutton>=0.5
-sphinx-autodoc-typehints>=2
+sphinx-autodoc-typehints>=3.13.10
 linkify-it-py>=2
