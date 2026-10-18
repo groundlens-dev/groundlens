@@ -2,7 +2,7 @@
 # installed here: the compiled extension is mocked in conf.py, so the build
 # needs no Rust toolchain.
 sphinx>=7,<9
-furo>=2024.8
+furo>=2025.12.19
 myst-parser>=3
 sphinx-copybutton>=0.5
 sphinx-autodoc-typehints>=2
