@@ -18,3 +18,13 @@ updates:
     directory: /python
     schedule:
       interval: weekly
+
+  - package-ecosystem: pip
+    directory: /docs
+    schedule:
+      interval: daily
+
+  - package-ecosystem: uv
+    directory: /plugins/groundlens
+    schedule:
+      interval: daily
