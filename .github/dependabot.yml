@@ -22,9 +22,4 @@ updates:
   - package-ecosystem: pip
     directory: /docs
     schedule:
-      interval: daily
-
-  - package-ecosystem: uv
-    directory: /plugins/groundlens
-    schedule:
-      interval: daily
+      interval: weekly
