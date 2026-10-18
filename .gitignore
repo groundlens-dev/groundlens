@@ -17,3 +17,7 @@ fuzz/Cargo.lock
 
 # Record compatibility fixtures are data the tests depend on, not logs.
 !crates/gl-record/tests/fixtures/**/*.jsonl
+
+# Python bytecode
+__pycache__/
+*.py[cod]
