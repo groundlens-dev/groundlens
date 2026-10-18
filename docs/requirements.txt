@@ -3,7 +3,7 @@
 # needs no Rust toolchain.
 sphinx>=7,<9
 furo>=2024.8
-myst-parser>=3
+myst-parser>=5.1.0
 sphinx-copybutton>=0.5
 sphinx-autodoc-typehints>=2
 linkify-it-py>=2
