@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![GroundLens](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_header.png)
+![GroundLens: the answer and its passages go through GroundLens first, then an LLM judge, then human review. A policy decides, and every check leaves a signed record.](https://raw.githubusercontent.com/groundlens-dev/groundlens/main/docs/assets/groundlens_diagram.png)
 
 # Guardrails for LLM answers
 
