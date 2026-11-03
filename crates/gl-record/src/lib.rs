@@ -203,13 +203,14 @@ fn verify_p256(
 /// Accepts SEC1 (compressed or not) or a DER SubjectPublicKeyInfo, which is
 /// what AWS KMS `GetPublicKey` returns.
 pub fn normalise_p256_public_key(bytes: &[u8]) -> Result<String> {
+    use p256::elliptic_curve::sec1::ToSec1Point as _;
     use p256::pkcs8::DecodePublicKey as _;
     let key = p256::PublicKey::from_sec1_bytes(bytes)
         .or_else(|_| p256::PublicKey::from_public_key_der(bytes))
         .map_err(|_| {
             Error::InvalidInput("not a P-256 public key (SEC1 or SubjectPublicKeyInfo DER)".into())
         })?;
-    Ok(hex::encode(p256::EncodedPoint::from(key).as_bytes()))
+    Ok(hex::encode(key.to_sec1_point(false).as_bytes()))
 }
 
 /// Bring a P-256 signature to the stored form, `r || s` hex with a low `s`.
@@ -218,7 +219,7 @@ pub fn normalise_p256_signature(bytes: &[u8]) -> Result<String> {
     let sig = p256::ecdsa::Signature::from_slice(bytes)
         .or_else(|_| p256::ecdsa::Signature::from_der(bytes))
         .map_err(|_| Error::InvalidInput("not a P-256 ECDSA signature (r||s or DER)".into()))?;
-    let sig = sig.normalize_s().unwrap_or(sig);
+    let sig = sig.normalize_s();
     Ok(hex::encode(sig.to_bytes()))
 }
 
@@ -485,7 +486,7 @@ mod tests {
         let raw = attach_signature(
             unsigned.clone(),
             ECDSA_P256_SHA256,
-            key.verifying_key().to_encoded_point(true).as_bytes(),
+            key.verifying_key().to_sec1_point(true).as_bytes(),
             &sig.to_bytes(),
         )
         .unwrap();
