@@ -50,6 +50,12 @@ identical in the git tag and on PyPI.
 
 ### Changed
 
+- **`cargo-deny` ignores RUSTSEC-2026-0543 until 2027-02-19.** `chrono`, used by
+`groundlens` and `groundlens-cli`, is unmaintained: all versions are affected and there
+is no patched release, so the check failed on every pull request. It is not a
+vulnerability. Every other advisory still fails the build. The plan is to replace
+`chrono` with `jiff` or `time` and remove the ignore (issue #407).
+
 - **README headline** says what GroundLens checks (figures, who an answer is
   about, whether it answers the question) and cites two measurements on data
   never used in development: FinQA (3 of 4 wrong answers stopped) and

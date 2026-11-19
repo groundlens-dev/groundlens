@@ -28,3 +28,9 @@ allow = [
 
 [advisories]
 yanked = "deny"
+# RUSTSEC-2026-0543: chrono is unmaintained (all versions affected, no patched release).
+# This is not a vulnerability. Replace chrono with jiff or time, then delete this ignore.
+# Tracked in issue #407. Review by 2027-02-19.
+ignore = [
+    { id = "RUSTSEC-2026-0543", reason = "chrono is unmaintained, no patched release; replacement tracked in issue #407" },
+]
