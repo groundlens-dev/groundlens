@@ -13,9 +13,9 @@ azure-core==1.41.0 \
 azure-storage-blob==12.31.1 \
     --hash=sha256:0d6e5b860a1357efc602db04cfa7c9950ac86126edcf7db89320cde281555fe5 \
     --hash=sha256:9e012d5f4ab658b7cb8a4581329d7a7aa2bf5f39b4d63baeefaae7f9e90fe6f0
-boto3==1.43.113 \
-    --hash=sha256:2e6fa2eef6decd7cbe5cf55b4ccc3218a3784630e54cb5e7e7f7074437dda281 \
-    --hash=sha256:5a3e7750325c22fab0957c41a500fe2f95a936c2bbcf5c18f58472ba5ffbb792
+boto3==1.44.6 \
+    --hash=sha256:7d5f43c824bdfcf203fd7c115cfb7bd4283f63caac01c731d8a667f8da096d52 \
+    --hash=sha256:af75aa81455f1c4dbbdd9bbd14c6ee3e66fb827430d1615014d4c45878e79c49
 botocore==1.43.113 \
     --hash=sha256:8908e4a5fe94a06801a7bf4c451717a38145cc4ffa41aaffa50665940b64b4fa \
     --hash=sha256:941d3f0e289540da7c49d5e2dc022f992e3638127a02a74a0c91df2661bd98ef
